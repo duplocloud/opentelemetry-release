@@ -115,7 +115,7 @@ loki.source.windowsevent "logs_integrations_windows_exporter_system" {
 }
 
 local.file_match "application_logs" {
-  path_targets = "{DUPLO_LOGGING_PATHS}"
+  path_targets = {DUPLO_LOGGING_PATHS}
   sync_period = "5s"
 }
 
