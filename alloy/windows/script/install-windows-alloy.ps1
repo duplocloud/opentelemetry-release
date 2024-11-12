@@ -54,7 +54,7 @@ catch {
 Write-Host "Installing Alloy for Windows"
 $INSTALL_STDOUT_PATH = ".\install-stdout.txt"
 $INSTALL_STDERR_PATH = ".\install-stderr.txt"
-$INSTALL_PROC = Start-Process ".\alloy-installer-windows-amd64.exe" -ArgumentList "/S" -Wait -PassThru -RedirectStandardOutput $INSTALL_STDOUT_PATH -RedirectStandardError $INSTALL_STDERR_PATH
+$INSTALL_PROC = Start-Process ".\alloy-installer-windows-amd64.exe" -ArgumentList "/S","/DISABLEREPORTING=yes" -Wait -PassThru -RedirectStandardOutput $INSTALL_STDOUT_PATH -RedirectStandardError $INSTALL_STDERR_PATH
 if ($INSTALL_PROC.ExitCode -ne 0) {
     Write-Host "ERROR: Failed to install Alloy"
     Write-Host "Alloy Install STDOUT: $(Get-Content $INSTALL_STDOUT_PATH)"
