@@ -66,7 +66,7 @@ try {
     $CONFIG_FILE = ".\config.alloy"
 
     Write-Host "--- Retrieving Alloy config"
-    $CONFIG_URI = "https://<URL>/alloy/config/config.alloy"
+    $CONFIG_URI = "https://raw.githubusercontent.com/duplocloud/opentelemetry-release/refs/heads/main/alloy/windows/config.alloy"
     
     Invoke-WebRequest -Uri $CONFIG_URI -Outfile $CONFIG_FILE -ErrorAction Stop
     $content = Get-Content $CONFIG_FILE
