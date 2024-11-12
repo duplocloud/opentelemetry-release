@@ -1,6 +1,6 @@
 // Metrics
 prometheus.exporter.windows "integrations_windows_exporter" {
-  enabled_collectors = ["cpu", "cs", "logical_disk", "net", "os", "service", "system", "time", "diskdrive"]
+  enabled_collectors = ["cpu", "cs", "logical_disk", "net", "os", "service", "system", "time", "diskdrive", "iis"]
 }
 
 discovery.relabel "integrations_windows_exporter" {
