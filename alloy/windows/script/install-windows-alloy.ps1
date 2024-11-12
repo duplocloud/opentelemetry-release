@@ -37,7 +37,7 @@ try {
     Write-Host "DUPLO_LOGGING_URL:" $DUPLO_LOGGING_URL
 
     Write-Host "Downloading Alloy Windows Installer"
-    $DOWNLOAD_URL = "https://github.com/grafana/alloy/releases/latest/download/alloy-installer-windows-amd64.exe.zip"
+    $DOWNLOAD_URL = "https://github.com/grafana/alloy/releases/download/v1.4.3/alloy-installer-windows-amd64.exe.zip"
     $OUTPUT_ZIP_FILE = ".\alloy-installer-windows-amd64.exe.zip"
     $OUTPUT_FILE = ".\alloy-installer-windows-amd64.exe"
     $WORKING_DIR = Get-Location
