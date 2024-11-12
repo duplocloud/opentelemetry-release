@@ -10,7 +10,7 @@ $renamedExeFilePath = "$destinationFolder\windows_exporter.exe"
 $serviceName = "WindowsExporter"
 $serviceDisplayName = "Windows Exporter Service"
 $serviceDescription = "Prometheus Windows Exporter Service"
-$arguments = "--collectors.enabled=cpu,cs,logical_disk,net,os,service,system,time,diskdrive"
+$arguments = "--collectors.enabled=cpu,cs,logical_disk,net,os,service,system,time,diskdrive,iis"
 
 # Create the directory if it doesn't exist
 if (-Not (Test-Path -Path $destinationFolder)) {
