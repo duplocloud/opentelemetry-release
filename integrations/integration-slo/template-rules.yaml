@@ -1,0 +1,185 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: duplo_slo_$name:$duplo_uuid
+    namespace: duplo_slo_$name:$duplo_uuid
+spec:
+    rules:
+    - record: duplo_slo_sli_5m
+      expr: (sum(rate($success_metric[5m]
+        offset 2m)) or 0 * sum(rate($total_metric[5m]
+        offset 2m))) / sum(rate($total_metric[5m]
+        offset 2m))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+    - record: duplo_slo_sli_30m
+      expr: (sum(rate($success_metric[30m]
+        offset 2m)) or 0 * sum(rate($total_metric[30m]
+        offset 2m))) / sum(rate($total_metric[30m]
+        offset 2m))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+    - record: duplo_slo_sli_1h
+      expr: (sum(rate($success_metric[1h]
+        offset 2m)) or 0 * sum(rate($total_metric[1h]
+        offset 2m))) / sum(rate($total_metric[1h]
+        offset 2m))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+    - record: duplo_slo_sli_2h
+      expr: (sum(rate($success_metric[2h]
+        offset 2m)) or 0 * sum(rate($total_metric[2h]
+        offset 2m))) / sum(rate($total_metric[2h]
+        offset 2m))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+    - record: duplo_slo_sli_6h
+      expr: (sum(rate($success_metric[6h]
+        offset 2m)) or 0 * sum(rate($total_metric[6h]
+        offset 2m))) / sum(rate($total_metric[6h]
+        offset 2m))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+    - record: duplo_slo_sli_1d
+      expr: (sum(rate($success_metric[1d]
+        offset 2m)) or 0 * sum(rate($total_metric[1d]
+        offset 2m))) / sum(rate($total_metric[1d]
+        offset 2m))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+    - record: duplo_slo_sli_3d
+      expr: (sum(rate($success_metric[3d]
+        offset 2m)) or 0 * sum(rate($total_metric[3d]
+        offset 2m))) / sum(rate($total_metric[3d]
+        offset 2m))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+    - record: duplo_slo_success_rate_5m
+      expr: sum(rate($success_metric[5m]
+        offset 2m)) or 0 * sum(rate($total_metric[5m]
+        offset 2m))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+    - record: duplo_slo_total_rate_5m
+      expr: sum(rate($total_metric[5m]
+        offset 2m))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+    - record: duplo_slo_sli_window
+      expr: sum without (duplo_slo_version) (sum_over_time((duplo_slo_sli_5m{duplo_slo_uuid="$duplo_uuid"}
+        < 1e+308)[$tw_in_week:5m])) / sum without (duplo_slo_version) (count_over_time((duplo_slo_sli_5m{duplo_slo_uuid="$duplo_uuid"}
+        < 1e+308)[$tw_in_week:5m]))
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_name: $name
+        duplo_slo_window: $time_window
+    - record: duplo_slo_info
+      expr: vector(1)
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_name: $name
+        duplo_slo_type: ratio
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_window: $time_window
+        duplo_slo_objective: $objective
+    - record: duplo_slo_objective
+      expr: vector($objective)
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_window: $time_window
+        duplo_slo_name: $name
+    - record: duplo_slo_objective_window_seconds
+      expr: vector( $timestamp_tw / 1000000000)
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_window: $time_window
+        duplo_slo_name: $name
+    - alert: $name - SLO Burn Rate Very High
+      expr: |-
+        1 - duplo_slo_sli_5m{duplo_slo_uuid="$duplo_uuid"} > 14.4 * $error_budget_val
+        and
+        1 - duplo_slo_sli_1h{duplo_slo_uuid="$duplo_uuid"} > 14.4 * $error_budget_val
+      for: 2m
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_severity: critical
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_window: 1h
+        duplo_slo_name: $name
+      annotations:
+        description: Error budget is burning too fast.
+        name: SLO Burn Rate Very High
+        runbook_url: ''
+        duplo_slo_name: $name
+    - alert: $name- SLO Burn Rate Very High
+      expr: |-
+        1 - duplo_slo_sli_30m{duplo_slo_uuid="$duplo_uuid"} > 6 * $error_budget_val
+        and
+        1 - duplo_slo_sli_6h{duplo_slo_uuid="$duplo_uuid"} > 6 * $error_budget_val
+      for: 15m
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_severity: critical
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_window: 6h
+        duplo_slo_name: $name
+      annotations:
+        description: Error budget is burning too fast.
+        name: SLO Burn Rate Very High
+        runbook_url: ''
+        duplo_slo_name: $name
+    - alert: $name - SLO Burn Rate High
+      expr: |-
+        1 - duplo_slo_sli_2h{duplo_slo_uuid="$duplo_uuid"} > 3 * $error_budget_val
+        and
+        1 - duplo_slo_sli_1d{duplo_slo_uuid="$duplo_uuid"} > 3 * $error_budget_val
+      for: 1h
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_severity: warning
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_window: 1d
+        duplo_slo_name: $name
+      annotations:
+        description: Error budget is burning too fast.
+        name: SLO Burn Rate High
+        runbook_url: ''
+        duplo_slo_name: $name
+    - alert: $name - SLO Burn Rate High
+      expr: |-
+        1 - duplo_slo_sli_6h{duplo_slo_uuid="$duplo_uuid"} > 1 * $error_budget_val
+        and
+        1 - duplo_slo_sli_3d{duplo_slo_uuid="$duplo_uuid"} > 1 * $error_budget_val
+      for: 1h
+      labels:
+        duplo_slo_version: v1.0.0
+        duplo_slo_severity: warning
+        duplo_slo_uuid: $duplo_uuid
+        duplo_slo_window: 3d
+        duplo_slo_name: $name
+      annotations:
+        description: Error budget is burning too fast.
+        name: SLO Burn Rate High
+        runbook_url: ''
+        duplo_slo_name: $name
