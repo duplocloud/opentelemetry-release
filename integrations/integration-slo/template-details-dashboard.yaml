@@ -278,7 +278,7 @@ spec:
               title: Explore Raw SLI Query
               tooltip: Opens the raw SLI query in explore
               type: link
-              url: /explore?schemaVersion=1&panes={"SLO":{"datasource":"duplo-metrics","queries":[{"refId":"SLI Query","expr":"(sum by ($groupby) (rate($success_metric[$__rate_interval] offset 2m)) or 0 * sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m))) / sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m))","queryType":"range","datasource":{"type":"","uid":"duplo-metrics"},"editorMode":"true"}],"range":{"from":"${__from}","to":"${__to}"}}}&orgId=1
+              url: /explore?schemaVersion=1&panes={"SLO":{"datasource":"duplo-metrics","queries":[{"refId":"SLI Query","expr":"(sum(rate($success_metric[$__rate_interval] offset 2m)) or 0 * sum(rate($total_metric[$__rate_interval] offset 2m))) / sum(rate($total_metric[$__rate_interval] offset 2m))","queryType":"range","datasource":{"type":"","uid":"duplo-metrics"},"editorMode":"true"}],"range":{"from":"${__from}","to":"${__to}"}}}&orgId=1
           options:
             legend:
                 calcs: []
@@ -305,7 +305,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               editorMode: code
-              expr: ((sum by ($groupby) (rate($success_metric[$__rate_interval] offset 2m)) or 0 * sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m))) / sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m))) AND timestamp(sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m))) < $curr_ts
+              expr: ((sum(rate($success_metric[$__rate_interval] offset 2m)) or 0 * sum(rate($total_metric[$__rate_interval] offset 2m))) / sum(rate($total_metric[$__rate_interval] offset 2m))) AND timestamp(sum(rate($total_metric[$__rate_interval] offset 2m))) < $curr_ts
               hide: false
               instant: false
               interval: 1m
@@ -694,7 +694,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               editorMode: code
-              expr: ((1 - ((sum by ($groupby) (rate($success_metric[$__rate_interval] offset 2m)) or 0 * sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m))) / sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m)))) / (1 - $objective)) AND timestamp(sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m))) < $curr_ts
+              expr: ((1 - ((sum(rate($success_metric[$__rate_interval] offset 2m)) or 0 * sum(rate($total_metric[$__rate_interval] offset 2m))) / sum(rate($total_metric[$__rate_interval] offset 2m)))) / (1 - $objective)) AND timestamp(sum(rate($total_metric[$__rate_interval] offset 2m))) < $curr_ts
               hide: false
               instant: false
               interval: 1m
@@ -827,7 +827,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               editorMode: code
-              expr: (sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m))) AND timestamp(sum by ($groupby) (rate($total_metric[$__rate_interval] offset 2m))) < $curr_ts
+              expr: (sum(rate($total_metric[$__rate_interval] offset 2m))) AND timestamp(sum(rate($total_metric[$__rate_interval] offset 2m))) < $curr_ts
               hide: false
               instant: false
               interval: ""
