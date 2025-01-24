@@ -1,0 +1,504 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: duplo-slo
+    name: slo-overview
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations and Alerts
+              target:
+                limit: 100
+                matchAny: false
+                tags: []
+                type: dashboard
+              type: dashboard
+    editable: false
+    fiscalYearStartMonth: 0
+    graphTooltip: 1
+    panels:
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: The number of SLIs that are meeting their SLO objective in the last 1d
+          fieldConfig:
+            defaults:
+                unit: none
+            overrides: null
+          gridPos:
+            h: 4
+            w: 3
+            x: 0
+            "y": 0
+          id: 1
+          options:
+            colorMode: none
+            graphMode: none
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                type: prometheus
+                uid: $datasource
+              editorMode: builder
+              expr: "count(\n\t\t(\n\t\t  sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_success_rate_5m < 1e308)[1d:5m]))\n\t\t  / sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_total_rate_5m < 1e308)[1d:5m]))\n\t\t  # combine with series that aren't producing duplo_slo_success_rate_5m and duplo_slo_total_rate_5m\n\t\t  or avg by (duplo_slo_uuid) (duplo_slo_sli_1d)\n\t\t)\n\t\t> on(duplo_slo_uuid) duplo_slo_objective\n\t  ) OR on() vector(0)\n\t  "
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: __auto
+              range: true
+              refId: recorded_data
+          title: Above Target (1 day)
+          transparent: false
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: The number of SLIs that are meeting their SLO objective in the last 6h
+          fieldConfig:
+            defaults:
+                unit: none
+            overrides: null
+          gridPos:
+            h: 4
+            w: 3
+            x: 3
+            "y": 0
+          id: 2
+          options:
+            colorMode: none
+            graphMode: none
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                type: prometheus
+                uid: $datasource
+              editorMode: builder
+              expr: "count(\n\t\t(\n\t\t  sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_success_rate_5m < 1e308)[6h:5m]))\n\t\t  / sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_total_rate_5m < 1e308)[6h:5m]))\n\t\t  # combine with series that aren't producing duplo_slo_success_rate_5m and duplo_slo_total_rate_5m\n\t\t  or avg by (duplo_slo_uuid) (duplo_slo_sli_6h)\n\t\t)\n\t\t> on(duplo_slo_uuid) duplo_slo_objective\n\t  ) OR on() vector(0)\n\t  "
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: __auto
+              range: true
+              refId: recorded_data
+          title: Above Target (6 hour)
+          transparent: false
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: The number of SLIs that are meeting their SLO objective in the last 1h
+          fieldConfig:
+            defaults:
+                unit: none
+            overrides: null
+          gridPos:
+            h: 4
+            w: 3
+            x: 6
+            "y": 0
+          id: 3
+          options:
+            colorMode: none
+            graphMode: none
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                type: prometheus
+                uid: $datasource
+              editorMode: builder
+              expr: "count(\n\t\t(\n\t\t  sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_success_rate_5m < 1e308)[1h:5m]))\n\t\t  / sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_total_rate_5m < 1e308)[1h:5m]))\n\t\t  # combine with series that aren't producing duplo_slo_success_rate_5m and duplo_slo_total_rate_5m\n\t\t  or avg by (duplo_slo_uuid) (duplo_slo_sli_1h)\n\t\t)\n\t\t> on(duplo_slo_uuid) duplo_slo_objective\n\t  ) OR on() vector(0)\n\t  "
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: __auto
+              range: true
+              refId: recorded_data
+          title: Above Target (1 hour)
+          transparent: false
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: ""
+          fieldConfig:
+            defaults:
+                unit: none
+            overrides: null
+          gridPos:
+            h: 4
+            w: 3
+            x: 9
+            "y": 0
+          id: 4
+          options:
+            colorMode: none
+            graphMode: none
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                type: prometheus
+                uid: $datasource
+              editorMode: builder
+              expr: vector($input_count)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: __auto
+              range: true
+              refId: recorded_data
+          title: SLOs Defined
+          transparent: false
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: The number of SLOs that are recording values
+          fieldConfig:
+            defaults:
+                unit: none
+            overrides: null
+          gridPos:
+            h: 4
+            w: 3
+            x: 12
+            "y": 0
+          id: 5
+          options:
+            colorMode: none
+            graphMode: none
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                type: prometheus
+                uid: $datasource
+              editorMode: builder
+              expr: count(count by (duplo_slo_uuid)(duplo_slo_sli_5m)) OR on() vector(0)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: __auto
+              range: true
+              refId: recorded_data
+          title: SLOs Recording
+          transparent: false
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: The total number of series created by SLO recording rules.
+          fieldConfig:
+            defaults:
+                unit: none
+            overrides: null
+          gridPos:
+            h: 4
+            w: 3
+            x: 15
+            "y": 0
+          id: 6
+          options:
+            colorMode: none
+            graphMode: none
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                type: prometheus
+                uid: $datasource
+              editorMode: builder
+              expr: count({__name__=~"duplo_slo_.*", duplo_slo_uuid!=""}) OR on() vector(0)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: __auto
+              range: true
+              refId: recorded_data
+          title: Recorded SLI Series
+          transparent: false
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: SLO name with hyperlink to the SLO's dashboard
+          gridPos:
+            h: 4
+            w: 6
+            x: 18
+            "y": 0
+          id: 7
+          options:
+            content: "<div style=\"display: flex; align-items: center; justify-content: center; height: 80px; font-family: Arial, sans-serif;\">\r\n    <a href=\"/d/manage-slo/manage-slo\" \r\n       style=\"display: inline-block; padding: 10px 25px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-size: 16px;\">\r\n        Create SLO\r\n    </a>\r\n</div>"
+            mode: html
+          transparent: true
+          type: text
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: SLO name with hyperlink to the SLO's dashboard
+          gridPos:
+            h: 4
+            w: 4
+            x: 0
+            "y": 4
+          id: 8
+          options:
+            content: "<div style=\"font-family: Arial, sans-serif; margin: 10px;\">\r\n    <div style=\"text-align: center;\">\r\n        <span style=\"font-weight: bold;\">\r\n            $name: \r\n        </span>\r\n        <span>\r\n            $description\r\n        </span>\r\n    </div>\r\n    <div style=\"text-align: center; margin-top: 10px;\">\r\n        <a href=\"/d/$duplo_uuid/$name-$duplo_uuid\" \r\n           style=\"display: inline-block; padding: 8px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;\">\r\n            View Dashboard\r\n        </a>\r\n        <a href=\"/d/manage-slo/manage-slo\" \r\n           style=\"display: inline-block; padding: 8px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 5px;\">\r\n            Edit SLO\r\n        </a>\r\n    </div>\r\n</div>"
+            mode: html
+          transparent: true
+          type: text
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: Service level indicator's value over the last $time_window
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                decimals: $objective_decimal
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                          value: null
+                        - color: green
+                          value: $objective
+                unit: percentunit
+            overrides: null
+          gridPos:
+            h: 4
+            w: 4
+            x: 4
+            "y": 4
+          id: 9
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                type: prometheus
+                uid: $datasource
+              editorMode: builder
+              expr: |-
+                # omit NaN by comparing to Infinity
+                sum(sum_over_time((duplo_slo_success_rate_5m{duplo_slo_uuid="$duplo_uuid"} < 1e308)[$time_window:5m]))
+                / sum(sum_over_time((duplo_slo_total_rate_5m{duplo_slo_uuid="$duplo_uuid"} < 1e308)[$time_window:5m]))
+              hide: false
+              instant: false
+              interval: 1m
+              legendFormat: __auto
+              range: true
+              refId: recorded_data
+          title: SLI (last $time_window)
+          transparent: false
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: The unspent error budget over the last {$objective $time_window} Window
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                          value: null
+                        - color: yellow
+                          value: 0
+                        - color: green
+                          value: 0.2
+                unit: percentunit
+            overrides: null
+          gridPos:
+            h: 4
+            w: 4
+            x: 8
+            "y": 4
+          id: 10
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: horizontal
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                type: prometheus
+                uid: $datasource
+              editorMode: builder
+              exemplar: false
+              expr: |-
+                (
+                		# omit NaN by comparing to Infinity
+                		sum(sum_over_time((duplo_slo_success_rate_5m{duplo_slo_uuid="$duplo_uuid"} < 1e308)[$time_window:5m]))
+                		/ sum(sum_over_time((duplo_slo_total_rate_5m{duplo_slo_uuid="$duplo_uuid"} < 1e308)[$time_window:5m]))
+                		- on() duplo_slo_objective{duplo_slo_uuid="$duplo_uuid"}
+                	)
+                	/ on () (1 - duplo_slo_objective{duplo_slo_uuid="$duplo_uuid"})
+              hide: false
+              instant: true
+              interval: ""
+              legendFormat: __auto
+              range: false
+              refId: A
+          title: Error Budget Remaining
+          transparent: false
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: $datasource
+          description: Service level indicator
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisPlacement: auto
+                    axisSoftMax: 0.05
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: scheme
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    lineInterpolation: linear
+                    lineWidth: 2
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                          value: null
+                        - color: green
+                          value: $objective
+                unit: percentunit
+            overrides: null
+          gridPos:
+            h: 4
+            w: 12
+            x: 12
+            "y": 4
+          id: 11
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: false
+            tooltip:
+                mode: single
+                sort: none
+          targets:
+            - datasource:
+                type: prometheus
+                uid: $datasource
+              editorMode: builder
+              expr: avg_over_time(duplo_slo_sli_5m{duplo_slo_uuid="$duplo_uuid"}[$__interval:])
+              hide: false
+              instant: false
+              interval: 1m
+              legendFormat: __auto
+              queryType: linear
+              range: true
+              refId: A
+          title: SLI
+          transparent: false
+          type: timeseries
+    schemaVersion: 34
+    tags:
+        - slo-overview
+    templating: {}
+    timezone: browser
+    title: SLO Overview
+    uid: slo-overview
