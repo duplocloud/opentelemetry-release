@@ -8,7 +8,7 @@ spec:
     - alertname
   receiver: grafana-default-email
   routes:
-      object_matchers:
+    - object_matchers:
         - - tenant
           - =~
           - .*otel.*
