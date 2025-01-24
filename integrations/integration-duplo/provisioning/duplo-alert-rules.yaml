@@ -2,17 +2,18 @@ apiVersion: grizzly.grafana.com/v1alpha1
 kind: AlertRuleGroup
 metadata:
   name: critical-priority-rules
-  folder: Integration-LinuxNode
 spec:
-  interval: 5m
+  folder: Integration-LinuxNode
+  interval: 60
   rules:
-    - uid: NodeMemoryCriticalUtilizationWithNodeLabels
-      title: Critical Node Memory usage
-      condition: C
+    - condition: C
       data:
-        - refId: A
-          datasource: duplo-metrics
-          query:
+        - datasourceUid: duplo-metrics
+          model:
+            datasource:
+              type: prometheus
+              uid: duplo-metrics
+            editorMode: code
             expr: |
               100 -
               (
@@ -33,35 +34,82 @@ spec:
                   "label_kubernetes_io_hostname",
                   "(.+)"
                 )
-        - refId: B
-          expression: A
-          reduce: max
-        - refId: C
-          expression: B
-          threshold: 90
-      annotations:
-        description: >
-          Memory usage on node {{$labels.instance}} is critically high.
-
-          - **Tenant**: {{$labels.label_tenantname}}
-          - **Memory Usage**: {{ $values.B.Value | printf "%.2f" }}%
-
-          Please investigate and take necessary action to reduce memory usage or increase available resources.
-        summary: >
-          Memory Usage Alert: High memory usage detected on node {{$labels.instance}} (Tenant: {{$labels.label_tenantname}})
-      labels:
-        severity: critical
-      noDataState: NoData
+            instant: true
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: A
+          refId: A
+          relativeTimeRange:
+            from: 1800
+        - datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: []
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - B
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: A
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: B
+            type: reduce
+          refId: B
+          relativeTimeRange:
+            from: 1800
+        - datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params:
+                    - 90
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - C
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: B
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: C
+            type: threshold
+          refId: C
+          relativeTimeRange:
+            from: 1800
       execErrState: Error
       for: 0s
-
-    - uid: NodeCpuCriticalUtilizationWithNodeLabels
-      title: Critical CPU Usage
-      condition: C
+      id: 1
+      noDataState: NoData
+      orgID: 1
+      ruleGroup: critical-priority-rules
+      title: Critical Memory usage
+      uid: fe1kjxgd3pibke
+    - condition: C
       data:
-        - refId: A
-          datasource: duplo-metrics
-          query:
+        - datasourceUid: duplo-metrics
+          model:
+            datasource:
+              type: prometheus
+              uid: duplo-metrics
+            editorMode: code
             expr: |
               (sum without(mode) (avg without (cpu) (rate(node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)", mode!="idle"}[2m]))) * 100)
               * on (instance) group_left(label_tenantname)
@@ -72,19 +120,72 @@ spec:
                   "label_kubernetes_io_hostname",
                   "(.+)"
                 )
-        - refId: B
-          expression: A
-          reduce: mean
-        - refId: C
-          expression: B
-          threshold: 90
-      annotations:
-        description: >
-          CPU usage at {{ $labels.instance }} has been above 90% for the last 5 minutes, 
-          currently at {{ printf "%.2f" $values.B.Value }}%.
-        summary: High CPU usage.
-      labels:
-        severity: critical
-      noDataState: NoData
+            instant: true
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: A
+          refId: A
+          relativeTimeRange:
+            from: 600
+        - datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params: []
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - B
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: A
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: B
+            type: reduce
+          refId: B
+          relativeTimeRange:
+            from: 600
+        - datasourceUid: __expr__
+          model:
+            conditions:
+              - evaluator:
+                  params:
+                    - 90
+                  type: gt
+                operator:
+                  type: and
+                query:
+                  params:
+                    - C
+                reducer:
+                  params: []
+                  type: last
+                type: query
+            datasource:
+              type: __expr__
+              uid: __expr__
+            expression: B
+            intervalMs: 1000
+            maxDataPoints: 43200
+            refId: C
+            type: threshold
+          refId: C
+          relativeTimeRange:
+            from: 600
       execErrState: Error
       for: 5m
+      id: 2
+      noDataState: NoData
+      orgID: 1
+      ruleGroup: critical-priority-rules
+      title: Critical CPU Usage
+      uid: ae4iqfd32jocgc
+  title: Node alerts with node labels
