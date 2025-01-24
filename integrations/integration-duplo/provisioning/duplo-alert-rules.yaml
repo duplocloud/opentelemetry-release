@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: AlertRuleGroup
 metadata:
-    name: critical-priority-rules
+    name: Integration-LinuxNode.node-exporter-with-labels
 spec:
     folderUid: ae7gzyeahhuyob
     interval: 60
