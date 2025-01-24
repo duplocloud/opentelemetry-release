@@ -116,9 +116,9 @@ spec:
             severity: critical
           noDataState: NoData
           orgID: 1
-          ruleGroup: critical-priority-rules
+          ruleGroup: node-exporter-with-labels
           title: Critical Memory usage
-          uid: fe1kjxgd3pibke
+          uid: NodeCriticalMemoryUsageWithLabels
           updated: "2025-01-09T08:12:32.000Z"
         - annotations:
             description: CPU usage at {{ $labels.instance }} has been above 90% for the last 5 minutes, is currently at {{ printf "%.2f" $values.B.Value }}%
@@ -204,7 +204,7 @@ spec:
             severity: critical
           noDataState: NoData
           orgID: 1
-          ruleGroup: critical-priority-rules
+          ruleGroup: node-exporter-with-labels
           title: Critical CPU Usage
-          uid: ae4iqfd32jocgc
-    title: critical-priority-rules
+          uid: NodeCriticalCpuUsageWithLabels
+    title: node-exporter-with-labels
