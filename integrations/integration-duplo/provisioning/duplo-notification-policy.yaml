@@ -1,0 +1,21 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertNotificationPolicy
+metadata:
+  name: global
+spec:
+  group_by:
+    - grafana_folder
+    - alertname
+  receiver: grafana-default-email
+  routes:
+      object_matchers:
+        - - tenant
+          - =~
+          - .*otel.*
+        - - namespace
+          - =~
+          - .*otel.*
+        - - label_tenantname
+          - =~
+          - .*otel.*
+      receiver: duplo-slack
