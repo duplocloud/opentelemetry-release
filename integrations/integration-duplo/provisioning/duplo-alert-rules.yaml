@@ -1,0 +1,90 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRuleGroup
+metadata:
+  name: critical-priority-rules
+  folder: Integration-LinuxNode
+spec:
+  interval: 5m
+  rules:
+    - uid: NodeMemoryCriticalUtilizationWithNodeLabels
+      title: Critical Node Memory usage
+      condition: C
+      data:
+        - refId: A
+          datasource: duplo-metrics
+          query:
+            expr: |
+              100 -
+              (
+                avg by (instance) (
+                  node_memory_MemAvailable_bytes{job=~"integrations/(node_exporter|unix)", cluster=~".*", job=~".+"}
+                )
+                /
+                avg by (instance) (
+                  node_memory_MemTotal_bytes{job=~"integrations/(node_exporter|unix)", cluster=~".*", job=~".+"}
+                )
+                * 100
+              )
+              * on (instance) group_left(label_tenantname)
+                label_replace(
+                  kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},
+                  "instance",
+                  "$1",
+                  "label_kubernetes_io_hostname",
+                  "(.+)"
+                )
+        - refId: B
+          expression: A
+          reduce: max
+        - refId: C
+          expression: B
+          threshold: 90
+      annotations:
+        description: >
+          Memory usage on node {{$labels.instance}} is critically high.
+
+          - **Tenant**: {{$labels.label_tenantname}}
+          - **Memory Usage**: {{ $values.B.Value | printf "%.2f" }}%
+
+          Please investigate and take necessary action to reduce memory usage or increase available resources.
+        summary: >
+          Memory Usage Alert: High memory usage detected on node {{$labels.instance}} (Tenant: {{$labels.label_tenantname}})
+      labels:
+        severity: critical
+      noDataState: NoData
+      execErrState: Error
+      for: 0s
+
+    - uid: NodeCpuCriticalUtilizationWithNodeLabels
+      title: Critical CPU Usage
+      condition: C
+      data:
+        - refId: A
+          datasource: duplo-metrics
+          query:
+            expr: |
+              (sum without(mode) (avg without (cpu) (rate(node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)", mode!="idle"}[2m]))) * 100)
+              * on (instance) group_left(label_tenantname)
+                label_replace(
+                  kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},
+                  "instance",
+                  "$1",
+                  "label_kubernetes_io_hostname",
+                  "(.+)"
+                )
+        - refId: B
+          expression: A
+          reduce: mean
+        - refId: C
+          expression: B
+          threshold: 90
+      annotations:
+        description: >
+          CPU usage at {{ $labels.instance }} has been above 90% for the last 5 minutes, 
+          currently at {{ printf "%.2f" $values.B.Value }}%.
+        summary: High CPU usage.
+      labels:
+        severity: critical
+      noDataState: NoData
+      execErrState: Error
+      for: 5m
