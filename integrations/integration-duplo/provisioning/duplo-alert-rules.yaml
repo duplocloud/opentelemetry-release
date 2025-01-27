@@ -2,8 +2,8 @@ apiVersion: grizzly.grafana.com/v1alpha1
 kind: AlertRuleGroup
 metadata:
     name: Integration-LinuxNode.node-exporter-with-labels
-    folder: Integration-LinuxNode
 spec:
+    folderUid: duplo-alerting
     interval: 60
     rules:
         - annotations:
@@ -110,6 +110,7 @@ spec:
                 from: 1800
           execErrState: Error
           for: 0s
+          folderUid: duplo-alerting
           id: 1
           labels:
             severity: critical
@@ -197,6 +198,7 @@ spec:
                 from: 600
           execErrState: Error
           for: 5m0s
+          folderUid: duplo-alerting
           id: 2
           labels:
             severity: critical
