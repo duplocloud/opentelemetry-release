@@ -314,7 +314,7 @@ spec:
             defaults:
                 color:
                     mode: thresholds
-                decimals: $objective_decimal
+                decimals: 2
                 thresholds:
                     mode: absolute
                     steps:
