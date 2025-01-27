@@ -2,8 +2,8 @@ apiVersion: grizzly.grafana.com/v1alpha1
 kind: AlertRuleGroup
 metadata:
     name: Integration-LinuxNode.node-exporter-with-labels
+    folder: Integration-LinuxNode
 spec:
-    folder: ae7gzyeahhuyob
     interval: 60
     rules:
         - annotations:
