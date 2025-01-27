@@ -3,7 +3,7 @@ kind: AlertRuleGroup
 metadata:
     name: Integration-LinuxNode.node-exporter-with-labels
 spec:
-    folderUid: ae7gzyeahhuyob
+    folder: ae7gzyeahhuyob
     interval: 60
     rules:
         - annotations:
@@ -109,7 +109,6 @@ spec:
               relativeTimeRange:
                 from: 1800
           execErrState: Error
-          folderUID: ae7gzyeahhuyob
           for: 0s
           id: 1
           labels:
@@ -197,7 +196,6 @@ spec:
               relativeTimeRange:
                 from: 600
           execErrState: Error
-          folderUID: ae7gzyeahhuyob
           for: 5m0s
           id: 2
           labels:
