@@ -23,17 +23,33 @@ spec:
     editable: true
     fiscalYearStartMonth: 0
     graphTooltip: 1
+    links: []
     panels:
-        - gridPos:
+        - datasource:
+            type: datasource
+            uid: grafana
+          gridPos:
             h: 4
-            w: 14
+            w: 9
             x: 0
             "y": 0
           id: 1
           options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
             content: |
-                # $name
-            mode: markdown
+                <div style="font-family: Arial, sans-serif; margin: 20px; text-align: center;">
+                    <h1 style="margin: 0; font-size: 3em; font-weight: bold; color: rgb(255, 94, 98);">$name</h1>
+                    <h2 style="margin: 10px 0 0; font-size: 1.5em; font-weight: normal; color: rgb(0, 164, 239);">$description</h2>
+                </div>
+            mode: html
+          targets:
+            - datasource:
+                type: datasource
+                uid: grafana
+              refId: A
           transparent: true
           type: text
         - datasource:
@@ -44,17 +60,20 @@ spec:
             defaults:
                 color:
                     mode: thresholds
+                mappings: []
+                max: 1
+                min: 0
                 thresholds:
                     mode: absolute
                     steps:
-                        - color: super-light-blue
+                        - color: '#8AB8FF'
                           value: null
                 unit: percentunit
-            overrides: null
+            overrides: []
           gridPos:
             h: 4
             w: 5
-            x: 14
+            x: 9
             "y": 0
           id: 2
           options:
@@ -62,10 +81,12 @@ spec:
             graphMode: area
             justifyMode: auto
             orientation: auto
+            percentChangeColorMode: standard
             reduceOptions:
                 calcs:
                     - lastNotNull
                 fields: /.*/
+                values: false
             showPercentChange: false
             textMode: auto
             wideLayout: true
@@ -94,7 +115,6 @@ spec:
                 renameByName:
                     label: time_period
                     value: Time Window
-          transparent: false
           type: stat
         - datasource:
             type: prometheus
@@ -105,17 +125,20 @@ spec:
                 color:
                     mode: thresholds
                 decimals: 1
+                mappings: []
+                max: 1
+                min: 0
                 thresholds:
                     mode: absolute
                     steps:
                         - color: super-light-blue
                           value: null
                 unit: percentunit
-            overrides: null
+            overrides: []
           gridPos:
             h: 4
             w: 5
-            x: 19
+            x: 14
             "y": 0
           id: 3
           options:
@@ -123,6 +146,7 @@ spec:
             graphMode: none
             justifyMode: auto
             orientation: auto
+            percentChangeColorMode: standard
             reduceOptions:
                 calcs:
                     - lastNotNull
@@ -144,8 +168,31 @@ spec:
               range: true
               refId: A
           title: SLO
-          transparent: false
           type: stat
+        - datasource:
+            type: datasource
+            uid: grafana
+          gridPos:
+            h: 4
+            w: 5
+            x: 19
+            "y": 0
+          id: 14
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: "<div style=\"display: flex; align-items: center; justify-content: center; height: 110px; font-family: Arial, sans-serif;\">\n    <a href=\"/d/manage-slo/manage-slo\" \n       style=\"display: inline-block; padding: 15px 30
+px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 20px;\">\n        Edit SLO\n    </a>\n</div>"
+            mode: html
+          targets:
+            - datasource:
+                type: datasource
+                uid: grafana
+              refId: A
+          transparent: true
+          type: text
         - datasource:
             type: prometheus
             uid: duplo-metrics
@@ -175,7 +222,7 @@ spec:
                         - color: orange
                           value: 1
                 unit: short
-            overrides: null
+            overrides: []
           gridPos:
             h: 2
             w: 5
@@ -187,7 +234,6 @@ spec:
               icon: ""
               includeVars: false
               keepTime: false
-              tags: null
               targetBlank: true
               title: View alert rule
               tooltip: ""
@@ -198,6 +244,7 @@ spec:
             graphMode: none
             justifyMode: auto
             orientation: vertical
+            percentChangeColorMode: standard
             reduceOptions:
                 calcs:
                     - lastNotNull
@@ -218,8 +265,6 @@ spec:
               legendFormat: Critical alert
               range: false
               refId: A
-          title: ""
-          transparent: false
           type: stat
         - datasource:
             type: prometheus
@@ -230,10 +275,14 @@ spec:
                 color:
                     mode: thresholds
                 custom:
+                    axisBorderShow: false
                     axisCenteredZero: false
                     axisColorMode: text
+                    axisLabel: ""
                     axisPlacement: auto
                     axisSoftMax: 0.05
+                    barAlignment: 0
+                    barWidthFactor: 0.6
                     drawStyle: line
                     fillOpacity: 0
                     gradientMode: scheme
@@ -241,6 +290,7 @@ spec:
                         legend: false
                         tooltip: false
                         viz: false
+                    insertNulls: false
                     lineInterpolation: linear
                     lineWidth: 2
                     pointSize: 5
@@ -253,6 +303,7 @@ spec:
                         mode: none
                     thresholdsStyle:
                         mode: "off"
+                mappings: []
                 thresholds:
                     mode: absolute
                     steps:
@@ -261,7 +312,7 @@ spec:
                         - color: green
                           value: $objective
                 unit: percentunit
-            overrides: null
+            overrides: []
           gridPos:
             h: 7
             w: 14
@@ -273,7 +324,6 @@ spec:
               icon: ""
               includeVars: true
               keepTime: true
-              tags: null
               targetBlank: true
               title: Explore Raw SLI Query
               tooltip: Opens the raw SLI query in explore
@@ -314,7 +364,6 @@ spec:
               range: true
               refId: computed_before_creation_time
           title: SLI
-          transparent: false
           type: timeseries
         - datasource:
             type: prometheus
@@ -325,6 +374,9 @@ spec:
                 color:
                     mode: thresholds
                 decimals: 2
+                mappings: []
+                max: 1
+                min: 0
                 thresholds:
                     mode: absolute
                     steps:
@@ -333,7 +385,7 @@ spec:
                         - color: green
                           value: $objective
                 unit: percentunit
-            overrides: null
+            overrides: []
           gridPos:
             h: 7
             w: 5
@@ -345,6 +397,7 @@ spec:
             graphMode: area
             justifyMode: auto
             orientation: auto
+            percentChangeColorMode: standard
             reduceOptions:
                 calcs:
                     - lastNotNull
@@ -369,7 +422,6 @@ spec:
               range: true
               refId: recorded_data
           title: SLI (last $time_window)
-          transparent: false
           type: stat
         - datasource:
             type: prometheus
@@ -400,7 +452,7 @@ spec:
                         - color: orange
                           value: 1
                 unit: short
-            overrides: null
+            overrides: []
           gridPos:
             h: 2
             w: 5
@@ -412,7 +464,6 @@ spec:
               icon: ""
               includeVars: false
               keepTime: false
-              tags: null
               targetBlank: true
               title: View alert rule
               tooltip: ""
@@ -423,6 +474,7 @@ spec:
             graphMode: none
             justifyMode: auto
             orientation: vertical
+            percentChangeColorMode: standard
             reduceOptions:
                 calcs:
                     - lastNotNull
@@ -443,10 +495,11 @@ spec:
               legendFormat: Warning alert
               range: false
               refId: A
-          title: ""
-          transparent: false
           type: stat
-        - description: All active alerts for this SLO
+        - datasource:
+            type: datasource
+            uid: grafana
+          description: All active alerts for this SLO
           gridPos:
             h: 17
             w: 5
@@ -470,6 +523,11 @@ spec:
                 normal: true
                 pending: true
             viewMode: list
+          targets:
+            - datasource:
+                type: datasource
+                uid: grafana
+              refId: A
           title: Burn Rate Alerts
           type: alertlist
         - datasource:
@@ -484,11 +542,15 @@ spec:
                 color:
                     mode: thresholds
                 custom:
+                    axisBorderShow: false
                     axisCenteredZero: false
                     axisColorMode: text
+                    axisLabel: ""
                     axisPlacement: auto
                     axisSoftMax: 1
                     axisSoftMin: 0
+                    barAlignment: 0
+                    barWidthFactor: 0.6
                     drawStyle: line
                     fillOpacity: 0
                     gradientMode: scheme
@@ -496,6 +558,7 @@ spec:
                         legend: false
                         tooltip: false
                         viz: false
+                    insertNulls: false
                     lineInterpolation: linear
                     lineWidth: 1
                     pointSize: 5
@@ -508,6 +571,7 @@ spec:
                         mode: none
                     thresholdsStyle:
                         mode: "off"
+                mappings: []
                 thresholds:
                     mode: absolute
                     steps:
@@ -518,7 +582,7 @@ spec:
                         - color: green
                           value: 0.2
                 unit: percentunit
-            overrides: null
+            overrides: []
           gridPos:
             h: 7
             w: 14
@@ -554,7 +618,6 @@ spec:
               range: true
               refId: error_budget_trend
           title: Error Budget Trend
-          transparent: false
           type: timeseries
         - datasource:
             type: prometheus
@@ -564,6 +627,8 @@ spec:
             defaults:
                 color:
                     mode: thresholds
+                mappings: []
+                max: 1
                 min: 0
                 thresholds:
                     mode: absolute
@@ -575,7 +640,7 @@ spec:
                         - color: green
                           value: 0.2
                 unit: percentunit
-            overrides: null
+            overrides: []
           gridPos:
             h: 7
             w: 5
@@ -587,6 +652,7 @@ spec:
             graphMode: area
             justifyMode: auto
             orientation: horizontal
+            percentChangeColorMode: standard
             reduceOptions:
                 calcs:
                     - lastNotNull
@@ -616,7 +682,6 @@ spec:
               range: false
               refId: A
           title: Remaining Error Budget
-          transparent: false
           type: stat
         - datasource:
             type: prometheus
@@ -627,10 +692,14 @@ spec:
                 color:
                     mode: thresholds
                 custom:
+                    axisBorderShow: false
                     axisCenteredZero: false
                     axisColorMode: text
+                    axisLabel: ""
                     axisPlacement: auto
                     axisSoftMin: 0
+                    barAlignment: 0
+                    barWidthFactor: 0.6
                     drawStyle: line
                     fillOpacity: 0
                     gradientMode: scheme
@@ -638,6 +707,7 @@ spec:
                         legend: false
                         tooltip: false
                         viz: false
+                    insertNulls: false
                     lineInterpolation: smooth
                     lineWidth: 2
                     pointSize: 5
@@ -650,6 +720,7 @@ spec:
                         mode: none
                     thresholdsStyle:
                         mode: "off"
+                mappings: []
                 thresholds:
                     mode: absolute
                     steps:
@@ -660,7 +731,7 @@ spec:
                         - color: dark-red
                           value: 3
                 unit: none
-            overrides: null
+            overrides: []
           gridPos:
             h: 7
             w: 14
@@ -702,7 +773,6 @@ spec:
               range: true
               refId: computed_before_creation_time
           title: Error Budget Burn Rate
-          transparent: false
           type: timeseries
         - datasource:
             type: datasource
@@ -713,6 +783,7 @@ spec:
                 color:
                     mode: thresholds
                 decimals: 2
+                mappings: []
                 thresholds:
                     mode: absolute
                     steps:
@@ -723,18 +794,19 @@ spec:
                         - color: dark-red
                           value: 3
                 unit: none
-            overrides: null
+            overrides: []
           gridPos:
             h: 7
             w: 5
             x: 19
-            "y": 19
+            "y": 18
           id: 12
           options:
             colorMode: value
             graphMode: none
             justifyMode: auto
             orientation: auto
+            percentChangeColorMode: standard
             reduceOptions:
                 calcs:
                     - lastNotNull
@@ -759,7 +831,6 @@ spec:
               range: true
               refId: A
           title: Current Burn Rate
-          transparent: false
           type: stat
         - datasource:
             type: prometheus
@@ -770,10 +841,14 @@ spec:
                 color:
                     mode: palette-classic
                 custom:
+                    axisBorderShow: false
                     axisCenteredZero: false
                     axisColorMode: text
+                    axisLabel: ""
                     axisPlacement: auto
                     axisSoftMax: 0.05
+                    barAlignment: 0
+                    barWidthFactor: 0.6
                     drawStyle: line
                     fillOpacity: 0
                     gradientMode: none
@@ -781,6 +856,7 @@ spec:
                         legend: false
                         tooltip: false
                         viz: false
+                    insertNulls: false
                     lineInterpolation: linear
                     lineWidth: 2
                     pointSize: 5
@@ -793,13 +869,21 @@ spec:
                         mode: none
                     thresholdsStyle:
                         mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
                 unit: reqps
-            overrides: null
+            overrides: []
           gridPos:
             h: 7
             w: 24
             x: 0
-            "y": 34
+            "y": 25
           id: 13
           options:
             legend:
@@ -836,13 +920,18 @@ spec:
               range: true
               refId: computed_before_creation_time
           title: Event Rate
-          transparent: false
           type: timeseries
     revision: 1
-    schemaVersion: 34
+    schemaVersion: 39
     tags:
         - slo
-    templating: {}
+    templating:
+        list: []
+    time:
+        from: now-3h
+        to: now
+    timepicker: {}
     timezone: browser
     title: $name-$duplo_uuid
     uid: $duplo_uuid
+    weekStart: ""
