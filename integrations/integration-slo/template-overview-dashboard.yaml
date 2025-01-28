@@ -340,8 +340,7 @@ spec:
                 language: plaintext
                 showLineNumbers: false
                 showMiniMap: false
-            content: "<div style=\"display: flex; align-items: center; justify-content: center; height: 110px; font-family: Arial, sans-serif;\">\r\n    <a href=\"/d/manage-slo/manage-slo?var-duplo_uuid=\" \r\n       style=\"display: inline-block; padding: 15p
-x 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-size: 20px;\">\r\n        Create SLO\r\n    </a>\r\n</div>"
+            content: "<div style=\"display: flex; align-items: center; justify-content: center; height: 110px; font-family: Arial, sans-serif;\">\r\n    <a href=\"/d/manage-slo/manage-slo?var-duplo_uuid=\" \r\n       style=\"display: inline-block; padding: 15px 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-size: 20px;\">\r\n        Create SLO\r\n    </a>\r\n</div>"
             mode: html
           targets:
             - datasource:

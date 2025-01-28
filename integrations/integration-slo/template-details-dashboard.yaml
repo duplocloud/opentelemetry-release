@@ -183,8 +183,7 @@ spec:
                 language: plaintext
                 showLineNumbers: false
                 showMiniMap: false
-            content: "<div style=\"display: flex; align-items: center; justify-content: center; height: 110px; font-family: Arial, sans-serif;\">\n    <a href=\"/d/manage-slo/manage-slo?var-duplo_uuid=$duplo_uuid\" \n       style=\"display: inline-block; padding: 15px 30
-px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 20px;\">\n        Edit SLO\n    </a>\n</div>"
+            content: "<div style=\"display: flex; align-items: center; justify-content: center; height: 110px; font-family: Arial, sans-serif;\">\n    <a href=\"/d/manage-slo/manage-slo?var-duplo_uuid=$duplo_uuid\" \n       style=\"display: inline-block; padding: 15px 30px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 20px;\">\n        Edit SLO\n    </a>\n</div>"
             mode: html
           targets:
             - datasource:
