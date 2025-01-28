@@ -27,7 +27,7 @@ spec:
     panels:
         - datasource:
             type: prometheus
-            uid: $datasource
+            uid: duplo-metrics
           description: The number of SLIs that are meeting their SLO objective in the last 1d
           fieldConfig:
             defaults:
@@ -64,7 +64,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: $datasource
+                uid: duplo-metrics
               editorMode: builder
               expr: "count(\n\t\t(\n\t\t  sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_success_rate_5m < 1e308)[1d:5m]))\n\t\t  / sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_total_rate_5m < 1e308)[1d:5m]))\n\t\t  # combine with series that aren't producing duplo_slo_success_rate_5m and duplo_slo_total_rate_5m\n\t\t  or avg by (duplo_slo_uuid) (duplo_slo_sli_1d)\n\t\t)\n\t\t> on(duplo_slo_uuid) duplo_slo_objective\n\t  ) OR on() vector(0)\n\t  "
               hide: false
@@ -77,7 +77,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: $datasource
+            uid: duplo-metrics
           description: The number of SLIs that are meeting their SLO objective in the last 6h
           fieldConfig:
             defaults:
@@ -114,7 +114,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: $datasource
+                uid: duplo-metrics
               editorMode: builder
               expr: "count(\n\t\t(\n\t\t  sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_success_rate_5m < 1e308)[6h:5m]))\n\t\t  / sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_total_rate_5m < 1e308)[6h:5m]))\n\t\t  # combine with series that aren't producing duplo_slo_success_rate_5m and duplo_slo_total_rate_5m\n\t\t  or avg by (duplo_slo_uuid) (duplo_slo_sli_6h)\n\t\t)\n\t\t> on(duplo_slo_uuid) duplo_slo_objective\n\t  ) OR on() vector(0)\n\t  "
               hide: false
@@ -127,7 +127,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: $datasource
+            uid: duplo-metrics
           description: The number of SLIs that are meeting their SLO objective in the last 1h
           fieldConfig:
             defaults:
@@ -164,7 +164,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: $datasource
+                uid: duplo-metrics
               editorMode: builder
               expr: "count(\n\t\t(\n\t\t  sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_success_rate_5m < 1e308)[1h:5m]))\n\t\t  / sum by (duplo_slo_uuid) (sum_over_time((duplo_slo_total_rate_5m < 1e308)[1h:5m]))\n\t\t  # combine with series that aren't producing duplo_slo_success_rate_5m and duplo_slo_total_rate_5m\n\t\t  or avg by (duplo_slo_uuid) (duplo_slo_sli_1h)\n\t\t)\n\t\t> on(duplo_slo_uuid) duplo_slo_objective\n\t  ) OR on() vector(0)\n\t  "
               hide: false
@@ -177,7 +177,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: $datasource
+            uid: duplo-metrics
           description: ""
           fieldConfig:
             defaults:
@@ -214,9 +214,9 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: $datasource
+                uid: duplo-metrics
               editorMode: builder
-              expr: vector($input_count)
+              expr: vector(0)
               hide: false
               instant: false
               interval: ""
@@ -227,7 +227,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: $datasource
+            uid: duplo-metrics
           description: The number of SLOs that are recording values
           fieldConfig:
             defaults:
@@ -264,7 +264,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: $datasource
+                uid: duplo-metrics
               editorMode: builder
               expr: count(count by (duplo_slo_uuid)(duplo_slo_sli_5m)) OR on() vector(0)
               hide: false
@@ -277,7 +277,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: $datasource
+            uid: duplo-metrics
           description: The total number of series created by SLO recording rules.
           fieldConfig:
             defaults:
@@ -314,7 +314,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: $datasource
+                uid: duplo-metrics
               editorMode: builder
               expr: count({__name__=~"duplo_slo_.*", duplo_slo_uuid!=""}) OR on() vector(0)
               hide: false
@@ -327,7 +327,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: $datasource
+            uid: duplo-metrics
           description: Create SLO with hyperlink to the Manage SLO dashboard
           gridPos:
             h: 4
@@ -345,7 +345,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: $datasource
+                uid: duplo-metrics
               refId: A
           transparent: true
           type: text
