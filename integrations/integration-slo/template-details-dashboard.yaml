@@ -174,7 +174,7 @@ spec:
             uid: grafana
           gridPos:
             h: 4
-            w: 5
+            w: 3
             x: 19
             "y": 0
           id: 14
@@ -183,15 +183,259 @@ spec:
                 language: plaintext
                 showLineNumbers: false
                 showMiniMap: false
-            content: "<div style=\"display: flex; align-items: center; justify-content: center; height: 110px; font-family: Arial, sans-serif;\">\n    <a href=\"/d/manage-slo/manage-slo?var-duplo_uuid=$duplo_uuid\" \n       style=\"display: inline-block; padding: 15px 30px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 20px;\">\n        Edit SLO\n    </a>\n</div>"
+            content: "<div style=\"display: flex; align-items: center; justify-content: center; height: 80px; font-family: Arial, sans-serif;\">\n    <a href=\"/d/manage-slo/manage-slo?var-duplo_uuid=$duplo_uuid\" \n       style=\"display: inline-block; padding: 15px 30px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 20px;\">\n        Edit SLO\n    </a>\n</div>"
             mode: html
           targets:
             - datasource:
                 type: datasource
                 uid: grafana
               refId: A
-          transparent: true
+          title: Edit SLO
           type: text
+        - datasource:
+            name: -- Grafana --
+            type: datasource
+            uid: grafana
+          description: ""
+          gridPos:
+            h: 4
+            w: 2
+            x: 22
+            "y": 0
+          id: 15
+          options:
+            buttonGroup:
+                orientation: center
+                size: lg
+            confirmModal:
+                body: Are you sure, you want to delete SLO ?
+                cancel: Cancel
+                columns:
+                    include: []
+                    name: Name
+                    newValue: New Value
+                    oldValue: name
+                confirm: Confirm
+                elementDisplayMode: all
+                title: Delete SLO
+            elementValueChanged: ""
+            elements:
+                - allowCustomValue: false
+                  fieldName: name
+                  id: name
+                  labelWidth: 20
+                  options: []
+                  optionsSource: Custom
+                  section: ""
+                  title: Name
+                  tooltip: ""
+                  type: disabled
+                  uid: d000d53c-f511-4fb0-94cc-1cf4840f7101
+                  unit: ""
+                  value: ""
+                - allowCustomValue: false
+                  fieldName: uuid
+                  id: uuid
+                  labelWidth: 20
+                  options: []
+                  optionsSource: Custom
+                  section: ""
+                  title: UUID
+                  tooltip: ""
+                  type: disabled
+                  uid: 491efdf3-95a4-46fd-8b85-7eaa40d3f1e9
+                  unit: ""
+                  value: ""
+                - allowCustomValue: false
+                  fieldName: description
+                  id: description
+                  labelWidth: 20
+                  options: []
+                  optionsSource: Custom
+                  section: ""
+                  title: Description
+                  tooltip: ""
+                  type: disabled
+                  uid: e6287c42-1a07-40c0-9781-50dee700c75f
+                  unit: ""
+                  value: ""
+                - allowCustomValue: false
+                  fieldName: objective
+                  id: objective
+                  labelWidth: 20
+                  options: []
+                  optionsSource: Custom
+                  section: ""
+                  title: Objective
+                  tooltip: ""
+                  type: disabled
+                  uid: d93232d1-902d-41a2-917f-537310c9da3f
+                  unit: ""
+                  value: 0
+                - allowCustomValue: false
+                  fieldName: time_window
+                  id: time_window
+                  labelWidth: 20
+                  options: []
+                  optionsSource: Custom
+                  section: ""
+                  title: Time Window
+                  tooltip: ""
+                  type: disabled
+                  uid: new-uid-1
+                  unit: ""
+                  value: 0
+                - allowCustomValue: false
+                  fieldName: type
+                  id: type
+                  labelWidth: 20
+                  options: []
+                  optionsSource: Custom
+                  section: ""
+                  title: Type
+                  tooltip: ""
+                  type: disabled
+                  uid: new-uid-2
+                  unit: ""
+                  value: ratio
+                - allowCustomValue: false
+                  fieldName: success_metric
+                  id: success_metric
+                  labelWidth: 20
+                  options: []
+                  optionsSource: Custom
+                  section: ""
+                  title: Success Metric
+                  tooltip: ""
+                  type: disabled
+                  uid: new-uid-3
+                  unit: ""
+                  value: ""
+                - allowCustomValue: false
+                  fieldName: total_metric
+                  id: total_metric
+                  labelWidth: 20
+                  options: []
+                  optionsSource: Custom
+                  section: ""
+                  title: Total Metric
+                  tooltip: ""
+                  type: disabled
+                  uid: new-uid-4
+                  unit: ""
+                  value: ""
+            initial:
+                code: |-
+                    if (context.panel.response?.error) {
+                      context.grafana.notifyError(['An error occurred. Please check the form details.']);
+                    } else {
+                      context.grafana.notifySuccess(['Update', 'Values fetched successfully.']);
+                      context.panel.enableSubmit();
+                    }
+                contentType: application/json
+                datasource: duplo-automation
+                getPayload: ""
+                highlight: false
+                highlightColor: green
+                method: datasource
+                payload:
+                    columns: []
+                    computed_columns: []
+                    filters: []
+                    format: as-is
+                    global_query_id: ""
+                    parser: backend
+                    refId: ""
+                    root_selector: ""
+                    source: url
+                    type: json
+                    uql: parse-json
+                    url: /integrations/slo?uuid=$duplo_uuid
+                    url_options:
+                        body_content_type: text/plain
+                        body_type: raw
+                        data: ""
+                        method: GET
+            layout:
+                orientation: horizontal
+                padding: 20
+                sectionVariant: default
+                variant: none
+            reset:
+                backgroundColor: purple
+                foregroundColor: yellow
+                icon: process
+                text: Delete SLO
+                variant: hidden
+            resetAction:
+                code: ""
+                confirm: false
+                datasource: duplo-automation
+                getPayload: ""
+                mode: initial
+                payload:
+                    columns: []
+                    filters: []
+                    format: table
+                    global_query_id: ""
+                    parser: backend
+                    refId: ""
+                    root_selector: ""
+                    source: url
+                    type: json
+                    url: ""
+                    url_options:
+                        body_content_type: text/plain
+                        body_type: none
+                        data: ""
+                        method: POST
+            saveDefault:
+                icon: save
+                text: Save Default
+                variant: hidden
+            submit:
+                backgroundColor: purple
+                foregroundColor: yellow
+                icon: process
+                text: Delete SLO
+                variant: destructive
+            sync: false
+            update:
+                code: "console.log(context.panel.response)\r\nif (context.panel.response?.error) {\r\n  context.grafana.notifyError(['Update', 'An error occurred in deleting SLO.']);\r\n  context.grafana.refresh();\r\n} else {\r\n  context.grafana.notifySuccess(['Update', 'Slo deleted successfully.']);\r\n}"
+                confirm: true
+                contentType: application/json
+                datasource: duplo-automation
+                getPayload: ""
+                header: []
+                method: datasource
+                payload:
+                    columns: []
+                    filters: []
+                    format: as-is
+                    global_query_id: ""
+                    parser: backend
+                    refId: ""
+                    root_selector: ""
+                    source: url
+                    type: json
+                    url: /integrations/slo/delete?uuid=$duplo_uuid
+                    url_options:
+                        body_content_type: application/json
+                        body_form: []
+                        body_type: none
+                        data: "{\r\n    \"name\": \"${payload.name}\",\r\n    \"uuid\": \"${payload.uuid}\",\r\n    \"description\": \"${payload.description}\",\r\n    \"objective\": \"${payload.objective}\",\r\n    \"time_window\": \"${payload.time_window}\",\r\n    \"type\": \"${payload.type}\",\r\n    \"success_metric\": \"${payload.success_metric}\",\r\n    \"total_metric\": \"${payload.total_metric}\"\r\n}"
+                        method: POST
+                        params: []
+                payloadMode: custom
+            updateEnabled: manual
+          targets:
+            - datasource:
+                type: datasource
+                uid: grafana
+              queryType: randomWalk
+              refId: A
+          title: Delete SLO
+          type: volkovlabs-form-panel
         - datasource:
             type: prometheus
             uid: duplo-metrics
@@ -224,7 +468,7 @@ spec:
             overrides: []
           gridPos:
             h: 2
-            w: 5
+            w: 6
             x: 0
             "y": 4
           id: 4
@@ -314,8 +558,8 @@ spec:
             overrides: []
           gridPos:
             h: 7
-            w: 14
-            x: 5
+            w: 13
+            x: 6
             "y": 4
           id: 5
           links:
@@ -454,7 +698,7 @@ spec:
             overrides: []
           gridPos:
             h: 2
-            w: 5
+            w: 6
             x: 0
             "y": 6
           id: 7
@@ -501,7 +745,7 @@ spec:
           description: All active alerts for this SLO
           gridPos:
             h: 17
-            w: 5
+            w: 6
             x: 0
             "y": 8
           id: 8
@@ -584,8 +828,8 @@ spec:
             overrides: []
           gridPos:
             h: 7
-            w: 14
-            x: 5
+            w: 13
+            x: 6
             "y": 11
           id: 9
           options:
@@ -733,8 +977,8 @@ spec:
             overrides: []
           gridPos:
             h: 7
-            w: 14
-            x: 5
+            w: 13
+            x: 6
             "y": 18
           id: 11
           options:
@@ -920,6 +1164,7 @@ spec:
               refId: computed_before_creation_time
           title: Event Rate
           type: timeseries
+    refresh: ""
     revision: 1
     schemaVersion: 39
     tags:
