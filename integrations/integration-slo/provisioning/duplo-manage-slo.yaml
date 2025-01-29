@@ -350,6 +350,8 @@ spec:
               skipUrlSync: false
               sort: 0
               type: query
+    tags:
+        - manage-slo
     time:
         from: now-5m
         to: now
