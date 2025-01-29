@@ -1,0 +1,17 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Datasource
+metadata:
+    name: duplo-automation
+spec:
+    access: proxy
+    jsonData:
+        customHealthCheckEnabled: true
+        customHealthCheckUrl: /
+        global_queries: []
+        proxy_type: env
+    name: duplo-automation
+    orgId: 1
+    type: yesoreyeram-infinity-datasource
+    typeLogoUrl: public/plugins/yesoreyeram-infinity-datasource/img/icon.svg
+    uid: duplo-automation
+    url: http://duplo-automation:5000

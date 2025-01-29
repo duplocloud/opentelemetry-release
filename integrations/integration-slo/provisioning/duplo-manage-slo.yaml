@@ -1,0 +1,360 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: duplo-slo
+    name: manage-slo
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          description: SLO name with hyperlink to the SLO's dashboard
+          gridPos:
+            h: 5
+            w: 24
+            x: 0
+            "y": 0
+          id: 3
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: "<div style=\"font-family: Arial, sans-serif; margin: 10px;\">\r\n    <!-- Heading -->\r\n    <h1 style=\"text-align: center; margin: 0; font-size: 3em; font-weight: bold; color: rgb(255, 94, 98);\">Dashboard For Managing SLO</h1>\r\n    \r\n    <div style=\"text-align: center; margin-top: 10px;\">\r\n        <a href=\"/d/slo-dashboard-overview/slo-overview\" \r\n           style=\"display: inline-block; padding: 15px 30px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-size: 16px; margin: 10px;\">\r\n            View Overview Dashboard\r\n        </a>\r\n    </div>\r\n</div>"
+            mode: html
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              refId: A
+          transparent: true
+          type: text
+        - datasource:
+            name: -- Grafana --
+            type: datasource
+            uid: grafana
+          description: ""
+          gridPos:
+            h: 17
+            w: 17
+            x: 0
+            "y": 5
+          id: 6
+          options:
+            buttonGroup:
+                orientation: center
+                size: lg
+            confirmModal:
+                body: Are you sure, you want to delete SLO ?
+                cancel: Cancel
+                columns:
+                    include: []
+                    name: Name
+                    newValue: New Value
+                    oldValue: name
+                confirm: Confirm
+                elementDisplayMode: all
+                title: Delete SLO
+            elementValueChanged: ""
+            elements:
+                - fieldName: name
+                  hidden: false
+                  id: name
+                  labelWidth: 20
+                  section: ""
+                  title: Name
+                  tooltip: ""
+                  type: string
+                  uid: d000d53c-f511-4fb0-94cc-1cf4840f7101
+                  unit: ""
+                  value: ""
+                - allowCustomValue: false
+                  background: ""
+                  fieldName: uuid
+                  id: uuid
+                  labelBackground: ""
+                  labelColor: ""
+                  labelWidth: 20
+                  options: []
+                  optionsSource: Custom
+                  section: ""
+                  title: UUID
+                  tooltip: ""
+                  type: disabled
+                  uid: 491efdf3-95a4-46fd-8b85-7eaa40d3f1e9
+                  unit: ""
+                  value: ""
+                - fieldName: description
+                  hidden: false
+                  id: description
+                  labelWidth: 20
+                  section: ""
+                  title: Description
+                  tooltip: ""
+                  type: string
+                  uid: e6287c42-1a07-40c0-9781-50dee700c75f
+                  unit: ""
+                  value: ""
+                - fieldName: objective
+                  id: objective
+                  labelWidth: 20
+                  max: 99.999
+                  min: 0.001
+                  section: ""
+                  step: 0.01
+                  title: Objective
+                  tooltip: ""
+                  type: slider
+                  uid: d93232d1-902d-41a2-917f-537310c9da3f
+                  unit: ""
+                  value: 0
+                - fieldName: time_window
+                  id: time_window
+                  labelWidth: 20
+                  max: 32
+                  min: 7
+                  section: ""
+                  step: 1
+                  title: Time Window
+                  tooltip: ""
+                  type: slider
+                  uid: new-uid-1
+                  unit: ""
+                  value: 0
+                - fieldName: type
+                  hidden: false
+                  id: type
+                  labelWidth: 20
+                  section: ""
+                  title: Type
+                  tooltip: ""
+                  type: string
+                  uid: new-uid-2
+                  unit: ""
+                  value: ""
+                - fieldName: success_metric
+                  hidden: false
+                  id: success_metric
+                  labelWidth: 20
+                  section: ""
+                  title: Success Metric
+                  tooltip: ""
+                  type: string
+                  uid: new-uid-3
+                  unit: ""
+                  value: ""
+                - background: ""
+                  fieldName: total_metric
+                  hidden: false
+                  id: total_metric
+                  labelWidth: 20
+                  section: ""
+                  title: Total Metric
+                  tooltip: ""
+                  type: string
+                  uid: new-uid-4
+                  unit: ""
+                  value: ""
+            initial:
+                code: |-
+                    duploUuid = "${duplo_uuid}";
+                    if (duploUuid !== '') {
+                      if (context.panel.response?.error) {
+                        context.grafana.notifyError(['An error occurred. Please check the form details.']);
+                      } else {
+                        context.grafana.notifySuccess(['Update', 'Values fetched successfully.']);
+                        context.panel.enableSubmit();
+                      }
+                    } else {
+                      console.log('duplo_uuid is empty, no message displayed.');
+                    }
+                contentType: application/json
+                datasource: duplo-automation
+                getPayload: ""
+                highlight: true
+                highlightColor: green
+                method: datasource
+                payload:
+                    columns: []
+                    computed_columns: []
+                    filters: []
+                    format: as-is
+                    global_query_id: ""
+                    parser: backend
+                    refId: ""
+                    root_selector: ""
+                    source: url
+                    type: json
+                    uql: parse-json
+                    url: /integrations/slo?uuid=$duplo_uuid
+                    url_options:
+                        body_content_type: text/plain
+                        body_type: raw
+                        data: ""
+                        method: GET
+            layout:
+                orientation: horizontal
+                padding: 20
+                sectionVariant: default
+                variant: single
+            reset:
+                backgroundColor: purple
+                foregroundColor: yellow
+                icon: edit
+                text: Create/Update SLO
+                variant: primary
+            resetAction:
+                code: "console.log(context.panel.response)\r\nif (context.panel.response?.error) {\r\n  context.grafana.notifyError(['Update', 'An error occurred updating values. Reverting to old values.']);\r\n  context.grafana.refresh();\r\n} else {\r\n  context.grafana.notifySuccess(['Update', 'Values updated successfully.']);\r\n  context.grafana.refresh();\r\n}"
+                confirm: false
+                datasource: duplo-automation
+                getPayload: "const payload = {};\r\n\r\ncontext.panel.elements.forEach((element) => {\r\n  if (typeof element.value === 'string') {\r\n    // Escape double quotes inside the string\r\n    payload[element.id] = element.value.replace(/\"/g, '\\\\\\\\\\\\\\\"');\r\n  } else {\r\n    // Directly assign non-string values (e.g., numbers, booleans)\r\n    payload[element.id] = element.value;\r\n  }\r\n});\r\n\r\nconsole.log(payload)\r\n\r\nreturn payload;"
+                mode: datasource
+                payload:
+                    columns: []
+                    filters: []
+                    format: table
+                    global_query_id: ""
+                    parser: backend
+                    refId: ""
+                    root_selector: ""
+                    source: url
+                    type: json
+                    url: /integrations/slo
+                    url_options:
+                        body_content_type: application/json
+                        body_type: raw
+                        data: "{\r\n    \"name\": \"${payload.name}\",\r\n    \"uuid\": \"${payload.uuid}\",\r\n    \"description\": \"${payload.description}\",\r\n    \"objective\": \"${payload.objective}\",\r\n    \"time_window\": \"${payload.time_window}\",\r\n    \"type\": \"${payload.type}\",\r\n    \"success_metric\": \"${payload.success_metric}\",\r\n    \"total_metric\": \"${payload.total_metric}\"\r\n}"
+                        method: POST
+            saveDefault:
+                icon: save
+                text: Save Default
+                variant: hidden
+            submit:
+                backgroundColor: purple
+                foregroundColor: yellow
+                icon: process
+                text: Delete SLO
+                variant: destructive
+            sync: true
+            update:
+                code: "console.log(context.panel.response)\r\nif (context.panel.response?.error) {\r\n  context.grafana.notifyError(['Update', 'An error occurred in deleting SLO.']);\r\n  context.grafana.refresh();\r\n} else {\r\n  context.grafana.notifySuccess(['Update', 'Slo deleted successfully.']);\r\n}"
+                confirm: true
+                contentType: application/json
+                datasource: duplo-automation
+                getPayload: ""
+                header: []
+                method: datasource
+                payload:
+                    columns: []
+                    filters: []
+                    format: as-is
+                    global_query_id: ""
+                    parser: backend
+                    refId: ""
+                    root_selector: ""
+                    source: url
+                    type: json
+                    url: /integrations/slo/delete?uuid=$duplo_uuid
+                    url_options:
+                        body_content_type: application/json
+                        body_form: []
+                        body_type: none
+                        data: "{\r\n    \"name\": \"${payload.name}\",\r\n    \"uuid\": \"${payload.uuid}\",\r\n    \"description\": \"${payload.description}\",\r\n    \"objective\": \"${payload.objective}\",\r\n    \"time_window\": \"${payload.time_window}\",\r\n    \"type\": \"${payload.type}\",\r\n    \"success_metric\": \"${payload.success_metric}\",\r\n    \"total_metric\": \"${payload.total_metric}\"\r\n}"
+                        method: POST
+                        params: []
+                payloadMode: custom
+            updateEnabled: manual
+          targets:
+            - datasource:
+                type: datasource
+                uid: grafana
+              queryType: randomWalk
+              refId: A
+          title: Manage SLO - Create/Update/Delete
+          transparent: true
+          type: volkovlabs-form-panel
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          description: SLO name with hyperlink to the SLO's dashboard
+          gridPos:
+            h: 17
+            w: 7
+            x: 17
+            "y": 5
+          id: 7
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: "<div>\r\n    <h3>Learn More</h3>\r\n    <p>Configure SLOs to meet your target service metrics and set alerts for any missed objectives or service disruptions.</p>\r\n    <ul>\r\n        <li>The SLO setup provides step-by-step guidance through the SLO creation process.</li>\r\n        <li>Select the right query builders to configure SLIs tailored to your team’s needs.</li>\r\n        <li>Optionally, SLO alerts are configured for complex alert rules.</li>\r\n   <li>Use the <a href=\"/d/slo-dashboard-overview/slo-overview\">SLO overview dashboard</a> to monitor trends and status updates across all SLOs.</li>\r\n        <li>View service-specific dashboards for individual SLO details, including errorbudgets and trends.</li>\r\n    </ul>\r\n</div>\r\n<div>\r\n    <h3></h3>\r\n    <h3>Manage SLO - Example Entries</h3>\r\n    <p>When filling out the SLO form, keep the following guidelines in mind:</p>\r\n    <ul>\r\n        <li><strong>Name:</strong> Use alphanumeric characters, hyphens (-), and underscores (_). Spaces will be automatically converted to hyphens.</li>\r\n        <li><strong>Description:</strong> It's better always to proper description, If not added, description will be same as name.</li>\r\n        <li><strong>Type:</strong> This is fixed as \"ratio\". (Optional)</li>\r\n        <li><strong>Objective and Time Window:</strong> Use sliders to set desired values within the allowed limits. Where Time Windowis integer and Objective is in decimals.</li>\r\n        <li><strong>Success & Total Metrics:</strong> Use the <a href=\"/explore/metrics\" target=\"_blank\">Grafana Metrics Explorer</a> to confirm success and total metrics. Make sure to gather metrics with appropriate labels such as \"cluster\", \"latency\", or \"service names\".</li>\r\n    </ul>\r\n    <h4>Example Success & Total Metrics:</h4>\r\n    <ul>\r\n        <li><strong>Success Metric:</strong> traces_span_metrics_duration_bucket{service_name=\"cartservice\",le=\"100\", span_kind=\"SPAN_KIND_SERVER\"}</li>\r\n        <li><strong>Total Metric:</strong> traces_span_metrics_duration_count{service_name=\"cartservice\",span_kind=\"SPAN_KIND_SERVER\"}</li>\r\n    </ul>\r\n</div>"
+            mode: html
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              refId: A
+          transparent: true
+          type: text
+    refresh: ""
+    schemaVersion: 39
+    tags: []
+    templating:
+        list:
+            - current: {}
+              hide: 2
+              includeAll: false
+              label: UUID
+              multi: false
+              name: duplo_uuid
+              options: []
+              query: ""
+              skipUrlSync: false
+              type: custom
+            - current:
+                selected: false
+                isNone: true
+                text: "None"
+                value: ""
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(duplo_slo_info{duplo_slo_uuid="$duplo_uuid"},duplo_slo_name)
+              hide: 2
+              includeAll: false
+              multi: false
+              name: slo_name
+              options: []
+              query:
+                qryType: 1
+                query: label_values(duplo_slo_info{duplo_slo_uuid="$duplo_uuid"},duplo_slo_name)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
+    time:
+        from: now-5m
+        to: now
+    timepicker: {}
+    timezone: browser
+    title: Manage SLO
+    uid: manage-slo
+    weekStart: ""
