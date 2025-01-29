@@ -314,7 +314,8 @@ spec:
           type: text
     refresh: ""
     schemaVersion: 39
-    tags: []
+    tags:
+        - manage-slo
     templating:
         list:
             - current: {}
@@ -350,8 +351,6 @@ spec:
               skipUrlSync: false
               sort: 0
               type: query
-    tags:
-        - manage-slo
     time:
         from: now-5m
         to: now
