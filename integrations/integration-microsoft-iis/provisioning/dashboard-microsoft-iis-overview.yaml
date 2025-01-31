@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration---microsoft-iis
+    folder: integration-microsoft-iis
     name: microsoft-iis-overview
 spec:
     __inputs: []
