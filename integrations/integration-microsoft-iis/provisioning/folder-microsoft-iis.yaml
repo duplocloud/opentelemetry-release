@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-microsoft-iis
+spec:
+    title: Integration-Microsoft-IIS
+    uid: integration-microsoft-iis
