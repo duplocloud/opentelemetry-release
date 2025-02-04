@@ -2,7 +2,9 @@
 param (
     $DUPLO_LOGGING_PATHS,
     $DUPLO_METRICS_URL,
-    $DUPLO_LOGGING_URL
+    $DUPLO_LOGGING_URL,
+    $DUPLO_TENANT_NAME,
+    $HOSTNAME
 )
 
 # Sets the default TLS version to 1.2 to avoid issues downloading the Alloy installer on some networks
@@ -31,10 +33,22 @@ if ($DUPLO_LOGGING_URL -eq $null -or $DUPLO_LOGGING_URL -eq "") {
     exit 1
 }
 
+if ($DUPLO_TENANT_NAME -eq $null -or $DUPLO_TENANT_NAME -eq "") {
+    Write-Host "ERROR: Required argument DUPLO_TENANT_NAME missing"
+    exit 1
+}
+
+if ($HOSTNAME -eq $null -or $HOSTNAME -eq "") {
+    Write-Host "ERROR: Required argument HOSTNAME missing"
+    exit 1
+}
+
 try {
     Write-Host "DUPLO_LOGGING_PATHS:" $DUPLO_LOGGING_PATHS
     Write-Host "DUPLO_METRICS_URL:" $DUPLO_METRICS_URL
     Write-Host "DUPLO_LOGGING_URL:" $DUPLO_LOGGING_URL
+    Write-Host "DUPLO_TENANT_NAME:" $DUPLO_TENANT_NAME
+    Write-Host "HOSTNAME:" $HOSTNAME
 
     Write-Host "Downloading Alloy Windows Installer"
     $DOWNLOAD_URL = "https://github.com/grafana/alloy/releases/download/v1.4.3/alloy-installer-windows-amd64.exe.zip"
@@ -75,6 +89,8 @@ try {
     $content = $content.Replace("{DUPLO_LOGGING_PATHS}", $DUPLO_LOGGING_PATHS)
     $content = $content.Replace("{DUPLO_METRICS_URL}", $DUPLO_METRICS_URL)
     $content = $content.Replace("{DUPLO_LOGGING_URL}", $DUPLO_LOGGING_URL)
+    $content = $content.Replace("{DUPLO_TENANT_NAME}", $DUPLO_TENANT_NAME)
+    $content = $content.Replace("{HOSTNAME}", $HOSTNAME)
     $content | Set-Content $CONFIG_FILE
 
     $DEST_DIR = "C:\Program Files\GrafanaLabs\Alloy"
