@@ -1,0 +1,37 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: docker-native
+    namespace: integrations-docker-native
+spec:
+    rules:
+      - record: asserts:resource:usage
+        expr: rate(container_cpu_usage_seconds_total{job!="kubelet", asserts_env!=""}[5m])
+        labels:
+          asserts_entity_type: Service
+          asserts_resource_type: cpu:usage
+          asserts_source: docker
+      - record: asserts:resource:gauge
+        expr: container_memory_usage_bytes{job!="kubelet", asserts_env!=""}
+        labels:
+          asserts_entity_type: Service
+          asserts_resource_type: memory:usage
+          asserts_source: docker
+      - record: asserts:resource:total
+        expr: container_network_transmit_bytes_total{job!="kubelet", asserts_env!=""}
+        labels:
+          asserts_entity_type: Service
+          asserts_resource_type: network:tx_bytes
+          asserts_source: docker
+      - record: asserts:resource:total
+        expr: container_network_receive_bytes_total{job!="kubelet", asserts_env!=""}
+        labels:
+          asserts_entity_type: Service
+          asserts_resource_type: network:rx_bytes
+          asserts_source: docker
+      - record: asserts:resource:gauge
+        expr: container_fs_usage_bytes{job!="kubelet", asserts_env!=""}
+        labels:
+          asserts_entity_type: Service
+          asserts_resource_type: disk:usage
+          asserts_source: docker
