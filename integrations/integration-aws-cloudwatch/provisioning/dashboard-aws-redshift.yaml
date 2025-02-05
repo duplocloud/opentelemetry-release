@@ -1,0 +1,921 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-aws
+    name: aws-redshift
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: datasource
+                uid: grafana
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    description: Visualize AWS Redshift metrics
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: percent
+            overrides:
+                - matcher:
+                    id: byName
+                    options: DatabaseConnections
+                  properties:
+                    - id: unit
+                      value: none
+                    - id: custom.axisPlacement
+                      value: right
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 0
+          id: 1
+          options:
+            dataLinks: []
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              metricEditorMode: 0
+              metricName: CPUUtilization
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: A
+              region: $region
+              returnData: false
+              statistic: Average
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              metricEditorMode: 0
+              metricName: DatabaseConnections
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: B
+              region: $region
+              returnData: false
+              statistic: Average
+          title: CPUUtilization/DatabaseConnections
+          type: timeseries
+        - datasource:
+            type: cloudwatch
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                max: 1
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: none
+            overrides:
+                - matcher:
+                    id: byName
+                    options: HealthStatus
+                  properties:
+                    - id: custom.axisPlacement
+                      value: right
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 7
+          id: 4
+          options:
+            dataLinks: []
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              metricEditorMode: 0
+              metricName: MaintenanceMode
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: A
+              region: $region
+              returnData: false
+              statistic: Average
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              metricEditorMode: 0
+              metricName: HealthStatus
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: B
+              region: $region
+              returnData: false
+              statistic: Average
+          title: MaintenanceMode/HealthStatus
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: Bps
+            overrides:
+                - matcher:
+                    id: byName
+                    options: NetworkTransmitThroughput
+                  properties:
+                    - id: custom.axisPlacement
+                      value: right
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 14
+          id: 5
+          options:
+            dataLinks: []
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              metricEditorMode: 0
+              metricName: NetworkReceiveThroughput
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: A
+              region: $region
+              returnData: false
+              statistic: Average
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              metricEditorMode: 0
+              metricName: NetworkTransmitThroughput
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: B
+              region: $region
+              returnData: false
+              statistic: Average
+          title: NetworkReceiveThroughput/NetworkTransmitThroughput
+          type: timeseries
+        - datasource:
+            type: cloudwatch
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: rps
+            overrides:
+                - matcher:
+                    id: byName
+                    options: WriteIOPS
+                  properties:
+                    - id: custom.axisPlacement
+                      value: right
+                    - id: unit
+                      value: wps
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 21
+          id: 6
+          options:
+            dataLinks: []
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+                NodeID: $nodeid
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              matchExact: true
+              metricEditorMode: 0
+              metricName: ReadIOPS
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: A
+              region: $region
+              returnData: false
+              statistic: Average
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+                NodeID: $nodeid
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              matchExact: true
+              metricEditorMode: 0
+              metricName: WriteIOPS
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: B
+              region: $region
+              returnData: false
+              statistic: Average
+          title: 'ReadIOPS/WriteIOPS - NodeId: $nodeid'
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: s
+            overrides:
+                - matcher:
+                    id: byName
+                    options: WriteLatency
+                  properties:
+                    - id: custom.axisPlacement
+                      value: right
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 28
+          id: 7
+          options:
+            dataLinks: []
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+                NodeID: $nodeid
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              matchExact: true
+              metricEditorMode: 0
+              metricName: ReadLatency
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: A
+              region: $region
+              returnData: false
+              statistic: Average
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+                NodeID: $nodeid
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              matchExact: true
+              metricEditorMode: 0
+              metricName: WriteLatency
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: B
+              region: $region
+              returnData: false
+              statistic: Average
+          title: 'ReadLatency/WriteLatency - NodeId: $nodeid'
+          type: timeseries
+        - datasource:
+            type: cloudwatch
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: Bps
+            overrides:
+                - matcher:
+                    id: byName
+                    options: WriteThroughput
+                  properties:
+                    - id: unit
+                      value: bytes
+                    - id: custom.axisPlacement
+                      value: right
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 35
+          id: 8
+          options:
+            dataLinks: []
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+                NodeID: $nodeid
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              matchExact: true
+              metricEditorMode: 0
+              metricName: ReadThroughput
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: A
+              region: $region
+              returnData: false
+              statistic: Average
+            - alias: '{{metric}} {{stat}}'
+              application:
+                filter: ""
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterIdentifier: $clusteridentifier
+                NodeID: $nodeid
+              expression: ""
+              functions: []
+              group:
+                filter: ""
+              highResolution: false
+              host:
+                filter: ""
+              id: ""
+              item:
+                filter: ""
+              label: ""
+              matchExact: true
+              metricEditorMode: 0
+              metricName: WriteThroughput
+              metricQueryType: 0
+              mode: 0
+              namespace: AWS/Redshift
+              options:
+                showDisabledItems: false
+              period: ""
+              refId: B
+              region: $region
+              returnData: false
+              statistic: Average
+          title: 'ReadThroughput/WriteThroughput - NodeId: $nodeid'
+          type: timeseries
+    preload: false
+    refresh: false
+    schemaVersion: 40
+    tags:
+        - monitoringartist
+        - cloudwatch
+    templating:
+        list:
+            - current: {}
+              includeAll: false
+              label: Datasource
+              name: datasource
+              options: []
+              query: cloudwatch
+              refresh: 1
+              regex: ""
+              type: datasource
+            - current: {}
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: regions()
+              includeAll: false
+              label: Region
+              name: region
+              options: []
+              query: regions()
+              refresh: 1
+              regex: ""
+              type: query
+            - current: {}
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: 'dimension_values($region,AWS/Redshift,CPUUtilization,ClusterIdentifier) '
+              includeAll: false
+              label: ClusterIdentifier
+              name: clusteridentifier
+              options: []
+              query: 'dimension_values($region,AWS/Redshift,CPUUtilization,ClusterIdentifier) '
+              refresh: 1
+              regex: ""
+              sort: 1
+              type: query
+            - current: {}
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: dimension_values($region,AWS/Redshift,ReadIOPS,NodeID)
+              includeAll: false
+              label: NodeID
+              name: nodeid
+              options: []
+              query: dimension_values($region,AWS/Redshift,ReadIOPS,NodeID)
+              refresh: 1
+              regex: ""
+              sort: 1
+              type: query
+    time:
+        from: now-24h
+        to: now
+    timepicker: {}
+    timezone: browser
+    title: AWS Redshift
+    uid: aws-redshift
+    weekStart: ""

@@ -3,5 +3,5 @@ kind: DashboardFolder
 metadata:
     name: integration-docker-native
 spec:
-    title: Integration - Docker Native
+    title: Integration Docker Native
     uid: integration-docker-native

@@ -1,0 +1,515 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-aws
+    name: aws-wcs
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: datasource
+                uid: grafana
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    description: Visualize AWS ECS metrics
+    editable: true
+    fiscalYearStartMonth: 0
+    gnetId: 551
+    graphTooltip: 0
+    links: []
+    panels:
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                max: 100
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: percent
+            overrides: []
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 0
+          id: 1
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.3.1
+          targets:
+            - alias: ""
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterName: $cluster
+                ServiceName: $service
+              expression: ""
+              id: ""
+              label: ""
+              matchExact: true
+              metricEditorMode: 0
+              metricName: CPUUtilization
+              metricQueryType: 0
+              namespace: AWS/ECS
+              period: ""
+              refId: A
+              region: $region
+              statistic: Average
+          title: CPUUtilization
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                max: 100
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: percent
+            overrides: []
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 7
+          id: 2
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.3.1
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterName: $cluster
+                ServiceName: $service
+              label: ""
+              metricEditorMode: 0
+              metricName: MemoryUtilization
+              metricQueryType: 0
+              namespace: AWS/ECS
+              period: ""
+              refId: A
+              region: $region
+              statistic: Average
+          title: MemoryUtilization
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                max: 100
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: percent
+            overrides:
+                - matcher:
+                    id: byName
+                    options: CPUReservation_Average
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: '#EAB839'
+                        mode: fixed
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 14
+          id: 3
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.3.1
+          targets:
+            - alias: ""
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterName: $cluster
+              expression: ""
+              id: ""
+              label: ""
+              matchExact: true
+              metricEditorMode: 0
+              metricName: CPUReservation
+              metricQueryType: 0
+              namespace: AWS/ECS
+              period: ""
+              refId: A
+              region: $region
+              statistic: Average
+          title: CPUReservation
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                max: 100
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: percent
+            overrides:
+                - matcher:
+                    id: byName
+                    options: MemoryReservation_Average
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: '#EAB839'
+                        mode: fixed
+          gridPos:
+            h: 7
+            w: 24
+            x: 0
+            "y": 21
+          id: 4
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.3.1
+          targets:
+            - alias: ""
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              dimensions:
+                ClusterName: $cluster
+              expression: ""
+              id: ""
+              label: ""
+              matchExact: true
+              metricEditorMode: 0
+              metricName: MemoryReservation
+              metricQueryType: 0
+              namespace: AWS/ECS
+              period: ""
+              refId: A
+              region: $region
+              statistic: Average
+          title: MemoryReservation
+          type: timeseries
+    schemaVersion: 39
+    tags:
+        - monitoringartist
+        - cloudwatch
+    templating:
+        list:
+            - current: {}
+              hide: 0
+              includeAll: false
+              label: Datasource
+              multi: false
+              name: datasource
+              options: []
+              query: cloudwatch
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              type: datasource
+            - current: {}
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: ""
+              hide: 0
+              includeAll: false
+              label: Region
+              multi: false
+              name: region
+              options: []
+              query: regions()
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
+            - current:
+                selected: true
+                text: otel-o11y
+                value: otel-o11y
+              datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              definition: ""
+              hide: 0
+              includeAll: false
+              label: Tenant
+              multi: false
+              name: tenant
+              options: []
+              query:
+                attributeName: Tags.TENANT_NAME
+                queryType: ec2InstanceAttributes
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
+            - current: {}
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: ""
+              hide: 0
+              includeAll: false
+              label: Cluster
+              multi: false
+              name: cluster
+              options: []
+              query:
+                attributeName: ""
+                dimensionFilters: {}
+                dimensionKey: ClusterName
+                ec2Filters: {}
+                instanceID: ""
+                metricName: CPUUtilization
+                namespace: AWS/ECS
+                queryType: resourceARNs
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
+                resourceType: ecs
+                tags:
+                    TENANT_NAME:
+                        - $tenant
+              refresh: 1
+              regex: /cluster/([^/]+)/
+              skipUrlSync: false
+              sort: 0
+              type: query
+            - current: {}
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: ""
+              hide: 0
+              includeAll: false
+              label: Service
+              multi: false
+              name: service
+              options: []
+              query:
+                attributeName: ""
+                dimensionFilters: {}
+                dimensionKey: ServiceName
+                ec2Filters: {}
+                instanceID: ""
+                metricName: CPUUtilization
+                namespace: AWS/ECS
+                queryType: resourceARNs
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
+                resourceType: ecs
+                tags:
+                    TENANT_NAME:
+                        - $tenant
+              refresh: 1
+              regex: /service/$cluster/([^/]+)/
+              skipUrlSync: false
+              sort: 0
+              type: query
+    time:
+        from: now-24h
+        to: now
+    timepicker: {}
+    timezone: browser
+    title: AWS ECS
+    uid: aws-ecs
+    weekStart: ""

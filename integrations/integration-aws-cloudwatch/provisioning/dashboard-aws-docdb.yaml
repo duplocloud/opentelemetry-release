@@ -1,0 +1,2317 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-aws
+    name: aws-docdb
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: datasource
+                uid: grafana
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    description: AWS documentDB dashboard from cloudwatch exporter
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 5
+            w: 3
+            x: 0
+            "y": 0
+          id: 28
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - mean
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.2.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBInstanceIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: false
+              metricEditorMode: 0
+              metricName: DatabaseConnectionsMax
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: ""
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Database Connection
+          type: stat
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 5
+            w: 3
+            x: 3
+            "y": 0
+          id: 30
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - mean
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.2.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DatabaseCursorsMax
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: ""
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Database cursors
+          type: stat
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                mappings: []
+                max: 100
+                min: 0
+                thresholds:
+                    mode: percentage
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: percent
+            overrides: []
+          gridPos:
+            h: 5
+            w: 3
+            x: 6
+            "y": 0
+          id: 32
+          options:
+            minVizHeight: 75
+            minVizWidth: 75
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - mean
+                fields: ""
+                values: false
+            showThresholdLabels: false
+            showThresholdMarkers: true
+            sizing: auto
+          pluginVersion: 11.2.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: false
+              metricEditorMode: 0
+              metricName: CPUUtilization
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Cpu Utilization
+          type: gauge
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                mappings: []
+                thresholds:
+                    mode: percentage
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 90
+                unit: decbytes
+            overrides: []
+          gridPos:
+            h: 5
+            w: 3
+            x: 9
+            "y": 0
+          id: 34
+          options:
+            minVizHeight: 75
+            minVizWidth: 75
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - mean
+                fields: ""
+                values: false
+            showThresholdLabels: false
+            showThresholdMarkers: true
+            sizing: auto
+          pluginVersion: 11.2.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: FreeLocalStorage
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: 'Free Storage '
+          type: gauge
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                mappings: []
+                thresholds:
+                    mode: percentage
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 90
+                unit: decbytes
+            overrides: []
+          gridPos:
+            h: 5
+            w: 4
+            x: 12
+            "y": 0
+          id: 36
+          options:
+            minVizHeight: 75
+            minVizWidth: 75
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - mean
+                fields: ""
+                values: false
+            showThresholdLabels: false
+            showThresholdMarkers: true
+            sizing: auto
+          pluginVersion: 11.2.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: FreeableMemory
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: ""
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Free Memory
+          type: gauge
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 50
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 5
+            w: 4
+            x: 16
+            "y": 0
+          id: 38
+          options:
+            minVizHeight: 75
+            minVizWidth: 75
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - mean
+                fields: ""
+                values: false
+            showThresholdLabels: false
+            showThresholdMarkers: true
+            sizing: auto
+          pluginVersion: 11.2.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: ReadLatency
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: ""
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Read Latency
+          type: gauge
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 5
+            w: 4
+            x: 20
+            "y": 0
+          id: 40
+          options:
+            minVizHeight: 75
+            minVizWidth: 75
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - mean
+                fields: ""
+                values: false
+            showThresholdLabels: false
+            showThresholdMarkers: true
+            sizing: auto
+          pluginVersion: 11.2.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: WriteLatency
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Write Latency
+          type: gauge
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          description: The maximum amount of lag, in milliseconds, between the primary instance and each Amazon DocumentDB instance in the cluster.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 2
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: ms
+            overrides:
+                - matcher:
+                    id: byName
+                    options: database_connections
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: purple
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: database_connections_max
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: light-orange
+                        mode: fixed
+          gridPos:
+            h: 8
+            w: 24
+            x: 0
+            "y": 5
+          id: 43
+          options:
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DBClusterReplicaLagMaximum
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: ""
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Database Cluster Replica Lag Maximum
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides:
+                - matcher:
+                    id: byName
+                    options: database_connections
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: purple
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: database_connections_max
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: light-orange
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: database_connections
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: purple
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: database_connections_max
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: light-orange
+                        mode: fixed
+          gridPos:
+            h: 10
+            w: 12
+            x: 0
+            "y": 13
+          id: 10
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DatabaseConnections
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DatabaseConnectionsMax
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: ""
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: B
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: 'Database Connections '
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 10
+            w: 12
+            x: 12
+            "y": 13
+          id: 12
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DatabaseCursors
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DatabaseCursorsMax
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: B
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: 'Database Cursors '
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: percent
+            overrides:
+                - matcher:
+                    id: byName
+                    options: cpu_utilization %
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: semi-dark-blue
+                        mode: fixed
+          gridPos:
+            h: 10
+            w: 12
+            x: 0
+            "y": 23
+          id: 2
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: CPUUtilization
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Cpu Utilization %
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: decbytes
+            overrides:
+                - matcher:
+                    id: byName
+                    options: freeable_memory
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: yellow
+                        mode: fixed
+          gridPos:
+            h: 10
+            w: 12
+            x: 12
+            "y": 23
+          id: 4
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: FreeableMemory
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Freeable Memory
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides:
+                - matcher:
+                    id: byName
+                    options: buffer_cache_hit_ratio
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: semi-dark-green
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: index_buffer_cache_hit_ratio
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: blue
+                        mode: fixed
+          gridPos:
+            h: 11
+            w: 24
+            x: 0
+            "y": 33
+          id: 24
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - lastNotNull
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: BufferCacheHitRatio
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Cache Hit Ratio
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 10
+            w: 24
+            x: 0
+            "y": 44
+          id: 42
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: WriteIOPS
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: ReadIOPS
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: B
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Panel Title
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: iops
+            overrides: []
+          gridPos:
+            h: 10
+            w: 12
+            x: 0
+            "y": 54
+          id: 14
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: VolumeWriteIOPs
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: VolumeReadIOPs
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: B
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Volume IOPS rate
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: decbytes
+            overrides:
+                - matcher:
+                    id: byName
+                    options: volume_bytes_used
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: light-green
+                        mode: fixed
+          gridPos:
+            h: 10
+            w: 12
+            x: 12
+            "y": 54
+          id: 8
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: VolumeBytesUsed
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Volume Bytes Used
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: decbytes
+            overrides:
+                - matcher:
+                    id: byName
+                    options: free_local_storage
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: semi-dark-yellow
+                        mode: fixed
+          gridPos:
+            h: 9
+            w: 12
+            x: 0
+            "y": 64
+          id: 6
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: FreeLocalStorage
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Free Local Storage
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 9
+            w: 12
+            x: 12
+            "y": 64
+          id: 26
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DiskQueueDepth
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Disk Queue Depth
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: Bps
+            overrides: []
+          gridPos:
+            h: 11
+            w: 24
+            x: 0
+            "y": 73
+          id: 16
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: ReadThroughput
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: WriteThroughput
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: B
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: NetworkThroughput
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: C
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Throughtput
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 11
+            w: 24
+            x: 0
+            "y": 84
+          id: 18
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: ReadLatency
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: WriteLatency
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: ""
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: B
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Latency
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 10
+            w: 24
+            x: 0
+            "y": 95
+          id: 22
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DocumentsDeleted
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DocumentsInserted
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: B
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DocumentsReturned
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: C
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: DocumentsUpdated
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: D
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Operations Documents
+          type: timeseries
+        - datasource:
+            default: false
+            type: cloudwatch
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 10
+            w: 24
+            x: 0
+            "y": 105
+          id: 20
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: none
+          pluginVersion: 11.4.0
+          targets:
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: OpcountersCommand
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: A
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: OpcountersDelete
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: B
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: OpcountersGetmore
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: C
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: OpcountersInsert
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: D
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+            - datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              dimensions:
+                DBClusterIdentifier: $Identifier
+              expression: ""
+              hide: false
+              id: ""
+              label: ""
+              logGroups: []
+              matchExact: true
+              metricEditorMode: 0
+              metricName: OpcountersUpdate
+              metricQueryType: 0
+              namespace: AWS/DocDB
+              period: $period
+              queryLanguage: CWLI
+              queryMode: Metrics
+              refId: E
+              region: $region
+              sqlExpression: ""
+              statistic: Average
+          title: Operation  Opcounters
+          type: timeseries
+    refresh: ""
+    schemaVersion: 39
+    tags: []
+    templating:
+        list:
+            - current:
+                text: duplo-aws
+                value: duplo-aws
+              hide: 0
+              includeAll: false
+              label: Data source
+              multi: false
+              name: datasource
+              options: []
+              query: cloudwatch
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              type: datasource
+            - current:
+                text: us-west-2
+                value: us-west-2
+              datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              definition: ""
+              hide: 0
+              includeAll: false
+              label: Region
+              multi: false
+              name: region
+              options: []
+              query:
+                queryType: regions
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: default
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
+            - current:
+                text: otel-o11y
+                value: otel-o11y
+              datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              definition: ""
+              hide: 0
+              includeAll: false
+              label: Tenant
+              multi: false
+              name: tenant
+              options: []
+              query:
+                attributeName: Tags.TENANT_NAME
+                queryType: ec2InstanceAttributes
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
+            - current:
+                text: []
+                value: []
+              datasource:
+                type: cloudwatch
+                uid: ${datasource}
+              definition: ""
+              hide: 0
+              includeAll: false
+              multi: false
+              name: Identifier
+              options: []
+              query:
+                attributeName: Tags.TENANT_NAME
+                namespace: AWS/DocDB
+                queryType: resourceARNs
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
+                resourceType: rds:cluster
+                tags:
+                    TENANT_NAME:
+                        - $tenant
+              refresh: 1
+              regex: /.*cluster:([^:]+$).*/
+              skipUrlSync: false
+              sort: 0
+              type: query
+            - current:
+                text: "60"
+                value: "60"
+              hide: 0
+              includeAll: false
+              label: Period [sec]
+              multi: false
+              name: period
+              options:
+                - selected: true
+                  text: "60"
+                  value: "60"
+                - selected: false
+                  text: "300"
+                  value: "300"
+                - selected: false
+                  text: "3600"
+                  value: "3600"
+              query: 60,300,3600
+              queryValue: ""
+              skipUrlSync: false
+              type: custom
+    time:
+        from: now-1h
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: AWS DocumentDB
+    uid: aws-docdb
+    weekStart: ""
