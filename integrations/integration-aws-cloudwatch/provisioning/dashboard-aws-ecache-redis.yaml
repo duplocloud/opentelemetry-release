@@ -8,7 +8,7 @@ spec:
     __inputs:
         - description: ""
           label: duplo-aws
-          name: DS_DUPLO-AWS
+          name: duplo-aws
           pluginId: cloudwatch
           pluginName: CloudWatch
           type: datasource
