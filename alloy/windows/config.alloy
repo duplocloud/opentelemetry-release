@@ -13,7 +13,17 @@ discovery.relabel "integrations_windows_exporter" {
 
   rule {
     target_label = "instance"
-    replacement  = constants.hostname
+    replacement  = {HOSTNAME}
+  }
+
+  rule {
+    target_label = "cluster"
+    replacement  = {DUPLO_TENANT_NAME}
+  }
+
+  rule {
+    target_label = "tenant"
+    replacement  = {DUPLO_TENANT_NAME}
   }
 }
 
@@ -69,7 +79,7 @@ loki.source.windowsevent "logs_integrations_windows_exporter_application" {
   use_incoming_timestamp = true
   forward_to             = [loki.relabel.logs_integrations_windows_exporter_application.receiver]
   labels                 = {
-    instance = constants.hostname,
+    instance = {HOSTNAME},
     job      = "integrations/windows_exporter",
   }
 }
@@ -109,7 +119,7 @@ loki.source.windowsevent "logs_integrations_windows_exporter_system" {
   use_incoming_timestamp = true
   forward_to             = [loki.relabel.logs_integrations_windows_exporter_system.receiver]
   labels                 = {
-    instance = constants.hostname,
+    instance = {HOSTNAME},
     job      = "integrations/windows_exporter",
   }
 }
@@ -126,11 +136,18 @@ loki.source.file "application_logs" {
 
 loki.process "logs_service" {
   stage.static_labels {
-      values = {
-        instance = constants.hostname,
-        job      = "integrations/windows_custom_logs",
-      }
+    values = {
+      instance = {HOSTNAME},
+      cluster = {DUPLO_TENANT_NAME},
+      tenant = {DUPLO_TENANT_NAME}
+    }
   }
+
+  stage.match {
+		selector = "{job=\"integrations/iis\"} |~ \"^#\""
+		action = "drop"
+		drop_counter_reason = "iis_comment_line"
+	}
 
   forward_to = [loki.write.logs_service.receiver]
 }
