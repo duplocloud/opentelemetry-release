@@ -23,7 +23,7 @@ spec:
           includeVars: true
           keepTime: true
           tags:
-            - docker-integration
+            - integration-docker-native
           title: All Docker dashboards
           type: dashboards
     panels:
