@@ -2196,7 +2196,8 @@ spec:
           type: timeseries
     refresh: ""
     schemaVersion: 39
-    tags: []
+    tags:
+        - cloudwatch
     templating:
         list:
             - current:

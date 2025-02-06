@@ -1113,7 +1113,8 @@ spec:
           title: ' '
           type: text
     schemaVersion: 39
-    tags: []
+    tags:
+        - cloudwatch
     templating:
         list:
             - current:

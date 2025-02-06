@@ -857,7 +857,6 @@ spec:
     refresh: false
     schemaVersion: 40
     tags:
-        - monitoringartist
         - cloudwatch
     templating:
         list:

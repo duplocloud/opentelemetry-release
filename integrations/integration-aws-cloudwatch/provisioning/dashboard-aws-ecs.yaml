@@ -386,7 +386,6 @@ spec:
           type: timeseries
     schemaVersion: 39
     tags:
-        - monitoringartist
         - cloudwatch
     templating:
         list:

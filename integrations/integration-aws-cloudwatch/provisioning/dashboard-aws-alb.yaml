@@ -1480,7 +1480,6 @@ spec:
     refresh: false
     schemaVersion: 39
     tags:
-        - monitoringartist
         - cloudwatch
     templating:
         list:
