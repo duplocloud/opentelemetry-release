@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-windows
+    folder: integration-windows-node
     name: windows-fleet
 spec:
     annotations:
@@ -52,11 +52,19 @@ spec:
     fiscalYearStartMonth: 0
     graphTooltip: 0
     links:
+        - keepTime: true
+          title: Back to Windows fleet
+          type: link
+          url: /d/windows-fleet
+        - keepTime: true
+          title: Back to Windows overview
+          type: link
+          url: /d/windows-overview
         - asDropdown: true
           includeVars: true
           keepTime: true
           tags:
-            - windows-exporter-integration
+            - integration-windows-node
           title: All Windows dashboards
           type: dashboards
     panels:

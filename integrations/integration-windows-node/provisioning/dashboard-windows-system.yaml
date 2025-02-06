@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-windows
+    folder: integration-windows-node
     name: windows-system
 spec:
     annotations:
@@ -64,7 +64,7 @@ spec:
           includeVars: true
           keepTime: true
           tags:
-            - windows-exporter-integration
+            - integration-windows-node
           title: All Windows dashboards
           type: dashboards
     panels:
