@@ -15,7 +15,7 @@ spec:
               iconColor: rgba(0, 211, 255, 1)
               name: Annotations & Alerts
               type: dashboard
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 0
     links:
@@ -1270,7 +1270,7 @@ spec:
               query: prometheus
               queryValue: ""
               refresh: 1
-              regex: (?!grafanacloud-usage|grafanacloud-ml-metrics).+
+              regex: ""
               skipUrlSync: false
               type: datasource
             - allValue: .+
@@ -1377,6 +1377,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Docker overview
+    title: Docker Overview
     uid: docker-overview
     weekStart: ""

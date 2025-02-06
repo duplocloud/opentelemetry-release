@@ -15,7 +15,7 @@ spec:
               iconColor: rgba(0, 211, 255, 1)
               name: Annotations & Alerts
               type: dashboard
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 0
     links:
@@ -511,7 +511,7 @@ spec:
               options: []
               query: loki
               refresh: 1
-              regex: (?!grafanacloud.+usage-insights|grafanacloud.+alert-state-history).+
+              regex: ""
               skipUrlSync: false
               type: datasource
             - allValue: .*
@@ -637,6 +637,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Docker logs
+    title: Docker Logs
     uid: docker-logs
     weekStart: ""
