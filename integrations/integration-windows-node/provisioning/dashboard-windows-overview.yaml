@@ -1321,6 +1321,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Windows overview
+    title: Windows Overview
     uid: windows-overview
     weekStart: ""
