@@ -412,14 +412,14 @@ spec:
     templating:
         list:
             - current:
-                text: grafanacloud-demoinfra-logs
-                value: grafanacloud-demoinfra-logs
+                text: ""
+                value: ""
               label: Loki data source
               name: loki_datasource
               options: []
               query: loki
               refresh: 1
-              regex: (?!grafanacloud.+usage-insights|grafanacloud.+alert-state-history).+
+              regex: ""
               type: datasource
             - allValue: .*
               current:
@@ -521,7 +521,7 @@ spec:
               options: []
               query: prometheus
               refresh: 1
-              regex: (?!grafanacloud-usage|grafanacloud-ml-metrics).+
+              regex: ""
               type: datasource
     time:
         from: now-30m

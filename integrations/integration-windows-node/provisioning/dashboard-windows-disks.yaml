@@ -671,7 +671,7 @@ spec:
               options: []
               query: prometheus
               refresh: 1
-              regex: (?!grafanacloud-usage|grafanacloud-ml-metrics).+
+              regex: ""
               type: datasource
             - allValue: .+
               current:
@@ -705,15 +705,15 @@ spec:
               sort: 1
               type: query
             - current:
-                text: grafanacloud-demoinfra-logs
-                value: grafanacloud-demoinfra-logs
+                text: ""
+                value: ""
               hide: 2
               label: Loki data source
               name: loki_datasource
               options: []
               query: loki
               refresh: 1
-              regex: (?!grafanacloud.+usage-insights|grafanacloud.+alert-state-history).+
+              regex: ""
               type: datasource
     time:
         from: now-30m
