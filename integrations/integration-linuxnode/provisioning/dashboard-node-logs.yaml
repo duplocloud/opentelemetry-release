@@ -108,7 +108,7 @@ spec:
           includeVars: true
           keepTime: true
           tags:
-            - linux-node-integration
+            - linuxnode-integration
           title: All Linux node /  dashboards
           type: dashboards
     panels:
@@ -463,7 +463,7 @@ spec:
               options: []
               query: loki
               refresh: 1
-              regex: (?!grafanacloud.+usage-insights|grafanacloud.+alert-state-history).+
+              regex: ""
               type: datasource
             - allValue: .*
               current:
@@ -573,8 +573,8 @@ spec:
               query: ""
               type: textbox
             - current:
-                text: grafanacloud-demoinfra-prom
-                value: grafanacloud-demoinfra-prom
+                text: ""
+                value: ""
               hide: 2
               label: Data source
               name: datasource

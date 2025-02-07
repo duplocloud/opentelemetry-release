@@ -100,7 +100,7 @@ spec:
           includeVars: true
           keepTime: true
           tags:
-            - linux-node-integration
+            - linuxnode-integration
           title: All Linux node /  dashboards
           type: dashboards
     panels:
@@ -1004,14 +1004,14 @@ spec:
     templating:
         list:
             - current:
-                text: grafanacloud-demoinfra-prom
-                value: grafanacloud-demoinfra-prom
+                text: ""
+                value: ""
               label: Data source
               name: datasource
               options: []
               query: prometheus
               refresh: 1
-              regex: (?!grafanacloud-usage|grafanacloud-ml-metrics).+
+              regex: ""
               type: datasource
             - allValue: .*
               current:
