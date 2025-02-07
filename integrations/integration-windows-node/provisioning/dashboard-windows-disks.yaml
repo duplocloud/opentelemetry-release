@@ -660,7 +660,7 @@ spec:
     refresh: 30s
     schemaVersion: 40
     tags:
-        - windows-exporter-integration
+        - integration-windows-node
     templating:
         list:
             - current:
