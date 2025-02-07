@@ -6,7 +6,7 @@ spec:
     access: proxy
     jsonData:
         authType: default
-        defaultRegion: us-west-2
+        defaultRegion: $region
     name: duplo-aws
     orgId: 1
     type: cloudwatch

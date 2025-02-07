@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-aws
+    folder: integration-aws-cloudwatch
     name: aws-rds
 spec:
     annotations:
@@ -16,7 +16,7 @@ spec:
               name: Annotations & Alerts
               type: dashboard
     description: Visualize Amazon RDS metrics
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 0
     links: []

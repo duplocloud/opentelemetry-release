@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-aws
+    folder: integration-aws-cloudwatch
     name: aws-opensearch
 spec:
     annotations:
@@ -21,7 +21,7 @@ spec:
                 type: dashboard
               type: dashboard
     description: Let's you visualise cluster health, latency, indexing rate, free storage and more.
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     gnetId: 18672
     graphTooltip: 1

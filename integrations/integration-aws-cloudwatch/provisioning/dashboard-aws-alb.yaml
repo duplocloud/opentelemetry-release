@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-aws
+    folder: integration-aws-cloudwatch
     name: aws-alb
 spec:
     annotations:
@@ -16,7 +16,7 @@ spec:
               name: Annotations & Alerts
               type: dashboard
     description: Visualize AWS ELB Application Load Balancer metrics
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     gnetId: 650
     graphTooltip: 0
@@ -1451,32 +1451,6 @@ spec:
               statistic: Average
           title: Auth
           type: timeseries
-        - datasource:
-            type: datasource
-            uid: grafana
-          editable: true
-          error: false
-          gridPos:
-            h: 3
-            w: 24
-            x: 0
-            "y": 74
-          id: 2
-          options:
-            code:
-                language: plaintext
-                showLineNumbers: false
-                showMiniMap: false
-            content: "<a href=\"http://www.monitoringartist.com\" target=\"_blank\" title=\"Dashboard maintained by Monitoring Artist - DevOps / Docker / Kubernetes / AWS ECS / Google GCP / Zabbix / Zenoss / Terraform / Monitoring\"><img src=\"https://monitoringartist.github.io/monitoring-artist-logo-grafana.png\" height=\"30px\" /></a> | \n<a target=\"_blank\" href=\"https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-cloudwatch-metrics.html\">AWS CloudWatch ELB documentation</a> | \n<a target=\"_blank\" href=\"https://grafana.com/dashboards/650\">Installed from Grafana.com dashboards</a>"
-            mode: html
-          pluginVersion: 11.2.0
-          targets:
-            - datasource:
-                type: datasource
-                uid: grafana
-              refId: A
-          title: Documentation
-          type: text
     refresh: false
     schemaVersion: 39
     tags:
