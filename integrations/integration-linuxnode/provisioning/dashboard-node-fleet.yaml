@@ -1077,6 +1077,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Linux Node / Fleet Overview
+    title: Linux node / fleet overview
     uid: node-fleet
     weekStart: ""

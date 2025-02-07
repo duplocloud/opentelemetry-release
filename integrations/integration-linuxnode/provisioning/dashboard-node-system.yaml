@@ -847,6 +847,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Linux Node / CPU and System
+    title: Linux node / CPU and system
     uid: node-system
     weekStart: ""

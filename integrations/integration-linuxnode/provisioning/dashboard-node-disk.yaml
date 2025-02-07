@@ -1018,6 +1018,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Linux Node / Filesystem and Disks
+    title: Linux node / filesystem and disks
     uid: node-disk
     weekStart: ""

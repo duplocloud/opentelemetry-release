@@ -1609,6 +1609,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Linux Node / Memory
+    title: Linux node / memory
     uid: node-memory
     weekStart: ""

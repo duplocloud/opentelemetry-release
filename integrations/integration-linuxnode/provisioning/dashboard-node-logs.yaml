@@ -588,6 +588,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Linux Node / Logs
+    title: Linux node / logs
     uid: node-logs
     weekStart: ""

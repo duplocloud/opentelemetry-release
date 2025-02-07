@@ -1463,6 +1463,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Linux Node / Overview
+    title: Linux node / overview
     uid: nodes
     weekStart: ""
