@@ -1070,7 +1070,7 @@ spec:
               options: []
               query: loki
               refresh: 1
-              regex: (?!grafanacloud.+usage-insights|grafanacloud.+alert-state-history).+
+              regex: ""
               type: datasource
     time:
         from: now-30m

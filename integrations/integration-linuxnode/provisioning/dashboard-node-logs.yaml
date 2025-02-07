@@ -581,7 +581,7 @@ spec:
               options: []
               query: prometheus
               refresh: 1
-              regex: (?!grafanacloud-usage|grafanacloud-ml-metrics).+
+              regex: ""
               type: datasource
     time:
         from: now-30m
