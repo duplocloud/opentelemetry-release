@@ -407,6 +407,7 @@ spec:
     schemaVersion: 39
     tags:
         - kubernetes-integration
+        - cluster
     templating:
         list:
             - current:

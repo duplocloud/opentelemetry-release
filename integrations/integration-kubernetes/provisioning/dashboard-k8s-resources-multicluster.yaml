@@ -444,6 +444,7 @@ spec:
     tags:
         - kubernetes-integration
         - resource
+        - compute
     templating:
         list:
             - current:

@@ -313,6 +313,7 @@ spec:
     tags:
         - kubernetes-integration
         - networking
+        - resource
     templating:
         list:
             - current:

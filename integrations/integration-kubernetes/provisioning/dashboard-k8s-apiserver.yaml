@@ -587,7 +587,7 @@ spec:
     schemaVersion: 39
     tags:
         - kubernetes-integration
-        - apiserver
+        - cluster
     templating:
         list:
             - current:

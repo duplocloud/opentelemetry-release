@@ -225,7 +225,8 @@ spec:
     schemaVersion: 39
     tags:
         - kubernetes-integration
-        - cluster
+        - resource
+        - compute
     templating:
         list:
             - current:
@@ -289,5 +290,5 @@ spec:
         from: now-1h
         to: now
     timezone: browser
-    title: K8s / Persistent Volumes
+    title: K8s / Compute Resources / Persistent Volumes
     uid: k8s-persistentvolumesusage

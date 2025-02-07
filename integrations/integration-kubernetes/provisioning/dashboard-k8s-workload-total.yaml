@@ -404,6 +404,7 @@ spec:
     schemaVersion: 39
     tags:
         - kubernetes-integration
+        - resource
         - networking
     templating:
         list:

@@ -20,23 +20,8 @@ spec:
                 tags: []
                 type: dashboard
               type: dashboard
-            - datasource:
-                uid: ${lokids}
-              enable: true
-              expr: '{job!="", cluster="$cluster"} |= "sourcecomponent=kubelet" |~ "sourcehost=$instance" |~ "reason=(Created|Killing|BackOff|SystemOOM|Started)" | logfmt'
-              hide: false
-              iconColor: blue
-              name: K8s events
-              tagKeys: reason,type
-              target:
-                limit: 100
-                matchAny: false
-                tags: []
-                type: dashboard
-              textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
-              titleFormat: '{{msg}}'
     description: The dashboard offers a simple view of the resource consumption of the deployed pods and their impact on the cluster. The outline of requests and limits for each pod and their totals can be used as a tool to determine appropriate resource quotas for your cluster.
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     gnetId: 17375
     graphTooltip: 0
@@ -926,7 +911,7 @@ spec:
     schemaVersion: 39
     tags:
         - kubernetes-integration
-        - resource
+        - general
     templating:
         list:
             - datasource:
@@ -937,23 +922,6 @@ spec:
               name: Filters
               skipUrlSync: false
               type: adhoc
-            - current:
-                selected: true
-                text:
-                    - All
-                value:
-                    - $__all
-              hide: 0
-              includeAll: true
-              label: Events Data Source
-              multi: true
-              name: lokids
-              options: []
-              query: loki
-              refresh: 1
-              regex: ""
-              skipUrlSync: false
-              type: datasource
     time:
         from: now-30m
         to: now
@@ -980,6 +948,6 @@ spec:
             - 7d
             - 30d
     timezone: browser
-    title: K8s / Resource / Monitoring
+    title: K8s / Resource Monitoring
     uid: k8s-resource-monitoring
     weekStart: ""

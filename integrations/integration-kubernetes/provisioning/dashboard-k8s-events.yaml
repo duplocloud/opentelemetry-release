@@ -1088,8 +1088,8 @@ spec:
     refresh: 1m
     schemaVersion: 39
     tags:
-        - integration-kubernetes
-        - loki
+        - kubernetes-integration
+        - k8s-events
     templating:
         list:
             - current:

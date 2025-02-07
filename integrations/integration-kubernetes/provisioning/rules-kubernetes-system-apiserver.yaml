@@ -1,8 +1,8 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: PrometheusRuleGroup
 metadata:
-    name: kubernetes-system-apiserver
-    namespace: integrations-kubernetes
+    name: apiserver-alerts
+    namespace: integrations-kubernetes-system
 spec:
     rules:
         - alerts: []
