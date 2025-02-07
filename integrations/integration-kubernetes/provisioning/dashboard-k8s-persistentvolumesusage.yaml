@@ -1,0 +1,294 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-kubernetes
+    name: k8s-persistentvolumesusage
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: datasource
+                uid: grafana
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              target:
+                limit: 100
+                matchAny: false
+                tags: []
+                type: dashboard
+              type: dashboard
+            - datasource:
+                uid: ${lokids}
+              enable: true
+              expr: '{job!="", cluster="$cluster"} |= "sourcecomponent=kubelet" |~ "sourcehost=$instance" |~ "reason=(Created|Killing|BackOff|SystemOOM|Started)" | logfmt'
+              hide: false
+              iconColor: blue
+              name: K8s events
+              tagKeys: reason,type
+              target:
+                limit: 100
+                matchAny: false
+                tags: []
+                type: dashboard
+              textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
+              titleFormat: '{{msg}}'
+    editable: false
+    links:
+        - asDropdown: true
+          includeVars: true
+          keepTime: true
+          tags:
+            - kubernetes-integration
+          targetBlank: false
+          title: Kubernetes
+          type: dashboards
+    panels:
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                custom:
+                    fillOpacity: 10
+                    showPoints: never
+                    spanNulls: true
+                unit: bytes
+          gridPos:
+            h: 7
+            w: 18
+            "y": 0
+          id: 1
+          interval: 1m
+          options:
+            legend:
+                asTable: true
+                calcs:
+                    - lastNotNull
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                mode: single
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: |
+                (
+                  sum without(instance, node) (topk(1, (kubelet_volume_stats_capacity_bytes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})))
+                  -
+                  sum without(instance, node) (topk(1, (kubelet_volume_stats_available_bytes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})))
+                )
+              legendFormat: Used Space
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: |
+                sum without(instance, node) (topk(1, (kubelet_volume_stats_available_bytes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})))
+              legendFormat: Free Space
+          title: Volume Space Usage
+          type: timeseries
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                max: 100
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: 0
+                        - color: orange
+                          value: 80
+                        - color: red
+                          value: 90
+                unit: percent
+          gridPos:
+            h: 7
+            w: 6
+            x: 18
+            "y": 0
+          id: 2
+          interval: 1m
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: |
+                max without(instance,node) (
+                (
+                  topk(1, kubelet_volume_stats_capacity_bytes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})
+                  -
+                  topk(1, kubelet_volume_stats_available_bytes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})
+                )
+                /
+                topk(1, kubelet_volume_stats_capacity_bytes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})
+                * 100)
+              instant: true
+          title: Volume Space Usage
+          type: gauge
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                custom:
+                    fillOpacity: 10
+                    showPoints: never
+                    spanNulls: true
+                unit: none
+          gridPos:
+            h: 7
+            w: 18
+            "y": 7
+          id: 3
+          interval: 1m
+          options:
+            legend:
+                asTable: true
+                calcs:
+                    - lastNotNull
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                mode: single
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: sum without(instance, node) (topk(1, (kubelet_volume_stats_inodes_used{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})))
+              legendFormat: Used inodes
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: |
+                (
+                  sum without(instance, node) (topk(1, (kubelet_volume_stats_inodes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})))
+                  -
+                  sum without(instance, node) (topk(1, (kubelet_volume_stats_inodes_used{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})))
+                )
+              legendFormat: Free inodes
+          title: Volume inodes Usage
+          type: timeseries
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                max: 100
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: 0
+                        - color: orange
+                          value: 80
+                        - color: red
+                          value: 90
+                unit: percent
+          gridPos:
+            h: 7
+            w: 6
+            x: 18
+            "y": 7
+          id: 4
+          interval: 1m
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: |
+                max without(instance,node) (
+                topk(1, kubelet_volume_stats_inodes_used{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})
+                /
+                topk(1, kubelet_volume_stats_inodes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})
+                * 100)
+              instant: true
+          title: Volume inodes Usage
+          type: gauge
+    refresh: 30s
+    schemaVersion: 39
+    tags:
+        - kubernetes-integration
+        - resource
+        - compute
+    templating:
+        list:
+            - current:
+                selected: true
+                text: duplo-metrics
+                value: duplo-metrics
+              hide: 0
+              label: Data source
+              name: datasource
+              query: prometheus
+              regex: ""
+              type: datasource
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              hide: 0
+              label: cluster
+              name: cluster
+              query: label_values(kubelet_volume_stats_capacity_bytes{job="integrations/kubernetes/kubelet"}, cluster)
+              refresh: 2
+              sort: 1
+              type: query
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              hide: 0
+              label: Namespace
+              name: namespace
+              query: label_values(kubelet_volume_stats_capacity_bytes{cluster="$cluster", job="integrations/kubernetes/kubelet"}, namespace)
+              refresh: 2
+              sort: 1
+              type: query
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              hide: 0
+              label: PersistentVolumeClaim
+              name: volume
+              query: label_values(kubelet_volume_stats_capacity_bytes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace"}, persistentvolumeclaim)
+              refresh: 2
+              sort: 1
+              type: query
+            - current:
+                selected: true
+                text:
+                    - All
+                value:
+                    - $__all
+              hide: 0
+              includeAll: true
+              label: Events Data Source
+              multi: true
+              name: lokids
+              options: []
+              query: loki
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              type: datasource
+    time:
+        from: now-1h
+        to: now
+    timezone: browser
+    title: K8s / Compute Resources / Persistent Volumes
+    uid: k8s-persistentvolumesusage
