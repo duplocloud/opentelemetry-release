@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-windows-node
+    folder: integration-kubernetes-windows
     name: k8s-windows-cluster-rsrc-use
 spec:
     editable: false
@@ -261,7 +261,7 @@ spec:
     refresh: 30s
     schemaVersion: 39
     tags:
-        - kubernetes-integration
+        - kubernetes-windows-integration
     templating:
         list:
             - current:

@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-kubernetes-windows
+spec:
+    title: Integration-Kubernetes-Windows
+    uid: integration-kubernetes-windows
