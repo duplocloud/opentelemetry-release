@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-docker-native
+spec:
+    title: Integration-Docker-Native
+    uid: integration-docker-native
