@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-aws-cloudwatch
+spec:
+    title: Integration-AWS-Cloudwatch
+    uid: integration-aws-cloudwatch
