@@ -463,7 +463,7 @@ spec:
               options: []
               query: prometheus
               refresh: 1
-              regex: (?!grafanacloud-usage|grafanacloud-ml-metrics).+
+              regex: ""
               skipUrlSync: false
               type: datasource
             - current:

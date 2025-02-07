@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-kubernetes
+    folder: integration-kubernetes-system
     name: k8s-kubelet
 spec:
     annotations:
@@ -41,7 +41,7 @@ spec:
           includeVars: true
           keepTime: true
           tags:
-            - kubernetes-integration
+            - kubernetes-integration-system
           targetBlank: false
           title: Kubernetes
           type: dashboards
@@ -866,7 +866,7 @@ spec:
     refresh: 30s
     schemaVersion: 39
     tags:
-        - kubernetes-integration
+        - kubernetes-integration-system
         - cluster
     templating:
         list:

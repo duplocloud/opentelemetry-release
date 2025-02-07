@@ -916,7 +916,7 @@ spec:
         list:
             - datasource:
                 type: prometheus
-                uid: PBFA97CFB590B2093
+                uid: duplo-metrics
               filters: []
               hide: 0
               name: Filters
