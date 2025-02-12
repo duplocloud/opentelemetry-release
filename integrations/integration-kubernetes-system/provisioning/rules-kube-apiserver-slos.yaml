@@ -11,18 +11,12 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapierrorbudgetburn
             summary: The API server is burning too much error budget.
           duration: 120
-          evaluationTime: 0.001215684
-          health: ok
-          keepFiringFor: 0
           labels:
             long: 1h
             severity: critical
             short: 5m
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:28.287770265Z"
           name: KubeAPIErrorBudgetBurn
           query: sum by (cluster) (apiserver_request:burnrate1h) > (14.4 * 0.01) and on (cluster) sum by (cluster) (apiserver_request:burnrate5m) > (14.4 * 0.01)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -30,18 +24,12 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapierrorbudgetburn
             summary: The API server is burning too much error budget.
           duration: 900
-          evaluationTime: 0.001141857
-          health: ok
-          keepFiringFor: 0
           labels:
             long: 6h
             severity: critical
             short: 30m
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:28.288992228Z"
           name: KubeAPIErrorBudgetBurn
           query: sum by (cluster) (apiserver_request:burnrate6h) > (6 * 0.01) and on (cluster) sum by (cluster) (apiserver_request:burnrate30m) > (6 * 0.01)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -49,18 +37,12 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapierrorbudgetburn
             summary: The API server is burning too much error budget.
           duration: 3600
-          evaluationTime: 0.000908142
-          health: ok
-          keepFiringFor: 0
           labels:
             long: 1d
             severity: warning
             short: 2h
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:28.290143462Z"
           name: KubeAPIErrorBudgetBurn
           query: sum by (cluster) (apiserver_request:burnrate1d) > (3 * 0.01) and on (cluster) sum by (cluster) (apiserver_request:burnrate2h) > (3 * 0.01)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -68,16 +50,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapierrorbudgetburn
             summary: The API server is burning too much error budget.
           duration: 10800
-          evaluationTime: 0.000825492
-          health: ok
-          keepFiringFor: 0
           labels:
             long: 3d
             severity: warning
             short: 6h
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:28.291057923Z"
           name: KubeAPIErrorBudgetBurn
           query: sum by (cluster) (apiserver_request:burnrate3d) > (1 * 0.01) and on (cluster) sum by (cluster) (apiserver_request:burnrate6h) > (1 * 0.01)
-          state: inactive
           type: alerting

@@ -6,29 +6,21 @@ metadata:
 spec:
     rules:
         - alerts:
-            - activeAt: "2025-02-06T11:14:21.471225351Z"
-              annotations:
+            - annotations:
                 description: KubeProxy has disappeared from Prometheus target discovery.
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeproxydown
                 summary: Target disappeared from Prometheus target discovery.
               labels:
                 alertname: KubeProxyDown
                 severity: critical
-              state: firing
               value: "1e+00"
           annotations:
             description: KubeProxy has disappeared from Prometheus target discovery.
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeproxydown
             summary: Target disappeared from Prometheus target discovery.
           duration: 900
-          evaluationTime: 0.002329325
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:21.471792788Z"
           name: KubeProxyDown
           query: absent(up{job="integrations/kubernetes/kube-proxy"} == 1)
-          state: firing
           type: alerting

@@ -5,138 +5,74 @@ metadata:
     namespace: integrations-kubernetes-apiserver
 spec:
     rules:
-        - evaluationTime: 0.012759874
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.492612785Z"
+        - labels: {}
           name: code_verb:apiserver_request_total:increase30d
           query: avg_over_time(code_verb:apiserver_request_total:increase1h[30d]) * 24 * 30
           type: recording
-        - evaluationTime: 0.001111119
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.505382Z"
           name: code:apiserver_request_total:increase30d
           query: sum by (cluster, code) (code_verb:apiserver_request_total:increase30d{verb=~"LIST|GET"})
           type: recording
-        - evaluationTime: 0.001414304
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.5065038Z"
           name: code:apiserver_request_total:increase30d
           query: sum by (cluster, code) (code_verb:apiserver_request_total:increase30d{verb=~"POST|PUT|PATCH|DELETE"})
           type: recording
-        - evaluationTime: 0.001003677
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.50792556Z"
+        - labels: {}
           name: cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase1h
           query: sum by (cluster, verb, scope, le) (increase(apiserver_request_sli_duration_seconds_bucket[1h]))
           type: recording
-        - evaluationTime: 0.004135777
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.508938617Z"
+        - labels: {}
           name: cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d
           query: sum by (cluster, verb, scope, le) (avg_over_time(cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase1h[30d]) * 24 * 30)
           type: recording
-        - evaluationTime: 0.001654957
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.513082874Z"
+        - labels: {}
           name: cluster_verb_scope:apiserver_request_sli_duration_seconds_count:increase1h
           query: sum by (cluster, verb, scope) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase1h{le="+Inf"})
           type: recording
-        - evaluationTime: 0.001208557
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.51474581Z"
+        - labels: {}
           name: cluster_verb_scope:apiserver_request_sli_duration_seconds_count:increase30d
           query: sum by (cluster, verb, scope) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d{le="+Inf"})
           type: recording
-        - evaluationTime: 0.005108002
-          health: ok
-          labels:
+        - labels:
             verb: all
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.515962845Z"
           name: apiserver_request:availability30d
           query: 1 - ((sum by (cluster) (cluster_verb_scope:apiserver_request_sli_duration_seconds_count:increase30d{verb=~"POST|PUT|PATCH|DELETE"}) - sum by (cluster) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d{le=~"1(\\.0)?",verb=~"POST|PUT|PATCH|DELETE"})) + (sum by (cluster) (cluster_verb_scope:apiserver_request_sli_duration_seconds_count:increase30d{verb=~"LIST|GET"}) - ((sum by (cluster) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d{le=~"1(\\.0)?",scope=~"resource|",verb=~"LIST|GET"}) or vector(0)) + sum by (cluster) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d{le=~"5(\\.0)?",scope="namespace",verb=~"LIST|GET"}) + sum by (cluster) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d{le=~"30(\\.0)?",scope="cluster",verb=~"LIST|GET"}))) + sum by (cluster) (code:apiserver_request_total:increase30d{code=~"5.."} or vector(0))) / sum by (cluster) (code:apiserver_request_total:increase30d)
           type: recording
-        - evaluationTime: 0.004151775
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.521080381Z"
           name: apiserver_request:availability30d
           query: 1 - (sum by (cluster) (cluster_verb_scope:apiserver_request_sli_duration_seconds_count:increase30d{verb=~"LIST|GET"}) - ((sum by (cluster) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d{le=~"1(\\.0)?",scope=~"resource|",verb=~"LIST|GET"}) or vector(0)) + sum by (cluster) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d{le=~"5(\\.0)?",scope="namespace",verb=~"LIST|GET"}) + sum by (cluster) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d{le=~"30(\\.0)?",scope="cluster",verb=~"LIST|GET"})) + sum by (cluster) (code:apiserver_request_total:increase30d{code=~"5..",verb="read"} or vector(0))) / sum by (cluster) (code:apiserver_request_total:increase30d{verb="read"})
           type: recording
-        - evaluationTime: 0.004483248
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.525238677Z"
           name: apiserver_request:availability30d
           query: 1 - ((sum by (cluster) (cluster_verb_scope:apiserver_request_sli_duration_seconds_count:increase30d{verb=~"POST|PUT|PATCH|DELETE"}) - sum by (cluster) (cluster_verb_scope_le:apiserver_request_sli_duration_seconds_bucket:increase30d{le=~"1(\\.0)?",verb=~"POST|PUT|PATCH|DELETE"})) + sum by (cluster) (code:apiserver_request_total:increase30d{code=~"5..",verb="write"} or vector(0))) / sum by (cluster) (code:apiserver_request_total:increase30d{verb="write"})
           type: recording
-        - evaluationTime: 0.002693866
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.529774653Z"
           name: code_resource:apiserver_request_total:rate5m
           query: sum by (cluster, code, resource) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[5m]))
           type: recording
-        - evaluationTime: 0.001893976
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.532479593Z"
           name: code_resource:apiserver_request_total:rate5m
           query: sum by (cluster, code, resource) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[5m]))
           type: recording
-        - evaluationTime: 0.001643993
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.53438433Z"
+        - labels: {}
           name: code_verb:apiserver_request_total:increase1h
           query: sum by (cluster, code, verb) (increase(apiserver_request_total{code=~"2..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET|POST|PUT|PATCH|DELETE"}[1h]))
           type: recording
-        - evaluationTime: 0.002367683
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.536160945Z"
+        - labels: {}
           name: code_verb:apiserver_request_total:increase1h
           query: sum by (cluster, code, verb) (increase(apiserver_request_total{code=~"3..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET|POST|PUT|PATCH|DELETE"}[1h]))
           type: recording
-        - evaluationTime: 0.001590504
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.538535582Z"
+        - labels: {}
           name: code_verb:apiserver_request_total:increase1h
           query: sum by (cluster, code, verb) (increase(apiserver_request_total{code=~"4..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET|POST|PUT|PATCH|DELETE"}[1h]))
           type: recording
-        - evaluationTime: 0.002229574
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:53:06.540136756Z"
+        - labels: {}
           name: code_verb:apiserver_request_total:increase1h
           query: sum by (cluster, code, verb) (increase(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET|POST|PUT|PATCH|DELETE"}[1h]))
           type: recording

@@ -6,8 +6,7 @@ metadata:
 spec:
     rules:
         - alerts:
-            - activeAt: "2025-02-06T11:14:17.78388913Z"
-              annotations:
+            - annotations:
                 description: Cluster duploinfra-o11y has overcommitted CPU resource requests for Pods by 2.9830000000000005 CPU shares and cannot tolerate node failure.
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubecpuovercommit
                 summary: Cluster has overcommitted CPU resource requests.
@@ -15,27 +14,19 @@ spec:
                 alertname: KubeCPUOvercommit
                 cluster: duploinfra-o11y
                 severity: warning
-              state: firing
               value: "2.9830000000000005e+00"
           annotations:
             description: Cluster {{ $labels.cluster }} has overcommitted CPU resource requests for Pods by {{ $value }} CPU shares and cannot tolerate node failure.
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubecpuovercommit
             summary: Cluster has overcommitted CPU resource requests.
           duration: 600
-          evaluationTime: 0.003762352
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:17.784989324Z"
           name: KubeCPUOvercommit
           query: sum by (cluster) (namespace_cpu:kube_pod_container_resource_requests:sum) - (sum by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="cpu"}) - max by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="cpu"})) > 0 and (sum by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="cpu"}) - max by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="cpu"})) > 0
-          state: firing
           type: alerting
         - alerts:
-            - activeAt: "2025-02-06T11:14:17.78388913Z"
-              annotations:
+            - annotations:
                 description: Cluster duploinfra-o11y has overcommitted memory resource requests for Pods by 3.419G bytes and cannot tolerate node failure.
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubememoryovercommit
                 summary: Cluster has overcommitted memory resource requests.
@@ -43,23 +34,16 @@ spec:
                 alertname: KubeMemoryOvercommit
                 cluster: duploinfra-o11y
                 severity: warning
-              state: firing
               value: "3.418611712e+09"
           annotations:
             description: Cluster {{ $labels.cluster }} has overcommitted memory resource requests for Pods by {{ $value | humanize }} bytes and cannot tolerate node failure.
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubememoryovercommit
             summary: Cluster has overcommitted memory resource requests.
           duration: 600
-          evaluationTime: 0.007113716
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:17.788766411Z"
           name: KubeMemoryOvercommit
           query: sum by (cluster) (namespace_memory:kube_pod_container_resource_requests:sum) - (sum by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="memory"}) - max by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="memory"})) > 0 and (sum by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="memory"}) - max by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="memory"})) > 0
-          state: firing
           type: alerting
         - alerts: []
           annotations:
@@ -67,16 +51,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubecpuquotaovercommit
             summary: Cluster has overcommitted CPU resource requests.
           duration: 300
-          evaluationTime: 0.001648874
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:17.795894743Z"
           name: KubeCPUQuotaOvercommit
           query: sum by (cluster) (min without (resource) (kube_resourcequota{job="integrations/kubernetes/kube-state-metrics",resource=~"(cpu|requests.cpu)",type="hard"})) / sum by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="cpu"}) > 1.5
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -84,16 +62,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubememoryquotaovercommit
             summary: Cluster has overcommitted memory resource requests.
           duration: 300
-          evaluationTime: 0.000983335
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:17.797551222Z"
           name: KubeMemoryQuotaOvercommit
           query: sum by (cluster) (min without (resource) (kube_resourcequota{job="integrations/kubernetes/kube-state-metrics",resource=~"(memory|requests.memory)",type="hard"})) / sum by (cluster) (kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="memory"}) > 1.5
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -101,16 +73,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubequotaalmostfull
             summary: Namespace quota is going to be full.
           duration: 900
-          evaluationTime: 0.00123804
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: info
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:17.798542274Z"
           name: KubeQuotaAlmostFull
           query: kube_resourcequota{job="integrations/kubernetes/kube-state-metrics",type="used"} / ignoring (instance, job, type) (kube_resourcequota{job="integrations/kubernetes/kube-state-metrics",type="hard"} > 0) > 0.9 < 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -118,16 +84,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubequotafullyused
             summary: Namespace quota is fully used.
           duration: 900
-          evaluationTime: 0.001025477
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: info
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:17.799789449Z"
           name: KubeQuotaFullyUsed
           query: kube_resourcequota{job="integrations/kubernetes/kube-state-metrics",type="used"} / ignoring (instance, job, type) (kube_resourcequota{job="integrations/kubernetes/kube-state-metrics",type="hard"} > 0) == 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -135,20 +95,13 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubequotaexceeded
             summary: Namespace quota has exceeded the limits.
           duration: 900
-          evaluationTime: 0.00111114
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:17.800820711Z"
           name: KubeQuotaExceeded
           query: kube_resourcequota{job="integrations/kubernetes/kube-state-metrics",type="used"} / ignoring (instance, job, type) (kube_resourcequota{job="integrations/kubernetes/kube-state-metrics",type="hard"} > 0) > 1
-          state: inactive
           type: alerting
         - alerts:
-            - activeAt: "2025-02-06T11:14:17.78388913Z"
-              annotations:
+            - annotations:
                 description: 82.47% throttling of CPU in namespace duploservices-otel-o11y for container node-exporter in pod duplo-monitoring-prometheus-node-exporter-pg6dk on cluster duploinfra-o11y.
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-cputhrottlinghigh
                 summary: Processes experience elevated CPU throttling.
@@ -160,10 +113,8 @@ spec:
                 namespace: duploservices-otel-o11y
                 pod: duplo-monitoring-prometheus-node-exporter-pg6dk
                 severity: info
-              state: firing
               value: "8.247422680412371e-01"
-            - activeAt: "2025-02-06T11:14:17.78388913Z"
-              annotations:
+            - annotations:
                 description: 30.77% throttling of CPU in namespace duploservices-otel-o11y for container node-exporter in pod duplo-monitoring-prometheus-node-exporter-ww6kw on cluster duploinfra-o11y.
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-cputhrottlinghigh
                 summary: Processes experience elevated CPU throttling.
@@ -175,7 +126,6 @@ spec:
                 namespace: duploservices-otel-o11y
                 pod: duplo-monitoring-prometheus-node-exporter-ww6kw
                 severity: info
-              state: firing
               value: "3.076923076923077e-01"
             - activeAt: "2025-02-06T11:14:17.78388913Z"
               annotations:
@@ -190,21 +140,14 @@ spec:
                 namespace: duploservices-otel-o11y
                 pod: duplo-monitoring-prometheus-node-exporter-bzxw6
                 severity: info
-              state: firing
               value: "6.206896551724138e-01"
           annotations:
             description: '{{ $value | humanizePercentage }} throttling of CPU in namespace {{ $labels.namespace }} for container {{ $labels.container }} in pod {{ $labels.pod }} on cluster {{ $labels.cluster }}.'
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-cputhrottlinghigh
             summary: Processes experience elevated CPU throttling.
           duration: 900
-          evaluationTime: 0.003585
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: info
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:17.801939433Z"
           name: CPUThrottlingHigh
           query: sum without (id, metrics_path, name, image, endpoint, job, node) (increase(container_cpu_cfs_throttled_periods_total{container!="",job="integrations/kubernetes/cadvisor"}[5m])) / sum without (id, metrics_path, name, image, endpoint, job, node) (increase(container_cpu_cfs_periods_total{job="integrations/kubernetes/cadvisor"}[5m])) > (25 / 100)
-          state: firing
           type: alerting

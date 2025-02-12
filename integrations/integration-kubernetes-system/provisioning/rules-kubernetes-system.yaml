@@ -11,16 +11,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeversionmismatch
             summary: Different semantic versions of Kubernetes components running.
           duration: 900
-          evaluationTime: 0.002698475
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:55:04.59132612Z"
           name: KubeVersionMismatch
           query: count by (cluster) (count by (git_version, cluster) (label_replace(kubernetes_build_info{job!~"kube-dns|coredns"}, "git_version", "$1", "git_version", "(v[0-9]*.[0-9]*).*"))) > 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -28,14 +22,8 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclienterrors
             summary: Kubernetes API server client is experiencing errors.
           duration: 900
-          evaluationTime: 0.002205825
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:55:04.59403363Z"
           name: KubeClientErrors
           query: (sum by (cluster, instance, job, namespace) (rate(rest_client_requests_total{code=~"5..",job="integrations/kubernetes/kube-apiserver"}[5m])) / sum by (cluster, instance, job, namespace) (rate(rest_client_requests_total{job="integrations/kubernetes/kube-apiserver"}[5m]))) > 0.01
-          state: inactive
           type: alerting

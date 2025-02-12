@@ -5,84 +5,48 @@ metadata:
     namespace: integrations-kubernetes
 spec:
     rules:
-        - evaluationTime: 0.001243375
-          health: ok
-          labels:
+        - labels:
             quantile: "0.99"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:39.881868866Z"
           name: cluster_quantile:scheduler_e2e_scheduling_duration_seconds:histogram_quantile
           query: histogram_quantile(0.99, sum without (instance, pod) (rate(scheduler_e2e_scheduling_duration_seconds_bucket{job="integrations/kubernetes/kube-scheduler"}[5m])))
           type: recording
-        - evaluationTime: 0.000942048
-          health: ok
-          labels:
+        - labels:
             quantile: "0.99"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:39.883123696Z"
           name: cluster_quantile:scheduler_scheduling_algorithm_duration_seconds:histogram_quantile
           query: histogram_quantile(0.99, sum without (instance, pod) (rate(scheduler_scheduling_algorithm_duration_seconds_bucket{job="integrations/kubernetes/kube-scheduler"}[5m])))
           type: recording
-        - evaluationTime: 0.000730971
-          health: ok
-          labels:
+        - labels:
             quantile: "0.99"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:39.884074657Z"
           name: cluster_quantile:scheduler_binding_duration_seconds:histogram_quantile
           query: histogram_quantile(0.99, sum without (instance, pod) (rate(scheduler_binding_duration_seconds_bucket{job="integrations/kubernetes/kube-scheduler"}[5m])))
           type: recording
-        - evaluationTime: 0.000736908
-          health: ok
-          labels:
+        - labels:
             quantile: "0.9"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:39.884812941Z"
           name: cluster_quantile:scheduler_e2e_scheduling_duration_seconds:histogram_quantile
           query: histogram_quantile(0.9, sum without (instance, pod) (rate(scheduler_e2e_scheduling_duration_seconds_bucket{job="integrations/kubernetes/kube-scheduler"}[5m])))
           type: recording
-        - evaluationTime: 0.001016762
-          health: ok
-          labels:
+        - labels:
             quantile: "0.9"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:39.8855589Z"
           name: cluster_quantile:scheduler_scheduling_algorithm_duration_seconds:histogram_quantile
           query: histogram_quantile(0.9, sum without (instance, pod) (rate(scheduler_scheduling_algorithm_duration_seconds_bucket{job="integrations/kubernetes/kube-scheduler"}[5m])))
           type: recording
-        - evaluationTime: 0.000926345
-          health: ok
-          labels:
+        - labels:
             quantile: "0.9"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:39.886583911Z"
           name: cluster_quantile:scheduler_binding_duration_seconds:histogram_quantile
           query: histogram_quantile(0.9, sum without (instance, pod) (rate(scheduler_binding_duration_seconds_bucket{job="integrations/kubernetes/kube-scheduler"}[5m])))
           type: recording
-        - evaluationTime: 0.000844028
-          health: ok
-          labels:
+        - labels:
             quantile: "0.5"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:39.887516907Z"
           name: cluster_quantile:scheduler_e2e_scheduling_duration_seconds:histogram_quantile
           query: histogram_quantile(0.5, sum without (instance, pod) (rate(scheduler_e2e_scheduling_duration_seconds_bucket{job="integrations/kubernetes/kube-scheduler"}[5m])))
           type: recording
-        - evaluationTime: 0.00069662
-          health: ok
-          labels:
+        - labels:
             quantile: "0.5"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:39.888367555Z"
           name: cluster_quantile:scheduler_scheduling_algorithm_duration_seconds:histogram_quantile
           query: histogram_quantile(0.5, sum without (instance, pod) (rate(scheduler_scheduling_algorithm_duration_seconds_bucket{job="integrations/kubernetes/kube-scheduler"}[5m])))
           type: recording
-        - evaluationTime: 0.000740269
-          health: ok
-          labels:
+        - labels:
             quantile: "0.5"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:39.889119974Z"
           name: cluster_quantile:scheduler_binding_duration_seconds:histogram_quantile
           query: histogram_quantile(0.5, sum without (instance, pod) (rate(scheduler_binding_duration_seconds_bucket{job="integrations/kubernetes/kube-scheduler"}[5m])))
           type: recording

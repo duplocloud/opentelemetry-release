@@ -5,91 +5,47 @@ metadata:
     namespace: integration-linuxnode
 spec:
     rules:
-        - evaluationTime: 0.002500357
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.486279617Z"
+        - labels: {}
           name: instance:node_num_cpu:sum
           query: count without (cpu, mode) (node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)",mode="idle"})
           type: recording
-        - evaluationTime: 0.001887573
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.488790191Z"
+        - labels: {}
           name: instance:node_cpu_utilisation:rate5m
           query: 1 - avg without (cpu) (sum without (mode) (rate(node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)",mode=~"idle|iowait|steal"}[5m])))
           type: recording
-        - evaluationTime: 0.001378566
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.490689369Z"
+        - labels: {}
           name: instance:node_load1_per_cpu:ratio
           query: (node_load1{job=~"integrations/(node_exporter|unix)"} / instance:node_num_cpu:sum{job=~"integrations/(node_exporter|unix)"})
           type: recording
-        - evaluationTime: 0.002590955
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.492079031Z"
+        - labels: {}
           name: instance:node_memory_utilisation:ratio
           query: 1 - ((node_memory_MemAvailable_bytes{job=~"integrations/(node_exporter|unix)"} or (node_memory_Buffers_bytes{job=~"integrations/(node_exporter|unix)"} + node_memory_Cached_bytes{job=~"integrations/(node_exporter|unix)"} + node_memory_MemFree_bytes{job=~"integrations/(node_exporter|unix)"} + node_memory_Slab_bytes{job=~"integrations/(node_exporter|unix)"})) / node_memory_MemTotal_bytes{job=~"integrations/(node_exporter|unix)"})
           type: recording
-        - evaluationTime: 0.004200429
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.49467853Z"
+        - labels: {}
           name: instance:node_vmstat_pgmajfault:rate5m
           query: rate(node_vmstat_pgmajfault{job=~"integrations/(node_exporter|unix)"}[5m])
           type: recording
-        - evaluationTime: 0.002005254
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.498891135Z"
+        - labels: {}
           name: instance_device:node_disk_io_time_seconds:rate5m
           query: rate(node_disk_io_time_seconds_total{device!="",job=~"integrations/(node_exporter|unix)"}[5m])
           type: recording
-        - evaluationTime: 0.00196664
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.500904217Z"
+        - labels: {}
           name: instance_device:node_disk_io_time_weighted_seconds:rate5m
           query: rate(node_disk_io_time_weighted_seconds_total{device!="",job=~"integrations/(node_exporter|unix)"}[5m])
           type: recording
-        - evaluationTime: 0.002560406
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.502881257Z"
+        - labels: {}
           name: instance:node_network_receive_bytes_excluding_lo:rate5m
           query: sum without (device) (rate(node_network_receive_bytes_total{device!="lo",job=~"integrations/(node_exporter|unix)"}[5m]))
           type: recording
-        - evaluationTime: 0.00279715
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.505450202Z"
+        - labels: {}
           name: instance:node_network_transmit_bytes_excluding_lo:rate5m
           query: sum without (device) (rate(node_network_transmit_bytes_total{device!="lo",job=~"integrations/(node_exporter|unix)"}[5m]))
           type: recording
-        - evaluationTime: 0.002396938
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.508256412Z"
+        - labels: {}
           name: instance:node_network_receive_drop_excluding_lo:rate5m
           query: sum without (device) (rate(node_network_receive_drop_total{device!="lo",job=~"integrations/(node_exporter|unix)"}[5m]))
           type: recording
-        - evaluationTime: 0.003490787
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:59.510662761Z"
+        - labels: {}
           name: instance:node_network_transmit_drop_excluding_lo:rate5m
           query: sum without (device) (rate(node_network_transmit_drop_total{device!="lo",job=~"integrations/(node_exporter|unix)"}[5m]))
           type: recording

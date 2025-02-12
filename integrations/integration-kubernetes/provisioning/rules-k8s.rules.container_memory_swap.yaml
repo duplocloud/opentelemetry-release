@@ -5,11 +5,7 @@ metadata:
     namespace: integrations-kubernetes-container
 spec:
     rules:
-        - evaluationTime: 0.010851186
-          health: ok
+        - name: node_namespace_pod_container:container_memory_swap
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:42.148890013Z"
-          name: node_namespace_pod_container:container_memory_swap
           query: container_memory_swap{image!="",job="integrations/kubernetes/cadvisor"} * on (cluster, namespace, pod) group_left (node) topk by (cluster, namespace, pod) (1, max by (cluster, namespace, pod, node) (kube_pod_info{node!=""}))
           type: recording

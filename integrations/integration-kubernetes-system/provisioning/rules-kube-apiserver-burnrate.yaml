@@ -5,129 +5,73 @@ metadata:
     namespace: integrations-kubernetes-apiserver
 spec:
     rules:
-        - evaluationTime: 0.00334262
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:35.985947708Z"
           name: apiserver_request:burnrate1d
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[1d])) - ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",scope=~"resource|",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[1d])) or vector(0)) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"5(\\.0)?",scope="namespace",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[1d])) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"30(\\.0)?",scope="cluster",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[1d])))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[1d]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[1d]))
           type: recording
-        - evaluationTime: 0.004436322
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:35.989300592Z"
           name: apiserver_request:burnrate1h
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[1h])) - ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",scope=~"resource|",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[1h])) or vector(0)) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"5(\\.0)?",scope="namespace",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[1h])) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"30(\\.0)?",scope="cluster",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[1h])))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[1h]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[1h]))
           type: recording
-        - evaluationTime: 0.002657653
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:35.993746712Z"
           name: apiserver_request:burnrate2h
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[2h])) - ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",scope=~"resource|",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[2h])) or vector(0)) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"5(\\.0)?",scope="namespace",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[2h])) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"30(\\.0)?",scope="cluster",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[2h])))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[2h]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[2h]))
           type: recording
-        - evaluationTime: 0.003989669
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:35.996414805Z"
           name: apiserver_request:burnrate30m
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[30m])) - ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",scope=~"resource|",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[30m])) or vector(0)) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"5(\\.0)?",scope="namespace",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[30m])) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"30(\\.0)?",scope="cluster",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[30m])))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[30m]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[30m]))
           type: recording
-        - evaluationTime: 0.00383593
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.000413589Z"
           name: apiserver_request:burnrate3d
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[3d])) - ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",scope=~"resource|",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[3d])) or vector(0)) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"5(\\.0)?",scope="namespace",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[3d])) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"30(\\.0)?",scope="cluster",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[3d])))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[3d]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[3d]))
           type: recording
-        - evaluationTime: 0.002684557
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.00425724Z"
           name: apiserver_request:burnrate5m
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[5m])) - ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",scope=~"resource|",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[5m])) or vector(0)) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"5(\\.0)?",scope="namespace",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[5m])) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"30(\\.0)?",scope="cluster",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[5m])))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[5m]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[5m]))
           type: recording
-        - evaluationTime: 0.003005673
-          health: ok
-          labels:
+        - labels:
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.006951859Z"
           name: apiserver_request:burnrate6h
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[6h])) - ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",scope=~"resource|",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[6h])) or vector(0)) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"5(\\.0)?",scope="namespace",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[6h])) + sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"30(\\.0)?",scope="cluster",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[6h])))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[6h]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"LIST|GET"}[6h]))
           type: recording
-        - evaluationTime: 0.002203525
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.009966685Z"
           name: apiserver_request:burnrate1d
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[1d])) - sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[1d]))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[1d]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[1d]))
           type: recording
-        - evaluationTime: 0.002000802
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.012178337Z"
           name: apiserver_request:burnrate1h
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[1h])) - sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[1h]))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[1h]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[1h]))
           type: recording
-        - evaluationTime: 0.001474663
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.01418743Z"
           name: apiserver_request:burnrate2h
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[2h])) - sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[2h]))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[2h]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[2h]))
           type: recording
-        - evaluationTime: 0.001571497
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.015669602Z"
           name: apiserver_request:burnrate30m
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[30m])) - sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[30m]))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[30m]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[30m]))
           type: recording
-        - evaluationTime: 0.003264638
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.017246215Z"
           name: apiserver_request:burnrate3d
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[3d])) - sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[3d]))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[3d]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[3d]))
           type: recording
-        - evaluationTime: 0.001346676
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.020519471Z"
           name: apiserver_request:burnrate5m
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[5m])) - sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[5m]))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[5m]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[5m]))
           type: recording
-        - evaluationTime: 0.002132767
-          health: ok
-          labels:
+        - labels:
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:36.021874141Z"
           name: apiserver_request:burnrate6h
           query: ((sum by (cluster) (rate(apiserver_request_sli_duration_seconds_count{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[6h])) - sum by (cluster) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",le=~"1(\\.0)?",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[6h]))) + sum by (cluster) (rate(apiserver_request_total{code=~"5..",job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[6h]))) / sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver",verb=~"POST|PUT|PATCH|DELETE"}[6h]))
           type: recording
