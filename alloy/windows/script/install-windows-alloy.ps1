@@ -3,6 +3,7 @@ param (
     $DUPLO_LOGGING_PATHS,
     $DUPLO_METRICS_URL,
     $DUPLO_LOGGING_URL,
+    $DUPLO_CLUSTER_NAME,
     $DUPLO_TENANT_NAME,
     $HOSTNAME
 )
@@ -47,6 +48,7 @@ try {
     Write-Host "DUPLO_LOGGING_PATHS:" $DUPLO_LOGGING_PATHS
     Write-Host "DUPLO_METRICS_URL:" $DUPLO_METRICS_URL
     Write-Host "DUPLO_LOGGING_URL:" $DUPLO_LOGGING_URL
+    Write-Host "DUPLO_CLUSTER_NAME:" $DUPLO_CLUSTER_NAME
     Write-Host "DUPLO_TENANT_NAME:" $DUPLO_TENANT_NAME
     Write-Host "HOSTNAME:" $HOSTNAME
 
@@ -89,6 +91,7 @@ try {
     $content = $content.Replace("{DUPLO_LOGGING_PATHS}", $DUPLO_LOGGING_PATHS)
     $content = $content.Replace("{DUPLO_METRICS_URL}", $DUPLO_METRICS_URL)
     $content = $content.Replace("{DUPLO_LOGGING_URL}", $DUPLO_LOGGING_URL)
+    $content = $content.Replace("{DUPLO_CLUSTER_NAME}", $DUPLO_CLUSTER_NAME)
     $content = $content.Replace("{DUPLO_TENANT_NAME}", $DUPLO_TENANT_NAME)
     $content = $content.Replace("{HOSTNAME}", $HOSTNAME)
     $content | Set-Content $CONFIG_FILE
