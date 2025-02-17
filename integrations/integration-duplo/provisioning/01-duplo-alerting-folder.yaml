@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: DashboardFolder
 metadata:
-    name: duplo-alerting
+    name: duplo-common
 spec:
-    title: duplo-alerting
-    uid: duplo-alerting
+    title: duplo-common
+    uid: duplo-common
