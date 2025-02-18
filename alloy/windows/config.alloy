@@ -18,11 +18,16 @@ discovery.relabel "integrations_windows_exporter" {
 
   rule {
     target_label = "cluster"
+    replacement  = "{DUPLO_CLUSTER_NAME}"
+  }
+
+  rule {
+    target_label = "namespace"
     replacement  = "{DUPLO_TENANT_NAME}"
   }
 
   rule {
-    target_label = "tenant"
+    target_label = "label_tenantname"
     replacement  = "{DUPLO_TENANT_NAME}"
   }
 }
@@ -138,8 +143,9 @@ loki.process "logs_service" {
   stage.static_labels {
     values = {
       instance = "{HOSTNAME}",
-      cluster = "{DUPLO_TENANT_NAME}",
-      tenant = "{DUPLO_TENANT_NAME}",
+      cluster = "{DUPLO_CLUSTER_NAME}",
+      namespace = "{DUPLO_TENANT_NAME}",
+      label_tenantname = "{DUPLO_TENANT_NAME}",
     }
   }
 
