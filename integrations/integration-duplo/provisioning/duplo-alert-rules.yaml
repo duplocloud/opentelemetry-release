@@ -1,0 +1,210 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRuleGroup
+metadata:
+    name: Integration-LinuxNode.node-exporter-with-labels
+spec:
+    folderUid: duplo-common
+    interval: 60
+    rules:
+        - annotations:
+            __dashboardUid__: node-memory
+            __panelId__: "1"
+            description: |-
+                Memory usage on node {{$labels.instance}} is critically high.
+
+                - **Tenant**: {{$labels.label_tenantname}}
+                - **Memory Usage**: {{ $values.B.Value | printf "%.2f" }}%
+
+                Please investigate and take necessary action to reduce memory usage or increase available resources.
+            summary: 'Memory Usage Alert: High memory usage detected on node {{$labels.instance}} (Tenant: {{$labels.label_tenantname}})'
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: |
+                    100 -
+                    (
+                      avg by (instance) (
+                        node_memory_MemAvailable_bytes{job=~"integrations/(node_exporter|unix)", cluster=~".*", job=~".+"}
+                      )
+                      /
+                      avg by (instance) (
+                        node_memory_MemTotal_bytes{job=~"integrations/(node_exporter|unix)", cluster=~".*", job=~".+"}
+                      )
+                      * 100
+                    )
+                    * on (instance) group_left(label_tenantname)
+                      label_replace(
+                        kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},
+                        "instance",
+                        "$1",
+                        "label_kubernetes_io_hostname",
+                        "(.+)"
+                      )
+                instant: true
+                interval: ""
+                intervalMs: 30000
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 1800
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: max
+                refId: B
+                type: reduce
+              refId: B
+              relativeTimeRange:
+                from: 1800
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 90
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange:
+                from: 1800
+          execErrState: Error
+          for: 0s
+          folderUid: duplo-common
+          id: 1
+          labels:
+            severity: critical
+          noDataState: NoData
+          orgID: 1
+          ruleGroup: node-exporter-with-labels
+          title: Critical Memory usage
+          uid: NodeCriticalMemoryUsageWithLabels
+          updated: "2025-01-09T08:12:32.000Z"
+        - annotations:
+            description: CPU usage at {{ $labels.instance }} has been above 90% for the last 5 minutes, is currently at {{ printf "%.2f" $values.B.Value }}%
+            summary: High CPU usage.
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: "(sum without(mode) (avg without (cpu) (rate(node_cpu_seconds_total{job=~\"integrations/(node_exporter|unix)\", mode!=\"idle\"}[2m]))) * 100)* on (instance) group_left(label_tenantname)\r\n  label_replace(\r\n    kube_node_labels{cluster=~\".*\", job=\"integrations/kubernetes/kube-state-metrics\"},\r\n    \"instance\",\r\n    \"$1\",\r\n    \"label_kubernetes_io_hostname\",\r\n    \"(.+)\"\r\n  )"
+                hide: false
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: mean
+                refId: B
+                type: reduce
+              refId: B
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 90
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange:
+                from: 600
+          execErrState: Error
+          for: 5m0s
+          folderUid: duplo-common
+          id: 2
+          labels:
+            severity: critical
+          noDataState: NoData
+          orgID: 1
+          ruleGroup: node-exporter-with-labels
+          title: Critical CPU Usage
+          uid: NodeCriticalCpuUsageWithLabels
+    title: node-exporter-with-labels
