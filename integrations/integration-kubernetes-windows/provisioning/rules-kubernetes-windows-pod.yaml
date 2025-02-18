@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: PrometheusRuleGroup
 metadata:
-    name: kubernetes-windows-pod-rules
+    name: kubernetes-windows-pod
     namespace: integrations-kubernetes-windows
 spec:
     rules:
