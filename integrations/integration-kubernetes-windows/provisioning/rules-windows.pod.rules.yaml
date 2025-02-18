@@ -1,0 +1,51 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: kubernetes-windows-pod-rules
+    namespace: integrations-kubernetes-windows
+spec:
+    rules:
+        - labels: {}
+          name: windows_pod_container_available
+          query: windows_container_available{container_id!="",job="integrations/windows-exporter"} * on (container_id, cluster) group_left (container, pod, namespace) max by (container, container_id, pod, namespace, cluster) (kube_pod_container_info{container_id!="",job="integrations/kubernetes/kube-state-metrics"})
+          type: recording
+        - labels: {}
+          name: windows_container_total_runtime
+          query: windows_container_cpu_usage_seconds_total{container_id!="",job="integrations/windows-exporter"} * on (container_id, cluster) group_left (container, pod, namespace) max by (container, container_id, pod, namespace, cluster) (kube_pod_container_info{container_id!="",job="integrations/kubernetes/kube-state-metrics"})
+          type: recording
+        - labels: {}
+          name: windows_container_memory_usage
+          query: windows_container_memory_usage_commit_bytes{container_id!="",job="integrations/windows-exporter"} * on (container_id, cluster) group_left (container, pod, namespace) max by (container, container_id, pod, namespace, cluster) (kube_pod_container_info{container_id!="",job="integrations/kubernetes/kube-state-metrics"})
+          type: recording
+        - labels: {}
+          name: windows_container_private_working_set_usage
+          query: windows_container_memory_usage_private_working_set_bytes{container_id!="",job="integrations/windows-exporter"} * on (container_id, cluster) group_left (container, pod, namespace) max by (container, container_id, pod, namespace, cluster) (kube_pod_container_info{container_id!="",job="integrations/kubernetes/kube-state-metrics"})
+          type: recording
+        - labels: {}
+          name: windows_container_network_received_bytes_total
+          query: windows_container_network_receive_bytes_total{container_id!="",job="integrations/windows-exporter"} * on (container_id, cluster) group_left (container, pod, namespace) max by (container, container_id, pod, namespace, cluster) (kube_pod_container_info{container_id!="",job="integrations/kubernetes/kube-state-metrics"})
+          type: recording
+        - labels: {}
+          name: windows_container_network_transmitted_bytes_total
+          query: windows_container_network_transmit_bytes_total{container_id!="",job="integrations/windows-exporter"} * on (container_id, cluster) group_left (container, pod, namespace) max by (container, container_id, pod, namespace, cluster) (kube_pod_container_info{container_id!="",job="integrations/kubernetes/kube-state-metrics"})
+          type: recording
+        - labels: {}
+          name: kube_pod_windows_container_resource_memory_request
+          query: max by (cluster, namespace, pod, container) (kube_pod_container_resource_requests{job="integrations/kubernetes/kube-state-metrics",resource="memory"}) * on (container, pod, namespace, cluster) (windows_pod_container_available)
+          type: recording
+        - labels: {}
+          name: kube_pod_windows_container_resource_memory_limit
+          query: kube_pod_container_resource_limits{job="integrations/kubernetes/kube-state-metrics",resource="memory"} * on (container, pod, namespace, cluster) (windows_pod_container_available)
+          type: recording
+        - labels: {}
+          name: kube_pod_windows_container_resource_cpu_cores_request
+          query: max by (cluster, namespace, pod, container) (kube_pod_container_resource_requests{job="integrations/kubernetes/kube-state-metrics",resource="cpu"}) * on (container, pod, namespace, cluster) (windows_pod_container_available)
+          type: recording
+        - labels: {}
+          name: kube_pod_windows_container_resource_cpu_cores_limit
+          query: kube_pod_container_resource_limits{job="integrations/kubernetes/kube-state-metrics",resource="cpu"} * on (container, pod, namespace, cluster) (windows_pod_container_available)
+          type: recording
+        - labels: {}
+          name: namespace_pod_container:windows_container_cpu_usage_seconds_total:sum_rate
+          query: sum by (cluster, namespace, pod, container) (rate(windows_container_total_runtime[5m]))
+          type: recording

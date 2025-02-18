@@ -2,7 +2,7 @@ apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
     folder: integration-kubernetes-windows
-    name: k8s-resources-windows-node
+    name: k8s-resources-windows-cluster
 spec:
     annotations:
         list:
