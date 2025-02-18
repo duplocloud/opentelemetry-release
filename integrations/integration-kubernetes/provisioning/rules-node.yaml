@@ -5,43 +5,23 @@ metadata:
     namespace: integrations-kubernetes
 spec:
     rules:
-        - evaluationTime: 0.004588191
-          health: ok
+        - name: 'node_namespace_pod:kube_pod_info:'
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:24.805782067Z"
-          name: 'node_namespace_pod:kube_pod_info:'
           query: topk by (cluster, namespace, pod) (1, max by (cluster, node, namespace, pod) (label_replace(kube_pod_info{job="integrations/kubernetes/kube-state-metrics",node!=""}, "pod", "$1", "pod", "(.*)")))
           type: recording
-        - evaluationTime: 0.002013516
-          health: ok
+        - name: node:node_num_cpu:sum
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:24.810381395Z"
-          name: node:node_num_cpu:sum
           query: count by (cluster, node) (node_cpu_seconds_total{job="integrations/node_exporter",mode="idle"} * on (cluster, namespace, pod) group_left (node) topk by (cluster, namespace, pod) (1, node_namespace_pod:kube_pod_info:))
           type: recording
-        - evaluationTime: 0.001992845
-          health: ok
+        - name: :node_memory_MemAvailable_bytes:sum
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:24.812401231Z"
-          name: :node_memory_MemAvailable_bytes:sum
           query: sum by (cluster) (node_memory_MemAvailable_bytes{job="integrations/node_exporter"} or (node_memory_Buffers_bytes{job="integrations/node_exporter"} + node_memory_Cached_bytes{job="integrations/node_exporter"} + node_memory_MemFree_bytes{job="integrations/node_exporter"} + node_memory_Slab_bytes{job="integrations/node_exporter"}))
           type: recording
-        - evaluationTime: 0.002028986
-          health: ok
+        - name: node:node_cpu_utilization:ratio_rate5m
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:24.814406761Z"
-          name: node:node_cpu_utilization:ratio_rate5m
           query: avg by (cluster, node) (sum without (mode) (rate(node_cpu_seconds_total{job="integrations/node_exporter",mode!="idle",mode!="iowait",mode!="steal"}[5m])))
           type: recording
-        - evaluationTime: 0.001701464
-          health: ok
+        - name: cluster:node_cpu:ratio_rate5m
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:24.816444982Z"
-          name: cluster:node_cpu:ratio_rate5m
           query: avg by (cluster) (node:node_cpu_utilization:ratio_rate5m)
           type: recording

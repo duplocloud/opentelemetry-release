@@ -5,39 +5,23 @@ metadata:
     namespace: integrations-kubernetes
 spec:
     rules:
-        - evaluationTime: 0.004599432
-          health: ok
+        - name: namespace_workload_pod:kube_pod_owner:relabel
           labels:
             workload_type: deployment
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.284845842Z"
-          name: namespace_workload_pod:kube_pod_owner:relabel
           query: max by (cluster, namespace, workload, pod) (label_replace(label_replace(kube_pod_owner{job="integrations/kubernetes/kube-state-metrics",owner_kind="ReplicaSet"}, "replicaset", "$1", "owner_name", "(.*)") * on (replicaset, namespace, cluster) group_left (owner_name) topk by (replicaset, namespace, cluster) (1, max by (replicaset, namespace, owner_name, cluster) (kube_replicaset_owner{job="integrations/kubernetes/kube-state-metrics"})), "workload", "$1", "owner_name", "(.*)"))
           type: recording
-        - evaluationTime: 0.005301243
-          health: ok
+        - name: namespace_workload_pod:kube_pod_owner:relabel
           labels:
             workload_type: daemonset
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.289454117Z"
-          name: namespace_workload_pod:kube_pod_owner:relabel
           query: max by (cluster, namespace, workload, pod) (label_replace(kube_pod_owner{job="integrations/kubernetes/kube-state-metrics",owner_kind="DaemonSet"}, "workload", "$1", "owner_name", "(.*)"))
           type: recording
-        - evaluationTime: 0.001835607
-          health: ok
+        - name: namespace_workload_pod:kube_pod_owner:relabel
           labels:
             workload_type: statefulset
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.294768446Z"
-          name: namespace_workload_pod:kube_pod_owner:relabel
           query: max by (cluster, namespace, workload, pod) (label_replace(kube_pod_owner{job="integrations/kubernetes/kube-state-metrics",owner_kind="StatefulSet"}, "workload", "$1", "owner_name", "(.*)"))
           type: recording
-        - evaluationTime: 0.000759361
-          health: ok
+        - name: namespace_workload_pod:kube_pod_owner:relabel
           labels:
             workload_type: job
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.296614387Z"
-          name: namespace_workload_pod:kube_pod_owner:relabel
           query: max by (cluster, namespace, workload, pod) (label_replace(kube_pod_owner{job="integrations/kubernetes/kube-state-metrics",owner_kind="Job"}, "workload", "$1", "owner_name", "(.*)"))
           type: recording

@@ -6,29 +6,21 @@ metadata:
 spec:
     rules:
         - alerts:
-            - activeAt: "2025-02-06T11:14:06.854398376Z"
-              annotations:
+            - annotations:
                 description: KubeScheduler has disappeared from Prometheus target discovery.
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeschedulerdown
                 summary: Target disappeared from Prometheus target discovery.
               labels:
                 alertname: KubeSchedulerDown
                 severity: critical
-              state: firing
               value: "1e+00"
           annotations:
             description: KubeScheduler has disappeared from Prometheus target discovery.
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeschedulerdown
             summary: Target disappeared from Prometheus target discovery.
           duration: 900
-          evaluationTime: 0.003060013
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:55:06.856434042Z"
           name: KubeSchedulerDown
           query: absent(up{job="integrations/kubernetes/kube-scheduler"} == 1)
-          state: firing
           type: alerting

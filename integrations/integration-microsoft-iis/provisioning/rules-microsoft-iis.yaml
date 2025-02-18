@@ -11,16 +11,10 @@ spec:
                 The number of rejected async IO requests is {{ printf "%.0f" $value }} over the last 5m on {{ $labels.instance }} - {{ $labels.site }} which is above the threshold of 20.
             summary: There are a high number of rejected async I/O requests for a site.
           duration: 300
-          evaluationTime: 0.003682765
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-01-31T16:52:51.741143709Z"
           name: MicrosoftIISHighNumberOfRejectedAsyncIORequests
           query: increase(windows_iis_rejected_async_io_requests_total[5m]) > 20
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -28,16 +22,10 @@ spec:
                 The number of 5xx request errors is {{ printf "%.0f" $value }} over the last 5m on {{ $labels.instance }} - {{ $labels.app }} which is above the threshold of 5.
             summary: There are a high number of 5xx request errors for an application.
           duration: 300
-          evaluationTime: 0.004597042
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-01-31T16:52:51.744848611Z"
           name: MicrosoftIISHighNumberOf5xxRequestErrors
           query: sum without (pid, status_code) (increase(windows_iis_worker_request_errors_total{status_code=~"5.*"}[5m])) > 5
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -45,16 +33,10 @@ spec:
                 The success rate for websocket connections is {{ printf "%.0f" $value }} over the last 5m on {{ $labels.instance }} - {{ $labels.app }} which is above the threshold of 80.
             summary: There is a low success rate for websocket connections for an application.
           duration: 300
-          evaluationTime: 0.008458101
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-01-31T16:52:51.749458469Z"
           name: MicrosoftIISLowSuccessRateForWebsocketConnections
           query: sum without (pid) (increase(windows_iis_worker_websocket_connection_accepted_total[5m]) / clamp_min(increase(windows_iis_worker_websocket_connection_attempts_total[5m]), 1)) * 100 > 80
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -62,16 +44,10 @@ spec:
                 The threadpool utilization is at {{ printf "%.0f" $value }} over the last 5m on {{ $labels.instance }} - {{ $labels.app }} which is above the threshold of 90.
             summary: The thread pool utilization is nearing max capacity.
           duration: 300
-          evaluationTime: 0.004163879
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-01-31T16:52:51.757928738Z"
           name: MicrosoftIISThreadpoolUtilizationNearingMax
           query: sum without (pid, state) (windows_iis_worker_threads / windows_iis_worker_max_threads) * 100 > 90
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -79,14 +55,8 @@ spec:
                 The number of worker process failures is at {{ printf "%.0f" $value }} over the last 5m on {{ $labels.instance }} - {{ $labels.app }} which is above the threshold of 10.
             summary: There are a high number of worker process failures for an application.
           duration: 300
-          evaluationTime: 0.00344264
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-01-31T16:52:51.76210604Z"
           name: MicrosoftIISHighNumberOfWorkerProcessFailures
           query: increase(windows_iis_total_worker_process_failures[5m]) > 10
-          state: inactive
           type: alerting

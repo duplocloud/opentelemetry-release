@@ -5,11 +5,7 @@ metadata:
     namespace: integrations-kubernetes-container
 spec:
     rules:
-        - evaluationTime: 0.020703714
-          health: ok
+        - name: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:09.356293682Z"
-          name: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate
           query: sum by (cluster, namespace, pod, container) (irate(container_cpu_usage_seconds_total{image!="",job="integrations/kubernetes/cadvisor"}[5m])) * on (cluster, namespace, pod) group_left (node) topk by (cluster, namespace, pod) (1, max by (cluster, namespace, pod, node) (kube_pod_info{node!=""}))
           type: recording

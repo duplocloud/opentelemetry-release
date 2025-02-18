@@ -11,16 +11,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubenodenotready
             summary: Node is not ready.
           duration: 900
-          evaluationTime: 0.001617462
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.925671077Z"
           name: KubeNodeNotReady
           query: kube_node_status_condition{condition="Ready",job="integrations/kubernetes/kube-state-metrics",status="true"} == 0 and on (cluster, node) kube_node_spec_unschedulable{job="integrations/kubernetes/kube-state-metrics"} == 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -28,21 +22,14 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubenodeunreachable
             summary: Node is unreachable.
           duration: 900
-          evaluationTime: 0.001278953
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.927297256Z"
           name: KubeNodeUnreachable
           query: (kube_node_spec_taint{effect="NoSchedule",job="integrations/kubernetes/kube-state-metrics",key="node.kubernetes.io/unreachable"} unless ignoring (key, value) kube_node_spec_taint{job="integrations/kubernetes/kube-state-metrics",key=~"ToBeDeletedByClusterAutoscaler|cloud.google.com/impending-node-termination|aws-node-termination-handler/spot-itn"}) == 1
-          state: inactive
           type: alerting
         - alerts:
-            - activeAt: "2025-02-06T11:13:37.92412981Z"
-              annotations:
-                description: Kubelet 'ip-10-222-14-103.us-west-2.compute.internal' is running at 100% of its Pod capacity on cluster duploinfra-o11y.
+            - annotations:
+                description: Kubelet ''{{ $labels.node }}'' is running at 100% of its Pod capacity on cluster duploinfra-o11y.
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubelettoomanypods
                 summary: Kubelet is running at capacity.
               labels:
@@ -50,23 +37,16 @@ spec:
                 cluster: duploinfra-o11y
                 node: ip-10-222-14-103.us-west-2.compute.internal
                 severity: info
-              state: firing
               value: "1e+00"
           annotations:
             description: Kubelet '{{ $labels.node }}' is running at {{ $value | humanizePercentage }} of its Pod capacity on cluster {{ $labels.cluster }}.
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubelettoomanypods
             summary: Kubelet is running at capacity.
           duration: 900
-          evaluationTime: 0.017602626
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: info
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.928584581Z"
           name: KubeletTooManyPods
           query: count by (cluster, node) ((kube_pod_status_phase{job="integrations/kubernetes/kube-state-metrics",phase="Running"} == 1) * on (cluster, namespace, pod) group_left (node) group by (cluster, namespace, pod, node) (kube_pod_info{job="integrations/kubernetes/kube-state-metrics"})) / max by (cluster, node) (kube_node_status_capacity{job="integrations/kubernetes/kube-state-metrics",resource="pods"} != 1) > 0.95
-          state: firing
           type: alerting
         - alerts: []
           annotations:
@@ -74,16 +54,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubenodereadinessflapping
             summary: Node readiness status is flapping.
           duration: 900
-          evaluationTime: 0.002570263
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.946205741Z"
           name: KubeNodeReadinessFlapping
           query: sum by (cluster, node) (changes(kube_node_status_condition{condition="Ready",job="integrations/kubernetes/kube-state-metrics",status="true"}[15m])) > 2 and on (cluster, node) kube_node_spec_unschedulable{job="integrations/kubernetes/kube-state-metrics"} == 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -91,16 +65,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeletplegdurationhigh
             summary: Kubelet Pod Lifecycle Event Generator is taking too long to relist.
           duration: 300
-          evaluationTime: 0.00350179
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.948809567Z"
           name: KubeletPlegDurationHigh
           query: node_quantile:kubelet_pleg_relist_duration_seconds:histogram_quantile{quantile="0.99"} >= 10
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -108,16 +76,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeletpodstartuplatencyhigh
             summary: Kubelet Pod startup latency is too high.
           duration: 900
-          evaluationTime: 0.004872848
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.952319226Z"
           name: KubeletPodStartUpLatencyHigh
           query: histogram_quantile(0.99, sum by (cluster, instance, le) (rate(kubelet_pod_worker_duration_seconds_bucket{job="integrations/kubernetes/kubelet"}[5m]))) * on (cluster, instance) group_left (node) kubelet_node_name{job="integrations/kubernetes/kubelet"} > 60
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -125,16 +87,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeletclientcertificateexpiration
             summary: Kubelet client certificate is about to expire.
           duration: 0
-          evaluationTime: 0.00107101
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.957200457Z"
           name: KubeletClientCertificateExpiration
           query: kubelet_certificate_manager_client_ttl_seconds < 604800
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -142,16 +98,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeletclientcertificateexpiration
             summary: Kubelet client certificate is about to expire.
           duration: 0
-          evaluationTime: 0.000732191
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.958278384Z"
           name: KubeletClientCertificateExpiration
           query: kubelet_certificate_manager_client_ttl_seconds < 86400
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -159,16 +109,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeletservercertificateexpiration
             summary: Kubelet server certificate is about to expire.
           duration: 0
-          evaluationTime: 0.00102082
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.95901858Z"
           name: KubeletServerCertificateExpiration
           query: kubelet_certificate_manager_server_ttl_seconds < 604800
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -176,16 +120,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeletservercertificateexpiration
             summary: Kubelet server certificate is about to expire.
           duration: 0
-          evaluationTime: 0.000918348
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.960046133Z"
           name: KubeletServerCertificateExpiration
           query: kubelet_certificate_manager_server_ttl_seconds < 86400
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -193,16 +131,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeletclientcertificaterenewalerrors
             summary: Kubelet has failed to renew its client certificate.
           duration: 900
-          evaluationTime: 0.000883449
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.960971211Z"
           name: KubeletClientCertificateRenewalErrors
           query: increase(kubelet_certificate_manager_client_expiration_renew_errors[5m]) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -210,16 +142,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeletservercertificaterenewalerrors
             summary: Kubelet has failed to renew its server certificate.
           duration: 900
-          evaluationTime: 0.000805223
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.961861805Z"
           name: KubeletServerCertificateRenewalErrors
           query: increase(kubelet_server_expiration_renew_errors[5m]) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -227,14 +153,8 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeletdown
             summary: Target disappeared from Prometheus target discovery.
           duration: 900
-          evaluationTime: 0.00085741
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:37.962673392Z"
           name: KubeletDown
           query: absent(up{job="integrations/kubernetes/kubelet"} == 1)
-          state: inactive
           type: alerting

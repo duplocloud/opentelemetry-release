@@ -5,23 +5,15 @@ metadata:
     namespace: integrations-kubernetes
 spec:
     rules:
-        - evaluationTime: 0.001299512
-          health: ok
-          labels:
+        - labels:
             quantile: "0.99"
             verb: read
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:41.120870504Z"
           name: cluster_quantile:apiserver_request_sli_duration_seconds:histogram_quantile
           query: histogram_quantile(0.99, sum by (cluster, le, resource) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"LIST|GET"}[5m]))) > 0
           type: recording
-        - evaluationTime: 0.001016946
-          health: ok
-          labels:
+        - labels:
             quantile: "0.99"
             verb: write
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:41.122176258Z"
           name: cluster_quantile:apiserver_request_sli_duration_seconds:histogram_quantile
           query: histogram_quantile(0.99, sum by (cluster, le, resource) (rate(apiserver_request_sli_duration_seconds_bucket{job="integrations/kubernetes/kube-apiserver",subresource!~"proxy|attach|log|exec|portforward",verb=~"POST|PUT|PATCH|DELETE"}[5m]))) > 0
           type: recording

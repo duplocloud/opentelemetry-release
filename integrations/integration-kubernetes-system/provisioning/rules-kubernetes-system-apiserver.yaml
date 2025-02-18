@@ -11,16 +11,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclientcertificateexpiration
             summary: Client certificate is about to expire.
           duration: 300
-          evaluationTime: 0.001230064
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:23.824818283Z"
           name: KubeClientCertificateExpiration
           query: histogram_quantile(0.01, sum without (namespace, service, endpoint) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="integrations/kubernetes/kube-apiserver"}[5m]))) < 604800 and on (job, cluster, instance) apiserver_client_certificate_expiration_seconds_count{job="integrations/kubernetes/kube-apiserver"} > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -28,16 +22,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeclientcertificateexpiration
             summary: Client certificate is about to expire.
           duration: 300
-          evaluationTime: 0.001029629
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:23.826054761Z"
           name: KubeClientCertificateExpiration
           query: histogram_quantile(0.01, sum without (namespace, service, endpoint) (rate(apiserver_client_certificate_expiration_seconds_bucket{job="integrations/kubernetes/kube-apiserver"}[5m]))) < 86400 and on (job, cluster, instance) apiserver_client_certificate_expiration_seconds_count{job="integrations/kubernetes/kube-apiserver"} > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -45,16 +33,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeaggregatedapierrors
             summary: Kubernetes aggregated API has reported errors.
           duration: 600
-          evaluationTime: 0.000869008
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:23.827091221Z"
           name: KubeAggregatedAPIErrors
           query: sum by (cluster, instance, name, reason) (increase(aggregator_unavailable_apiservice_total{job="integrations/kubernetes/kube-apiserver"}[1m])) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -62,16 +44,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeaggregatedapidown
             summary: Kubernetes aggregated API is down.
           duration: 300
-          evaluationTime: 0.000954579
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:23.827966495Z"
           name: KubeAggregatedAPIDown
           query: (1 - max by (name, namespace, cluster) (avg_over_time(aggregator_unavailable_apiservice{job="integrations/kubernetes/kube-apiserver"}[10m]))) * 100 < 85
-          state: inactive
           type: alerting
         - alerts:
             - activeAt: "2025-02-06T11:14:23.824406134Z"
@@ -82,23 +58,16 @@ spec:
               labels:
                 alertname: KubeAPIDown
                 severity: critical
-              state: firing
               value: "1e+00"
           annotations:
             description: KubeAPI has disappeared from Prometheus target discovery.
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapidown
             summary: Target disappeared from Prometheus target discovery.
           duration: 900
-          evaluationTime: 0.00165517
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:23.828927258Z"
           name: KubeAPIDown
           query: absent(up{job="integrations/kubernetes/kube-apiserver"} == 1)
-          state: firing
           type: alerting
         - alerts: []
           annotations:
@@ -106,14 +75,8 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubeapiterminatedrequests
             summary: The kubernetes apiserver has terminated {{ $value | humanizePercentage }} of its incoming requests.
           duration: 300
-          evaluationTime: 0.001339248
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:23.830591065Z"
           name: KubeAPITerminatedRequests
           query: sum by (cluster) (rate(apiserver_request_terminations_total{job="integrations/kubernetes/kube-apiserver"}[10m])) / (sum by (cluster) (rate(apiserver_request_total{job="integrations/kubernetes/kube-apiserver"}[10m])) + sum by (cluster) (rate(apiserver_request_terminations_total{job="integrations/kubernetes/kube-apiserver"}[10m]))) > 0.2
-          state: inactive
           type: alerting

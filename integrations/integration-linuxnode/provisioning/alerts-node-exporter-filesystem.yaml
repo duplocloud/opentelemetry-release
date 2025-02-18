@@ -10,94 +10,58 @@ spec:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available space left.
             summary: Filesystem has less than 5% space left.
           duration: 1800
-          evaluationTime: 0.007498776
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:56.464797459Z"
           name: NodeFilesystemAlmostOutOfSpace
           query: (node_filesystem_avail_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_size_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 5 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available space left.
             summary: Filesystem has less than 3% space left.
           duration: 1800
-          evaluationTime: 0.007800635
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:56.472307936Z"
           name: NodeFilesystemAlmostOutOfSpace
           query: (node_filesystem_avail_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_size_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 3 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available inodes left and is filling up.
             summary: Filesystem is predicted to run out of inodes within the next 24 hours.
           duration: 3600
-          evaluationTime: 0.015360622
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:56.480120942Z"
           name: NodeFilesystemFilesFillingUp
           query: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 40 and predict_linear(node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""}[6h], 24 * 60 * 60) < 0 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available inodes left and is filling up fast.
             summary: Filesystem is predicted to run out of inodes within the next 4 hours.
           duration: 3600
-          evaluationTime: 0.013444015
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:56.495494312Z"
           name: NodeFilesystemFilesFillingUp
           query: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 20 and predict_linear(node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""}[6h], 4 * 60 * 60) < 0 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available inodes left.
             summary: Filesystem has less than 5% inodes left.
           duration: 3600
-          evaluationTime: 0.011646995
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:56.508950484Z"
           name: NodeFilesystemAlmostOutOfFiles
           query: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 5 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available inodes left.
             summary: Filesystem has less than 3% inodes left.
           duration: 3600
-          evaluationTime: 0.013026281
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-01-31T05:58:56.520612441Z"
           name: NodeFilesystemAlmostOutOfFiles
           query: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 3 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
-          state: inactive
           type: alerting

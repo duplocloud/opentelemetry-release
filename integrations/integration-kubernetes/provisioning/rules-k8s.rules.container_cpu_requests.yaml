@@ -5,19 +5,11 @@ metadata:
     namespace: integrations-kubernetes-container
 spec:
     rules:
-        - evaluationTime: 0.00633071
-          health: ok
+        - name: cluster:namespace:pod_cpu:active:kube_pod_container_resource_requests
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:33.445336693Z"
-          name: cluster:namespace:pod_cpu:active:kube_pod_container_resource_requests
           query: kube_pod_container_resource_requests{job="integrations/kubernetes/kube-state-metrics",resource="cpu"} * on (namespace, pod, cluster) group_left () max by (namespace, pod, cluster) ((kube_pod_status_phase{phase=~"Pending|Running"} == 1))
           type: recording
-        - evaluationTime: 0.004515557
-          health: ok
+        - name: namespace_cpu:kube_pod_container_resource_requests:sum
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:33.451685678Z"
-          name: namespace_cpu:kube_pod_container_resource_requests:sum
           query: sum by (namespace, cluster) (sum by (namespace, pod, cluster) (max by (namespace, pod, container, cluster) (kube_pod_container_resource_requests{job="integrations/kubernetes/kube-state-metrics",resource="cpu"}) * on (namespace, pod, cluster) group_left () max by (namespace, pod, cluster) (kube_pod_status_phase{phase=~"Pending|Running"} == 1)))
           type: recording

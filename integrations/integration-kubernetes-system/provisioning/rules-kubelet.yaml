@@ -5,30 +5,18 @@ metadata:
     namespace: integrations-kubernetes
 spec:
     rules:
-        - evaluationTime: 0.00456044
-          health: ok
-          labels:
+        - labels:
             quantile: "0.99"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:55:06.711377186Z"
           name: node_quantile:kubelet_pleg_relist_duration_seconds:histogram_quantile
           query: histogram_quantile(0.99, sum by (cluster, instance, le) (rate(kubelet_pleg_relist_duration_seconds_bucket{job="integrations/kubernetes/kubelet"}[5m])) * on (cluster, instance) group_left (node) kubelet_node_name{job="integrations/kubernetes/kubelet"})
           type: recording
-        - evaluationTime: 0.005802179
-          health: ok
-          labels:
+        - labels:
             quantile: "0.9"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:55:06.71595316Z"
           name: node_quantile:kubelet_pleg_relist_duration_seconds:histogram_quantile
           query: histogram_quantile(0.9, sum by (cluster, instance, le) (rate(kubelet_pleg_relist_duration_seconds_bucket{job="integrations/kubernetes/kubelet"}[5m])) * on (cluster, instance) group_left (node) kubelet_node_name{job="integrations/kubernetes/kubelet"})
           type: recording
-        - evaluationTime: 0.002990319
-          health: ok
-          labels:
+        - labels:
             quantile: "0.5"
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:55:06.721767241Z"
           name: node_quantile:kubelet_pleg_relist_duration_seconds:histogram_quantile
           query: histogram_quantile(0.5, sum by (cluster, instance, le) (rate(kubelet_pleg_relist_duration_seconds_bucket{job="integrations/kubernetes/kubelet"}[5m])) * on (cluster, instance) group_left (node) kubelet_node_name{job="integrations/kubernetes/kubelet"})
           type: recording

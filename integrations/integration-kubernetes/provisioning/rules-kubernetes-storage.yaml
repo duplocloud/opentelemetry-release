@@ -11,16 +11,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumefillingup
             summary: PersistentVolume is filling up.
           duration: 60
-          evaluationTime: 0.002315788
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:46.845084724Z"
           name: KubePersistentVolumeFillingUp
           query: (kubelet_volume_stats_available_bytes{job="integrations/kubernetes/kubelet"} / kubelet_volume_stats_capacity_bytes{job="integrations/kubernetes/kubelet"}) < 0.03 and kubelet_volume_stats_used_bytes{job="integrations/kubernetes/kubelet"} > 0 unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode="ReadOnlyMany"} == 1 unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts="true"} == 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -28,16 +22,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumefillingup
             summary: PersistentVolume is filling up.
           duration: 3600
-          evaluationTime: 0.002473993
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:46.847408983Z"
           name: KubePersistentVolumeFillingUp
           query: (kubelet_volume_stats_available_bytes{job="integrations/kubernetes/kubelet"} / kubelet_volume_stats_capacity_bytes{job="integrations/kubernetes/kubelet"}) < 0.15 and kubelet_volume_stats_used_bytes{job="integrations/kubernetes/kubelet"} > 0 and predict_linear(kubelet_volume_stats_available_bytes{job="integrations/kubernetes/kubelet"}[6h], 4 * 24 * 3600) < 0 unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode="ReadOnlyMany"} == 1 unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts="true"} == 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -45,16 +33,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumeinodesfillingup
             summary: PersistentVolumeInodes are filling up.
           duration: 60
-          evaluationTime: 0.002979646
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:46.84989293Z"
           name: KubePersistentVolumeInodesFillingUp
           query: (kubelet_volume_stats_inodes_free{job="integrations/kubernetes/kubelet"} / kubelet_volume_stats_inodes{job="integrations/kubernetes/kubelet"}) < 0.03 and kubelet_volume_stats_inodes_used{job="integrations/kubernetes/kubelet"} > 0 unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode="ReadOnlyMany"} == 1 unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts="true"} == 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -62,16 +44,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumeinodesfillingup
             summary: PersistentVolumeInodes are filling up.
           duration: 3600
-          evaluationTime: 0.00515278
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:46.852880768Z"
           name: KubePersistentVolumeInodesFillingUp
           query: (kubelet_volume_stats_inodes_free{job="integrations/kubernetes/kubelet"} / kubelet_volume_stats_inodes{job="integrations/kubernetes/kubelet"}) < 0.15 and kubelet_volume_stats_inodes_used{job="integrations/kubernetes/kubelet"} > 0 and predict_linear(kubelet_volume_stats_inodes_free{job="integrations/kubernetes/kubelet"}[6h], 4 * 24 * 3600) < 0 unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_access_mode{access_mode="ReadOnlyMany"} == 1 unless on (cluster, namespace, persistentvolumeclaim) kube_persistentvolumeclaim_labels{label_excluded_from_alerts="true"} == 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -79,14 +55,8 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepersistentvolumeerrors
             summary: PersistentVolume is having issues with provisioning.
           duration: 300
-          evaluationTime: 0.007187222
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:46.858043138Z"
           name: KubePersistentVolumeErrors
           query: kube_persistentvolume_status_phase{job="integrations/kubernetes/kube-state-metrics",phase=~"Failed|Pending"} > 0
-          state: inactive
           type: alerting

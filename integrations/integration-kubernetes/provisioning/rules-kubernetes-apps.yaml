@@ -6,8 +6,7 @@ metadata:
 spec:
     rules:
         - alerts:
-            - activeAt: "2025-02-06T11:13:38.578886111Z"
-              annotations:
+            - annotations:
                 description: 'Pod duploservices-otel-o11y/duplo-monitoring-beyla-2vsk2 (beyla) is in waiting state (reason: "CrashLoopBackOff") on cluster duploinfra-o11y.'
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodcrashlooping
                 summary: Pod is crash looping.
@@ -21,28 +20,19 @@ spec:
                 pod: duplo-monitoring-beyla-2vsk2
                 reason: CrashLoopBackOff
                 severity: warning
-                uid: 3d86c0ad-83da-4239-8038-fb847be030a2
-              state: firing
               value: "1e+00"
           annotations:
             description: 'Pod {{ $labels.namespace }}/{{ $labels.pod }} ({{ $labels.container }}) is in waiting state (reason: "CrashLoopBackOff") on cluster {{ $labels.cluster }}.'
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodcrashlooping
             summary: Pod is crash looping.
           duration: 900
-          evaluationTime: 0.002851318
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.580853383Z"
           name: KubePodCrashLooping
           query: max_over_time(kube_pod_container_status_waiting_reason{job="integrations/kubernetes/kube-state-metrics",reason="CrashLoopBackOff"}[5m]) >= 1
-          state: firing
           type: alerting
         - alerts:
-            - activeAt: "2025-02-06T11:13:38.578886111Z"
-              annotations:
+            - annotations:
                 description: Pod kube-system/node-shell-d862377e-4924-40a5-aebe-da62ca8b17a0 has been in a non-ready state for longer than 15 minutes on cluster duploinfra-o11y.
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodnotready
                 summary: Pod has been in a non-ready state for more than 15 minutes.
@@ -52,23 +42,16 @@ spec:
                 namespace: kube-system
                 pod: node-shell-d862377e-4924-40a5-aebe-da62ca8b17a0
                 severity: warning
-              state: firing
               value: "1e+00"
           annotations:
             description: Pod {{ $labels.namespace }}/{{ $labels.pod }} has been in a non-ready state for longer than 15 minutes on cluster {{ $labels.cluster }}.
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubepodnotready
             summary: Pod has been in a non-ready state for more than 15 minutes.
           duration: 900
-          evaluationTime: 0.010758789
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.583718672Z"
           name: KubePodNotReady
           query: sum by (namespace, pod, cluster) (max by (namespace, pod, cluster) (kube_pod_status_phase{job="integrations/kubernetes/kube-state-metrics",phase=~"Pending|Unknown|Failed"}) * on (namespace, pod, cluster) group_left (owner_kind) topk by (namespace, pod, cluster) (1, max by (namespace, pod, owner_kind, cluster) (kube_pod_owner{owner_kind!="Job"}))) > 0
-          state: firing
           type: alerting
         - alerts: []
           annotations:
@@ -76,16 +59,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedeploymentgenerationmismatch
             summary: Deployment generation mismatch due to possible roll-back
           duration: 900
-          evaluationTime: 0.006842044
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.594494898Z"
           name: KubeDeploymentGenerationMismatch
           query: kube_deployment_status_observed_generation{job="integrations/kubernetes/kube-state-metrics"} != kube_deployment_metadata_generation{job="integrations/kubernetes/kube-state-metrics"}
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -93,16 +70,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedeploymentreplicasmismatch
             summary: Deployment has not matched the expected number of replicas.
           duration: 900
-          evaluationTime: 0.002819639
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.601349642Z"
           name: KubeDeploymentReplicasMismatch
           query: (kube_deployment_spec_replicas{job="integrations/kubernetes/kube-state-metrics"} > kube_deployment_status_replicas_available{job="integrations/kubernetes/kube-state-metrics"}) and (changes(kube_deployment_status_replicas_updated{job="integrations/kubernetes/kube-state-metrics"}[10m]) == 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -110,16 +81,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedeploymentrolloutstuck
             summary: Deployment rollout is not progressing.
           duration: 900
-          evaluationTime: 0.002042446
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.604180071Z"
           name: KubeDeploymentRolloutStuck
           query: kube_deployment_status_condition{condition="Progressing",job="integrations/kubernetes/kube-state-metrics",status="false"} != 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -127,16 +92,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubestatefulsetreplicasmismatch
             summary: StatefulSet has not matched the expected number of replicas.
           duration: 900
-          evaluationTime: 0.002310765
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.606232142Z"
           name: KubeStatefulSetReplicasMismatch
           query: (kube_statefulset_status_replicas_ready{job="integrations/kubernetes/kube-state-metrics"} != kube_statefulset_status_replicas{job="integrations/kubernetes/kube-state-metrics"}) and (changes(kube_statefulset_status_replicas_updated{job="integrations/kubernetes/kube-state-metrics"}[10m]) == 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -144,16 +103,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubestatefulsetgenerationmismatch
             summary: StatefulSet generation mismatch due to possible roll-back
           duration: 900
-          evaluationTime: 0.003928484
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.608550306Z"
           name: KubeStatefulSetGenerationMismatch
           query: kube_statefulset_status_observed_generation{job="integrations/kubernetes/kube-state-metrics"} != kube_statefulset_metadata_generation{job="integrations/kubernetes/kube-state-metrics"}
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -161,20 +114,13 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubestatefulsetupdatenotrolledout
             summary: StatefulSet update has not been rolled out.
           duration: 900
-          evaluationTime: 0.003017511
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.612491997Z"
           name: KubeStatefulSetUpdateNotRolledOut
           query: (max by (namespace, statefulset, job, cluster) (kube_statefulset_status_current_revision{job="integrations/kubernetes/kube-state-metrics"} unless kube_statefulset_status_update_revision{job="integrations/kubernetes/kube-state-metrics"}) * (kube_statefulset_replicas{job="integrations/kubernetes/kube-state-metrics"} != kube_statefulset_status_replicas_updated{job="integrations/kubernetes/kube-state-metrics"})) and (changes(kube_statefulset_status_replicas_updated{job="integrations/kubernetes/kube-state-metrics"}[5m]) == 0)
-          state: inactive
           type: alerting
         - alerts:
-            - activeAt: "2025-02-06T11:25:38.578886111Z"
-              annotations:
+            - annotations:
                 description: DaemonSet duploservices-otel-o11y/duplo-monitoring-beyla has not finished or progressed for at least 15m on cluster duploinfra-o11y.
                 runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedaemonsetrolloutstuck
                 summary: DaemonSet rollout is stuck.
@@ -186,23 +132,16 @@ spec:
                 job: integrations/kubernetes/kube-state-metrics
                 namespace: duploservices-otel-o11y
                 severity: warning
-              state: firing
               value: "2e+00"
           annotations:
             description: DaemonSet {{ $labels.namespace }}/{{ $labels.daemonset }} has not finished or progressed for at least 15m on cluster {{ $labels.cluster }}.
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedaemonsetrolloutstuck
             summary: DaemonSet rollout is stuck.
           duration: 900
-          evaluationTime: 0.004761576
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.615520109Z"
           name: KubeDaemonSetRolloutStuck
           query: ((kube_daemonset_status_current_number_scheduled{job="integrations/kubernetes/kube-state-metrics"} != kube_daemonset_status_desired_number_scheduled{job="integrations/kubernetes/kube-state-metrics"}) or (kube_daemonset_status_number_misscheduled{job="integrations/kubernetes/kube-state-metrics"} != 0) or (kube_daemonset_status_updated_number_scheduled{job="integrations/kubernetes/kube-state-metrics"} != kube_daemonset_status_desired_number_scheduled{job="integrations/kubernetes/kube-state-metrics"}) or (kube_daemonset_status_number_available{job="integrations/kubernetes/kube-state-metrics"} != kube_daemonset_status_desired_number_scheduled{job="integrations/kubernetes/kube-state-metrics"})) and (changes(kube_daemonset_status_updated_number_scheduled{job="integrations/kubernetes/kube-state-metrics"}[5m]) == 0)
-          state: firing
           type: alerting
         - alerts: []
           annotations:
@@ -210,16 +149,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubecontainerwaiting
             summary: Pod container waiting longer than 1 hour
           duration: 3600
-          evaluationTime: 0.000977964
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.620295644Z"
           name: KubeContainerWaiting
           query: kube_pod_container_status_waiting_reason{job="integrations/kubernetes/kube-state-metrics",reason!="CrashLoopBackOff"} > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -227,16 +160,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedaemonsetnotscheduled
             summary: DaemonSet pods are not scheduled.
           duration: 600
-          evaluationTime: 0.00163103
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.621281776Z"
           name: KubeDaemonSetNotScheduled
           query: kube_daemonset_status_desired_number_scheduled{job="integrations/kubernetes/kube-state-metrics"} - kube_daemonset_status_current_number_scheduled{job="integrations/kubernetes/kube-state-metrics"} > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -244,16 +171,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubedaemonsetmisscheduled
             summary: DaemonSet pods are misscheduled.
           duration: 900
-          evaluationTime: 0.001990389
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.62291992Z"
           name: KubeDaemonSetMisScheduled
           query: kube_daemonset_status_number_misscheduled{job="integrations/kubernetes/kube-state-metrics"} > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -261,16 +182,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubejobnotcompleted
             summary: Job did not complete in time
           duration: 0
-          evaluationTime: 0.002171057
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.624919515Z"
           name: KubeJobNotCompleted
           query: time() - max by (namespace, job_name, cluster) (kube_job_status_start_time{job="integrations/kubernetes/kube-state-metrics"} and kube_job_status_active{job="integrations/kubernetes/kube-state-metrics"} > 0) > 43200
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -278,16 +193,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubejobfailed
             summary: Job failed to complete.
           duration: 900
-          evaluationTime: 0.001491715
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.627100002Z"
           name: KubeJobFailed
           query: kube_job_failed{job="integrations/kubernetes/kube-state-metrics"} > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -295,16 +204,10 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubehpareplicasmismatch
             summary: HPA has not matched desired number of replicas.
           duration: 900
-          evaluationTime: 0.003287563
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.628600578Z"
           name: KubeHpaReplicasMismatch
           query: (kube_horizontalpodautoscaler_status_desired_replicas{job="integrations/kubernetes/kube-state-metrics"} != kube_horizontalpodautoscaler_status_current_replicas{job="integrations/kubernetes/kube-state-metrics"}) and (kube_horizontalpodautoscaler_status_current_replicas{job="integrations/kubernetes/kube-state-metrics"} > kube_horizontalpodautoscaler_spec_min_replicas{job="integrations/kubernetes/kube-state-metrics"}) and (kube_horizontalpodautoscaler_status_current_replicas{job="integrations/kubernetes/kube-state-metrics"} < kube_horizontalpodautoscaler_spec_max_replicas{job="integrations/kubernetes/kube-state-metrics"}) and changes(kube_horizontalpodautoscaler_status_current_replicas{job="integrations/kubernetes/kube-state-metrics"}[15m]) == 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -312,14 +215,8 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/tree/master/runbook.md#alert-name-kubehpamaxedout
             summary: HPA is running at max replicas
           duration: 900
-          evaluationTime: 0.001046261
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-02-06T11:54:38.631896526Z"
           name: KubeHpaMaxedOut
           query: kube_horizontalpodautoscaler_status_current_replicas{job="integrations/kubernetes/kube-state-metrics"} == kube_horizontalpodautoscaler_spec_max_replicas{job="integrations/kubernetes/kube-state-metrics"}
-          state: inactive
           type: alerting
