@@ -722,7 +722,8 @@ spec:
     schemaVersion: 39
     tags:
         - kubernetes-integration
-        - cluster
+        - resource
+        - networking
     templating:
         list:
             - current:
