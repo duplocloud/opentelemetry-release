@@ -7,7 +7,7 @@ spec:
     rules:
       - alert: WindowsCPUHighUsage
         expr: >
-          100 - (avg without (mode, core) (rate(windows_cpu_time_total{job=~"integrations/windows_exporter", mode="idle"}[2m])) * 100) > 90
+          100 - (avg without (mode, core) (rate(windows_cpu_time_total{job=~"integrations/windows-exporter", mode="idle"}[2m])) * 100) > 90
         for: 15m
         keep_firing_for: 5m
         labels:
@@ -21,7 +21,7 @@ spec:
           summary: High CPU usage on Windows host.
       - alert: WindowsDiskAlmostOutOfSpace
         expr: >
-          100 - ((windows_logical_disk_free_bytes{job=~"integrations/windows_exporter"} ) / (windows_logical_disk_size_bytes{job=~"integrations/windows_exporter"})) * 100  > 90
+          100 - ((windows_logical_disk_free_bytes{job=~"integrations/windows-exporter"} ) / (windows_logical_disk_size_bytes{job=~"integrations/windows-exporter"})) * 100  > 90
         for: 15m
         keep_firing_for: 5m
         labels:
@@ -35,7 +35,7 @@ spec:
           summary: Disk is almost full on Windows host.
       - alert: WindowsDiskDriveNotHealthy
         expr: >
-          windows_disk_drive_status{job=~"integrations/windows_exporter", status="OK"} != 1
+          windows_disk_drive_status{job=~"integrations/windows-exporter", status="OK"} != 1
         for: 5m
         labels:
           asserts_alert_category: failure
@@ -48,11 +48,11 @@ spec:
           summary: Windows physical disk is not healthy.
       - alert: WindowsMemoryHighUtilization
         expr: >
-          100 - ((windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter"}
+          100 - ((windows_os_physical_memory_free_bytes{job=~"integrations/windows-exporter"}
 
           /
 
-          windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter"}) * 100) > 90
+          windows_cs_physical_memory_bytes{job=~"integrations/windows-exporter"}) * 100) > 90
         for: 15m
         keep_firing_for: 5m
         labels:
@@ -66,7 +66,7 @@ spec:
           summary: High memory usage on Windows host.
       - alert: WindowsNTPClientDelay
         expr: >
-          windows_time_ntp_round_trip_delay_seconds{job=~"integrations/windows_exporter"} > 1
+          windows_time_ntp_round_trip_delay_seconds{job=~"integrations/windows-exporter"} > 1
         for: 5m
         keep_firing_for: 5m
         labels:
@@ -80,7 +80,7 @@ spec:
           summary: NTP client delay.
       - alert: WindowsNTPTimeOffset
         expr: >
-          windows_time_computed_time_offset_seconds{job=~"integrations/windows_exporter"} > 1
+          windows_time_computed_time_offset_seconds{job=~"integrations/windows-exporter"} > 1
         for: 5m
         keep_firing_for: 5m
         labels:
@@ -94,7 +94,7 @@ spec:
           summary: NTP time offset is too large.
       - alert: WindowsServiceNotHealthy
         expr: >
-          windows_service_status{job=~"integrations/windows_exporter", status!~"starting|stopping|ok"} > 0
+          windows_service_status{job=~"integrations/windows-exporter", status!~"starting|stopping|ok"} > 0
         for: 5m
         labels:
           asserts_alert_category: failure
