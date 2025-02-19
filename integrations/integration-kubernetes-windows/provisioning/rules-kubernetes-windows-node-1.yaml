@@ -7,5 +7,5 @@ spec:
     rules:
         - labels: {}
           name: node:windows_node_net_saturation:sum_irate
-          query: sum by (cluster, instance) ((irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[1m]) + irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[1m])))
+          query: sum by (cluster, instance) ((irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[5m]) + irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[5m])))
           type: recording

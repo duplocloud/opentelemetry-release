@@ -38,7 +38,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: node:windows_node_cpu_utilisation:avg1m{cluster="$cluster", instance="$instance"}
+              expr: node:windows_node_cpu_utilisation:avg5m{cluster="$cluster", instance="$instance"}
               legendFormat: Utilisation
           title: CPU Utilisation
           type: timeseries
