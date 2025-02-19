@@ -6,32 +6,32 @@ metadata:
 spec:
     rules:
       - record: asserts:resource:usage
-        expr: 1 - (avg without (mode,core) (rate(windows_cpu_time_total{job=~"integrations/windows-exporter", asserts_env!="", mode="idle"}[5m])))
+        expr: 1 - (avg without (mode,core) (rate(windows_cpu_time_total{job=~"integrations/windows_exporter", asserts_env!="", mode="idle"}[5m])))
         labels:
           asserts_entity_type: Node
           asserts_resource_type: cpu:usage
-          asserts_source: windows-exporter
+          asserts_source: windows_exporter
       - record: asserts:resource:usage
-        expr: 1 - windows_os_physical_memory_free_bytes{job=~"integrations/windows-exporter", asserts_env!=""} / windows_cs_physical_memory_bytes{job=~"integrations/windows-exporter", asserts_env!=""}
+        expr: 1 - windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter", asserts_env!=""} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter", asserts_env!=""}
         labels:
           asserts_entity_type: Node
           asserts_resource_type: memory:usage
-          asserts_source: windows-exporter
+          asserts_source: windows_exporter
       - record: asserts:resource:total
-        expr: windows_net_bytes_sent_total{job=~"integrations/windows-exporter", asserts_env!=""}
+        expr: windows_net_bytes_sent_total{job=~"integrations/windows_exporter", asserts_env!=""}
         labels:
           asserts_entity_type: Node
           asserts_resource_type: network:tx_bytes
-          asserts_source: windows-exporter
+          asserts_source: windows_exporter
       - record: asserts:resource:total
-        expr: windows_net_bytes_received_total{job=~"integrations/windows-exporter", asserts_env!=""}
+        expr: windows_net_bytes_received_total{job=~"integrations/windows_exporter", asserts_env!=""}
         labels:
           asserts_entity_type: Node
           asserts_resource_type: network:rx_bytes
-          asserts_source: windows-exporter
+          asserts_source: windows_exporter
       - record: asserts:resource
-        expr: 1 - windows_logical_disk_free_bytes{volume!~"HarddiskVolume.*", job=~"integrations/windows-exporter", asserts_env!=""}/windows_logical_disk_size_bytes{volume!~"HarddiskVolume.*", job=~"integrations/windows-exporter", asserts_env!=""}
+        expr: 1 - windows_logical_disk_free_bytes{volume!~"HarddiskVolume.*", job=~"integrations/windows_exporter", asserts_env!=""}/windows_logical_disk_size_bytes{volume!~"HarddiskVolume.*", job=~"integrations/windows_exporter", asserts_env!=""}
         labels:
           asserts_entity_type: Node
           asserts_resource_type: disk:usage
-          asserts_source: windows-exporter
+          asserts_source: windows_exporter
