@@ -19,7 +19,7 @@ spec:
                 type: loki
                 uid: ${loki_datasource}
               enable: true
-              expr: '{job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance", channel="System", level="Critical"} | json'
+              expr: '{job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance", channel="System", level="Critical"} | json'
               hide: true
               iconColor: light-purple
               name: Critical system event
@@ -30,7 +30,7 @@ spec:
                 type: prometheus
                 uid: ${datasource}
               enable: true
-              expr: windows_system_system_up_time{job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
+              expr: windows_system_system_up_time{job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
               hide: true
               iconColor: light-yellow
               name: Reboot
@@ -41,7 +41,7 @@ spec:
                 type: loki
                 uid: ${loki_datasource}
               enable: true
-              expr: '{job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance", source="Service Control Manager", level="Error"} |= "terminated" | json'
+              expr: '{job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance", source="Service Control Manager", level="Error"} |= "terminated" | json'
               hide: true
               iconColor: light-orange
               name: Service failed
@@ -119,7 +119,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: time() - windows_system_system_up_time{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: time() - windows_system_system_up_time{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               refId: A
           title: Uptime
           type: stat
@@ -166,7 +166,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               format: table
               refId: A
           title: Hostname
@@ -214,7 +214,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               format: table
               refId: A
           title: OS version
@@ -262,7 +262,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               format: table
               refId: A
           title: OS family
@@ -312,7 +312,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_cs_logical_processors{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_cs_logical_processors{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               refId: A
           title: CPU count
           type: stat
@@ -363,7 +363,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               legendFormat: Memory total
               refId: A
           title: Memory total
@@ -416,7 +416,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_os_paging_limit_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_os_paging_limit_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               refId: A
           title: Pagefile size
           type: stat
@@ -465,7 +465,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_logical_disk_size_bytes{asserts_env=~"$env", asserts_site=~"$site", volume="C:", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_logical_disk_size_bytes{asserts_env=~"$env", asserts_site=~"$site", volume="C:", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               refId: A
           title: 'Disk C: size'
           type: stat
@@ -531,7 +531,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: 100 - (avg without (mode,core) (rate(windows_cpu_time_total{asserts_env=~"$env", asserts_site=~"$site", mode="idle", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])*100))
+              expr: 100 - (avg without (mode,core) (rate(windows_cpu_time_total{asserts_env=~"$env", asserts_site=~"$site", mode="idle", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])*100))
               legendFormat: CPU usage
               refId: A
           title: CPU usage
@@ -610,7 +610,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: 100 - (avg without (mode,core) (rate(windows_cpu_time_total{asserts_env=~"$env", asserts_site=~"$site", mode="idle", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])*100))
+              expr: 100 - (avg without (mode,core) (rate(windows_cpu_time_total{asserts_env=~"$env", asserts_site=~"$site", mode="idle", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])*100))
               legendFormat: CPU usage
               refId: A
           title: CPU usage
@@ -672,7 +672,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: 100 - windows_os_physical_memory_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"} * 100
+              expr: 100 - windows_os_physical_memory_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"} * 100
               refId: A
           title: Memory usage
           type: stat
@@ -760,13 +760,13 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"} - windows_os_physical_memory_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"} - windows_os_physical_memory_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               legendFormat: Memory used
               refId: A
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               legendFormat: Memory total
               refId: B
           title: Memory usage
@@ -857,19 +857,19 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_logical_disk_read_bytes_total{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
+              expr: irate(windows_logical_disk_read_bytes_total{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
               legendFormat: '{{ volume }} read'
               refId: A
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_logical_disk_write_bytes_total{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
+              expr: irate(windows_logical_disk_write_bytes_total{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
               legendFormat: '{{ volume }} written'
               refId: B
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: (1-clamp_max(irate(windows_logical_disk_idle_seconds_total{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval]),1)) * 100
+              expr: (1-clamp_max(irate(windows_logical_disk_idle_seconds_total{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval]),1)) * 100
               legendFormat: '{{ volume }} io util'
               refId: C
           title: Disk reads/writes
@@ -956,14 +956,14 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_logical_disk_size_bytes{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_logical_disk_size_bytes{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
               refId: TOTAL
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_logical_disk_free_bytes{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}
+              expr: windows_logical_disk_free_bytes{asserts_env=~"$env", asserts_site=~"$site", volume!~"HarddiskVolume.*", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
               legendFormat: '{{ volume }} available'
@@ -1111,13 +1111,13 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_net_bytes_received_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])*8
+              expr: irate(windows_net_bytes_received_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])*8
               legendFormat: '{{ nic }} received'
               refId: A
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_net_bytes_sent_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])*8
+              expr: irate(windows_net_bytes_sent_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])*8
               legendFormat: '{{ nic }} transmitted'
               refId: B
           title: Network traffic
@@ -1196,31 +1196,31 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_net_packets_outbound_errors_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
+              expr: irate(windows_net_packets_outbound_errors_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
               legendFormat: '{{ nic }} transmitted'
               refId: A
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_net_packets_received_errors_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
+              expr: irate(windows_net_packets_received_errors_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
               legendFormat: '{{ nic }} received'
               refId: B
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_net_packets_received_unknown_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
+              expr: irate(windows_net_packets_received_unknown_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
               legendFormat: '{{ nic }} received (unknown)'
               refId: C
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_net_packets_outbound_discarded_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
+              expr: irate(windows_net_packets_outbound_discarded_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
               legendFormat: '{{ nic }} transmitted packets dropped'
               refId: D
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_net_packets_received_discarded_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
+              expr: irate(windows_net_packets_received_discarded_total{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows-exporter",job=~"$job",instance=~"$instance"}[$__rate_interval])
               legendFormat: '{{ nic }} received packets dropped'
               refId: E
           title: Network errors and dropped packets
@@ -1286,7 +1286,7 @@ spec:
               multi: true
               name: job
               options: []
-              query: label_values(windows_os_info{job=~"integrations/windows_exporter"}, job)
+              query: label_values(windows_os_info{job=~"integrations/windows-exporter"}, job)
               refresh: 2
               sort: 1
               type: query
@@ -1301,7 +1301,7 @@ spec:
               label: Instance
               name: instance
               options: []
-              query: label_values(windows_os_info{job=~"integrations/windows_exporter",job=~"$job"}, instance)
+              query: label_values(windows_os_info{job=~"integrations/windows-exporter",job=~"$job"}, instance)
               refresh: 2
               sort: 1
               type: query
