@@ -1,0 +1,180 @@
+namespace: app-o11y
+groups:
+    - name: baseline-constants
+      rules:
+        - record: appo11y:request:rate:threshold_by_stddev
+          expr: "2"
+        - record: appo11y:request:rate:threshold_margin
+          expr: "0.5"
+        - record: appo11y:request:rate:sparse_threshold
+          expr: "0.08333333333333333"
+        - record: appo11y:request:stddev:threshold_by_covar
+          expr: "0.5"
+        - record: appo11y:duration:stddev:threshold_by_covar
+          expr: "0.5"
+        - record: appo11y:duration:threshold_by_stddev
+          expr: "2"
+        - record: appo11y:duration:threshold_margin
+          expr: "0.5"
+        - record: appo11y:duration:threshold
+          expr: "3"
+        - record: appo11y:error:ratio:threshold_by_stddev
+          expr: "2"
+        - record: appo11y:error:ratio:threshold_margin
+          expr: "0.2"
+    - name: baseline-duration
+      rules:
+        - record: appo11y:duration:p95:prediction
+          expr: quantile_over_time(0.5, appo11y:duration:p95[1h]) unless (appo11y:request:rate5m unless appo11y:request:rate5m:select)
+        - record: appo11y:duration:p95:stddev
+          expr: avg_over_time(appo11y:duration:p95:stddev_1h[26h])
+        - record: appo11y:duration:p95:anomaly_lower_threshold
+          expr: "\n              clamp_min(\n                min without(prediction_type)(\n                  label_replace(\n                    last_over_time(appo11y:duration:p95:prediction[1m]) - last_over_time(appo11y:duration:p95:stddev[1m]) * on() group_left appo11y:duration:threshold_by_stddev,\n                    \"prediction_type\", \"stddev\", \"\", \"\"\n                  )\n                  or\n                  label_replace(\n                    last_over_time(appo11y:duration:p95:prediction[1m]) - last_over_time(appo11y:duration:p95:prediction[1m]) * on() group_left appo11y:duration:threshold_margin,\n                    \"prediction_type\", \"margin\", \"\", \"\"\n                  )\n                ),\n                0\n              )\n            "
+        - record: appo11y:duration:p95:anomaly_upper_threshold
+          expr: |4-
+                    max without(prediction_type)(
+                      label_replace(
+                        last_over_time(appo11y:duration:p95:prediction[1m]) + last_over_time(appo11y:duration:p95:stddev[1m]) * on() group_left appo11y:duration:threshold_by_stddev,
+                        "prediction_type", "stddev", "", ""
+                      )
+                      or
+                      label_replace(
+                        last_over_time(appo11y:duration:p95:prediction[1m]) + last_over_time(appo11y:duration:p95:prediction[1m]) * on() group_left appo11y:duration:threshold_margin,
+                        "prediction_type", "margin", "", ""
+                      )
+                    )
+    - name: baseline-duration-base
+      rules:
+        - record: appo11y:duration:p95
+          expr: histogram_quantile(0.95, sum by (job, span_name, deployment_environment, le) (rate(traces_spanmetrics_latency_bucket{span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"} [5m] offset 1m)))
+        - record: appo11y:duration:p95
+          expr: histogram_quantile(0.95, sum by (job, deployment_environment, le) (rate(traces_spanmetrics_latency_bucket{span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"} [5m] offset 1m)))
+          labels:
+            span_name: __aggregated__
+    - name: baseline-error-ratio
+      rules:
+        - record: appo11y:error:ratio
+          expr: "(\n      sum(rate(traces_spanmetrics_latency_count{span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\", status_code=\"STATUS_CODE_ERROR\"} [5m] offset 1m)) by (job, span_name, deployment_environment)\n      OR \n      sum(rate(traces_spanmetrics_latency_count{span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\"} [5m] offset 1m)) by (job, span_name, deployment_environment) * 0\n    ) \n    / sum(rate(traces_spanmetrics_latency_count{span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\"} [5m] offset 1m)) by (job, span_name, deployment_environment)"
+        - record: appo11y:error:ratio
+          expr: "(\n      sum(rate(traces_spanmetrics_latency_count{span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\", status_code=\"STATUS_CODE_ERROR\"} [5m] offset 1m)) by (job, deployment_environment)\n      OR \n      sum(rate(traces_spanmetrics_latency_count{span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\"} [5m] offset 1m)) by (job, deployment_environment) * 0\n    ) \n    / sum(rate(traces_spanmetrics_latency_count{span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\"} [5m] offset 1m)) by (job, deployment_environment)"
+          labels:
+            span_name: __aggregated__
+        - record: appo11y:error:ratio:prediction
+          expr: avg_over_time(appo11y:error:ratio[1h])
+        - record: appo11y:error:ratio:stddev
+          expr: avg_over_time(appo11y:error:ratio:stddev_1h[26h])
+        - record: appo11y:error:ratio:anomaly_upper_threshold
+          expr: |4-
+                  clamp_max(
+                    max without(prediction_type) (
+                      label_replace(
+                        last_over_time(appo11y:error:ratio:prediction[1m]) + last_over_time(appo11y:error:ratio:stddev[1m]) * on() group_left appo11y:error:ratio:threshold_by_stddev,
+                        "prediction_type", "stddev", "", ""
+                      )
+                      or
+                      label_replace(
+                        last_over_time(appo11y:error:ratio:prediction[1m]) + last_over_time(appo11y:error:ratio:prediction[1m]) * on() group_left appo11y:error:ratio:threshold_margin,
+                        "prediction_type", "margin", "", ""
+                      )
+                    ),
+                    1
+                  )
+    - name: baseline-stddev-1h
+      interval: 5m
+      rules:
+        - record: appo11y:request:rate5m:stddev_st_1h
+          expr: stddev_over_time(appo11y:request:rate5m:select[1h]) > appo11y:request:rate5m:prediction_st * on() group_left appo11y:request:stddev:threshold_by_covar
+        - record: appo11y:duration:p95:stddev_1h
+          expr: |4-
+                  stddev_over_time(appo11y:duration:p95[1h]) unless (appo11y:request:rate5m unless appo11y:request:rate5m:select)
+                  >
+                  avg_over_time(appo11y:duration:p95[1h]) * on() group_left appo11y:duration:stddev:threshold_by_covar
+        - record: appo11y:error:ratio:stddev_1h
+          expr: stddev_over_time(appo11y:error:ratio[1h])
+    - name: baseline-request-rate
+      rules:
+        - record: appo11y:request:rate5m
+          expr: "\n      sum by(job, span_name, deployment_environment) (rate(traces_spanmetrics_latency_count{span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\"}[5m] offset 1m))\n    "
+        - record: appo11y:request:rate5m
+          expr: "\n      sum by(job, deployment_environment) (rate(traces_spanmetrics_latency_count{span_kind=~\"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER\"}[5m] offset 1m))\n    "
+          labels:
+            span_name: __aggregated__
+        - record: appo11y:request:rate5m:select
+          expr: "\n          appo11y:request:rate5m > 0\n          and\n          (\n            \n            max_over_time(appo11y:request:rate5m[1h] offset 23h30m) > 0\n            or\n            max_over_time(appo11y:request:rate5m[1h] offset 167h30m) > 0\n          )\n          unless\n          avg_over_time(appo11y:request:rate5m[1h]) < on() group_left appo11y:request:rate:sparse_threshold\n          "
+        - record: appo11y:request:rate5m:prediction_st
+          expr: avg_over_time(appo11y:request:rate5m:select[1h])
+        - record: appo11y:request:rate5m:stddev_st
+          expr: avg_over_time(appo11y:request:rate5m:stddev_st_1h[26h])
+        - record: appo11y:request:rate5m:anomaly_lower_threshold
+          expr: |-
+            clamp_min(
+                              min without(prediction_type) (
+                                label_replace(
+                                  last_over_time(appo11y:request:rate5m:prediction_st[2m]) - last_over_time(appo11y:request:rate5m:stddev_st[2m]) * on() group_left appo11y:request:rate:threshold_by_stddev,
+                                  "prediction_type", "short_term", "", ""
+                                )
+                                or
+                                label_replace(
+                                  last_over_time(appo11y:request:rate5m:prediction_st[2m]) - last_over_time(appo11y:request:rate5m:prediction_st[2m]) * on() group_left appo11y:request:rate:threshold_margin,
+                                  "prediction_type", "margin", "", ""
+                                )
+                                or
+                                last_over_time(
+                                  (
+                                    min without(look_back) (
+                                      label_replace(
+                                        avg_over_time(appo11y:request:rate5m:select[1h] offset 167h30m)
+                                        -
+                                        stddev_over_time(appo11y:request:rate5m:select[1h] offset 167h30m)
+                                        * on() group_left appo11y:request:rate:threshold_by_stddev,
+                                        "look_back", "1w", "", ""
+                                      )
+                                      or
+                                      label_replace(
+                                        avg_over_time(appo11y:request:rate5m:select[1h] offset 23h30m)
+                                        -
+                                        stddev_over_time(appo11y:request:rate5m:select[1h] offset 23h30m)
+                                        * on() group_left appo11y:request:rate:threshold_by_stddev,
+                                        "look_back", "1d", "", ""
+                                      )
+                                    )
+                                  )
+                                [10m:1m])
+                              ),
+                              0
+                            )
+        - record: appo11y:request:rate5m:anomaly_upper_threshold
+          expr: |-
+            max without(prediction_type) (
+                              label_replace(
+                                last_over_time(appo11y:request:rate5m:prediction_st[2m]) + last_over_time(appo11y:request:rate5m:stddev_st[2m]) * on() group_left appo11y:request:rate:threshold_by_stddev,
+                                "prediction_type", "short_term", "", ""
+                              )
+                              or
+                              label_replace(
+                                last_over_time(appo11y:request:rate5m:prediction_st[2m]) + last_over_time(appo11y:request:rate5m:prediction_st[2m]) * on() group_left appo11y:request:rate:threshold_margin,
+                                "prediction_type", "margin", "", ""
+                              )
+                              or
+                              last_over_time(
+                                (
+                                  max without(look_back) (
+                                    label_replace(
+                                      avg_over_time(appo11y:request:rate5m:select[1h] offset 167h30m)
+                                      +
+                                      stddev_over_time(appo11y:request:rate5m:select[1h] offset 167h30m)
+                                      * on() group_left appo11y:request:rate:threshold_by_stddev,
+                                      "look_back", "1w", "", ""
+                                    )
+                                    or
+                                    label_replace(
+                                      avg_over_time(appo11y:request:rate5m:select[1h] offset 23h30m)
+                                      +
+                                      stddev_over_time(appo11y:request:rate5m:select[1h] offset 23h30m)
+                                      * on() group_left appo11y:request:rate:threshold_by_stddev,
+                                      "look_back", "1d", "", ""
+                                    )
+                                  )
+                                )
+                              [10m:1m])
+                            )
