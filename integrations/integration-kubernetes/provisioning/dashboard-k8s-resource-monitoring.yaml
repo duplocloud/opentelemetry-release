@@ -288,7 +288,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               editorMode: code
-              expr: avg(1 - rate(node_cpu_seconds_total{mode="idle"}[2m])) by (node)
+              expr: avg(1 - rate(node_cpu_seconds_total{mode="idle"}[$__rate_interval])) by (node)
               format: time_series
               interval: ""
               intervalFactor: 2
@@ -700,7 +700,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               editorMode: code
-              expr: sum(rate(container_cpu_usage_seconds_total{image!="", container_name!="POD"}[5m])) by (pod)
+              expr: sum(rate(container_cpu_usage_seconds_total{image!="", container_name!="POD"}[$__rate_interval])) by (pod)
               format: table
               hide: false
               instant: true
@@ -900,7 +900,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: true
-              expr: sum(rate(container_cpu_usage_seconds_total{image!="", container_name!="POD"}[5m]) * 1000) by (pod)
+              expr: sum(rate(container_cpu_usage_seconds_total{image!="", container_name!="POD"}[$__rate_interval]) * 1000) by (pod)
               interval: ""
               legendFormat: '{{pod}}'
               range: true

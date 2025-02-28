@@ -38,7 +38,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: node:windows_node_cpu_utilisation:avg1m{cluster="$cluster"} * node:windows_node_num_cpu:sum{cluster="$cluster"} / scalar(sum(node:windows_node_num_cpu:sum{cluster="$cluster"}))
+              expr: node:windows_node_cpu_utilisation:avg5m{cluster="$cluster"} * node:windows_node_num_cpu:sum{cluster="$cluster"} / scalar(sum(node:windows_node_num_cpu:sum{cluster="$cluster"}))
               legendFormat: '{{instance}}'
           title: CPU Utilisation
           type: timeseries
@@ -280,7 +280,7 @@ spec:
               hide: 0
               label: cluster
               name: cluster
-              query: label_values(up{job="integrations/windows-exporter"}, cluster)
+              query: label_values(up{job="integrations/windows_exporter"}, cluster)
               refresh: 2
               sort: 1
               type: query

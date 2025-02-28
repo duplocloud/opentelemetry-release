@@ -285,7 +285,7 @@ spec:
               hide: 0
               label: cluster
               name: cluster
-              query: label_values(up{job="integrations/windows-exporter"}, cluster)
+              query: label_values(up{job="integrations/windows_exporter"}, cluster)
               refresh: 2
               sort: 1
               type: query
