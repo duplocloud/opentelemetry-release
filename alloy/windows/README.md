@@ -25,7 +25,7 @@ This guide provides step-by-step instructions for installing Alloy and the Windo
    Execute the following PowerShell command to download and run the Alloy installer:
 
    ```cmd
-   powershell -c Invoke-WebRequest "https://raw.githubusercontent.com/duplocloud/opentelemetry-release/refs/heads/main/alloy/windows/script/install-windows-alloy.ps1" -OutFile "install-windows-alloy.ps1" && powershell -executionpolicy Bypass -File ".\install-windows-alloy.ps1" -DUPLO_LOGGING_PATHS "[{\"__path__\" = \"C:\\var\\log\\*.log\"}]" -DUPLO_METRICS_URL "https://<metrics_url>/api/v1/push" -DUPLO_LOGGING_URL "https://<logs_url>/loki/api/v1/push" -DUPLO_TENANT_NAME "tenant name" -HOSTNAME "hostname"
+   powershell -c Invoke-WebRequest "https://raw.githubusercontent.com/duplocloud/opentelemetry-release/refs/heads/main/alloy/windows/script/install-windows-alloy.ps1" -OutFile "install-windows-alloy.ps1" && powershell -executionpolicy Bypass -File ".\install-windows-alloy.ps1" -DUPLO_LOGGING_PATHS "[{\"__path__\" = \"C:\\var\\log\\*.log\", \"__address__\" = \"localhost\", \"job\" = \"integrations/iis\" or \"integrations/windows_exporter\", \"site\" = \"<your-site1-name>\"}]" -DUPLO_METRICS_URL "https://<metrics_url>/api/v1/push" -DUPLO_LOGGING_URL "https://<logs_url>/loki/api/v1/push" -DUPLO_TENANT_NAME "tenant name" -HOSTNAME "hostname"
    ```
 
    - **Parameters**:
