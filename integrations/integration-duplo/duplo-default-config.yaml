@@ -25,7 +25,7 @@ receivers:
         title_link: '{{ template "slack.alert.title_link" . }}'
         pretext: '{{ template "slack.default.pretext" . }}'
         text: '{{ template "slack.alert.text" . }}'
-        footer: '{{ template "slack.default.footerr" . }}'
+        footer: '{{ template "slack.default.footer" . }}'
         fallback: '{{ template "slack.default.fallback" . }}'
         callback_id: '{{ template "slack.default.callbackid" . }}'
         icon_emoji: '{{ template "slack.default.iconemoji" . }}'
