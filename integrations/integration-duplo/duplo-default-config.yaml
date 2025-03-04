@@ -1,0 +1,34 @@
+global:
+  resolve_timeout: 5m
+  http_config:
+    tls_config:
+      insecure_skip_verify: false
+    follow_redirects: true
+    enable_http2: true
+route:
+  receiver: default-receiver
+  group_by:
+    - alertname
+  routes:
+    - receiver: duplo-slack-notifications
+      matchers:
+        - namespace=~".*otel.*"
+receivers:
+  - name: duplo-slack-notifications
+    slack_configs:
+      - send_resolved: true
+        api_url: <<SlackWebhook>>
+        channel: '#<<SlackChannelName>>'
+        username: Duplo-Metrics-Alertmanager
+        color: '{{ template "slack.alert.color" . }}'
+        title: '{{ template "slack.alert.title" . }}'
+        title_link: '{{ template "slack.alert.title_link" . }}'
+        pretext: '{{ template "slack.default.pretext" . }}'
+        text: '{{ template "slack.alert.text" . }}'
+        footer: '{{ template "slack.default.footerr" . }}'
+        fallback: '{{ template "slack.default.fallback" . }}'
+        callback_id: '{{ template "slack.default.callbackid" . }}'
+        icon_emoji: '{{ template "slack.default.iconemoji" . }}'
+        icon_url: '{{ template "slack.default.iconurl" . }}'
+templates:
+  - duplo_templates.tpl
