@@ -6,7 +6,7 @@ global:
     follow_redirects: true
     enable_http2: true
 route:
-  receiver: default-receiver
+  receiver: duplo-slack-notifications
   group_by:
     - alertname
   routes:
