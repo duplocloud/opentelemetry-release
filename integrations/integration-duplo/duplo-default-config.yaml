@@ -20,7 +20,7 @@ receivers:
         api_url: <<SlackWebhook>>
         channel: '#<<SlackChannelName>>'
         username: Duplo-Metrics-Alertmanager
-        color: '{{ template "slack.alert.color" . }}'
+        color: '{{ if eq .Status "firing" }}#FF0000{{ else }}#36A64F{{ end }}'
         title: '{{ template "slack.alert.title" . }}'
         title_link: '{{ template "slack.alert.title_link" . }}'
         pretext: '{{ template "slack.default.pretext" . }}'
