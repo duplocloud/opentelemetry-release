@@ -6,7 +6,7 @@ global:
     follow_redirects: true
     enable_http2: true
 route:
-  receiver: duplo-slack-notifications
+  receiver: default-receiver
   group_by:
     - alertname
   routes:
@@ -31,5 +31,7 @@ receivers:
         callback_id: '{{ template "slack.default.callbackid" . }}'
         icon_emoji: '{{ template "slack.default.iconemoji" . }}'
         icon_url: '{{ template "slack.default.iconurl" . }}'
+  - name: default-receiver
+    slack_configs: []
 templates:
   - duplo_templates.tpl
