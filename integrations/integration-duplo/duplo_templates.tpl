@@ -1,7 +1,3 @@
-{{ define "slack.alert.color" }}
-{{ if eq .Status "firing" }}#FF0000{{ else }}#36A64F{{ end }}
-{{ end }}
-
 {{ define "slack.alert.title" }}
 <<DuploPortalName>> - {{ .CommonLabels.cluster }} [{{ .Status | toUpper }}:{{ .Alerts | len }}]
 {{ end }}
