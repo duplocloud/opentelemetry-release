@@ -1,0 +1,985 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-apm
+    name: service-dashboard
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    description: Service Level Dashboard
+    editable: false
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links:
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: Service Logs
+          tooltip: ""
+          type: link
+          url: /a/grafana-lokiexplore-app/explore/service/xyz/logs?var-ds=duplo-logging&var-filters=service_name%7C%3D%7C${service}
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: Service Graph
+          tooltip: ""
+          type: link
+          url: /explore?schemaVersion=1&panes=%7B%22tte%22:%7B%22datasource%22:%22duplo-tracing%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22datasource%22:%7B%22type%22:%22tempo%22,%22uid%22:%22duplo-tracing%22%7D,%22queryType%22:%22serviceMap%22,%22limit%22:20,%22tableType%22:%22traces%22,%22serviceMapQuery%22:%22%7Bsource%3D%5C%22tempo%5C%22,k8s_cluster_name%3D%5C%22${cluster}%5C%22,k8s_namespace_name%3D%5C%22${namespace}%5C%22,service_name%3D%5C%22${service}%5C%22%7D%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D%7D
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: Back to Services Overview
+          tooltip: ""
+          type: link
+          url: /d/service-overview-dashboard/service-overview-dashboard
+        - asDropdown: true
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags:
+            - apm
+            - service
+            - tempo-mg
+          targetBlank: false
+          title: All Services | Dashboards
+          tooltip: ""
+          type: dashboards
+          url: ""
+    panels:
+        - gridPos:
+            h: 3
+            w: 24
+            x: 0
+            "y": 0
+          id: 9
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: "# \U0001F6A8 Investigate RED Metrics\n\nPlease drill down to a 3-hour time window.\nThen, open the \U0001F517 Rate, Errors & Duration metrics panel links to investigate further."
+            mode: markdown
+          pluginVersion: 11.5.2
+          type: text
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+                unit: reqps
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Rate
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: '#1bc2c9'
+                        mode: fixed
+          gridPos:
+            h: 9
+            w: 8
+            x: 0
+            "y": 3
+          id: 2
+          links:
+            - targetBlank: true
+              title: Drill Down To Traces
+              url: /a/grafana-exploretraces-app/explore?var-filters=resource.k8s.cluster.name%7C%3D%7C${cluster}&var-filters=resource.k8s.namespace.name%7C%3D%7C${namespace}&var-filters=resource.service.name%7C%3D%7C${service}&var-metric=rate&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (service)
+              hide: false
+              instant: true
+              interval: ""
+              legendFormat: Rate
+              range: true
+              refId: serviceRateQuery
+          title: Rate
+          transformations:
+            - id: merge
+              options: {}
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+                unit: percentunit
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Errors
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: dark-red
+                        mode: fixed
+          gridPos:
+            h: 9
+            w: 8
+            x: 8
+            "y": 3
+          id: 3
+          links:
+            - targetBlank: true
+              title: Drill Down To Traces
+              url: /a/grafana-exploretraces-app/explore?var-filters=resource.k8s.cluster.name%7C%3D%7C${cluster}&var-filters=resource.k8s.namespace.name%7C%3D%7C${namespace}&var-filters=resource.service.name%7C%3D%7C${service}&var-metric=errors&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: (sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", status_code="STATUS_CODE_ERROR"} [$__rate_interval])) by (service) OR sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (service) * 0) / sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (service)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: Errors
+              range: true
+              refId: serviceErrorsQuery
+          title: Errors
+          transformations:
+            - id: joinByField
+              options:
+                byField: Time
+                mode: outer
+            - id: merge
+              options: {}
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+                unit: s
+            overrides:
+                - matcher:
+                    id: byName
+                    options: P99
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: dark-green
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: P95
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: semi-dark-yellow
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: AVG
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: blue
+                        mode: fixed
+          gridPos:
+            h: 9
+            w: 8
+            x: 16
+            "y": 3
+          id: 4
+          links:
+            - targetBlank: true
+              title: Drill Down To Traces
+              url: /a/grafana-exploretraces-app/explore?var-filters=resource.k8s.cluster.name%7C%3D%7C${cluster}&var-filters=resource.k8s.namespace.name%7C%3D%7C${namespace}&var-filters=resource.service.name%7C%3D%7C${service}&var-metric=duration&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (le,service))
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: P99
+              range: true
+              refId: serviceP99Query
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (le,service))
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: P95
+              range: true
+              refId: serviceP95Query
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: sum(rate(traces_spanmetrics_latency_sum{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (service) / (sum(rate(traces_spanmetrics_latency_count{span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (service))
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: AVG
+              range: true
+              refId: serviceAvgQuery
+          title: Duration
+          transformations:
+            - id: joinByField
+              options:
+                byField: Time
+                mode: outer
+            - id: merge
+              options: {}
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: orange
+                          value: null
+                unit: short
+            overrides: []
+          gridPos:
+            h: 11
+            w: 12
+            x: 0
+            "y": 12
+          id: 5
+          options:
+            displayMode: gradient
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: false
+            maxVizHeight: 300
+            minVizHeight: 16
+            minVizWidth: 8
+            namePlacement: auto
+            orientation: vertical
+            reduceOptions:
+                calcs: []
+                fields: ""
+                values: false
+            showUnfilled: false
+            sizing: auto
+            valueMode: text
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: sum by (le) (increase(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__range]))
+              format: heatmap
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: '{{le}}'
+              range: true
+              refId: serviceRateQuery
+          title: Duration distribution
+          transformations:
+            - id: renameByRegex
+              options:
+                regex: (^\d+\.\d+$)
+                renamePattern: $1 s
+          type: bargauge
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: center
+                    cellOptions:
+                        type: auto
+                    filterable: false
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Duration, p95
+                  properties:
+                    - id: unit
+                      value: s
+                    - id: color
+                      value:
+                        fixedColor: orange
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Errors
+                  properties:
+                    - id: unit
+                      value: percentunit
+                    - id: color
+                      value:
+                        fixedColor: dark-red
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Rate
+                  properties:
+                    - id: unit
+                      value: reqps
+                    - id: color
+                      value:
+                        fixedColor: '#15a425'
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Operation
+                  properties:
+                    - id: custom.filterable
+                      value: true
+                    - id: links
+                      value:
+                        - targetBlank: false
+                          title: ""
+                          url: /d/service-span-dashboard/service-span-dashboard??var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-span=${__data.fields.Operation}
+          gridPos:
+            h: 11
+            w: 12
+            x: 12
+            "y": 12
+          id: 6
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                enablePagination: true
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            frameIndex: 2
+            showHeader: true
+            sortBy:
+                - desc: true
+                  displayName: Errors
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (le,span_name))
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: serviceOverviewOperationsDuration
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: (sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", status_code="STATUS_CODE_ERROR"} [$__rate_interval])) by (span_name) OR sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (span_name) * 0) / sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (span_name)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: serviceOverviewOperationsErrors
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$__rate_interval])) by (span_name)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: serviceOverviewOperationsRate
+          title: Operations
+          transformations:
+            - id: timeSeriesTable
+              options:
+                serviceOverviewOperationsDuration:
+                    timeField: Time
+                serviceOverviewOperationsDuration-Instant:
+                    timeField: Time
+                serviceOverviewOperationsErrors:
+                    stat: lastNotNull
+                    timeField: Time
+                serviceOverviewOperationsErrors-Instant:
+                    stat: lastNotNull
+                    timeField: Time
+                serviceOverviewOperationsRate:
+                    timeField: Time
+                serviceOverviewOperationsRate-Instant:
+                    timeField: Time
+            - id: joinByField
+              options:
+                byField: span_name
+                mode: outer
+            - id: organize
+              options:
+                excludeByName: {}
+                includeByName: {}
+                indexByName: {}
+                renameByName:
+                    'Trend #serviceOverviewOperationsDuration': Duration, p95
+                    'Trend #serviceOverviewOperationsErrors': Errors
+                    'Trend #serviceOverviewOperationsRate': Rate
+                    span_name: Operation
+          type: table
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: center
+                    cellOptions:
+                        type: auto
+                    filterable: false
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Duration, p95
+                  properties:
+                    - id: unit
+                      value: s
+                    - id: color
+                      value:
+                        fixedColor: orange
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Errors
+                  properties:
+                    - id: unit
+                      value: percentunit
+                    - id: color
+                      value:
+                        fixedColor: dark-red
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Rate
+                  properties:
+                    - id: unit
+                      value: reqps
+                    - id: color
+                      value:
+                        fixedColor: '#15a425'
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Name
+                  properties:
+                    - id: links
+                      value:
+                        - targetBlank: false
+                          title: ""
+                          url: /d/service-dashboard/service-dashboard?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}
+                    - id: custom.filterable
+                      value: true
+          gridPos:
+            h: 10
+            w: 12
+            x: 0
+            "y": 23
+          id: 7
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                enablePagination: true
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            frameIndex: 2
+            showHeader: true
+            sortBy: []
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: histogram_quantile(0.95, sum(rate(traces_service_graph_request_server_seconds_bucket{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", server=~"$service", client!="user"} [$__rate_interval])) by (le, client, k8s_cluster_name, k8s_namespace_name))
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: serviceOverviewInboundDuration
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: (sum(rate(traces_service_graph_request_failed_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", server=~"$service", client!="user"} [$__rate_interval])) by (client, k8s_cluster_name, k8s_namespace_name) OR sum(rate(traces_service_graph_request_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", server=~"$service", client!="user"} [$__rate_interval])) by (client, k8s_cluster_name, k8s_namespace_name) * 0) / sum(rate(traces_service_graph_request_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", server=~"$service",  client!="user"} [$__rate_interval])) by (client, k8s_cluster_name, k8s_namespace_name)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: serviceOverviewInboundErrors
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: sum(rate(traces_service_graph_request_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", server=~"$service", client!="user"} [$__rate_interval])) by (client, k8s_cluster_name, k8s_namespace_name)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: serviceOverviewInboundRate
+          title: Inbound
+          transformations:
+            - id: timeSeriesTable
+              options:
+                serviceOverviewInboundDuration:
+                    timeField: Time
+                serviceOverviewInboundErrors:
+                    timeField: Time
+                serviceOverviewInboundRate:
+                    timeField: Time
+            - id: joinByField
+              options:
+                byField: client
+                mode: outer
+            - id: organize
+              options:
+                excludeByName:
+                    k8s_cluster_name 1: true
+                    k8s_cluster_name 2: true
+                    k8s_cluster_name 3: true
+                    k8s_namespace_name 1: true
+                    k8s_namespace_name 2: true
+                    k8s_namespace_name 3: true
+                includeByName: {}
+                indexByName: {}
+                renameByName:
+                    'Trend #serviceOverviewInboundDuration': Duration, p95
+                    'Trend #serviceOverviewInboundErrors': Errors
+                    'Trend #serviceOverviewInboundRate': Rate
+                    client: Name
+          type: table
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: center
+                    cellOptions:
+                        type: auto
+                    filterable: false
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Duration, p95
+                  properties:
+                    - id: unit
+                      value: s
+                    - id: color
+                      value:
+                        fixedColor: orange
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Errors
+                  properties:
+                    - id: unit
+                      value: percentunit
+                    - id: color
+                      value:
+                        fixedColor: dark-red
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Rate
+                  properties:
+                    - id: unit
+                      value: reqps
+                    - id: color
+                      value:
+                        fixedColor: '#15a425'
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Name
+                  properties:
+                    - id: custom.filterable
+                      value: true
+                    - id: links
+                      value:
+                        - title: ""
+                          url: /d/service-dashboard/service-dashboard?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}
+          gridPos:
+            h: 10
+            w: 12
+            x: 12
+            "y": 23
+          id: 8
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                enablePagination: true
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            frameIndex: 2
+            showHeader: true
+            sortBy:
+                - desc: true
+                  displayName: Errors
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: histogram_quantile(0.95, sum(rate(traces_service_graph_request_server_seconds_bucket{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", client=~"$service"} [$__rate_interval])) by (le, server, k8s_cluster_name, k8s_namespace_name))
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: serviceOverviewOutboundDatabasesDuration
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: (sum(rate(traces_service_graph_request_failed_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", client=~"$service"} [$__rate_interval])) by (server, k8s_cluster_name, k8s_namespace_name) OR sum(rate(traces_service_graph_request_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", client=~"$service"} [$__rate_interval])) by (server, k8s_cluster_name, k8s_namespace_name) * 0) / sum(rate(traces_service_graph_request_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", client=~"$service"} [$__rate_interval])) by (server, k8s_cluster_name, k8s_namespace_name)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: serviceOverviewOutboundDatabasesErrors
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: sum(rate(traces_service_graph_request_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", client=~"$service"} [$__rate_interval])) by (server, k8s_cluster_name, k8s_namespace_name)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: serviceOverviewOutboundDatabasesRate
+          title: Outbound & databases
+          transformations:
+            - id: timeSeriesTable
+              options:
+                serviceOverviewInboundDuration:
+                    timeField: Time
+                serviceOverviewInboundErrors:
+                    timeField: Time
+                serviceOverviewInboundRate:
+                    timeField: Time
+                serviceOverviewOutboundDatabasesDuration:
+                    timeField: Time
+                serviceOverviewOutboundDatabasesErrors:
+                    timeField: Time
+                serviceOverviewOutboundDatabasesRate:
+                    timeField: Time
+            - id: joinByField
+              options:
+                byField: server
+                mode: outer
+            - id: organize
+              options:
+                excludeByName:
+                    k8s_cluster_name 1: true
+                    k8s_cluster_name 2: true
+                    k8s_cluster_name 3: true
+                    k8s_namespace_name 1: true
+                    k8s_namespace_name 2: true
+                    k8s_namespace_name 3: true
+                includeByName: {}
+                indexByName: {}
+                renameByName:
+                    'Trend #serviceOverviewInboundDuration': Duration, p95
+                    'Trend #serviceOverviewInboundErrors': Errors
+                    'Trend #serviceOverviewInboundRate': Rate
+                    'Trend #serviceOverviewOutboundDatabasesDuration': Duration, p95
+                    'Trend #serviceOverviewOutboundDatabasesErrors': Errors
+                    'Trend #serviceOverviewOutboundDatabasesRate': Rate
+                    client: Name
+                    server: Name
+          type: table
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - apm
+        - service
+        - tempo-mg
+        - main
+    templating:
+        list:
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(traces_spanmetrics_calls_total{source="tempo"},k8s_cluster_name)
+              label: Cluster
+              name: cluster
+              options: []
+              query:
+                qryType: 1
+                query: label_values(traces_spanmetrics_calls_total{source="tempo"},k8s_cluster_name)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name="$cluster"},k8s_namespace_name)
+              label: Namespace
+              name: namespace
+              options: []
+              query:
+                qryType: 1
+                query: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name="$cluster"},k8s_namespace_name)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name="$cluster", k8s_namespace_name="$namespace"},service)
+              description: ""
+              label: Service
+              name: service
+              options: []
+              query:
+                qryType: 1
+                query: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name="$cluster", k8s_namespace_name="$namespace"},service)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-5m
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: Service Dashboard
+    uid: service-dashboard
