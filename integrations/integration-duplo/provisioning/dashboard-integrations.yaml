@@ -1,0 +1,527 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: duplo-common
+    name: integrations
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: false
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - description: ""
+          gridPos:
+            h: 4
+            w: 19
+            x: 0
+            "y": 0
+          id: 6
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: "<div style=\"font-family: Arial, sans-serif; margin: 20px; display: flex; align-items: center; justify-content: center;\">\r\n    <!-- Heading -->\r\n    <h1 style=\"margin: 0; font-size: 3em; font-weight: bold; color: rgb(0, 173, 181);\">\r\n        Integrations Dashboard\r\n    </h1>\r\n</div>"
+            mode: html
+          pluginVersion: 11.5.2
+          transparent: true
+          type: text
+        - datasource:
+            name: -- Grafana --
+            type: datasource
+            uid: grafana
+          description: ""
+          gridPos:
+            h: 4
+            w: 5
+            x: 19
+            "y": 0
+          id: 13
+          options:
+            buttonGroup:
+                orientation: center
+                size: lg
+            confirmModal:
+                body: Are you sure, you want to enable/upgrade Integration ?
+                cancel: Cancel
+                columns:
+                    include: []
+                    name: Name
+                    newValue: New Value
+                    oldValue: name
+                confirm: Confirm
+                elementDisplayMode: all
+                title: Add New Integration
+            elementValueChanged: ""
+            elements:
+                - hidden: true
+                  id: name
+                  labelWidth: 20
+                  section: ""
+                  title: Integration Name
+                  tooltip: ""
+                  type: string
+                  uid: d000d53c-f511-4fb0-94cc-1cf4840f7101
+                  unit: ""
+                  value: ""
+            initial:
+                code: |-
+                    if (context.panel.response?.error) {
+                      context.grafana.notifyError(['An error occurred. Please check the form details.']);
+                    } else {
+                      context.grafana.notifySuccess(['Update', 'Values fetched successfully.']);
+                      context.panel.enableSubmit();
+                    }
+                contentType: application/json
+                datasource: duplo-automation
+                getPayload: ""
+                highlight: false
+                highlightColor: green
+                method: datasource
+                payload:
+                    columns: []
+                    computed_columns: []
+                    filters: []
+                    format: as-is
+                    global_query_id: ""
+                    parser: backend
+                    refId: ""
+                    root_selector: integrations
+                    source: url
+                    type: json
+                    uql: parse-json
+                    url: /list-integrations
+                    url_options:
+                        body_content_type: application/json
+                        body_type: raw
+                        data: "{\r\n    \"integration_name\": \"$enable_integration\",\r\n    \"context_name\": \"duplo-otel\"\r\n}"
+                        method: GET
+            layout:
+                orientation: horizontal
+                padding: 20
+                sectionVariant: default
+                variant: single
+            reset:
+                backgroundColor: purple
+                foregroundColor: yellow
+                icon: process
+                text: New Integration
+                variant: hidden
+            resetAction:
+                code: ""
+                confirm: false
+                datasource: duplo-automation
+                getPayload: ""
+                mode: initial
+                payload:
+                    columns: []
+                    filters: []
+                    format: table
+                    global_query_id: ""
+                    parser: backend
+                    refId: ""
+                    root_selector: ""
+                    source: url
+                    type: json
+                    url: ""
+                    url_options:
+                        body_content_type: text/plain
+                        body_type: none
+                        data: ""
+                        method: POST
+            saveDefault:
+                icon: save
+                text: Save Default
+                variant: hidden
+            submit:
+                backgroundColor: purple
+                foregroundColor: yellow
+                icon: panel-add
+                text: Enable/Upgrade Integration
+                variant: destructive
+            sync: true
+            update:
+                code: "console.log(context.panel.response);\r\nif (context.panel.response?.error) {\r\n  context.grafana.notifyError(['Integration Update', 'An error occurred while enabling the integration.']);\r\n  context.grafana.refresh();\r\n} else {\r\n  context.grafana.notifySuccess(['Integration Update', 'Integration enabled successfully.']);\r\n}"
+                confirm: true
+                contentType: application/json
+                datasource: duplo-automation
+                getPayload: ""
+                header: []
+                method: datasource
+                payload:
+                    columns: []
+                    filters: []
+                    format: as-is
+                    global_query_id: ""
+                    parser: backend
+                    refId: ""
+                    root_selector: ""
+                    source: url
+                    type: json
+                    url: /enable-integration
+                    url_options:
+                        body_content_type: application/json
+                        body_form: []
+                        body_type: raw
+                        data: "{\r\n    \"integration_name\": \"$enable_integration\",\r\n    \"context_name\": \"duplo-otel\"\r\n}"
+                        method: POST
+                        params: []
+                payloadMode: custom
+            updateEnabled: manual
+          pluginVersion: 5.1.0
+          targets:
+            - datasource:
+                type: datasource
+                uid: grafana
+              queryType: randomWalk
+              refId: A
+          title: Enable/Upgrade Integration - $enable_integration
+          transparent: true
+          type: volkovlabs-form-panel
+        - collapsed: false
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 4
+          id: 11
+          panels: []
+          title: Enabled Integrations
+          type: row
+        - datasource:
+            type: yesoreyeram-infinity-datasource
+            uid: duplo-automation
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: center
+                    cellOptions:
+                        type: auto
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Action
+                  properties:
+                    - id: mappings
+                      value:
+                        - options:
+                            "0":
+                                index: 0
+                                text: Upgrade
+                          type: value
+                    - id: custom.width
+                      value: 220
+                    - id: links
+                      value:
+                        - title: 'Upgrade Integration: This will overwrite any manual changes.'
+                          url: /d/integrations/integrations?var-enable_integration=${__data.fields.Name}
+                - matcher:
+                    id: byName
+                    options: Dashboards
+                  properties:
+                    - id: mappings
+                      value:
+                        - options:
+                            "0":
+                                index: 0
+                                text: View Dashboards
+                          type: value
+                    - id: links
+                      value:
+                        - targetBlank: true
+                          title: ""
+                          url: /dashboards/f/integration-${__data.fields["Enabled Integrations"]}
+                    - id: custom.width
+                      value: 220
+                - matcher:
+                    id: byName
+                    options: Alerts
+                  properties:
+                    - id: mappings
+                      value:
+                        - options:
+                            "0":
+                                index: 0
+                                text: View Alerts
+                          type: value
+                    - id: links
+                      value:
+                        - targetBlank: true
+                          title: ""
+                          url: /alerting/list?search=namespace:integrations-${__data.fields["Enabled Integrations"]}
+                    - id: custom.width
+                      value: 220
+                - matcher:
+                    id: byName
+                    options: Name
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: dark-green
+                        mode: fixed
+                    - id: custom.cellOptions
+                      value:
+                        type: color-text
+                    - id: custom.align
+                      value: auto
+          gridPos:
+            h: 11
+            w: 24
+            x: 0
+            "y": 5
+          id: 9
+          options:
+            cellHeight: md
+            footer:
+                countRows: false
+                enablePagination: true
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            frameIndex: 1
+            showHeader: true
+            sortBy: []
+          pluginVersion: 11.5.2
+          targets:
+            - columns: []
+              datasource:
+                type: yesoreyeram-infinity-datasource
+                uid: duplo-automation
+              filters: []
+              format: table
+              global_query_id: ""
+              hide: false
+              parser: backend
+              refId: Enabled Integrations
+              root_selector: integrations
+              source: url
+              type: json
+              url: /list-integrations?installed=true
+              url_options:
+                data: ""
+                method: GET
+          transformations:
+            - id: calculateField
+              options:
+                alias: Action
+                binary:
+                    left:
+                        fixed: "0"
+                    right:
+                        fixed: "0"
+                mode: binary
+                reduce:
+                    reducer: sum
+                replaceFields: false
+            - id: calculateField
+              options:
+                alias: Dashboards
+                binary:
+                    left:
+                        fixed: "0"
+                    right:
+                        fixed: "0"
+                mode: binary
+                reduce:
+                    reducer: sum
+            - id: calculateField
+              options:
+                alias: Alerts
+                binary:
+                    left:
+                        fixed: "0"
+                    right:
+                        fixed: "0"
+                mode: binary
+                reduce:
+                    reducer: sum
+            - id: organize
+              options:
+                excludeByName: {}
+                includeByName: {}
+                indexByName: {}
+                renameByName:
+                    Enabled Integrations: Name
+          type: table
+        - collapsed: false
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 16
+          id: 12
+          panels: []
+          title: Add Integrations
+          type: row
+        - datasource:
+            type: yesoreyeram-infinity-datasource
+            uid: duplo-automation
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: center
+                    cellOptions:
+                        type: auto
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Action
+                  properties:
+                    - id: mappings
+                      value:
+                        - options:
+                            "0":
+                                index: 0
+                                text: Enable
+                          type: value
+                    - id: custom.width
+                      value: 220
+                    - id: links
+                      value:
+                        - title: 'Enable Integration: This will overwrite any manual changes.'
+                          url: /d/integrations/integrations?var-enable_integration=${__data.fields.Name}
+                - matcher:
+                    id: byName
+                    options: Name
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: dark-green
+                        mode: fixed
+                    - id: custom.cellOptions
+                      value:
+                        type: color-text
+                    - id: custom.align
+                      value: auto
+          gridPos:
+            h: 11
+            w: 24
+            x: 0
+            "y": 17
+          id: 10
+          options:
+            cellHeight: md
+            footer:
+                countRows: false
+                enablePagination: true
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            frameIndex: 1
+            showHeader: true
+            sortBy: []
+          pluginVersion: 11.5.2
+          targets:
+            - columns: []
+              datasource:
+                type: yesoreyeram-infinity-datasource
+                uid: duplo-automation
+              filters: []
+              format: table
+              global_query_id: ""
+              hide: false
+              parser: backend
+              refId: Add Integrations
+              root_selector: integrations
+              source: url
+              type: json
+              url: /list-integrations?installed=false
+              url_options:
+                data: ""
+                method: GET
+          transformations:
+            - id: calculateField
+              options:
+                alias: Action
+                binary:
+                    left:
+                        fixed: "0"
+                    right:
+                        fixed: "0"
+                mode: binary
+                reduce:
+                    reducer: sum
+                replaceFields: false
+            - id: organize
+              options:
+                excludeByName: {}
+                includeByName: {}
+                indexByName: {}
+                renameByName:
+                    Add Integrations: Name
+                    Enabled Integrations: Name
+          type: table
+    refresh: ""
+    schemaVersion: 40
+    tags: []
+    templating:
+        list:
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: yesoreyeram-infinity-datasource
+                uid: duplo-automation
+              definition: ""
+              label: Integration Name
+              name: enable_integration
+              options: []
+              query:
+                infinityQuery:
+                    columns: []
+                    filters: []
+                    format: table
+                    parser: backend
+                    refId: variable
+                    root_selector: integrations
+                    source: url
+                    type: json
+                    url: /list-integrations
+                    url_options:
+                        data: ""
+                        method: GET
+                query: ""
+                queryType: infinity
+              refresh: 1
+              regex: ^(?!.*duplo).*
+              type: query
+    time:
+        from: now-5m
+        to: now
+    timepicker:
+        hidden: true
+        refresh_intervals:
+            - 5s
+    timezone: browser
+    title: Integrations
+    uid: integrations
