@@ -24,3 +24,18 @@ spec:
           - =~
           - .*otel.*
       receiver: duplo-slack
+    - object_matchers:
+        - - pod
+          - =~
+          - .*monitoring-prometheus-node-exporter.*
+      receiver: duplo-slack
+    - object_matchers:
+        - - pod
+          - =~
+          - .*monitoring-alloy-.*
+      receiver: duplo-slack
+    - object_matchers:
+        - - pod
+          - =~
+          - .*monitoring-beyla.*
+      receiver: duplo-slack
