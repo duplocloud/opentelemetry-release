@@ -119,7 +119,7 @@ spec:
           links:
             - targetBlank: true
               title: Drill Down To Traces
-              url: /a/grafana-exploretraces-app/explore?var-filters=resource.k8s.cluster.name%7C%3D%7C${cluster}&var-filters=resource.k8s.namespace.name%7C%3D%7C${namespace}&var-filters=resource.service.name%7C%3D%7C${service}&var-metric=rate&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing
+              url: /a/grafana-exploretraces-app/explore?var-filters=resource.k8s.cluster.name%7C%3D%7C${cluster}&var-filters=resource.k8s.namespace.name%7C%3D%7C${namespace}&var-filters=resource.service.name%7C%3D%7C${service}&var-filters=span:name%7C%3D%7C${span}&var-metric=rate&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing
           options:
             legend:
                 calcs: []
@@ -209,7 +209,7 @@ spec:
           links:
             - targetBlank: true
               title: Drill Down To Traces
-              url: /a/grafana-exploretraces-app/explore?var-filters=resource.k8s.cluster.name%7C%3D%7C${cluster}&var-filters=resource.k8s.namespace.name%7C%3D%7C${namespace}&var-filters=resource.service.name%7C%3D%7C${service}&var-metric=errors&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing
+              url: /a/grafana-exploretraces-app/explore?var-filters=resource.k8s.cluster.name%7C%3D%7C${cluster}&var-filters=resource.k8s.namespace.name%7C%3D%7C${namespace}&var-filters=resource.service.name%7C%3D%7C${service}&var-filters=span:name%7C%3D%7C${span}&var-metric=errors&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing
           options:
             legend:
                 calcs: []
@@ -319,7 +319,7 @@ spec:
           links:
             - targetBlank: true
               title: Drill Down To Traces
-              url: /a/grafana-exploretraces-app/explore?var-filters=resource.k8s.cluster.name%7C%3D%7C${cluster}&var-filters=resource.k8s.namespace.name%7C%3D%7C${namespace}&var-filters=resource.service.name%7C%3D%7C${service}&var-metric=duration&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing
+              url: /a/grafana-exploretraces-app/explore?var-filters=resource.k8s.cluster.name%7C%3D%7C${cluster}&var-filters=resource.k8s.namespace.name%7C%3D%7C${namespace}&var-filters=resource.service.name%7C%3D%7C${service}&var-filters=span:name%7C%3D%7C${span}&var-metric=duration&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing
           options:
             legend:
                 calcs: []
