@@ -39,3 +39,18 @@ spec:
           - =~
           - .*monitoring-beyla.*
       receiver: duplo-slack
+    - object_matchers:
+        - - daemonset
+          - =~
+          - .*monitoring-prometheus-node-exporter.*
+      receiver: duplo-slack
+    - object_matchers:
+        - - daemonset
+          - =~
+          - .*monitoring-alloy-.*
+      receiver: duplo-slack
+    - object_matchers:
+        - - daemonset
+          - =~
+          - .*monitoring-beyla.*
+      receiver: duplo-slack
