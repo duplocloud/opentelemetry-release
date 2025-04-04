@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-frontend
+spec:
+    title: integration-frontend
+    uid: integration-frontend
