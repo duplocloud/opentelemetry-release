@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: otel-observability-collector
+  namespace: duploservices-otel-o11y
+spec:
+  schedule: "*/5 * * * *"  # Run every 5 minutes
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: otel-collector
+            image: alpine/git:latest
+            command:
+            - /bin/sh  # Alpine uses sh instead of bash
+            - /scripts/entrypoint.sh
+            env:
+            - name: PROMETHEUS_URL
+              value: "http://duplo-metrics-nginx:80/prometheus"
+            - name: LOKI_URL
+              value: "http://duplo-logging-gateway:80"
+            - name: CLUSTER
+              value: "duploinfra-o11y"
+            - name: NAMESPACE
+              value: "duploservices-otel-o11y"
+            - name: CUSTOMER
+              value: "test24"
+            - name: ENVIRONMENT
+              value: "nonprod"
+            - name: DUPLO_URL
+              value: "https://test24.duplocloud.com"
+            volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+          volumes:
+          - name: scripts
+            configMap:
+              name: otel-scripts
+              defaultMode: 0755
+          restartPolicy: OnFailure 
