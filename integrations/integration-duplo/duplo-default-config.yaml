@@ -15,6 +15,7 @@ route:
         - namespace=~".*otel.*"
         - severity!="info"
         - daemonset!~".*"
+        - alertname!="KubeHpaMaxedOut"
 receivers:
   - name: duplo-slack-notifications
     slack_configs:
