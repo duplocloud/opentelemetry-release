@@ -23,6 +23,16 @@ spec:
               value: "http://duplo-metrics-nginx:80/prometheus"
             - name: LOKI_URL
               value: "http://duplo-logging-gateway:80"
+            - name: LOKI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: loki-credentials
+                  key: username
+            - name: LOKI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: loki-credentials
+                  key: password
             - name: CLUSTER
               value: "duploinfra-o11y"
             - name: NAMESPACE

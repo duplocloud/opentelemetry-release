@@ -116,6 +116,10 @@ def send_to_loki(loki_url, images, grafana_usage, labels):
     logger.info("Preparing data to send to Loki")
     current_time = int(time.time() * 1000000000)  # Current time in nanoseconds
     
+    # Get Loki credentials from environment
+    loki_username = os.getenv('LOKI_USERNAME')
+    loki_password = os.getenv('LOKI_PASSWORD')
+    
     # Prepare the payload with additional labels
     payload = {
         "streams": [
@@ -172,10 +176,19 @@ def send_to_loki(loki_url, images, grafana_usage, labels):
 
     try:
         logger.info("Sending data to Loki")
+        headers = {'Content-Type': 'application/json'}
+        
+        # Add authentication if credentials are provided
+        auth = None
+        if loki_username and loki_password:
+            auth = (loki_username, loki_password)
+            logger.debug("Using basic authentication for Loki")
+        
         response = requests.post(
             f"{loki_url}/loki/api/v1/push",
             json=payload,
-            headers={'Content-Type': 'application/json'}
+            headers=headers,
+            auth=auth
         )
         response.raise_for_status()
         logger.info("Successfully sent monitoring data to Loki")
@@ -200,7 +213,11 @@ def main():
     }
     
     # Validate required environment variables
-    required_vars = ['PROMETHEUS_URL', 'LOKI_URL', 'CLUSTER', 'NAMESPACE', 'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL']
+    required_vars = [
+        'PROMETHEUS_URL', 'LOKI_URL', 'CLUSTER', 'NAMESPACE', 
+        'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL', 
+        'LOKI_USERNAME', 'LOKI_PASSWORD'
+    ]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     
     if missing_vars:
