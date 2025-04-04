@@ -16,7 +16,6 @@ route:
         - severity!="info"
         - daemonset!~".*"
         - alertname!="KubeHpaMaxedOut"
-        - pod!~"duplo-monitoring-.*"
         - pod!~"duplo-monitoring-beyla-.*"
         - pod!~"duplo-monitoring-prometheus-.*"
         - pod!~"duplo-monitoring-alloy-profiles-.*"
