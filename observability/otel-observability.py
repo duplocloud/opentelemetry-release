@@ -341,9 +341,8 @@ def main() -> None:
     
     # PromQL query for all components
     query = f'''
-    count by(container, image, pod) (
+    count by(cluster, namespace, container, image, pod) (
       kube_pod_container_info{{
-        namespace="{labels['namespace']}",
         container=~"loki|ingester|distributor|compactor|querier|query-frontend|ruler|store-gateway|pyroscope|beyla|node-exporter|alloy|kube-state-metrics",
         pod=~"duplo-(logging|metrics|tracing|profiling)-.+|duplo-monitoring-.+"
       }}
