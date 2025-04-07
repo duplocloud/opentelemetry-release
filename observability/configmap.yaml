@@ -22,8 +22,6 @@ data:
         git pull
     else
         git clone $REPO_URL opentelemetry-release
-        git checkout observability
-        git pull
         cd opentelemetry-release
     fi
 

@@ -4,7 +4,7 @@ metadata:
   name: otel-observability-collector
   namespace: duploservices-otel-o11y
 spec:
-  schedule: "*/5 * * * *"  # Run every 5 minutes
+  schedule: "0 0 * * *"  # Run every 24 hours at midnight
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid
