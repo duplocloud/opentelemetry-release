@@ -49,7 +49,7 @@ def query_prometheus(prometheus_url: str, query: str) -> Optional[Dict[str, Any]
         return None
 
 
-def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[Dict[str, Dict[str, Dict[str, str]]]]:
+def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[Dict[str, Dict[str, Dict[str, Dict[str, str]]]]]:
     """
     Extract image information for monitoring components and daemonsets.
     
@@ -122,141 +122,61 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
         return None
 
 
-def query_grafana_usage(prometheus_url: str) -> Optional[Dict[str, int]]:
-    """
-    Query Grafana datasource usage from Prometheus.
-    
-    Args:
-        prometheus_url: URL of the Prometheus instance
-        
-    Returns:
-        Dictionary with datasource names as keys and usage counts as values, or None if query fails
-    """
-    query = 'sum by (datasource) (increase(grafana_datasource_request_duration_seconds_count[24h]))'
-    logger.info("Querying Grafana datasource usage")
-    
-    # Use the query_prometheus function instead of duplicating the logic
-    data = query_prometheus(prometheus_url, query)
-    if not data:
-        return None
-    
-    # Extract datasource usage data
-    usage_data = {}
-    try:
-        if 'data' in data and 'result' in data['data']:
-            for result in data['data']['result']:
-                datasource = result['metric']['datasource']
-                value = float(result['value'][1])  # Get the instant value
-                usage_data[datasource] = round(value)  # Round to nearest integer
-                logger.debug(f"Datasource {datasource} usage: {usage_data[datasource]}")
-        
-        logger.info(f"Successfully collected usage data for {len(usage_data)} datasources")
-        return usage_data
-    except (KeyError, IndexError, ValueError) as e:
-        logger.error(f"Error processing Grafana usage data: {e}")
-        return None
-
-
 def send_to_loki(
-    loki_url: str, 
-    images: Dict[str, Dict[str, Dict[str, Dict[str, str]]]], 
-    grafana_usage: Dict[str, int], 
-    labels: Dict[str, str]
+    job: str,
+    source: str,
+    type: str,
+    values: List[List[str]]
 ) -> None:
     """
-    Send data to Loki in JSON format with additional labels.
+    Send data to Loki in JSON format with stream labels.
     
     Args:
-        loki_url: URL of the Loki instance
-        images: Dictionary containing image information for different services, grouped by cluster and namespace
-        grafana_usage: Dictionary containing Grafana datasource usage information
-        labels: Dictionary containing additional labels to add to the Loki streams
+        job: Job name for the stream
+        source: Source of the data
+        type: Type of data
+        values: List of [timestamp, value] pairs to send
     """
-    logger.info("Preparing data to send to Loki")
-    current_time = int(time.time() * 1000000000)  # Current time in nanoseconds
+    logger.info(f"Sending {type} data to Loki")
     
-    # Get Loki credentials from environment
+    # Get Loki credentials and URL from environment
+    loki_url = os.getenv('LOKI_URL')
     loki_username = os.getenv('LOKI_USERNAME')
     loki_password = os.getenv('LOKI_PASSWORD')
     
-    # Prepare the payload with additional labels
-    streams = []
+    # Get static labels from environment variables
+    cluster = os.getenv('CLUSTER', '')
+    namespace = os.getenv('NAMESPACE', '')
+    customer = os.getenv('CUSTOMER', '')
+    environment = os.getenv('ENVIRONMENT', '')
+    duplo_url = os.getenv('DUPLO_URL', '')
     
-    # Add streams for each cluster and namespace
-    for cluster, namespaces in images.items():
-        for namespace, categories in namespaces.items():
-            # Add main stream
-            if categories['main']:
-                streams.append({
-                    "stream": {
-                        "job": "monitoring_images",
-                        "source": "prometheus",
-                        "type": "main",
-                        "cluster": cluster,
-                        "namespace": namespace,
-                        "customer": labels['customer'],
-                        "environment": labels['environment'],
-                        "duplo_url": labels['duplo_url']
-                    },
-                    "values": [
-                        [str(current_time), json.dumps({
-                            "metadata": {
-                                "cluster": cluster,
-                                "namespace": namespace
-                            },
-                            "spec": categories['main']
-                        })]
-                    ]
-                })
-            
-            # Add monitoring stream
-            if categories['monitoring']:
-                streams.append({
-                    "stream": {
-                        "job": "monitoring_images",
-                        "source": "prometheus",
-                        "type": "monitoring",
-                        "cluster": cluster,
-                        "namespace": namespace,
-                        "customer": labels['customer'],
-                        "environment": labels['environment'],
-                        "duplo_url": labels['duplo_url']
-                    },
-                    "values": [
-                        [str(current_time), json.dumps({
-                            "metadata": {
-                                "cluster": cluster,
-                                "namespace": namespace
-                            },
-                            "spec": categories['monitoring']
-                        })]
-                    ]
-                })
+    # Prepare the stream with labels
+    stream = {
+        "job": job,
+        "source": source,
+        "type": type,
+        "cluster": cluster,
+        "namespace": namespace,
+        "customer": customer,
+        "environment": environment,
+        "duplo_url": duplo_url
+    }
     
-    # Add Grafana usage stream
-    streams.append({
-        "stream": {
-            "job": "grafana_usage",
-            "source": "prometheus",
-            "type": "datasource_usage",
-            "cluster": labels['cluster'],
-            "namespace": labels['namespace'],
-            "customer": labels['customer'],
-            "environment": labels['environment'],
-            "duplo_url": labels['duplo_url']
-        },
-        "values": [
-            [str(current_time), json.dumps(grafana_usage)]
+    # Create the payload
+    payload = {
+        "streams": [
+            {
+                "stream": stream,
+                "values": values
+            }
         ]
-    })
+    }
     
-    payload = {"streams": streams}
-
     # Log the payload for debugging
     logger.debug(f"Loki payload: {json.dumps(payload, indent=2)}")
 
     try:
-        logger.info("Sending data to Loki")
         headers = {'Content-Type': 'application/json'}
         
         # Add authentication if credentials are provided
@@ -272,10 +192,82 @@ def send_to_loki(
             auth=auth
         )
         response.raise_for_status()
-        logger.info("Successfully sent monitoring data to Loki")
+        logger.info(f"Successfully sent {type} data to Loki")
         logger.debug(f"Loki response status code: {response.status_code}")
     except requests.exceptions.RequestException as e:
         logger.error(f"Error sending data to Loki: {e}")
+
+
+def format_and_send_image_data(images: Dict[str, Dict[str, Dict[str, Dict[str, str]]]], labels: Dict[str, str]) -> None:
+    """
+    Format and send image data to Loki.
+    
+    Args:
+        images: Dictionary containing image information for different services
+        labels: Dictionary containing additional labels
+    """
+    current_time = int(time.time() * 1000000000)  # Current time in nanoseconds
+    
+    # Process each cluster and namespace
+    for cluster, namespaces in images.items():
+        for namespace, categories in namespaces.items():
+            # Process main images
+            if categories['main']:
+                values = [
+                    [str(current_time), json.dumps({
+                        "metadata": {
+                            "cluster": cluster,
+                            "namespace": namespace
+                        },
+                        "spec": categories['main']
+                    })]
+                ]
+                send_to_loki(
+                    "monitoring_images",
+                    "prometheus",
+                    "main",
+                    values
+                )
+            
+            # Process monitoring images
+            if categories['monitoring']:
+                values = [
+                    [str(current_time), json.dumps({
+                        "metadata": {
+                            "cluster": cluster,
+                            "namespace": namespace
+                        },
+                        "spec": categories['monitoring']
+                    })]
+                ]
+                send_to_loki(
+                    "monitoring_images",
+                    "prometheus",
+                    "monitoring",
+                    values
+                )
+
+
+def format_and_send_grafana_usage_data(grafana_usage: Dict[str, int], labels: Dict[str, str]) -> None:
+    """
+    Format and send Grafana usage data to Loki.
+    
+    Args:
+        grafana_usage: Dictionary containing Grafana datasource usage information
+        labels: Dictionary containing additional labels
+    """
+    current_time = int(time.time() * 1000000000)  # Current time in nanoseconds
+    
+    values = [
+        [str(current_time), json.dumps(grafana_usage)]
+    ]
+    
+    send_to_loki(
+        "grafana_usage",
+        "prometheus",
+        "datasource_usage",
+        values
+    )
 
 
 def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
@@ -315,28 +307,18 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     return True, labels, []
 
 
-def main() -> None:
+def collect_image_versions(prometheus_url: str) -> Optional[Dict[str, Dict[str, Dict[str, Dict[str, str]]]]]:
     """
-    Main function that orchestrates the monitoring data collection process.
+    Collect image versions for monitoring components from Prometheus.
     
-    This function:
-    1. Retrieves configuration from environment variables
-    2. Validates required environment variables
-    3. Queries Prometheus for container images
-    4. Extracts monitoring images
-    5. Queries Grafana usage
-    6. Sends all data to Loki
+    Args:
+        prometheus_url: URL of the Prometheus instance
+        
+    Returns:
+        Dictionary with image information categorized by cluster and namespace, then by 'main' and 'monitoring',
+        or None if collection fails
     """
-    logger.info("Starting monitoring data collection")
-    
-    # Validate environment variables
-    is_valid, labels, missing_vars = validate_environment_variables()
-    if not is_valid:
-        return
-    
-    # Get configuration from environment
-    prometheus_url = os.getenv('PROMETHEUS_URL')
-    loki_url = os.getenv('LOKI_URL')
+    logger.info("Collecting image versions from Prometheus")
     
     # PromQL query for all components
     query = f'''
@@ -351,21 +333,120 @@ def main() -> None:
     # Query Prometheus for container images
     prometheus_response = query_prometheus(prometheus_url, query)
     if not prometheus_response:
-        return
+        logger.error("Failed to query Prometheus for image versions")
+        return None
     
     # Extract monitoring images
     images = extract_monitoring_images(prometheus_response)
     if not images:
+        logger.error("Failed to extract monitoring images from Prometheus response")
+        return None
+    
+    logger.info("Successfully collected image versions")
+    return images
+
+
+def collect_grafana_usage(prometheus_url: str) -> Dict[str, int]:
+    """
+    Collect Grafana datasource usage information from Prometheus.
+    
+    Args:
+        prometheus_url: URL of the Prometheus instance
+        
+    Returns:
+        Dictionary with datasource names as keys and usage counts as values
+    """
+    logger.info("Collecting Grafana usage data")
+    
+    # PromQL query for Grafana datasource usage
+    query = 'sum by (datasource) (increase(grafana_datasource_request_duration_seconds_count[24h]))'
+    
+    # Query Prometheus for Grafana usage
+    data = query_prometheus(prometheus_url, query)
+    if not data:
+        logger.warning("Could not fetch Grafana usage data from Prometheus")
+        return {}
+    
+    # Extract datasource usage data
+    usage_data = {}
+    try:
+        if 'data' in data and 'result' in data['data']:
+            for result in data['data']['result']:
+                datasource = result['metric']['datasource']
+                value = float(result['value'][1])  # Get the instant value
+                usage_data[datasource] = round(value)  # Round to nearest integer
+                logger.debug(f"Datasource {datasource} usage: {usage_data[datasource]}")
+        
+        logger.info(f"Successfully collected usage data for {len(usage_data)} datasources")
+        return usage_data
+    except (KeyError, IndexError, ValueError) as e:
+        logger.error(f"Error processing Grafana usage data: {e}")
+        return {}
+
+
+def collect_and_send_version_data(prometheus_url: str, labels: Dict[str, str]) -> None:
+    """
+    Collect image versions from Prometheus and send them to Loki.
+    
+    Args:
+        prometheus_url: URL of the Prometheus instance
+        labels: Dictionary containing additional labels
+    """
+    logger.info("Collecting and sending image data")
+    
+    # Collect image versions
+    images = collect_image_versions(prometheus_url)
+    if not images:
+        logger.error("Failed to collect image versions")
         return
     
-    # Query Grafana usage
-    grafana_usage = query_grafana_usage(prometheus_url)
-    if not grafana_usage:
-        logger.warning("Could not fetch Grafana usage data")
-        grafana_usage = {}
+    # Format and send image data
+    format_and_send_image_data(images, labels)
+    logger.info("Completed image data collection and sending")
+
+
+def collect_and_send_grafana_usage(prometheus_url: str, labels: Dict[str, str]) -> None:
+    """
+    Collect Grafana usage data from Prometheus and send it to Loki.
     
-    # Send to Loki with additional labels
-    send_to_loki(loki_url, images, grafana_usage, labels)
+    Args:
+        prometheus_url: URL of the Prometheus instance
+        labels: Dictionary containing additional labels
+    """
+    logger.info("Collecting and sending Grafana usage data")
+    
+    # Collect Grafana usage
+    grafana_usage = collect_grafana_usage(prometheus_url)
+    
+    # Format and send Grafana usage data
+    format_and_send_grafana_usage_data(grafana_usage, labels)
+    logger.info("Completed Grafana usage data collection and sending")
+
+
+def main() -> None:
+    """
+    Main function that orchestrates the monitoring data collection process.
+    
+    This function:
+    1. Retrieves configuration from environment variables
+    2. Validates required environment variables
+    3. Collects and sends image data
+    4. Collects and sends Grafana usage data
+    """
+    logger.info("Starting monitoring data collection")
+    
+    # Validate environment variables
+    is_valid, labels, missing_vars = validate_environment_variables()
+    if not is_valid:
+        return
+    
+    # Get configuration from environment
+    prometheus_url = os.getenv('PROMETHEUS_URL')
+    
+    # Collect and send data to Loki
+    collect_and_send_version_data(prometheus_url, labels)
+    collect_and_send_grafana_usage(prometheus_url, labels)
+    
     logger.info("Completed monitoring data collection")
 
 
