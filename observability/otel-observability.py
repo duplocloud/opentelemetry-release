@@ -150,6 +150,7 @@ def send_to_loki(
     customer = os.getenv('CUSTOMER', '')
     environment = os.getenv('ENVIRONMENT', '')
     duplo_url = os.getenv('DUPLO_URL', '')
+    job_version = os.getenv('JOB_VERSION', '')
     
     # Prepare the stream with labels
     stream = {
@@ -160,7 +161,8 @@ def send_to_loki(
         "namespace": namespace,
         "customer": customer,
         "environment": environment,
-        "duplo_url": duplo_url
+        "duplo_url": duplo_url,
+        "job_version": job_version
     }
     
     # Create the payload
@@ -290,7 +292,8 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
         'namespace': os.getenv('NAMESPACE', ''),
         'customer': os.getenv('CUSTOMER', ''),
         'environment': os.getenv('ENVIRONMENT', ''),
-        'duplo_url': os.getenv('DUPLO_URL', '')
+        'duplo_url': os.getenv('DUPLO_URL', ''),
+        'job_version': os.getenv('JOB_VERSION', '')
     }
     
     # Validate required environment variables
