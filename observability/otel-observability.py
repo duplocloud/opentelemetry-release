@@ -304,8 +304,7 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     # Validate required environment variables
     required_vars = [
         'PROMETHEUS_URL', 'LOKI_URL', 'CLUSTER', 'NAMESPACE', 
-        'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL', 
-        'LOKI_USERNAME', 'LOKI_PASSWORD'
+        'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL'
     ]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     
