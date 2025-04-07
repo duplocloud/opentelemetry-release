@@ -49,7 +49,7 @@ def query_prometheus(prometheus_url: str, query: str) -> Optional[Dict[str, Any]
         return None
 
 
-def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[Dict[str, Dict[str, str]]]:
+def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[Dict[str, Dict[str, Dict[str, str]]]]:
     """
     Extract image information for monitoring components and daemonsets.
     
@@ -57,19 +57,27 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
         prometheus_response: Response from Prometheus containing container information
         
     Returns:
-        Dictionary with image information categorized by 'main' and 'monitoring' or None if extraction fails
+        Dictionary with image information categorized by cluster and namespace, then by 'main' and 'monitoring'
     """
     try:
         logger.info("Extracting monitoring images from Prometheus response")
-        images = {
-            'main': {},       # For non-monitoring components
-            'monitoring': {}  # For all duplo-monitoring components
-        }
+        images = {}
         
         for result in prometheus_response['data']['result']:
             container = result['metric']['container']
             image = result['metric']['image']
             pod = result['metric']['pod']
+            cluster = result['metric']['cluster']
+            namespace = result['metric']['namespace']
+            
+            # Initialize cluster and namespace structure if not exists
+            if cluster not in images:
+                images[cluster] = {}
+            if namespace not in images[cluster]:
+                images[cluster][namespace] = {
+                    'main': {},
+                    'monitoring': {}
+                }
             
             # Determine category based on pod name
             category = 'monitoring' if pod.startswith('duplo-monitoring-') else 'main'
@@ -104,10 +112,10 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
                 service_name = 'kube-state-metrics'
             
             if service_name:
-                images[category][service_name] = image
-                logger.debug(f"Added image for service {service_name} in category {category}")
+                images[cluster][namespace][category][service_name] = image
+                logger.debug(f"Added image for service {service_name} in category {category} for cluster {cluster} namespace {namespace}")
                 
-        logger.info(f"Successfully extracted images for {len(images['main']) + len(images['monitoring'])} services")
+        logger.info(f"Successfully extracted images for {sum(len(ns['main']) + len(ns['monitoring']) for cluster in images.values() for ns in cluster.values())} services")
         return images
     except (KeyError, IndexError) as e:
         logger.error(f"Error extracting monitoring images: {e}")
@@ -151,7 +159,7 @@ def query_grafana_usage(prometheus_url: str) -> Optional[Dict[str, int]]:
 
 def send_to_loki(
     loki_url: str, 
-    images: Dict[str, Dict[str, str]], 
+    images: Dict[str, Dict[str, Dict[str, Dict[str, str]]]], 
     grafana_usage: Dict[str, int], 
     labels: Dict[str, str]
 ) -> None:
@@ -160,7 +168,7 @@ def send_to_loki(
     
     Args:
         loki_url: URL of the Loki instance
-        images: Dictionary containing image information for different services
+        images: Dictionary containing image information for different services, grouped by cluster and namespace
         grafana_usage: Dictionary containing Grafana datasource usage information
         labels: Dictionary containing additional labels to add to the Loki streams
     """
@@ -172,55 +180,77 @@ def send_to_loki(
     loki_password = os.getenv('LOKI_PASSWORD')
     
     # Prepare the payload with additional labels
-    payload = {
-        "streams": [
-            {
-                "stream": {
-                    "job": "monitoring_images",
-                    "source": "prometheus",
-                    "type": "main",
-                    "cluster": labels['cluster'],
-                    "namespace": labels['namespace'],
-                    "customer": labels['customer'],
-                    "environment": labels['environment'],
-                    "duplo_url": labels['duplo_url']
-                },
-                "values": [
-                    [str(current_time), json.dumps(images['main'])]
-                ]
-            },
-            {
-                "stream": {
-                    "job": "monitoring_images",
-                    "source": "prometheus",
-                    "type": "monitoring",
-                    "cluster": labels['cluster'],
-                    "namespace": labels['namespace'],
-                    "customer": labels['customer'],
-                    "environment": labels['environment'],
-                    "duplo_url": labels['duplo_url']
-                },
-                "values": [
-                    [str(current_time), json.dumps(images['monitoring'])]
-                ]
-            },
-            {
-                "stream": {
-                    "job": "grafana_usage",
-                    "source": "prometheus",
-                    "type": "datasource_usage",
-                    "cluster": labels['cluster'],
-                    "namespace": labels['namespace'],
-                    "customer": labels['customer'],
-                    "environment": labels['environment'],
-                    "duplo_url": labels['duplo_url']
-                },
-                "values": [
-                    [str(current_time), json.dumps(grafana_usage)]
-                ]
-            }
+    streams = []
+    
+    # Add streams for each cluster and namespace
+    for cluster, namespaces in images.items():
+        for namespace, categories in namespaces.items():
+            # Add main stream
+            if categories['main']:
+                streams.append({
+                    "stream": {
+                        "job": "monitoring_images",
+                        "source": "prometheus",
+                        "type": "main",
+                        "cluster": cluster,
+                        "namespace": namespace,
+                        "customer": labels['customer'],
+                        "environment": labels['environment'],
+                        "duplo_url": labels['duplo_url']
+                    },
+                    "values": [
+                        [str(current_time), json.dumps({
+                            "metadata": {
+                                "cluster": cluster,
+                                "namespace": namespace
+                            },
+                            "spec": categories['main']
+                        })]
+                    ]
+                })
+            
+            # Add monitoring stream
+            if categories['monitoring']:
+                streams.append({
+                    "stream": {
+                        "job": "monitoring_images",
+                        "source": "prometheus",
+                        "type": "monitoring",
+                        "cluster": cluster,
+                        "namespace": namespace,
+                        "customer": labels['customer'],
+                        "environment": labels['environment'],
+                        "duplo_url": labels['duplo_url']
+                    },
+                    "values": [
+                        [str(current_time), json.dumps({
+                            "metadata": {
+                                "cluster": cluster,
+                                "namespace": namespace
+                            },
+                            "spec": categories['monitoring']
+                        })]
+                    ]
+                })
+    
+    # Add Grafana usage stream
+    streams.append({
+        "stream": {
+            "job": "grafana_usage",
+            "source": "prometheus",
+            "type": "datasource_usage",
+            "cluster": labels['cluster'],
+            "namespace": labels['namespace'],
+            "customer": labels['customer'],
+            "environment": labels['environment'],
+            "duplo_url": labels['duplo_url']
+        },
+        "values": [
+            [str(current_time), json.dumps(grafana_usage)]
         ]
-    }
+    })
+    
+    payload = {"streams": streams}
 
     # Log the payload for debugging
     logger.debug(f"Loki payload: {json.dumps(payload, indent=2)}")
