@@ -290,7 +290,9 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
         'customer': os.getenv('CUSTOMER', ''),
         'environment': os.getenv('ENVIRONMENT', ''),
         'duplo_url': os.getenv('DUPLO_URL', ''),
-        'job_version': os.getenv('JOB_VERSION', '')
+        'job_version': os.getenv('JOB_VERSION', ''),
+        # Ability to filter the custom OTEL namespace for the query
+        'namespace_filter': os.getenv('NAMESPACE_FILTER', '.+otel.+')
     }
     
     # Validate required environment variables
@@ -307,12 +309,13 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     return True, labels, []
 
 
-def collect_image_versions(prometheus_url: str) -> Optional[Dict[str, Dict[str, Dict[str, Dict[str, str]]]]]:
+def collect_image_versions(prometheus_url: str, labels: Dict[str, str]) -> Optional[Dict[str, Dict[str, Dict[str, Dict[str, str]]]]]:
     """
     Collect image versions for monitoring components from Prometheus.
     
     Args:
         prometheus_url: URL of the Prometheus instance
+        labels: Dictionary containing additional labels
         
     Returns:
         Dictionary with image information categorized by cluster and namespace, then by 'main' and 'monitoring',
@@ -320,10 +323,13 @@ def collect_image_versions(prometheus_url: str) -> Optional[Dict[str, Dict[str, 
     """
     logger.info("Collecting image versions from Prometheus")
     
+    # Get namespace filter from labels with fallback to default
+    namespace_filter = labels.get('namespace_filter', '.+otel.+')
+    
     # PromQL query for all components
-    query = '''
+    query = f'''
     count by(cluster, namespace, container, image, pod) (
-      kube_pod_container_info{namespace=~".+otel.+", container!~"config-reloader|loki-sc-rules|memcached|gateway|exporter|kube-rbac-proxy|nginx|pushgateway"}
+      kube_pod_container_info{{namespace=~"{namespace_filter}", container!~"config-reloader|loki-sc-rules|memcached|gateway|exporter|kube-rbac-proxy|nginx|pushgateway"}}
     )
     '''
     
@@ -392,7 +398,7 @@ def collect_and_send_version_data(prometheus_url: str, labels: Dict[str, str]) -
     logger.info("Collecting and sending image data")
     
     # Collect image versions
-    images = collect_image_versions(prometheus_url)
+    images = collect_image_versions(prometheus_url, labels)
     if not images:
         logger.error("Failed to collect image versions")
         return
