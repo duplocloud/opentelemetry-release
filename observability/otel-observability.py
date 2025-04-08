@@ -85,21 +85,15 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
             # Map container names to their service names
             service_name = None
             
-            # Check for monitoring components
-            if container == 'loki':
-                service_name = 'loki'
-            elif container in ['ingester', 'distributor', 'compactor', 'querier', 'query-frontend', 'ruler', 'store-gateway']:
+            # Check for special cases first
+            if container in ['ingester', 'distributor', 'compactor', 'querier', 'query-frontend', 'ruler', 'store-gateway', 'metrics-generator']:
+                # Check if it's tempo or mimir
                 if 'tempo' in image:
                     service_name = 'tempo'
                 else:
                     service_name = 'mimir'
-            elif container == 'pyroscope':
-                service_name = 'pyroscope'
-            elif container == 'beyla':
-                service_name = 'beyla'
-            elif container == 'node-exporter':
-                service_name = 'node-exporter'
             elif container == 'alloy':
+                # Check alloy type based on pod name
                 if 'profiles' in pod:
                     service_name = 'alloy-profiles'
                 elif 'logs' in pod:
@@ -108,8 +102,11 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
                     service_name = 'alloy-events'
                 else:
                     service_name = 'alloy-core'
-            elif container == 'kube-state-metrics':
-                service_name = 'kube-state-metrics'
+            elif container == 'manager':
+                service_name = 'opentelemetry-operator'
+            else:
+                # Default case: use container name as service name
+                service_name = container
             
             if service_name:
                 images[cluster][namespace][category][service_name] = image
@@ -324,12 +321,9 @@ def collect_image_versions(prometheus_url: str) -> Optional[Dict[str, Dict[str, 
     logger.info("Collecting image versions from Prometheus")
     
     # PromQL query for all components
-    query = f'''
+    query = '''
     count by(cluster, namespace, container, image, pod) (
-      kube_pod_container_info{{
-        container=~"loki|ingester|distributor|compactor|querier|query-frontend|ruler|store-gateway|pyroscope|beyla|node-exporter|alloy|kube-state-metrics",
-        pod=~"duplo-(logging|metrics|tracing|profiling)-.+|duplo-monitoring-.+"
-      }}
+      kube_pod_container_info{namespace=~".+otel.+", container!~"config-reloader|loki-sc-rules|memcached|gateway|exporter|kube-rbac-proxy|nginx"}
     )
     '''
     
