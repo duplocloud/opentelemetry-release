@@ -292,7 +292,7 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
         'duplo_url': os.getenv('DUPLO_URL', ''),
         'job_version': os.getenv('JOB_VERSION', ''),
         # Ability to filter the custom OTEL namespace for the query
-        'namespace_filter': os.getenv('NAMESPACE_FILTER', '.+otel.+')
+        'namespace_filter': os.getenv('NAMESPACE_FILTER', '.*otel.*')
     }
     
     # Validate required environment variables
@@ -324,7 +324,7 @@ def collect_image_versions(prometheus_url: str, labels: Dict[str, str]) -> Optio
     logger.info("Collecting image versions from Prometheus")
     
     # Get namespace filter from labels with fallback to default
-    namespace_filter = labels.get('namespace_filter', '.+otel.+')
+    namespace_filter = labels.get('namespace_filter', '.*otel.*')
     
     # PromQL query for all components
     query = f'''
