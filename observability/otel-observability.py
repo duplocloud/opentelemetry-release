@@ -104,6 +104,8 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
                     service_name = 'alloy-core'
             elif container == 'manager':
                 service_name = 'opentelemetry-operator'
+                # This is run on each cluster, so we need to categorize it as monitoring
+                category = 'monitoring'
             else:
                 # Default case: use container name as service name
                 service_name = container
