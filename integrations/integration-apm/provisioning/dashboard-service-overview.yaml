@@ -310,7 +310,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               definition: label_values(traces_spanmetrics_calls_total{source="tempo"},k8s_cluster_name)
-              includeAll: true
+              includeAll: false
               label: Cluster
               name: cluster
               options: []
