@@ -1,0 +1,55 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: tempo_rules
+    namespace: integration-tempo
+spec:
+    rules:
+        - evaluationTime: 0.007807067
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:46.779678424Z"
+          name: cluster_namespace_job_route:tempo_request_duration_seconds:99quantile
+          query: histogram_quantile(0.99, sum by (le, cluster, namespace, job, route) (rate(tempo_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.013691577
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:46.787499095Z"
+          name: cluster_namespace_job_route:tempo_request_duration_seconds:50quantile
+          query: histogram_quantile(0.5, sum by (le, cluster, namespace, job, route) (rate(tempo_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.004055399
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:46.801206253Z"
+          name: cluster_namespace_job_route:tempo_request_duration_seconds:avg
+          query: sum by (cluster, namespace, job, route) (rate(tempo_request_duration_seconds_sum[1m])) / sum by (cluster, namespace, job, route) (rate(tempo_request_duration_seconds_count[1m]))
+          type: recording
+        - evaluationTime: 0.008298832
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:46.805278998Z"
+          name: cluster_namespace_job_route:tempo_request_duration_seconds_bucket:sum_rate
+          query: sum by (le, cluster, namespace, job, route) (rate(tempo_request_duration_seconds_bucket[1m]))
+          type: recording
+        - evaluationTime: 0.001572328
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:46.813592049Z"
+          name: cluster_namespace_job_route:tempo_request_duration_seconds_sum:sum_rate
+          query: sum by (cluster, namespace, job, route) (rate(tempo_request_duration_seconds_sum[1m]))
+          type: recording
+        - evaluationTime: 0.001580385
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:46.815174116Z"
+          name: cluster_namespace_job_route:tempo_request_duration_seconds_count:sum_rate
+          query: sum by (cluster, namespace, job, route) (rate(tempo_request_duration_seconds_count[1m]))
+          type: recording
