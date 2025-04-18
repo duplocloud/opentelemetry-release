@@ -10,148 +10,94 @@ spec:
             message: Mimir Compactor {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not successfully cleaned up blocks in the last 6 hours.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircompactorhasnotsuccessfullycleanedupblocks
           duration: 3600
-          evaluationTime: 0.001478036
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:33.265583893Z"
           name: MimirCompactorHasNotSuccessfullyCleanedUpBlocks
           query: (time() - cortex_compactor_block_cleanup_last_successful_run_timestamp_seconds > 60 * 60 * 6)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Compactor {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not run compaction in the last 24 hours.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircompactorhasnotsuccessfullyruncompaction
           duration: 3600
-          evaluationTime: 0.001367696
-          health: ok
-          keepFiringFor: 0
           labels:
             reason: in-last-24h
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:33.267069355Z"
           name: MimirCompactorHasNotSuccessfullyRunCompaction
           query: (time() - cortex_compactor_last_successful_run_timestamp_seconds > 60 * 60 * 24) and (cortex_compactor_last_successful_run_timestamp_seconds > 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Compactor {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not run compaction in the last 24 hours.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircompactorhasnotsuccessfullyruncompaction
           duration: 86400
-          evaluationTime: 0.000985212
-          health: ok
-          keepFiringFor: 0
           labels:
             reason: since-startup
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:33.268443853Z"
           name: MimirCompactorHasNotSuccessfullyRunCompaction
           query: cortex_compactor_last_successful_run_timestamp_seconds == 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Compactor {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} failed to run 2 consecutive compactions.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircompactorhasnotsuccessfullyruncompaction
           duration: 0
-          evaluationTime: 0.001022201
-          health: ok
-          keepFiringFor: 0
           labels:
             reason: consecutive-failures
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:33.269434915Z"
           name: MimirCompactorHasNotSuccessfullyRunCompaction
           query: increase(cortex_compactor_runs_failed_total{reason!="shutdown"}[2h]) >= 2
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Compactor {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has run out of disk space.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircompactorhasrunoutofdiskspace
           duration: 0
-          evaluationTime: 0.057928689
-          health: ok
-          keepFiringFor: 0
           labels:
             reason: non-transient
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:33.27046304Z"
           name: MimirCompactorHasRunOutOfDiskSpace
           query: increase(cortex_compactor_disk_out_of_space_errors_total[1d]) >= 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Compactor {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not uploaded any block in the last 24 hours.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircompactorhasnotuploadedblocks
           duration: 900
-          evaluationTime: 0.069877128
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
             time_period: 24h
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:33.328400057Z"
           name: MimirCompactorHasNotUploadedBlocks
           query: (time() - (max by (cluster, namespace, pod) (thanos_objstore_bucket_last_successful_upload_time{component="compactor"})) > 60 * 60 * 24) and (max by (cluster, namespace, pod) (thanos_objstore_bucket_last_successful_upload_time{component="compactor"}) > 0) and (sum by (cluster, namespace, pod) (rate(cortex_compactor_group_compaction_runs_started_total[1d])) > 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Compactor {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not uploaded any block since its start.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircompactorhasnotuploadedblocks
           duration: 86400
-          evaluationTime: 0.067176502
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
             time_period: since-start
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:33.398285316Z"
           name: MimirCompactorHasNotUploadedBlocks
           query: (max by (cluster, namespace, pod) (thanos_objstore_bucket_last_successful_upload_time{component="compactor"}) == 0) and (sum by (cluster, namespace, pod) (rate(cortex_compactor_group_compaction_runs_started_total[1d])) > 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Compactor {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has found and ignored unhealthy blocks.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircompactorskippedunhealthyblocks
           duration: 60
-          evaluationTime: 0.002790562
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:33.465469629Z"
           name: MimirCompactorSkippedUnhealthyBlocks
           query: increase(cortex_compactor_blocks_marked_for_no_compaction_total[5m]) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Compactor {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has found and ignored unhealthy blocks.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircompactorskippedunhealthyblocks
           duration: 1800
-          evaluationTime: 0.001243768
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:33.468267354Z"
           name: MimirCompactorSkippedUnhealthyBlocks
           query: increase(cortex_compactor_blocks_marked_for_no_compaction_total[5m]) > 1
-          state: inactive
           type: alerting

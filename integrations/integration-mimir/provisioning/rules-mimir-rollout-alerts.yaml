@@ -11,17 +11,11 @@ spec:
                 The {{ $labels.rollout_group }} rollout is stuck in {{ $labels.cluster }}/{{ $labels.namespace }}.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrolloutstuck
           duration: 1800
-          evaluationTime: 0.004921098
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
             workload_type: statefulset
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:05.072263343Z"
           name: MimirRolloutStuck
           query: (max without (revision) (sum without (statefulset) (label_replace(kube_statefulset_status_current_revision, "rollout_group", "$1", "statefulset", "(.*?)(?:-zone-[a-z])?")) unless sum without (statefulset) (label_replace(kube_statefulset_status_update_revision, "rollout_group", "$1", "statefulset", "(.*?)(?:-zone-[a-z])?"))) * (sum without (statefulset) (label_replace(kube_statefulset_replicas, "rollout_group", "$1", "statefulset", "(.*?)(?:-zone-[a-z])?")) != sum without (statefulset) (label_replace(kube_statefulset_status_replicas_updated, "rollout_group", "$1", "statefulset", "(.*?)(?:-zone-[a-z])?")))) and (changes(sum without (statefulset) (label_replace(kube_statefulset_status_replicas_updated, "rollout_group", "$1", "statefulset", "(.*?)(?:-zone-[a-z])?"))[15m:1m]) == 0) * on (cluster, namespace) group_left () max by (cluster, namespace) (cortex_build_info)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -29,17 +23,11 @@ spec:
                 The {{ $labels.rollout_group }} rollout is stuck in {{ $labels.cluster }}/{{ $labels.namespace }}.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrolloutstuck
           duration: 1800
-          evaluationTime: 0.004661197
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
             workload_type: deployment
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:05.077192974Z"
           name: MimirRolloutStuck
           query: (sum without (deployment) (label_replace(kube_deployment_spec_replicas, "rollout_group", "$1", "deployment", "(.*?)(?:-zone-[a-z])?")) != sum without (deployment) (label_replace(kube_deployment_status_replicas_updated, "rollout_group", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"))) and (changes(sum without (deployment) (label_replace(kube_deployment_status_replicas_updated, "rollout_group", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"))[15m:1m]) == 0) * on (cluster, namespace) group_left () max by (cluster, namespace) (cortex_build_info)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -47,14 +35,8 @@ spec:
                 Rollout operator is not reconciling the rollout group {{ $labels.rollout_group }} in {{ $labels.cluster }}/{{ $labels.namespace }}.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#rolloutoperatornotreconciling
           duration: 300
-          evaluationTime: 0.00105388
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:05.08186346Z"
           name: RolloutOperatorNotReconciling
           query: max by (cluster, namespace, rollout_group) (time() - rollout_operator_last_successful_group_reconcile_timestamp_seconds) > 600
-          state: inactive
           type: alerting

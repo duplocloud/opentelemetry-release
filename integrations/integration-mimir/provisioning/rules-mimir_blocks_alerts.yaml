@@ -10,224 +10,140 @@ spec:
             message: Mimir Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not shipped any block in the last 4 hours.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterhasnotshippedblocks
           duration: 900
-          evaluationTime: 0.002744851
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.848362222Z"
           name: MimirIngesterHasNotShippedBlocks
           query: (min by (cluster, namespace, pod) (time() - cortex_ingester_shipper_last_successful_upload_timestamp_seconds) > 60 * 60 * 4) and (max by (cluster, namespace, pod) (cortex_ingester_shipper_last_successful_upload_timestamp_seconds) > 0) and (max by (cluster, namespace, pod) (max_over_time(cluster_namespace_pod:cortex_ingester_ingested_samples_total:rate1m[4h])) > 0) and (max by (cluster, namespace, pod) (max_over_time(cluster_namespace_pod:cortex_ingester_ingested_samples_total:rate1m[1h] offset 4h)) > 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not shipped any block in the last 4 hours.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterhasnotshippedblockssincestart
           duration: 14400
-          evaluationTime: 0.001398349
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.851113999Z"
           name: MimirIngesterHasNotShippedBlocksSinceStart
           query: (max by (cluster, namespace, pod) (cortex_ingester_shipper_last_successful_upload_timestamp_seconds) == 0) and (max by (cluster, namespace, pod) (max_over_time(cluster_namespace_pod:cortex_ingester_ingested_samples_total:rate1m[4h])) > 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has compacted a block {{ $value | humanizeDuration }} ago but it hasn't been successfully uploaded to the storage yet.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterhasunshippedblocks
           duration: 900
-          evaluationTime: 0.001411436
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.852519347Z"
           name: MimirIngesterHasUnshippedBlocks
           query: (time() - cortex_ingester_oldest_unshipped_block_timestamp_seconds > 3600) and (cortex_ingester_oldest_unshipped_block_timestamp_seconds > 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to compact TSDB head.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringestertsdbheadcompactionfailed
           duration: 900
-          evaluationTime: 0.001149952
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.853938061Z"
           name: MimirIngesterTSDBHeadCompactionFailed
           query: rate(cortex_ingester_tsdb_compactions_failed_total[5m]) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to truncate TSDB head.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringestertsdbheadtruncationfailed
           duration: 0
-          evaluationTime: 0.001204236
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.855093888Z"
           name: MimirIngesterTSDBHeadTruncationFailed
           query: rate(cortex_ingester_tsdb_head_truncations_failed_total[5m]) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to create TSDB checkpoint.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringestertsdbcheckpointcreationfailed
           duration: 0
-          evaluationTime: 0.001017089
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.856304458Z"
           name: MimirIngesterTSDBCheckpointCreationFailed
           query: rate(cortex_ingester_tsdb_checkpoint_creations_failed_total[5m]) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to delete TSDB checkpoint.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringestertsdbcheckpointdeletionfailed
           duration: 0
-          evaluationTime: 0.000968942
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.857326905Z"
           name: MimirIngesterTSDBCheckpointDeletionFailed
           query: rate(cortex_ingester_tsdb_checkpoint_deletions_failed_total[5m]) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to truncate TSDB WAL.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringestertsdbwaltruncationfailed
           duration: 0
-          evaluationTime: 0.001064858
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.858301541Z"
           name: MimirIngesterTSDBWALTruncationFailed
           query: rate(cortex_ingester_tsdb_wal_truncations_failed_total[5m]) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester in {{ $labels.cluster }}/{{ $labels.namespace }} got a corrupted TSDB WAL.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringestertsdbwalcorrupted
           duration: 0
-          evaluationTime: 0.001278417
-          health: ok
-          keepFiringFor: 0
           labels:
             deployment: single-zone
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.859373193Z"
           name: MimirIngesterTSDBWALCorrupted
           query: count by (cluster, namespace) (rate(cortex_ingester_tsdb_wal_corruptions_total[5m]) > 0) > 1 and count by (cluster, namespace) (group by (cluster, namespace, job) (cortex_ingester_tsdb_wal_corruptions_total)) == 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester in {{ $labels.cluster }}/{{ $labels.namespace }} got a corrupted TSDB WAL.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringestertsdbwalcorrupted
           duration: 0
-          evaluationTime: 0.001295196
-          health: ok
-          keepFiringFor: 0
           labels:
             deployment: multi-zone
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.86070125Z"
           name: MimirIngesterTSDBWALCorrupted
           query: count by (cluster, namespace) (sum by (cluster, namespace, job) (rate(cortex_ingester_tsdb_wal_corruptions_total[5m]) > 0)) > 1 and count by (cluster, namespace) (group by (cluster, namespace, job) (cortex_ingester_tsdb_wal_corruptions_total)) > 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir Ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to write to TSDB WAL.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringestertsdbwalwritesfailed
           duration: 180
-          evaluationTime: 0.000972741
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.862004389Z"
           name: MimirIngesterTSDBWALWritesFailed
           query: rate(cortex_ingester_tsdb_wal_writes_failed_total[1m]) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir store-gateway {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not successfully synched the bucket since {{ $value | humanizeDuration }}.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirstoregatewayhasnotsyncthebucket
           duration: 300
-          evaluationTime: 0.001266627
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.862983251Z"
           name: MimirStoreGatewayHasNotSyncTheBucket
           query: (time() - cortex_bucket_stores_blocks_last_successful_sync_timestamp_seconds{component="store-gateway"} > 60 * 30) and cortex_bucket_stores_blocks_last_successful_sync_timestamp_seconds{component="store-gateway"} > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir store-gateway {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is not syncing any blocks for any tenant.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirstoregatewaynosyncedtenants
           duration: 3600
-          evaluationTime: 0.001055512
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.864255982Z"
           name: MimirStoreGatewayNoSyncedTenants
           query: min by (cluster, namespace, pod) (cortex_bucket_stores_tenants_synced{component="store-gateway"}) == 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Mimir bucket index for tenant {{ $labels.user }} in {{ $labels.cluster }}/{{ $labels.namespace }} has not been updated since {{ $value | humanizeDuration }}.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirbucketindexnotupdated
           duration: 0
-          evaluationTime: 0.000965865
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:48.865318953Z"
           name: MimirBucketIndexNotUpdated
           query: min by (cluster, namespace, user) (time() - cortex_bucket_index_last_successful_update_timestamp_seconds) > 2100
-          state: inactive
           type: alerting

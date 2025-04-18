@@ -5,147 +5,75 @@ metadata:
     namespace: integration-mimir
 spec:
     rules:
-        - evaluationTime: 0.0018937
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.664415757Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_series:99quantile
           query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(cortex_ingester_queried_series_bucket[1m])))
           type: recording
-        - evaluationTime: 0.001636827
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.666318458Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_series:50quantile
           query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(cortex_ingester_queried_series_bucket[1m])))
           type: recording
-        - evaluationTime: 0.001562293
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.667963793Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_series:avg
           query: sum by (cluster, job) (rate(cortex_ingester_queried_series_sum[1m])) / sum by (cluster, job) (rate(cortex_ingester_queried_series_count[1m]))
           type: recording
-        - evaluationTime: 0.001399367
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.669536753Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_series_bucket:sum_rate
           query: sum by (le, cluster, job) (rate(cortex_ingester_queried_series_bucket[1m]))
           type: recording
-        - evaluationTime: 0.001046258
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.670943955Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_series_sum:sum_rate
           query: sum by (cluster, job) (rate(cortex_ingester_queried_series_sum[1m]))
           type: recording
-        - evaluationTime: 0.000953615
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.671997343Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_series_count:sum_rate
           query: sum by (cluster, job) (rate(cortex_ingester_queried_series_count[1m]))
           type: recording
-        - evaluationTime: 0.001493289
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.672958375Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_samples:99quantile
           query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(cortex_ingester_queried_samples_bucket[1m])))
           type: recording
-        - evaluationTime: 0.00156514
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.674459681Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_samples:50quantile
           query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(cortex_ingester_queried_samples_bucket[1m])))
           type: recording
-        - evaluationTime: 0.001808311
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.676032714Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_samples:avg
           query: sum by (cluster, job) (rate(cortex_ingester_queried_samples_sum[1m])) / sum by (cluster, job) (rate(cortex_ingester_queried_samples_count[1m]))
           type: recording
-        - evaluationTime: 0.001582125
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.67785165Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_samples_bucket:sum_rate
           query: sum by (le, cluster, job) (rate(cortex_ingester_queried_samples_bucket[1m]))
           type: recording
-        - evaluationTime: 0.001090318
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.679443063Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_samples_sum:sum_rate
           query: sum by (cluster, job) (rate(cortex_ingester_queried_samples_sum[1m]))
           type: recording
-        - evaluationTime: 0.00106389
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.680543063Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_samples_count:sum_rate
           query: sum by (cluster, job) (rate(cortex_ingester_queried_samples_count[1m]))
           type: recording
-        - evaluationTime: 0.001415211
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.681613796Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_exemplars:99quantile
           query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(cortex_ingester_queried_exemplars_bucket[1m])))
           type: recording
-        - evaluationTime: 0.001317604
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.683036916Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_exemplars:50quantile
           query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(cortex_ingester_queried_exemplars_bucket[1m])))
           type: recording
-        - evaluationTime: 0.001127708
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.684361839Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_exemplars:avg
           query: sum by (cluster, job) (rate(cortex_ingester_queried_exemplars_sum[1m])) / sum by (cluster, job) (rate(cortex_ingester_queried_exemplars_count[1m]))
           type: recording
-        - evaluationTime: 0.001176355
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.685495791Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_exemplars_bucket:sum_rate
           query: sum by (le, cluster, job) (rate(cortex_ingester_queried_exemplars_bucket[1m]))
           type: recording
-        - evaluationTime: 0.000980265
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.68668109Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_exemplars_sum:sum_rate
           query: sum by (cluster, job) (rate(cortex_ingester_queried_exemplars_sum[1m]))
           type: recording
-        - evaluationTime: 0.001068994
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:46.68766819Z"
+        - labels: {}
           name: cluster_job:cortex_ingester_queried_exemplars_count:sum_rate
           query: sum by (cluster, job) (rate(cortex_ingester_queried_exemplars_count[1m]))
           type: recording

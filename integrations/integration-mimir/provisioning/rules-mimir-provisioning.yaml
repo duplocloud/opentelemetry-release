@@ -11,16 +11,10 @@ spec:
                 Instance {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirallocatingtoomuchmemory
           duration: 900
-          evaluationTime: 0.002288294
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:38.620424961Z"
           name: MimirAllocatingTooMuchMemory
           query: (container_memory_rss{container=~"(ingester|mimir-write|mimir-backend)"} / (container_spec_memory_limit_bytes{container=~"(ingester|mimir-write|mimir-backend)"} > 0)) * on (cluster, namespace) group_left () max by (cluster, namespace) (cortex_build_info) > 0.65
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -28,14 +22,8 @@ spec:
                 Instance {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirallocatingtoomuchmemory
           duration: 900
-          evaluationTime: 0.001749137
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:38.622718958Z"
           name: MimirAllocatingTooMuchMemory
           query: (container_memory_rss{container=~"(ingester|mimir-write|mimir-backend)"} / (container_spec_memory_limit_bytes{container=~"(ingester|mimir-write|mimir-backend)"} > 0)) * on (cluster, namespace) group_left () max by (cluster, namespace) (cortex_build_info) > 0.8
-          state: inactive
           type: alerting

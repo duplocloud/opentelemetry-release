@@ -5,83 +5,43 @@ metadata:
     namespace: integration-mimir
 spec:
     rules:
-        - evaluationTime: 0.002219873
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.608976195Z"
+        - labels: {}
           name: cluster_job_pod:cortex_alertmanager_alerts:sum
           query: sum by (cluster, job, pod) (cortex_alertmanager_alerts)
           type: recording
-        - evaluationTime: 0.007536319
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.611211633Z"
+        - labels: {}
           name: cluster_job_pod:cortex_alertmanager_silences:sum
           query: sum by (cluster, job, pod) (cortex_alertmanager_silences)
           type: recording
-        - evaluationTime: 0.00169098
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.618761933Z"
+        - labels: {}
           name: cluster_job:cortex_alertmanager_alerts_received_total:rate5m
           query: sum by (cluster, job) (rate(cortex_alertmanager_alerts_received_total[5m]))
           type: recording
-        - evaluationTime: 0.001691193
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.620466722Z"
+        - labels: {}
           name: cluster_job:cortex_alertmanager_alerts_invalid_total:rate5m
           query: sum by (cluster, job) (rate(cortex_alertmanager_alerts_invalid_total[5m]))
           type: recording
-        - evaluationTime: 0.001943931
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.622171634Z"
+        - labels: {}
           name: cluster_job_integration:cortex_alertmanager_notifications_total:rate5m
           query: sum by (cluster, job, integration) (rate(cortex_alertmanager_notifications_total[5m]))
           type: recording
-        - evaluationTime: 0.001820684
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.624132434Z"
+        - labels: {}
           name: cluster_job_integration:cortex_alertmanager_notifications_failed_total:rate5m
           query: sum by (cluster, job, integration) (rate(cortex_alertmanager_notifications_failed_total[5m]))
           type: recording
-        - evaluationTime: 0.001993448
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.625964146Z"
+        - labels: {}
           name: cluster_job:cortex_alertmanager_state_replication_total:rate5m
           query: sum by (cluster, job) (rate(cortex_alertmanager_state_replication_total[5m]))
           type: recording
-        - evaluationTime: 0.004100445
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.627969835Z"
+        - labels: {}
           name: cluster_job:cortex_alertmanager_state_replication_failed_total:rate5m
           query: sum by (cluster, job) (rate(cortex_alertmanager_state_replication_failed_total[5m]))
           type: recording
-        - evaluationTime: 0.002852657
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.632082021Z"
+        - labels: {}
           name: cluster_job:cortex_alertmanager_partial_state_merges_total:rate5m
           query: sum by (cluster, job) (rate(cortex_alertmanager_partial_state_merges_total[5m]))
           type: recording
-        - evaluationTime: 0.004493767
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:02.634945057Z"
+        - labels: {}
           name: cluster_job:cortex_alertmanager_partial_state_merges_failed_total:rate5m
           query: sum by (cluster, job) (rate(cortex_alertmanager_partial_state_merges_failed_total[5m]))
           type: recording

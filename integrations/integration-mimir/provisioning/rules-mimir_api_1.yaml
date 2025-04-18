@@ -5,59 +5,31 @@ metadata:
     namespace: integration-mimir
 spec:
     rules:
-        - evaluationTime: 0.017806881
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:43.923512551Z"
+        - labels: {}
           name: cluster_job:cortex_request_duration_seconds:99quantile
           query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(cortex_request_duration_seconds_bucket[1m])))
           type: recording
-        - evaluationTime: 0.021844123
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:43.941335702Z"
+        - labels: {}
           name: cluster_job:cortex_request_duration_seconds:50quantile
           query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(cortex_request_duration_seconds_bucket[1m])))
           type: recording
-        - evaluationTime: 0.00342419
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:43.963194709Z"
+        - labels: {}
           name: cluster_job:cortex_request_duration_seconds:avg
           query: sum by (cluster, job) (rate(cortex_request_duration_seconds_sum[1m])) / sum by (cluster, job) (rate(cortex_request_duration_seconds_count[1m]))
           type: recording
-        - evaluationTime: 0.014567499
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:43.96662644Z"
+        - labels: {}
           name: cluster_job:cortex_request_duration_seconds_bucket:sum_rate
           query: sum by (le, cluster, job) (rate(cortex_request_duration_seconds_bucket[1m]))
           type: recording
-        - evaluationTime: 0.002202642
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:43.98120815Z"
+        - labels: {}
           name: cluster_job:cortex_request_duration_seconds_sum:sum_rate
           query: sum by (cluster, job) (rate(cortex_request_duration_seconds_sum[1m]))
           type: recording
-        - evaluationTime: 0.002082423
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:43.983421951Z"
+        - labels: {}
           name: cluster_job:cortex_request_duration_seconds_count:sum_rate
           query: sum by (cluster, job) (rate(cortex_request_duration_seconds_count[1m]))
           type: recording
-        - evaluationTime: 0.00091616
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:43.985515245Z"
+        - labels: {}
           name: cluster_job:cortex_request_duration_seconds:sum_rate
           query: sum by (cluster, job) (rate(cortex_request_duration_seconds[1m]))
           type: recording

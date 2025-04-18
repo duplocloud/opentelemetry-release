@@ -5,11 +5,7 @@ metadata:
     namespace: integration-mimir
 spec:
     rules:
-        - evaluationTime: 0.002389174
-          health: ok
-          labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:11:04.874722285Z"
+        - labels: {}
           name: cluster_namespace_job:cortex_distributor_received_exemplars:rate5m
           query: sum by (cluster, namespace, job) (rate(cortex_distributor_received_exemplars_total[5m]))
           type: recording

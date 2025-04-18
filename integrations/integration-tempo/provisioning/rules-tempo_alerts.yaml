@@ -10,271 +10,168 @@ spec:
             message: |
                 {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoRequestLatency
-          duration: 900
-          evaluationTime: 0.00124024
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.281379448Z"
           name: TempoRequestLatency
           query: cluster_namespace_job_route:tempo_request_duration_seconds:99quantile{route!~"metrics|/frontend.Frontend/Process|debug_pprof"} > 3
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: There are {{ printf "%f" $value }} unhealthy compactor(s).
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoCompactorUnhealthy
           duration: 900
-          evaluationTime: 0.001148901
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.282629632Z"
           name: TempoCompactorUnhealthy
           query: max by (cluster, namespace) (tempo_ring_members{name="compactor",namespace=~".*",state="Unhealthy"}) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: There are {{ printf "%f" $value }} unhealthy distributor(s).
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoDistributorUnhealthy
           duration: 900
-          evaluationTime: 0.001186357
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.283785803Z"
           name: TempoDistributorUnhealthy
           query: max by (cluster, namespace) (tempo_ring_members{name="distributor",namespace=~".*",state="Unhealthy"}) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Greater than 2 compactions have failed in the past hour.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoCompactionsFailing
           duration: 3600
-          evaluationTime: 0.002012566
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.284978929Z"
           name: TempoCompactionsFailing
           query: sum by (cluster, namespace) (increase(tempodb_compaction_errors_total[1h])) > 2 and sum by (cluster, namespace) (increase(tempodb_compaction_errors_total[5m])) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Greater than 2 flush retries have occurred in the past hour.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoIngesterFlushesFailing
           duration: 300
-          evaluationTime: 0.002295072
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.286998396Z"
           name: TempoIngesterFlushesUnhealthy
           query: sum by (cluster, namespace) (increase(tempo_ingester_failed_flushes_total[1h])) > 2 and sum by (cluster, namespace) (increase(tempo_ingester_failed_flushes_total[5m])) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Greater than 2 flush retries have failed in the past hour.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoIngesterFlushesFailing
           duration: 300
-          evaluationTime: 0.002025316
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.289301959Z"
           name: TempoIngesterFlushesFailing
           query: sum by (cluster, namespace) (increase(tempo_ingester_flush_failed_retries_total[1h])) > 2 and sum by (cluster, namespace) (increase(tempo_ingester_flush_failed_retries_total[5m])) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Greater than 2 polls have failed in the past hour.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoPollsFailing
           duration: 0
-          evaluationTime: 0.001066852
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.291334159Z"
           name: TempoPollsFailing
           query: sum by (cluster, namespace) (increase(tempodb_blocklist_poll_errors_total[1h])) > 2 and sum by (cluster, namespace) (increase(tempodb_blocklist_poll_errors_total[5m])) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Greater than 2 tenant index failures in the past hour.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoTenantIndexFailures
           duration: 0
-          evaluationTime: 0.001057006
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.292407542Z"
           name: TempoTenantIndexFailures
           query: sum by (cluster, namespace) (increase(tempodb_blocklist_tenant_index_errors_total[1h])) > 2 and sum by (cluster, namespace) (increase(tempodb_blocklist_tenant_index_errors_total[5m])) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: No tenant index builders for tenant {{ $labels.tenant }}. Tenant index will quickly become stale.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoNoTenantIndexBuilders
           duration: 300
-          evaluationTime: 0.002386343
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.293470686Z"
           name: TempoNoTenantIndexBuilders
           query: sum by (cluster, namespace, tenant) (tempodb_blocklist_tenant_index_builder) == 0 and max by (cluster, namespace) (tempodb_blocklist_length) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Tenant index age is 600 seconds old for tenant {{ $labels.tenant }}.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoTenantIndexTooOld
           duration: 300
-          evaluationTime: 0.001624716
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.295864446Z"
           name: TempoTenantIndexTooOld
           query: max by (cluster, namespace, tenant) (tempodb_blocklist_tenant_index_age_seconds) > 600
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Tempo block list length is up 40 percent over the last 7 days.  Consider scaling compactors.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoBlockListRisingQuickly
           duration: 900
-          evaluationTime: 0.005842533
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.297496515Z"
           name: TempoBlockListRisingQuickly
           query: avg(tempodb_blocklist_length{namespace=".*"}) / avg(tempodb_blocklist_length{job=~"$namespace/$component",namespace=".*"} offset 1w) > 1.4
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: '{{ $labels.job }} failed to reload overrides.'
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoBadOverrides
           duration: 900
-          evaluationTime: 0.001968473
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.303348903Z"
           name: TempoBadOverrides
           query: sum by (cluster, namespace, job) (tempo_runtime_config_last_reload_successful{namespace=~".*"} == 0)
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
-            message: Greater than 5 user-configurable overides reloads failed in the past hour.
+            message: Greater than 5 user-configurable overrides reloads failed in the past hour.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoTenantIndexFailures
           duration: 0
-          evaluationTime: 0.008308334
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.305325908Z"
           name: TempoUserConfigurableOverridesReloadFailing
           query: sum by (cluster, namespace) (increase(tempo_overrides_user_configurable_overrides_reload_failed_total[1h])) > 5 and sum by (cluster, namespace) (increase(tempo_overrides_user_configurable_overrides_reload_failed_total[5m])) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Ingesters in {{ $labels.cluster }}/{{ $labels.namespace }} are receiving more data/second than desired, add more ingesters.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoProvisioningTooManyWrites
           duration: 900
-          evaluationTime: 0.001146112
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.313641955Z"
           name: TempoProvisioningTooManyWrites
           query: avg by (cluster, namespace) (rate(tempo_ingester_bytes_received_total{job=~".+/ingester"}[5m])) / 1024 / 1024 > 30
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: There are too many outstanding compaction blocks in {{ $labels.cluster }}/{{ $labels.namespace }} for tenant {{ $labels.tenant }}, increase compactor's CPU or add more compactors.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoCompactorsTooManyOutstandingBlocks
           duration: 21600
-          evaluationTime: 0.001332423
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.314793851Z"
           name: TempoCompactorsTooManyOutstandingBlocks
           query: sum by (cluster, namespace, tenant) (tempodb_compaction_outstanding_blocks{container="compactor",namespace=~".*"}) / ignoring (tenant) group_left () count by (cluster, namespace) (tempo_build_info{container="compactor",namespace=~".*"}) > 100
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: There are too many outstanding compaction blocks in {{ $labels.cluster }}/{{ $labels.namespace }} for tenant {{ $labels.tenant }}, increase compactor's CPU or add more compactors.
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoCompactorsTooManyOutstandingBlocks
           duration: 86400
-          evaluationTime: 0.001212679
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.316131829Z"
           name: TempoCompactorsTooManyOutstandingBlocks
           query: sum by (cluster, namespace, tenant) (tempodb_compaction_outstanding_blocks{container="compactor",namespace=~".*"}) / ignoring (tenant) group_left () count by (cluster, namespace) (tempo_build_info{container="compactor",namespace=~".*"}) > 250
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
             message: Tempo ingester has encountered errors while replaying a block on startup in {{ $labels.cluster }}/{{ $labels.namespace }} for tenant {{ $labels.tenant }}
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoIngesterReplayErrors
           duration: 300
-          evaluationTime: 0.001093666
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:34.31735085Z"
           name: TempoIngesterReplayErrors
           query: sum by (cluster, namespace, tenant) (increase(tempo_ingester_replay_errors_total{namespace=~".*"}[5m])) > 0
-          state: inactive
           type: alerting

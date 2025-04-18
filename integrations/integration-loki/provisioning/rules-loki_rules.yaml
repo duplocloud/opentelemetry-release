@@ -5,147 +5,75 @@ metadata:
     namespace: integration-loki
 spec:
     rules:
-        - evaluationTime: 0.014721794
-          health: ok
+        - name: cluster_job:loki_request_duration_seconds:99quantile
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.202737786Z"
-          name: cluster_job:loki_request_duration_seconds:99quantile
           query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(loki_request_duration_seconds_bucket[1m])))
           type: recording
-        - evaluationTime: 0.014538617
-          health: ok
+        - name: cluster_job:loki_request_duration_seconds:50quantile
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.217473101Z"
-          name: cluster_job:loki_request_duration_seconds:50quantile
           query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(loki_request_duration_seconds_bucket[1m])))
           type: recording
-        - evaluationTime: 0.004141347
-          health: ok
+        - name: cluster_job:loki_request_duration_seconds:avg
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.232025855Z"
-          name: cluster_job:loki_request_duration_seconds:avg
           query: sum by (cluster, job) (rate(loki_request_duration_seconds_sum[1m])) / sum by (cluster, job) (rate(loki_request_duration_seconds_count[1m]))
           type: recording
-        - evaluationTime: 0.015584185
-          health: ok
+        - name: cluster_job:loki_request_duration_seconds_bucket:sum_rate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.236183325Z"
-          name: cluster_job:loki_request_duration_seconds_bucket:sum_rate
           query: sum by (le, cluster, job) (rate(loki_request_duration_seconds_bucket[1m]))
           type: recording
-        - evaluationTime: 0.002974353
-          health: ok
+        - name: cluster_job:loki_request_duration_seconds_sum:sum_rate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.251806336Z"
-          name: cluster_job:loki_request_duration_seconds_sum:sum_rate
           query: sum by (cluster, job) (rate(loki_request_duration_seconds_sum[1m]))
           type: recording
-        - evaluationTime: 0.003112541
-          health: ok
+        - name: cluster_job:loki_request_duration_seconds_count:sum_rate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.254794194Z"
-          name: cluster_job:loki_request_duration_seconds_count:sum_rate
           query: sum by (cluster, job) (rate(loki_request_duration_seconds_count[1m]))
           type: recording
-        - evaluationTime: 0.014397738
-          health: ok
+        - name: cluster_job_route:loki_request_duration_seconds:99quantile
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.257921373Z"
-          name: cluster_job_route:loki_request_duration_seconds:99quantile
           query: histogram_quantile(0.99, sum by (le, cluster, job, route) (rate(loki_request_duration_seconds_bucket[1m])))
           type: recording
-        - evaluationTime: 0.014958449
-          health: ok
+        - name: cluster_job_route:loki_request_duration_seconds:50quantile
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.272354031Z"
-          name: cluster_job_route:loki_request_duration_seconds:50quantile
           query: histogram_quantile(0.5, sum by (le, cluster, job, route) (rate(loki_request_duration_seconds_bucket[1m])))
           type: recording
-        - evaluationTime: 0.004328715
-          health: ok
+        - name: cluster_job_route:loki_request_duration_seconds:avg
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.287327701Z"
-          name: cluster_job_route:loki_request_duration_seconds:avg
           query: sum by (cluster, job, route) (rate(loki_request_duration_seconds_sum[1m])) / sum by (cluster, job, route) (rate(loki_request_duration_seconds_count[1m]))
           type: recording
-        - evaluationTime: 0.015866322
-          health: ok
+        - name: cluster_job_route:loki_request_duration_seconds_bucket:sum_rate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.291668757Z"
-          name: cluster_job_route:loki_request_duration_seconds_bucket:sum_rate
           query: sum by (le, cluster, job, route) (rate(loki_request_duration_seconds_bucket[1m]))
           type: recording
-        - evaluationTime: 0.003007345
-          health: ok
+        - name: cluster_job_route:loki_request_duration_seconds_sum:sum_rate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.307550422Z"
-          name: cluster_job_route:loki_request_duration_seconds_sum:sum_rate
           query: sum by (cluster, job, route) (rate(loki_request_duration_seconds_sum[1m]))
           type: recording
-        - evaluationTime: 0.005399177
-          health: ok
+        - name: cluster_job_route:loki_request_duration_seconds_count:sum_rate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.310569697Z"
-          name: cluster_job_route:loki_request_duration_seconds_count:sum_rate
           query: sum by (cluster, job, route) (rate(loki_request_duration_seconds_count[1m]))
           type: recording
-        - evaluationTime: 0.020062699
-          health: ok
+        - name: cluster_namespace_job_route:loki_request_duration_seconds:99quantile
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.315988804Z"
-          name: cluster_namespace_job_route:loki_request_duration_seconds:99quantile
           query: histogram_quantile(0.99, sum by (le, cluster, namespace, job, route) (rate(loki_request_duration_seconds_bucket[1m])))
           type: recording
-        - evaluationTime: 0.016509148
-          health: ok
+        - name: cluster_namespace_job_route:loki_request_duration_seconds:50quantile
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.336070777Z"
-          name: cluster_namespace_job_route:loki_request_duration_seconds:50quantile
           query: histogram_quantile(0.5, sum by (le, cluster, namespace, job, route) (rate(loki_request_duration_seconds_bucket[1m])))
           type: recording
-        - evaluationTime: 0.003842399
-          health: ok
+        - name: cluster_namespace_job_route:loki_request_duration_seconds:avg
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.352594424Z"
-          name: cluster_namespace_job_route:loki_request_duration_seconds:avg
           query: sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_sum[1m])) / sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_count[1m]))
           type: recording
-        - evaluationTime: 0.016589574
-          health: ok
+        - name: cluster_namespace_job_route:loki_request_duration_seconds_bucket:sum_rate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.356449572Z"
-          name: cluster_namespace_job_route:loki_request_duration_seconds_bucket:sum_rate
           query: sum by (le, cluster, namespace, job, route) (rate(loki_request_duration_seconds_bucket[1m]))
           type: recording
-        - evaluationTime: 0.002979973
-          health: ok
+        - name: cluster_namespace_job_route:loki_request_duration_seconds_sum:sum_rate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.373054202Z"
-          name: cluster_namespace_job_route:loki_request_duration_seconds_sum:sum_rate
           query: sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_sum[1m]))
           type: recording
-        - evaluationTime: 0.003059217
-          health: ok
+        - name: cluster_namespace_job_route:loki_request_duration_seconds_count:sum_rate
           labels: {}
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:57.37604828Z"
-          name: cluster_namespace_job_route:loki_request_duration_seconds_count:sum_rate
           query: sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_count[1m]))
           type: recording

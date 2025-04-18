@@ -11,16 +11,10 @@ spec:
                 {{ $labels.cluster }} {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.
             summary: Loki request error rate is high.
           duration: 900
-          evaluationTime: 0.00268196
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:47.081695023Z"
           name: LokiRequestErrors
           query: 100 * sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_count{status_code=~"5.."}[2m])) / sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_count[2m])) > 10
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -28,16 +22,10 @@ spec:
                 {{ $labels.cluster }} {{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% increase of panics.
             summary: Loki requests are causing code panics.
           duration: 0
-          evaluationTime: 0.001351097
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:47.084384433Z"
           name: LokiRequestPanics
           query: sum by (cluster, namespace, job) (increase(loki_panic_total[10m])) > 0
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -45,16 +33,10 @@ spec:
                 {{ $labels.cluster }} {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
             summary: Loki request error latency is high.
           duration: 900
-          evaluationTime: 0.001711853
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:47.085743538Z"
           name: LokiRequestLatency
           query: cluster_namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*|/schedulerpb.SchedulerForQuerier/QuerierLoop"} > 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -62,16 +44,10 @@ spec:
                 {{ $labels.cluster }} {{ $labels.namespace }} has had {{ printf "%.0f" $value }} compactors running for more than 5m. Only one compactor should run at a time.
             summary: Loki deployment is running more than one compactor.
           duration: 300
-          evaluationTime: 0.001229844
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: warning
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:47.087463342Z"
           name: LokiTooManyCompactorsRunning
           query: sum by (cluster, namespace) (loki_boltdb_shipper_compactor_running) > 1
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -79,16 +55,10 @@ spec:
                 {{ $labels.cluster }} {{ $labels.namespace }} has not run compaction in the last 3 hours since the last compaction. This may indicate a problem with the compactor.
             summary: Loki compaction has not run in the last 3 hours since the last compaction.
           duration: 3600
-          evaluationTime: 0.001170891
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:47.088699594Z"
           name: LokiCompactorHasNotSuccessfullyRunCompaction
           query: min by (cluster, namespace) (time() - (loki_boltdb_shipper_compact_tables_operation_last_successful_run_timestamp_seconds > 0)) > 60 * 60 * 3
-          state: inactive
           type: alerting
         - alerts: []
           annotations:
@@ -96,14 +66,8 @@ spec:
                 {{ $labels.cluster }} {{ $labels.namespace }} has not run compaction in the last 3h since startup. This may indicate a problem with the compactor.
             summary: Loki compaction has not run in the last 3h since startup.
           duration: 3600
-          evaluationTime: 0.001423293
-          health: ok
-          keepFiringFor: 0
           labels:
             severity: critical
-          lastError: ""
-          lastEvaluation: "2025-04-18T10:10:47.089876393Z"
           name: LokiCompactorHasNotSuccessfullyRunCompaction
           query: max by (cluster, namespace) (max_over_time(loki_boltdb_shipper_compact_tables_operation_last_successful_run_timestamp_seconds[3h])) == 0
-          state: inactive
           type: alerting
