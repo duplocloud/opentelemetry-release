@@ -1,0 +1,111 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: ruler_alerts
+    namespace: integration-mimir
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Ruler {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% write (push) errors.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrulertoomanyfailedpushes
+          duration: 300
+          evaluationTime: 0.001744845
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:33.232941602Z"
+          name: MimirRulerTooManyFailedPushes
+          query: 100 * (sum by (cluster, namespace, pod) (rate(cortex_ruler_write_requests_failed_total[1m])) / sum by (cluster, namespace, pod) (rate(cortex_ruler_write_requests_total[1m]))) > 1
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Ruler {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% errors while evaluating rules.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrulertoomanyfailedqueries
+          duration: 300
+          evaluationTime: 0.001456342
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:33.23469302Z"
+          name: MimirRulerTooManyFailedQueries
+          query: 100 * (sum by (cluster, namespace, pod) (rate(cortex_ruler_queries_failed_total[1m])) / sum by (cluster, namespace, pod) (rate(cortex_ruler_queries_total[1m]))) > 1
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Ruler {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% missed iterations for the rule group {{ $labels.rule_group }}.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrulermissedevaluations
+          duration: 300
+          evaluationTime: 0.004129163
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:33.236156607Z"
+          name: MimirRulerMissedEvaluations
+          query: 100 * (sum by (cluster, namespace, pod, rule_group) (rate(cortex_prometheus_rule_group_iterations_missed_total[1m])) / sum by (cluster, namespace, pod, rule_group) (rate(cortex_prometheus_rule_group_iterations_total[1m]))) > 1
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Rulers in {{ $labels.cluster }}/{{ $labels.namespace }} are experiencing errors when checking the ring for rule group ownership.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrulerfailedringcheck
+          duration: 300
+          evaluationTime: 0.001067229
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:33.240294213Z"
+          name: MimirRulerFailedRingCheck
+          query: sum by (cluster, namespace, job) (rate(cortex_ruler_ring_check_errors_total[1m])) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir rulers in {{ $labels.cluster }}/{{ $labels.namespace }} are failing to perform {{ printf "%.2f" $value }}% of remote evaluations through the ruler-query-frontend.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrulerremoteevaluationfailing
+          duration: 300
+          evaluationTime: 0.001372003
+          health: ok
+          keepFiringFor: 0
+          labels:
+            histogram: classic
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:33.24136767Z"
+          name: MimirRulerRemoteEvaluationFailing
+          query: (sum by (cluster, namespace) (rate(cortex_request_duration_seconds_count{job=~".*/(ruler-query-frontend.*)",route="/httpgrpc.HTTP/Handle",status_code=~"5.."}[5m])) / sum by (cluster, namespace) (rate(cortex_request_duration_seconds_count{job=~".*/(ruler-query-frontend.*)",route="/httpgrpc.HTTP/Handle"}[5m]))) * 100 > 1
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir rulers in {{ $labels.cluster }}/{{ $labels.namespace }} are failing to perform {{ printf "%.2f" $value }}% of remote evaluations through the ruler-query-frontend.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrulerremoteevaluationfailing
+          duration: 300
+          evaluationTime: 0.001541346
+          health: ok
+          keepFiringFor: 0
+          labels:
+            histogram: native
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:33.242747213Z"
+          name: MimirRulerRemoteEvaluationFailing
+          query: (sum by (cluster, namespace) (histogram_count(rate(cortex_request_duration_seconds{job=~".*/(ruler-query-frontend.*)",route="/httpgrpc.HTTP/Handle",status_code=~"5.."}[5m]))) / sum by (cluster, namespace) (histogram_count(rate(cortex_request_duration_seconds{job=~".*/(ruler-query-frontend.*)",route="/httpgrpc.HTTP/Handle"}[5m])))) * 100 > 1
+          state: inactive
+          type: alerting

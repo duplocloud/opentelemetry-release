@@ -1,0 +1,159 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: alertmanager_alerts
+    namespace: integration-mimir
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Alertmanager {{ $labels.job }}/{{ $labels.pod }} is failing to read tenant configurations from storage.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiralertmanagersyncconfigsfailing
+          duration: 1800
+          evaluationTime: 0.001436535
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:05.419640092Z"
+          name: MimirAlertmanagerSyncConfigsFailing
+          query: rate(cortex_alertmanager_sync_configs_failed_total[5m]) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Alertmanager {{ $labels.job }}/{{ $labels.pod }} is unable to check tenants ownership via the ring.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiralertmanagerringcheckfailing
+          duration: 600
+          evaluationTime: 0.000975761
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:05.421086629Z"
+          name: MimirAlertmanagerRingCheckFailing
+          query: rate(cortex_alertmanager_ring_check_errors_total[2m]) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Alertmanager {{ $labels.job }}/{{ $labels.pod }} is failing to merge partial state changes received from a replica.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiralertmanagerpartialstatemergefailing
+          duration: 600
+          evaluationTime: 0.001192946
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:05.422068067Z"
+          name: MimirAlertmanagerPartialStateMergeFailing
+          query: rate(cortex_alertmanager_partial_state_merges_failed_total[2m]) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Alertmanager {{ $labels.job }}/{{ $labels.pod }} is failing to replicating partial state to its replicas.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiralertmanagerreplicationfailing
+          duration: 600
+          evaluationTime: 0.001010623
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:05.423268045Z"
+          name: MimirAlertmanagerReplicationFailing
+          query: rate(cortex_alertmanager_state_replication_failed_total[2m]) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Alertmanager {{ $labels.job }}/{{ $labels.pod }} is unable to persist full state snaphots to remote storage.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiralertmanagerpersiststatefailing
+          duration: 3600
+          evaluationTime: 0.001135495
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:05.424284264Z"
+          name: MimirAlertmanagerPersistStateFailing
+          query: rate(cortex_alertmanager_state_persist_failed_total[15m]) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir Alertmanager {{ $labels.job }}/{{ $labels.pod }} was unable to obtain some initial state when starting up.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiralertmanagerinitialsyncfailed
+          duration: 0
+          evaluationTime: 0.001122236
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:05.425426052Z"
+          name: MimirAlertmanagerInitialSyncFailed
+          query: increase(cortex_alertmanager_state_initial_sync_completed_total{outcome="failed"}[1m]) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Alertmanager {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiralertmanagerallocatingtoomuchmemory
+          duration: 900
+          evaluationTime: 0.001300349
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:05.426555065Z"
+          name: MimirAlertmanagerAllocatingTooMuchMemory
+          query: (container_memory_working_set_bytes{container="alertmanager"} / container_spec_memory_limit_bytes{container="alertmanager"}) > 0.8 and (container_spec_memory_limit_bytes{container="alertmanager"} > 0)
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Alertmanager {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is using too much memory.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiralertmanagerallocatingtoomuchmemory
+          duration: 900
+          evaluationTime: 0.001411198
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:05.427861174Z"
+          name: MimirAlertmanagerAllocatingTooMuchMemory
+          query: (container_memory_working_set_bytes{container="alertmanager"} / container_spec_memory_limit_bytes{container="alertmanager"}) > 0.9 and (container_spec_memory_limit_bytes{container="alertmanager"} > 0)
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir alertmanager {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} owns no tenants.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiralertmanagerinstancehasnotenants
+          duration: 3600
+          evaluationTime: 0.00127164
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:05.429278231Z"
+          name: MimirAlertmanagerInstanceHasNoTenants
+          query: min by (cluster, namespace, pod) (cortex_alertmanager_tenants_owned{pod=~"(.*mimir-)?alertmanager.*"}) == 0 and on (cluster, namespace) max by (cluster, namespace) (cortex_alertmanager_tenants_owned) > 0
+          state: inactive
+          type: alerting

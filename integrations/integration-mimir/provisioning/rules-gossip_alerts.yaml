@@ -1,0 +1,82 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: gossip_alerts
+    namespace: integration-mimir
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            message: One or more Mimir instances in {{ $labels.cluster }}/{{ $labels.namespace }} consistently sees a higher than expected number of gossip members.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirgossipmemberstoohigh
+          duration: 1200
+          evaluationTime: 0.001986958
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.2071302Z"
+          name: MimirGossipMembersTooHigh
+          query: max by (cluster, namespace) (memberlist_client_cluster_members_count) > (sum by (cluster, namespace) (up{job=~".+/(admin-api|alertmanager|compactor.*|distributor.*|ingester.*|querier.*|ruler|ruler-querier.*|store-gateway.*|cortex|mimir|mimir-write.*|mimir-read.*|mimir-backend.*)"}) + 10)
+          state: inactive
+          type: alerting
+        - alerts:
+            - activeAt: "2025-04-18T09:52:27.206675445Z"
+              annotations:
+                message: One or more Mimir instances in duploinfra-o11y/duploservices-otel-o11y consistently sees a lower than expected number of gossip members.
+                runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirgossipmemberstoolow
+              labels:
+                alertname: MimirGossipMembersTooLow
+                cluster: duploinfra-o11y
+                namespace: duploservices-otel-o11y
+                severity: warning
+              state: pending
+              value: "1e+00"
+          annotations:
+            message: One or more Mimir instances in {{ $labels.cluster }}/{{ $labels.namespace }} consistently sees a lower than expected number of gossip members.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirgossipmemberstoolow
+          duration: 1200
+          evaluationTime: 0.002564827
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.209124058Z"
+          name: MimirGossipMembersTooLow
+          query: min by (cluster, namespace) (memberlist_client_cluster_members_count) < (sum by (cluster, namespace) (up{job=~".+/(admin-api|alertmanager|compactor.*|distributor.*|ingester.*|querier.*|ruler|ruler-querier.*|store-gateway.*|cortex|mimir|mimir-write.*|mimir-read.*|mimir-backend.*)"}) * 0.5)
+          state: pending
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir gossip-ring service endpoints list in {{ $labels.cluster }}/{{ $labels.namespace }} is out of sync.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirgossipmembersendpointsoutofsync
+          duration: 900
+          evaluationTime: 0.005455636
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.211701537Z"
+          name: MimirGossipMembersEndpointsOutOfSync
+          query: (count by (cluster, namespace) (kube_endpoint_address{endpoint="gossip-ring"} unless on (cluster, namespace, ip) label_replace(kube_pod_info, "ip", "$1", "pod_ip", "(.*)")) / count by (cluster, namespace) (kube_endpoint_address{endpoint="gossip-ring"}) * 100 > 10) and (count by (cluster, namespace) (cortex_build_info) > 0)
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir gossip-ring service endpoints list in {{ $labels.cluster }}/{{ $labels.namespace }} is out of sync.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirgossipmembersendpointsoutofsync
+          duration: 300
+          evaluationTime: 0.005678918
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.217190518Z"
+          name: MimirGossipMembersEndpointsOutOfSync
+          query: (count by (cluster, namespace) (kube_endpoint_address{endpoint="gossip-ring"} unless on (cluster, namespace, ip) label_replace(kube_pod_info, "ip", "$1", "pod_ip", "(.*)")) / count by (cluster, namespace) (kube_endpoint_address{endpoint="gossip-ring"}) * 100 > 50) and (count by (cluster, namespace) (cortex_build_info) > 0)
+          state: inactive
+          type: alerting

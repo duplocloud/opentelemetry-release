@@ -1,0 +1,151 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_querier_api
+    namespace: integration-mimir
+spec:
+    rules:
+        - evaluationTime: 0.002843943
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.608352642Z"
+          name: cluster_job:cortex_querier_request_duration_seconds:99quantile
+          query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(cortex_querier_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.002538512
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.611206152Z"
+          name: cluster_job:cortex_querier_request_duration_seconds:50quantile
+          query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(cortex_querier_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.001661565
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.613753403Z"
+          name: cluster_job:cortex_querier_request_duration_seconds:avg
+          query: sum by (cluster, job) (rate(cortex_querier_request_duration_seconds_sum[1m])) / sum by (cluster, job) (rate(cortex_querier_request_duration_seconds_count[1m]))
+          type: recording
+        - evaluationTime: 0.002357372
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.615423484Z"
+          name: cluster_job:cortex_querier_request_duration_seconds_bucket:sum_rate
+          query: sum by (le, cluster, job) (rate(cortex_querier_request_duration_seconds_bucket[1m]))
+          type: recording
+        - evaluationTime: 0.001080587
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.617791186Z"
+          name: cluster_job:cortex_querier_request_duration_seconds_sum:sum_rate
+          query: sum by (cluster, job) (rate(cortex_querier_request_duration_seconds_sum[1m]))
+          type: recording
+        - evaluationTime: 0.001068271
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.618879978Z"
+          name: cluster_job:cortex_querier_request_duration_seconds_count:sum_rate
+          query: sum by (cluster, job) (rate(cortex_querier_request_duration_seconds_count[1m]))
+          type: recording
+        - evaluationTime: 0.002499317
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.619956602Z"
+          name: cluster_job_route:cortex_querier_request_duration_seconds:99quantile
+          query: histogram_quantile(0.99, sum by (le, cluster, job, route) (rate(cortex_querier_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.00223232
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.622465011Z"
+          name: cluster_job_route:cortex_querier_request_duration_seconds:50quantile
+          query: histogram_quantile(0.5, sum by (le, cluster, job, route) (rate(cortex_querier_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.001698381
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.624706667Z"
+          name: cluster_job_route:cortex_querier_request_duration_seconds:avg
+          query: sum by (cluster, job, route) (rate(cortex_querier_request_duration_seconds_sum[1m])) / sum by (cluster, job, route) (rate(cortex_querier_request_duration_seconds_count[1m]))
+          type: recording
+        - evaluationTime: 0.002470543
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.62641162Z"
+          name: cluster_job_route:cortex_querier_request_duration_seconds_bucket:sum_rate
+          query: sum by (le, cluster, job, route) (rate(cortex_querier_request_duration_seconds_bucket[1m]))
+          type: recording
+        - evaluationTime: 0.001107557
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.628891098Z"
+          name: cluster_job_route:cortex_querier_request_duration_seconds_sum:sum_rate
+          query: sum by (cluster, job, route) (rate(cortex_querier_request_duration_seconds_sum[1m]))
+          type: recording
+        - evaluationTime: 0.001171383
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.63000965Z"
+          name: cluster_job_route:cortex_querier_request_duration_seconds_count:sum_rate
+          query: sum by (cluster, job, route) (rate(cortex_querier_request_duration_seconds_count[1m]))
+          type: recording
+        - evaluationTime: 0.002180316
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.631188056Z"
+          name: cluster_namespace_job_route:cortex_querier_request_duration_seconds:99quantile
+          query: histogram_quantile(0.99, sum by (le, cluster, namespace, job, route) (rate(cortex_querier_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.00221705
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.633377324Z"
+          name: cluster_namespace_job_route:cortex_querier_request_duration_seconds:50quantile
+          query: histogram_quantile(0.5, sum by (le, cluster, namespace, job, route) (rate(cortex_querier_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.001399539
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.635603572Z"
+          name: cluster_namespace_job_route:cortex_querier_request_duration_seconds:avg
+          query: sum by (cluster, namespace, job, route) (rate(cortex_querier_request_duration_seconds_sum[1m])) / sum by (cluster, namespace, job, route) (rate(cortex_querier_request_duration_seconds_count[1m]))
+          type: recording
+        - evaluationTime: 0.002173432
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.637009552Z"
+          name: cluster_namespace_job_route:cortex_querier_request_duration_seconds_bucket:sum_rate
+          query: sum by (le, cluster, namespace, job, route) (rate(cortex_querier_request_duration_seconds_bucket[1m]))
+          type: recording
+        - evaluationTime: 0.00115581
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.639193667Z"
+          name: cluster_namespace_job_route:cortex_querier_request_duration_seconds_sum:sum_rate
+          query: sum by (cluster, namespace, job, route) (rate(cortex_querier_request_duration_seconds_sum[1m]))
+          type: recording
+        - evaluationTime: 0.000964372
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.64035696Z"
+          name: cluster_namespace_job_route:cortex_querier_request_duration_seconds_count:sum_rate
+          query: sum by (cluster, namespace, job, route) (rate(cortex_querier_request_duration_seconds_count[1m]))
+          type: recording

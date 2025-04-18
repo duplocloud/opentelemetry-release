@@ -1,0 +1,55 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_continuous_test
+    namespace: integration-mimir
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            message: Mimir continuous test {{ $labels.test }} in {{ $labels.cluster }}/{{ $labels.namespace }} is not effectively running because writes are failing.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircontinuoustestnotrunningonwrites
+          duration: 3600
+          evaluationTime: 0.001320295
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.488022674Z"
+          name: MimirContinuousTestNotRunningOnWrites
+          query: sum by (cluster, namespace, test) (rate(mimir_continuous_test_writes_failed_total[5m])) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir continuous test {{ $labels.test }} in {{ $labels.cluster }}/{{ $labels.namespace }} is not effectively running because queries are failing.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircontinuoustestnotrunningonreads
+          duration: 3600
+          evaluationTime: 0.001050704
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.489349509Z"
+          name: MimirContinuousTestNotRunningOnReads
+          query: sum by (cluster, namespace, test) (rate(mimir_continuous_test_queries_failed_total[5m])) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir continuous test {{ $labels.test }} in {{ $labels.cluster }}/{{ $labels.namespace }} failed when asserting query results.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircontinuoustestfailed
+          duration: 0
+          evaluationTime: 0.000920049
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:00.490407171Z"
+          name: MimirContinuousTestFailed
+          query: sum by (cluster, namespace, test) (rate(mimir_continuous_test_query_result_checks_failed_total[10m])) > 0
+          state: inactive
+          type: alerting

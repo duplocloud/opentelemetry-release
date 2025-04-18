@@ -1,0 +1,55 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_storage
+    namespace: integration-mimir
+spec:
+    rules:
+        - evaluationTime: 0.005816114
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.378448259Z"
+          name: cluster_job:cortex_kv_request_duration_seconds:99quantile
+          query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(cortex_kv_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.012366844
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.384276647Z"
+          name: cluster_job:cortex_kv_request_duration_seconds:50quantile
+          query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(cortex_kv_request_duration_seconds_bucket[1m])))
+          type: recording
+        - evaluationTime: 0.004494661
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.396657718Z"
+          name: cluster_job:cortex_kv_request_duration_seconds:avg
+          query: sum by (cluster, job) (rate(cortex_kv_request_duration_seconds_sum[1m])) / sum by (cluster, job) (rate(cortex_kv_request_duration_seconds_count[1m]))
+          type: recording
+        - evaluationTime: 0.006875638
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.401161766Z"
+          name: cluster_job:cortex_kv_request_duration_seconds_bucket:sum_rate
+          query: sum by (le, cluster, job) (rate(cortex_kv_request_duration_seconds_bucket[1m]))
+          type: recording
+        - evaluationTime: 0.00161853
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.408050278Z"
+          name: cluster_job:cortex_kv_request_duration_seconds_sum:sum_rate
+          query: sum by (cluster, job) (rate(cortex_kv_request_duration_seconds_sum[1m]))
+          type: recording
+        - evaluationTime: 0.001437257
+          health: ok
+          labels: {}
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:27.409677891Z"
+          name: cluster_job:cortex_kv_request_duration_seconds_count:sum_rate
+          query: sum by (cluster, job) (rate(cortex_kv_request_duration_seconds_count[1m]))
+          type: recording

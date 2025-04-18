@@ -1,0 +1,41 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: etcd_alerts
+    namespace: integration-mimir
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            message: |
+                Too much memory being used by {{ $labels.namespace }}/{{ $labels.pod }} - bump memory limit.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#etcdallocatingtoomuchmemory
+          duration: 900
+          evaluationTime: 0.001467903
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:15.844596861Z"
+          name: EtcdAllocatingTooMuchMemory
+          query: (container_memory_working_set_bytes{container="etcd"} / (container_spec_memory_limit_bytes{container="etcd"} > 0)) > 0.65
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Too much memory being used by {{ $labels.namespace }}/{{ $labels.pod }} - bump memory limit.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#etcdallocatingtoomuchmemory
+          duration: 900
+          evaluationTime: 0.001141115
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:15.846071599Z"
+          name: EtcdAllocatingTooMuchMemory
+          query: (container_memory_working_set_bytes{container="etcd"} / (container_spec_memory_limit_bytes{container="etcd"} > 0)) > 0.8
+          state: inactive
+          type: alerting

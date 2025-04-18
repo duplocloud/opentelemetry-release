@@ -1,0 +1,185 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_ingest_storage_alerts
+    namespace: integration-mimir
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to commit the last consumed offset.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterlastconsumedoffsetcommitfailed
+          duration: 900
+          evaluationTime: 0.001680724
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.172242218Z"
+          name: MimirIngesterLastConsumedOffsetCommitFailed
+          query: sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_offset_commit_failures_total[5m])) / sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_offset_commit_requests_total[5m])) > 0.2
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is failing to read records from Kafka.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterfailedtoreadrecordsfromkafka
+          duration: 300
+          evaluationTime: 0.00119636
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.173958748Z"
+          name: MimirIngesterFailedToReadRecordsFromKafka
+          query: sum by (cluster, namespace, pod, node_id) (rate(cortex_ingest_storage_reader_read_errors_total[1m])) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is receiving fetch errors when reading records from Kafka.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterkafkafetcherrorsratetoohigh
+          duration: 900
+          evaluationTime: 0.001213968
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.175165011Z"
+          name: MimirIngesterKafkaFetchErrorsRateTooHigh
+          query: sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_fetch_errors_total[5m])) / sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_fetches_total[5m])) > 0.1
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} in "starting" phase is not reducing consumption lag of write requests read from Kafka.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirstartingingesterkafkareceivedelayincreasing
+          duration: 300
+          evaluationTime: 0.001231165
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.176408278Z"
+          name: MimirStartingIngesterKafkaReceiveDelayIncreasing
+          query: deriv((sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_receive_delay_seconds_sum{phase="starting"}[1m])) / sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_receive_delay_seconds_count{phase="starting"}[1m])))[5m:1m]) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} in "running" phase is too far behind in its consumption of write requests from Kafka.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrunningingesterreceivedelaytoohigh
+          duration: 180
+          evaluationTime: 0.001232362
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+            threshold: very_high_for_short_period
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.17764741Z"
+          name: MimirRunningIngesterReceiveDelayTooHigh
+          query: (sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_receive_delay_seconds_sum{phase="running"}[1m])) / sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_receive_delay_seconds_count{phase="running"}[1m]))) > (2 * 60)
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} in "running" phase is too far behind in its consumption of write requests from Kafka.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrunningingesterreceivedelaytoohigh
+          duration: 900
+          evaluationTime: 0.001139754
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+            threshold: relatively_high_for_long_period
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.178885549Z"
+          name: MimirRunningIngesterReceiveDelayTooHigh
+          query: (sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_receive_delay_seconds_sum{phase="running"}[1m])) / sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_receive_delay_seconds_count{phase="running"}[1m]))) > 30
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} fails to consume write requests read from Kafka due to internal errors.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterfailstoprocessrecordsfromkafka
+          duration: 300
+          evaluationTime: 0.000906634
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.180032202Z"
+          name: MimirIngesterFailsToProcessRecordsFromKafka
+          query: sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_records_failed_total{cause="server"}[1m])) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} is stuck processing write requests from Kafka.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterstuckprocessingrecordsfromkafka
+          duration: 300
+          evaluationTime: 0.001051279
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.180944571Z"
+          name: MimirIngesterStuckProcessingRecordsFromKafka
+          query: (sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_reader_records_total[5m])) == 0) and (sum by (cluster, namespace, pod) (cortex_ingest_storage_reader_buffered_fetch_records_total) > 0)
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} fails to enforce strong-consistency on read-path.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirstrongconsistencyenforcementfailed
+          duration: 300
+          evaluationTime: 0.000946329
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.18200193Z"
+          name: MimirStrongConsistencyEnforcementFailed
+          query: sum by (cluster, namespace, pod) (rate(cortex_ingest_storage_strong_consistency_failures_total[1m])) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir ingesters in {{ $labels.cluster }}/{{ $labels.namespace }} are receiving an unexpected high number of strongly consistent requests without an offset specified.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirstrongconsistencyoffsetnotpropagatedtoingesters
+          duration: 300
+          evaluationTime: 0.001295935
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.182954601Z"
+          name: MimirStrongConsistencyOffsetNotPropagatedToIngesters
+          query: sum by (cluster, namespace) (rate(cortex_ingest_storage_strong_consistency_requests_total{component="partition-reader",with_offset="false"}[1m])) / sum by (cluster, namespace) (rate(cortex_ingest_storage_strong_consistency_requests_total{component="partition-reader"}[1m])) * 100 > 5
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} Kafka client produce buffer utilization is {{ printf "%.2f" $value }}%.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirkafkaclientbufferedproducebytestoohigh
+          duration: 300
+          evaluationTime: 0.001275849
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:11:25.184258963Z"
+          name: MimirKafkaClientBufferedProduceBytesTooHigh
+          query: max by (cluster, namespace, pod) (max_over_time(cortex_ingest_storage_writer_buffered_produce_bytes{quantile="1.0"}[1m])) / min by (cluster, namespace, pod) (min_over_time(cortex_ingest_storage_writer_buffered_produce_bytes_limit[1m])) * 100 > 50
+          state: inactive
+          type: alerting

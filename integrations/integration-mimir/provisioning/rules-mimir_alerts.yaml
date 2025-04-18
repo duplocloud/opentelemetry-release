@@ -1,0 +1,292 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_alerts
+    namespace: integration-mimir
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            message: Mimir cluster {{ $labels.cluster }}/{{ $labels.namespace }} has {{ printf "%f" $value }} unhealthy ingester(s).
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterunhealthy
+          duration: 900
+          evaluationTime: 0.001607149
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.681896244Z"
+          name: MimirIngesterUnhealthy
+          query: min by (cluster, namespace) (cortex_ring_members{name="ingester",state="Unhealthy"}) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                The route {{ $labels.route }} in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% errors.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrequesterrors
+          duration: 900
+          evaluationTime: 0.002376686
+          health: ok
+          keepFiringFor: 0
+          labels:
+            histogram: classic
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.683510597Z"
+          name: MimirRequestErrors
+          query: (sum by (cluster, namespace, job, route) (rate(cortex_request_duration_seconds_count{route!~"ready|debug_pprof",status_code!~"529|598",status_code=~"5.."}[1m])) / sum by (cluster, namespace, job, route) (rate(cortex_request_duration_seconds_count{route!~"ready|debug_pprof"}[1m]))) * 100 > 1
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                The route {{ $labels.route }} in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% errors.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrequesterrors
+          duration: 900
+          evaluationTime: 0.001450516
+          health: ok
+          keepFiringFor: 0
+          labels:
+            histogram: native
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.685894167Z"
+          name: MimirRequestErrors
+          query: (sum by (cluster, namespace, job, route) (histogram_count(rate(cortex_request_duration_seconds{route!~"ready|debug_pprof",status_code!~"529|598",status_code=~"5.."}[1m]))) / sum by (cluster, namespace, job, route) (histogram_count(rate(cortex_request_duration_seconds{route!~"ready|debug_pprof"}[1m])))) * 100 > 1
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrequestlatency
+          duration: 900
+          evaluationTime: 0.001309859
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.687352593Z"
+          name: MimirRequestLatency
+          query: cluster_namespace_job_route:cortex_request_duration_seconds:99quantile{route!~"metrics|/frontend.Frontend/Process|ready|/schedulerpb.SchedulerForFrontend/FrontendLoop|/schedulerpb.SchedulerForQuerier/QuerierLoop|debug_pprof"} > 2.5
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                An inconsistent runtime config file is used across cluster {{ $labels.cluster }}/{{ $labels.namespace }}.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirinconsistentruntimeconfig
+          duration: 3600
+          evaluationTime: 0.001475927
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.688671026Z"
+          name: MimirInconsistentRuntimeConfig
+          query: count without (sha256) (count by (cluster, namespace, job, sha256) (cortex_runtime_config_hash)) > 1
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                {{ $labels.job }} failed to reload runtime config.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirbadruntimeconfig
+          duration: 300
+          evaluationTime: 0.001085206
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.690153214Z"
+          name: MimirBadRuntimeConfig
+          query: cortex_runtime_config_last_reload_successful == 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                There are {{ $value }} queued up queries in {{ $labels.cluster }}/{{ $labels.namespace }} {{ $labels.job }}.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirfrontendqueriesstuck
+          duration: 300
+          evaluationTime: 0.001091327
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.691243893Z"
+          name: MimirFrontendQueriesStuck
+          query: sum by (cluster, namespace, job) (min_over_time(cortex_query_frontend_queue_length[1m])) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                There are {{ $value }} queued up queries in {{ $labels.cluster }}/{{ $labels.namespace }} {{ $labels.job }}.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirschedulerqueriesstuck
+          duration: 420
+          evaluationTime: 0.000954378
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.692341259Z"
+          name: MimirSchedulerQueriesStuck
+          query: sum by (cluster, namespace, job) (min_over_time(cortex_query_scheduler_queue_length[1m])) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                The cache {{ $labels.name }} used by Mimir {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ printf "%.2f" $value }}% errors for {{ $labels.operation }} operation.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircacherequesterrors
+          duration: 300
+          evaluationTime: 0.00158754
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.693301775Z"
+          name: MimirCacheRequestErrors
+          query: (sum by (cluster, namespace, name, operation) (rate(thanos_memcached_operation_failures_total[1m]) or rate(thanos_cache_operation_failures_total[1m])) / sum by (cluster, namespace, name, operation) (rate(thanos_memcached_operations_total[1m]) or rate(thanos_cache_operations_total[1m]))) * 100 > 5
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has restarted {{ printf "%.2f" $value }} times in the last 30 mins.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterrestarts
+          duration: 0
+          evaluationTime: 0.001782687
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.694905626Z"
+          name: MimirIngesterRestarts
+          query: (sum by (cluster, namespace, pod) (increase(kube_pod_container_status_restarts_total{container=~"(ingester|mimir-write)"}[30m])) >= 2) and (count by (cluster, namespace, pod) (cortex_build_info) > 0)
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir {{ $labels.pod }} in  {{ $labels.cluster }}/{{ $labels.namespace }} is failing to talk to the KV store {{ $labels.kv_name }}.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirkvstorefailure
+          duration: 300
+          evaluationTime: 0.002133934
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.696695188Z"
+          name: MimirKVStoreFailure
+          query: (sum by (cluster, namespace, pod, status_code, kv_name) (rate(cortex_kv_request_duration_seconds_count{status_code!~"2.+"}[1m])) / sum by (cluster, namespace, pod, status_code, kv_name) (rate(cortex_kv_request_duration_seconds_count[1m]))) == 1
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: '{{ $labels.job }}/{{ $labels.pod }} has a number of mmap-ed areas close to the limit.'
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirmemorymapareastoohigh
+          duration: 300
+          evaluationTime: 0.004820489
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: critical
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.698853072Z"
+          name: MimirMemoryMapAreasTooHigh
+          query: process_memory_map_areas{job=~".*/(ingester.*|cortex|mimir|mimir-write.*|store-gateway.*|cortex|mimir|mimir-backend.*)"} / process_memory_map_areas_limit{job=~".*/(ingester.*|cortex|mimir|mimir-write.*|store-gateway.*|cortex|mimir|mimir-backend.*)"} > 0.8
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has no tenants assigned.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterinstancehasnotenants
+          duration: 3600
+          evaluationTime: 0.002618823
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.703681987Z"
+          name: MimirIngesterInstanceHasNoTenants
+          query: (min by (cluster, namespace, pod) (cortex_ingester_memory_users) == 0) and on (cluster, namespace) ((sum by (cluster, namespace) (cortex_ingester_memory_series) / max by (cluster, namespace) (cortex_distributor_replication_factor)) or (sum by (cluster, namespace) (max by (ingester_id, cluster, namespace) (label_replace(cortex_ingester_memory_series, "ingester_id", "$1", "pod", ".*-([0-9]+)$"))))) > 100000
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir ruler {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has no rule groups assigned.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirrulerinstancehasnorulegroups
+          duration: 3600
+          evaluationTime: 0.003788623
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.706309713Z"
+          name: MimirRulerInstanceHasNoRuleGroups
+          query: min by (cluster, namespace, pod) (cortex_ruler_managers_total{pod=~"(.*mimir-)?ruler.*"}) == 0 and on (cluster, namespace) (max by (cluster, namespace) (cortex_ruler_managers_total) > 0) and on (cluster, namespace) (count by (cluster, namespace) (cortex_ruler_managers_total) > 2)
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir ingester {{ $labels.pod }} in {{ $labels.cluster }}/{{ $labels.namespace }} has ingested samples with timestamps more than 1h in the future.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesteddatatoofarinthefuture
+          duration: 300
+          evaluationTime: 0.007618673
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.710107213Z"
+          name: MimirIngestedDataTooFarInTheFuture
+          query: max by (cluster, namespace, pod) (cortex_ingester_tsdb_head_max_timestamp_seconds - time() and cortex_ingester_tsdb_head_max_timestamp_seconds > 0) > 60 * 60
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir store-gateway in {{ $labels.cluster }}/{{ $labels.namespace }} is experiencing {{ $value | humanizePercentage }} errors while doing {{ $labels.operation }} on the object storage.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirstoregatewaytoomanyfailedoperations
+          duration: 300
+          evaluationTime: 0.002385753
+          health: ok
+          keepFiringFor: 0
+          labels:
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.717733434Z"
+          name: MimirStoreGatewayTooManyFailedOperations
+          query: sum by (cluster, namespace, operation) (rate(thanos_objstore_bucket_operation_failures_total{component="store-gateway"}[1m])) > 0
+          state: inactive
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Number of members in Mimir ingester hash ring does not match the expected number in {{ $labels.cluster }}/{{ $labels.namespace }}.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirringmembersmismatch
+          duration: 900
+          evaluationTime: 0.003360709
+          health: ok
+          keepFiringFor: 0
+          labels:
+            component: ingester
+            severity: warning
+          lastError: ""
+          lastEvaluation: "2025-04-18T10:10:55.720137033Z"
+          name: MimirRingMembersMismatch
+          query: (avg by (cluster, namespace) (sum by (cluster, namespace, pod) (cortex_ring_members{job!~".*/(ingester.*-partition)",job=~".*/(ingester.*|cortex|mimir|mimir-write.*)",name="ingester"})) != sum by (cluster, namespace) (up{job!~".*/(ingester.*-partition)",job=~".*/(ingester.*|cortex|mimir|mimir-write.*)"})) and (count by (cluster, namespace) (cortex_build_info) > 0)
+          state: inactive
+          type: alerting
