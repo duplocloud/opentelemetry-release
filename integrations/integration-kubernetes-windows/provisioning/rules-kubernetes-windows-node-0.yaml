@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: PrometheusRuleGroup
 metadata:
-    name: kubernetes-windows-node-0
+    name: kubernetes-windows-node
     namespace: integrations-kubernetes-windows
 spec:
     rules:
@@ -84,5 +84,9 @@ spec:
         - labels: {}
           name: :windows_node_net_saturation:sum_irate
           query: sum by (cluster) (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[5m])) + sum by (cluster) (irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[5m]))
+          type: recording
+        - labels: {}
+          name: node:windows_node_net_saturation:sum_irate
+          query: sum by (cluster, instance) ((irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[5m]) + irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[5m])))
           type: recording
           

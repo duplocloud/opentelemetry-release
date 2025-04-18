@@ -3,5 +3,5 @@ kind: DashboardFolder
 metadata:
     name: integration-mimir
 spec:
-    title: integration-mimir
+    title: Integration-Mimir
     uid: integration-mimir

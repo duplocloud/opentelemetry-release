@@ -3,5 +3,5 @@ kind: DashboardFolder
 metadata:
     name: integration-loki
 spec:
-    title: integration-loki
+    title: Integration-Loki
     uid: integration-loki

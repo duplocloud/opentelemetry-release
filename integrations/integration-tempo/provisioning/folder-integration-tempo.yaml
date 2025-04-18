@@ -3,5 +3,5 @@ kind: DashboardFolder
 metadata:
     name: integration-tempo
 spec:
-    title: integration-tempo
+    title: Integration-Tempo
     uid: integration-tempo
