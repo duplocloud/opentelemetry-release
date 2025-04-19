@@ -1,0 +1,73 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: loki_alerts
+    namespace: integration-loki
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            description: |
+                {{ $labels.cluster }} {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}% errors.
+            summary: Loki request error rate is high.
+          duration: 900
+          labels:
+            severity: critical
+          name: LokiRequestErrors
+          query: 100 * sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_count{status_code=~"5.."}[2m])) / sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_count[2m])) > 10
+          type: alerting
+        - alerts: []
+          annotations:
+            description: |
+                {{ $labels.cluster }} {{ $labels.job }} is experiencing {{ printf "%.2f" $value }}% increase of panics.
+            summary: Loki requests are causing code panics.
+          duration: 0
+          labels:
+            severity: critical
+          name: LokiRequestPanics
+          query: sum by (cluster, namespace, job) (increase(loki_panic_total[10m])) > 0
+          type: alerting
+        - alerts: []
+          annotations:
+            description: |
+                {{ $labels.cluster }} {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
+            summary: Loki request error latency is high.
+          duration: 900
+          labels:
+            severity: critical
+          name: LokiRequestLatency
+          query: cluster_namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*|/schedulerpb.SchedulerForQuerier/QuerierLoop"} > 1
+          type: alerting
+        - alerts: []
+          annotations:
+            description: |
+                {{ $labels.cluster }} {{ $labels.namespace }} has had {{ printf "%.0f" $value }} compactors running for more than 5m. Only one compactor should run at a time.
+            summary: Loki deployment is running more than one compactor.
+          duration: 300
+          labels:
+            severity: warning
+          name: LokiTooManyCompactorsRunning
+          query: sum by (cluster, namespace) (loki_boltdb_shipper_compactor_running) > 1
+          type: alerting
+        - alerts: []
+          annotations:
+            description: |
+                {{ $labels.cluster }} {{ $labels.namespace }} has not run compaction in the last 3 hours since the last compaction. This may indicate a problem with the compactor.
+            summary: Loki compaction has not run in the last 3 hours since the last compaction.
+          duration: 3600
+          labels:
+            severity: critical
+          name: LokiCompactorHasNotSuccessfullyRunCompaction
+          query: min by (cluster, namespace) (time() - (loki_boltdb_shipper_compact_tables_operation_last_successful_run_timestamp_seconds > 0)) > 60 * 60 * 3
+          type: alerting
+        - alerts: []
+          annotations:
+            description: |
+                {{ $labels.cluster }} {{ $labels.namespace }} has not run compaction in the last 3h since startup. This may indicate a problem with the compactor.
+            summary: Loki compaction has not run in the last 3h since startup.
+          duration: 3600
+          labels:
+            severity: critical
+          name: LokiCompactorHasNotSuccessfullyRunCompaction
+          query: max by (cluster, namespace) (max_over_time(loki_boltdb_shipper_compact_tables_operation_last_successful_run_timestamp_seconds[3h])) == 0
+          type: alerting

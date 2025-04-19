@@ -1,0 +1,79 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: loki_rules
+    namespace: integration-loki
+spec:
+    rules:
+        - name: cluster_job:loki_request_duration_seconds:99quantile
+          labels: {}
+          query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(loki_request_duration_seconds_bucket[1m])))
+          type: recording
+        - name: cluster_job:loki_request_duration_seconds:50quantile
+          labels: {}
+          query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(loki_request_duration_seconds_bucket[1m])))
+          type: recording
+        - name: cluster_job:loki_request_duration_seconds:avg
+          labels: {}
+          query: sum by (cluster, job) (rate(loki_request_duration_seconds_sum[1m])) / sum by (cluster, job) (rate(loki_request_duration_seconds_count[1m]))
+          type: recording
+        - name: cluster_job:loki_request_duration_seconds_bucket:sum_rate
+          labels: {}
+          query: sum by (le, cluster, job) (rate(loki_request_duration_seconds_bucket[1m]))
+          type: recording
+        - name: cluster_job:loki_request_duration_seconds_sum:sum_rate
+          labels: {}
+          query: sum by (cluster, job) (rate(loki_request_duration_seconds_sum[1m]))
+          type: recording
+        - name: cluster_job:loki_request_duration_seconds_count:sum_rate
+          labels: {}
+          query: sum by (cluster, job) (rate(loki_request_duration_seconds_count[1m]))
+          type: recording
+        - name: cluster_job_route:loki_request_duration_seconds:99quantile
+          labels: {}
+          query: histogram_quantile(0.99, sum by (le, cluster, job, route) (rate(loki_request_duration_seconds_bucket[1m])))
+          type: recording
+        - name: cluster_job_route:loki_request_duration_seconds:50quantile
+          labels: {}
+          query: histogram_quantile(0.5, sum by (le, cluster, job, route) (rate(loki_request_duration_seconds_bucket[1m])))
+          type: recording
+        - name: cluster_job_route:loki_request_duration_seconds:avg
+          labels: {}
+          query: sum by (cluster, job, route) (rate(loki_request_duration_seconds_sum[1m])) / sum by (cluster, job, route) (rate(loki_request_duration_seconds_count[1m]))
+          type: recording
+        - name: cluster_job_route:loki_request_duration_seconds_bucket:sum_rate
+          labels: {}
+          query: sum by (le, cluster, job, route) (rate(loki_request_duration_seconds_bucket[1m]))
+          type: recording
+        - name: cluster_job_route:loki_request_duration_seconds_sum:sum_rate
+          labels: {}
+          query: sum by (cluster, job, route) (rate(loki_request_duration_seconds_sum[1m]))
+          type: recording
+        - name: cluster_job_route:loki_request_duration_seconds_count:sum_rate
+          labels: {}
+          query: sum by (cluster, job, route) (rate(loki_request_duration_seconds_count[1m]))
+          type: recording
+        - name: cluster_namespace_job_route:loki_request_duration_seconds:99quantile
+          labels: {}
+          query: histogram_quantile(0.99, sum by (le, cluster, namespace, job, route) (rate(loki_request_duration_seconds_bucket[1m])))
+          type: recording
+        - name: cluster_namespace_job_route:loki_request_duration_seconds:50quantile
+          labels: {}
+          query: histogram_quantile(0.5, sum by (le, cluster, namespace, job, route) (rate(loki_request_duration_seconds_bucket[1m])))
+          type: recording
+        - name: cluster_namespace_job_route:loki_request_duration_seconds:avg
+          labels: {}
+          query: sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_sum[1m])) / sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_count[1m]))
+          type: recording
+        - name: cluster_namespace_job_route:loki_request_duration_seconds_bucket:sum_rate
+          labels: {}
+          query: sum by (le, cluster, namespace, job, route) (rate(loki_request_duration_seconds_bucket[1m]))
+          type: recording
+        - name: cluster_namespace_job_route:loki_request_duration_seconds_sum:sum_rate
+          labels: {}
+          query: sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_sum[1m]))
+          type: recording
+        - name: cluster_namespace_job_route:loki_request_duration_seconds_count:sum_rate
+          labels: {}
+          query: sum by (cluster, namespace, job, route) (rate(loki_request_duration_seconds_count[1m]))
+          type: recording

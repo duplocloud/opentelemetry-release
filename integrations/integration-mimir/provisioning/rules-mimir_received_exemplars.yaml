@@ -1,0 +1,11 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_received_exemplars
+    namespace: integration-mimir
+spec:
+    rules:
+        - labels: {}
+          name: cluster_namespace_job:cortex_distributor_received_exemplars:rate5m
+          query: sum by (cluster, namespace, job) (rate(cortex_distributor_received_exemplars_total[5m]))
+          type: recording

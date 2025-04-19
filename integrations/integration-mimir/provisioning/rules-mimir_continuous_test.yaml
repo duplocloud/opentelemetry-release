@@ -1,0 +1,37 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_continuous_test
+    namespace: integration-mimir
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            message: Mimir continuous test {{ $labels.test }} in {{ $labels.cluster }}/{{ $labels.namespace }} is not effectively running because writes are failing.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircontinuoustestnotrunningonwrites
+          duration: 3600
+          labels:
+            severity: warning
+          name: MimirContinuousTestNotRunningOnWrites
+          query: sum by (cluster, namespace, test) (rate(mimir_continuous_test_writes_failed_total[5m])) > 0
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir continuous test {{ $labels.test }} in {{ $labels.cluster }}/{{ $labels.namespace }} is not effectively running because queries are failing.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircontinuoustestnotrunningonreads
+          duration: 3600
+          labels:
+            severity: warning
+          name: MimirContinuousTestNotRunningOnReads
+          query: sum by (cluster, namespace, test) (rate(mimir_continuous_test_queries_failed_total[5m])) > 0
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Mimir continuous test {{ $labels.test }} in {{ $labels.cluster }}/{{ $labels.namespace }} failed when asserting query results.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimircontinuoustestfailed
+          duration: 0
+          labels:
+            severity: warning
+          name: MimirContinuousTestFailed
+          query: sum by (cluster, namespace, test) (rate(mimir_continuous_test_query_result_checks_failed_total[10m])) > 0
+          type: alerting

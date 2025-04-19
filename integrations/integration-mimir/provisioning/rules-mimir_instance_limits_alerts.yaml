@@ -1,0 +1,73 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_instance_limits_alerts
+    namespace: integration-mimir
+spec:
+    rules:
+        - alerts: []
+          annotations:
+            message: |
+                Ingester {{ $labels.job }}/{{ $labels.pod }} has reached {{ $value | humanizePercentage }} of its series limit.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterreachingserieslimit
+          duration: 10800
+          labels:
+            severity: warning
+          name: MimirIngesterReachingSeriesLimit
+          query: ((cortex_ingester_memory_series / ignoring (limit) cortex_ingester_instance_limits{limit="max_series"}) and ignoring (limit) (cortex_ingester_instance_limits{limit="max_series"} > 0)) > 0.8
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Ingester {{ $labels.job }}/{{ $labels.pod }} has reached {{ $value | humanizePercentage }} of its series limit.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterreachingserieslimit
+          duration: 300
+          labels:
+            severity: critical
+          name: MimirIngesterReachingSeriesLimit
+          query: ((cortex_ingester_memory_series / ignoring (limit) cortex_ingester_instance_limits{limit="max_series"}) and ignoring (limit) (cortex_ingester_instance_limits{limit="max_series"} > 0)) > 0.9
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Ingester {{ $labels.job }}/{{ $labels.pod }} has reached {{ $value | humanizePercentage }} of its tenant limit.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterreachingtenantslimit
+          duration: 300
+          labels:
+            severity: warning
+          name: MimirIngesterReachingTenantsLimit
+          query: ((cortex_ingester_memory_users / ignoring (limit) cortex_ingester_instance_limits{limit="max_tenants"}) and ignoring (limit) (cortex_ingester_instance_limits{limit="max_tenants"} > 0)) > 0.7
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Ingester {{ $labels.job }}/{{ $labels.pod }} has reached {{ $value | humanizePercentage }} of its tenant limit.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimiringesterreachingtenantslimit
+          duration: 300
+          labels:
+            severity: critical
+          name: MimirIngesterReachingTenantsLimit
+          query: ((cortex_ingester_memory_users / ignoring (limit) cortex_ingester_instance_limits{limit="max_tenants"}) and ignoring (limit) (cortex_ingester_instance_limits{limit="max_tenants"} > 0)) > 0.8
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Mimir instance {{ $labels.job }}/{{ $labels.pod }} has reached {{ $value | humanizePercentage }} of its TCP connections limit for {{ $labels.protocol }} protocol.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirreachingtcpconnectionslimit
+          duration: 300
+          labels:
+            severity: critical
+          name: MimirReachingTCPConnectionsLimit
+          query: cortex_tcp_connections / cortex_tcp_connections_limit > 0.8 and cortex_tcp_connections_limit > 0
+          type: alerting
+        - alerts: []
+          annotations:
+            message: |
+                Distributor {{ $labels.job }}/{{ $labels.pod }} has reached {{ $value | humanizePercentage }} of its inflight push request limit.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirdistributorreachinginflightpushrequestlimit
+          duration: 300
+          labels:
+            severity: critical
+          name: MimirDistributorReachingInflightPushRequestLimit
+          query: ((cortex_distributor_inflight_push_requests / ignoring (limit) cortex_distributor_instance_limits{limit="max_inflight_push_requests"}) and ignoring (limit) (cortex_distributor_instance_limits{limit="max_inflight_push_requests"} > 0)) > 0.8
+          type: alerting

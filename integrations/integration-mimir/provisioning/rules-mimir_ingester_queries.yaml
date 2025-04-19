@@ -1,0 +1,79 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_ingester_queries
+    namespace: integration-mimir
+spec:
+    rules:
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_series:99quantile
+          query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(cortex_ingester_queried_series_bucket[1m])))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_series:50quantile
+          query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(cortex_ingester_queried_series_bucket[1m])))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_series:avg
+          query: sum by (cluster, job) (rate(cortex_ingester_queried_series_sum[1m])) / sum by (cluster, job) (rate(cortex_ingester_queried_series_count[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_series_bucket:sum_rate
+          query: sum by (le, cluster, job) (rate(cortex_ingester_queried_series_bucket[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_series_sum:sum_rate
+          query: sum by (cluster, job) (rate(cortex_ingester_queried_series_sum[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_series_count:sum_rate
+          query: sum by (cluster, job) (rate(cortex_ingester_queried_series_count[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_samples:99quantile
+          query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(cortex_ingester_queried_samples_bucket[1m])))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_samples:50quantile
+          query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(cortex_ingester_queried_samples_bucket[1m])))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_samples:avg
+          query: sum by (cluster, job) (rate(cortex_ingester_queried_samples_sum[1m])) / sum by (cluster, job) (rate(cortex_ingester_queried_samples_count[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_samples_bucket:sum_rate
+          query: sum by (le, cluster, job) (rate(cortex_ingester_queried_samples_bucket[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_samples_sum:sum_rate
+          query: sum by (cluster, job) (rate(cortex_ingester_queried_samples_sum[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_samples_count:sum_rate
+          query: sum by (cluster, job) (rate(cortex_ingester_queried_samples_count[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_exemplars:99quantile
+          query: histogram_quantile(0.99, sum by (le, cluster, job) (rate(cortex_ingester_queried_exemplars_bucket[1m])))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_exemplars:50quantile
+          query: histogram_quantile(0.5, sum by (le, cluster, job) (rate(cortex_ingester_queried_exemplars_bucket[1m])))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_exemplars:avg
+          query: sum by (cluster, job) (rate(cortex_ingester_queried_exemplars_sum[1m])) / sum by (cluster, job) (rate(cortex_ingester_queried_exemplars_count[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_exemplars_bucket:sum_rate
+          query: sum by (le, cluster, job) (rate(cortex_ingester_queried_exemplars_bucket[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_exemplars_sum:sum_rate
+          query: sum by (cluster, job) (rate(cortex_ingester_queried_exemplars_sum[1m]))
+          type: recording
+        - labels: {}
+          name: cluster_job:cortex_ingester_queried_exemplars_count:sum_rate
+          query: sum by (cluster, job) (rate(cortex_ingester_queried_exemplars_count[1m]))
+          type: recording

@@ -1,0 +1,78 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: mimir_scaling_rules
+    namespace: integration-mimir
+spec:
+    rules:
+        - labels: {}
+          name: cluster_namespace_deployment:actual_replicas:count
+          query: sum by (cluster, namespace, deployment) (label_replace(kube_deployment_spec_replicas, "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?")) or sum by (cluster, namespace, deployment) (label_replace(kube_statefulset_replicas, "deployment", "$1", "statefulset", "(.*?)(?:-zone-[a-z])?"))
+          type: recording
+        - labels:
+            deployment: distributor
+            reason: sample_rate
+          name: cluster_namespace_deployment_reason:required_replicas:count
+          query: ceil(quantile_over_time(0.99, sum by (cluster, namespace) (cluster_namespace_job:cortex_distributor_received_samples:rate5m)[1d:]) / 240000)
+          type: recording
+        - labels:
+            deployment: distributor
+            reason: sample_rate_limits
+          name: cluster_namespace_deployment_reason:required_replicas:count
+          query: ceil(sum by (cluster, namespace) (cortex_limits_overrides{limit_name="ingestion_rate"}) * 0.6 / 240000)
+          type: recording
+        - labels:
+            deployment: ingester
+            reason: sample_rate
+          name: cluster_namespace_deployment_reason:required_replicas:count
+          query: ceil(quantile_over_time(0.99, sum by (cluster, namespace) (cluster_namespace_job:cortex_distributor_received_samples:rate5m)[1d:]) * 3 / 80000)
+          type: recording
+        - labels:
+            deployment: ingester
+            reason: active_series
+          name: cluster_namespace_deployment_reason:required_replicas:count
+          query: ceil(quantile_over_time(0.99, sum by (cluster, namespace) (cortex_ingester_memory_series)[1d:]) / 1.5e+06)
+          type: recording
+        - labels:
+            deployment: ingester
+            reason: active_series_limits
+          name: cluster_namespace_deployment_reason:required_replicas:count
+          query: ceil(sum by (cluster, namespace) (cortex_limits_overrides{limit_name="max_global_series_per_user"}) * 3 * 0.6 / 1.5e+06)
+          type: recording
+        - labels:
+            deployment: ingester
+            reason: sample_rate_limits
+          name: cluster_namespace_deployment_reason:required_replicas:count
+          query: ceil(sum by (cluster, namespace) (cortex_limits_overrides{limit_name="ingestion_rate"}) * 0.6 / 80000)
+          type: recording
+        - labels:
+            deployment: memcached
+          name: cluster_namespace_deployment_reason:required_replicas:count
+          query: ceil((sum by (cluster, namespace) (cortex_ingester_tsdb_storage_blocks_bytes{job=~".+/ingester.*"}) / 4) / avg by (cluster, namespace) (memcached_limit_bytes{job=~".+/memcached"}))
+          type: recording
+        - labels: {}
+          name: cluster_namespace_deployment:container_cpu_usage_seconds_total:sum_rate
+          query: sum by (cluster, namespace, deployment) (label_replace(label_replace(sum by (cluster, namespace, pod) (rate(container_cpu_usage_seconds_total[1m])), "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"), "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"))
+          type: recording
+        - labels: {}
+          name: cluster_namespace_deployment:kube_pod_container_resource_requests_cpu_cores:sum
+          query: (sum by (cluster, namespace, deployment) (label_replace(label_replace(kube_pod_container_resource_requests_cpu_cores, "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"), "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"))) or (sum by (cluster, namespace, deployment) (label_replace(label_replace(kube_pod_container_resource_requests{resource="cpu"}, "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"), "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?")))
+          type: recording
+        - labels:
+            reason: cpu_usage
+          name: cluster_namespace_deployment_reason:required_replicas:count
+          query: ceil(cluster_namespace_deployment:actual_replicas:count * quantile_over_time(0.99, cluster_namespace_deployment:container_cpu_usage_seconds_total:sum_rate[1d]) / cluster_namespace_deployment:kube_pod_container_resource_requests_cpu_cores:sum)
+          type: recording
+        - labels: {}
+          name: cluster_namespace_deployment:container_memory_usage_bytes:sum
+          query: sum by (cluster, namespace, deployment) (label_replace(label_replace(container_memory_usage_bytes{image!=""}, "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"), "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"))
+          type: recording
+        - labels: {}
+          name: cluster_namespace_deployment:kube_pod_container_resource_requests_memory_bytes:sum
+          query: (sum by (cluster, namespace, deployment) (label_replace(label_replace(kube_pod_container_resource_requests_memory_bytes, "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"), "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?"))) or (sum by (cluster, namespace, deployment) (label_replace(label_replace(kube_pod_container_resource_requests{resource="memory"}, "deployment", "$1", "pod", "(.*)-(?:([0-9]+)|([a-z0-9]+)-([a-z0-9]+))"), "deployment", "$1", "deployment", "(.*?)(?:-zone-[a-z])?")))
+          type: recording
+        - labels:
+            reason: memory_usage
+          name: cluster_namespace_deployment_reason:required_replicas:count
+          query: ceil(cluster_namespace_deployment:actual_replicas:count * quantile_over_time(0.99, cluster_namespace_deployment:container_memory_usage_bytes:sum[1d]) / cluster_namespace_deployment:kube_pod_container_resource_requests_memory_bytes:sum)
+          type: recording
