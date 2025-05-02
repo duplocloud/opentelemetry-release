@@ -175,3 +175,13 @@ spec:
           name: TempoIngesterReplayErrors
           query: sum by (cluster, namespace, tenant) (increase(tempo_ingester_replay_errors_total{namespace=~".*"}[5m])) > 0
           type: alerting
+        - alerts: []
+          annotations:
+            message: Tempo ingester has not received any trace data in the last 5 minutes. Check upstream services or ingestion pipeline.
+            runbook_url: ""
+          duration: 300
+          labels:
+            severity: critical
+          name: TempoIngesterNotReceivedTraceData
+          query: rate(tempo_ingester_bytes_received_total[5m]) < 1
+          type: alerting

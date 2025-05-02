@@ -1,0 +1,72 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRuleGroup
+metadata:
+    name: duplo-common.pod-alerts
+spec:
+    folderUid: duplo-common
+    interval: 60
+    rules:
+        - annotations:
+            description: |-
+                Pod {{$labels.pod}} in namespace {{$labels.namespace}} termination reason  {{$labels.reason}}.
+
+                          - **Instance**: {{$labels.instance}}
+                          - **Service**: {{$labels.service}}
+                          - **Namespace**: {{$labels.namespace}}
+            summary: 'Pod OOM Alert: {{$labels.pod}}'
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} > 0
+                hide: false
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: duplo-common
+          for: 1m0s
+          labels:
+            severity: warning
+          noDataState: NoData
+          orgID: 1
+          ruleGroup: Pod alerts
+          title: Pod OOM Alert
+          uid: PodOOMalert
+    title: Pod alerts
