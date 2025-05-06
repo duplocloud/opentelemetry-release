@@ -22,5 +22,8 @@ cd observability
 # Install requirements
 pip install -r requirements.txt
 
+echo "[*] Encrypting password file..."
+python encrypt_password_file.py
+
 # Run the script
 python $SCRIPT_PATH 

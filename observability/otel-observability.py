@@ -12,6 +12,7 @@ import os
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union, Tuple
+from decryptor import decrypt_password
 
 import requests
 
@@ -140,8 +141,8 @@ def send_to_loki(
     
     # Get Loki credentials and URL from environment
     loki_url = os.getenv('LOKI_URL')
-    loki_username = os.getenv('LOKI_USERNAME')
-    loki_password = os.getenv('LOKI_PASSWORD')
+    loki_username = "duplocloud"
+    loki_password = decrypt_password()
     
     # Get static labels from environment variables
     cluster = os.getenv('CLUSTER', '')
@@ -294,7 +295,7 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
         'duplo_url': os.getenv('DUPLO_URL', ''),
         'job_version': os.getenv('JOB_VERSION', ''),
         # Ability to filter the custom OTEL namespace for the query
-        'namespace_filter': os.getenv('NAMESPACE_FILTER', '.*otel.*')
+        'namespace_filter': os.getenv('NAMESPACE_FILTER', '.*(otel|aos).*')
     }
     
     # Validate required environment variables
