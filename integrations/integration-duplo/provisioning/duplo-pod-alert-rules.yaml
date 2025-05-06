@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: AlertRuleGroup
 metadata:
-    name: duplo-common.pod-alerts
+    name: Integration-Kubernetes.pod-alerts
 spec:
     folderUid: duplo-common
     interval: 60
