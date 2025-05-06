@@ -294,7 +294,7 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
         'duplo_url': os.getenv('DUPLO_URL', ''),
         'job_version': os.getenv('JOB_VERSION', ''),
         # Ability to filter the custom OTEL namespace for the query
-        'namespace_filter': os.getenv('NAMESPACE_FILTER', '.*otel.*')
+        'namespace_filter': os.getenv('NAMESPACE_FILTER', '.*(otel|aos).*')
     }
     
     # Validate required environment variables
