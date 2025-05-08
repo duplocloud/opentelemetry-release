@@ -8,9 +8,8 @@ spec:
     rules:
         - annotations:
             description: |-
-                Pod - {{ $labels.pod }}
-                Log - {{ $labels.msg }}
-            summary: 'Loki cluster has insufficient healthy replicas : Cluster - {{ $labels.cluster }}'
+                Loki is throttling logs in cluster {{ $labels.cluster }}, namespace {{ $labels.namespace }} due to ingestion rate limits. Reduce log volume or adjust limits.
+            summary: 'Loki ingestion rate limit exceeded in {{ $labels.cluster }}/{{ $labels.namespace }}'
           condition: C
           data:
             - datasourceUid: duplo-logging
@@ -19,67 +18,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({service_name="duplo-logging"} |~ "(?i)at least 2 live replicas required" | json | logfmt | drop __error__, __error_details__ | caller=~".*logging.go.*"  [$__auto])) by (msg, cluster, level, namespace, pod)
-                instant: true
-                intervalMs: 1000
-                maxDataPoints: 43200
-                queryType: instant
-                refId: A
-              queryType: instant
-              refId: A
-              relativeTimeRange:
-                from: 600
-            - datasourceUid: __expr__
-              model:
-                conditions:
-                    - evaluator:
-                        params:
-                            - 0
-                        type: gt
-                      operator:
-                        type: and
-                      query:
-                        params:
-                            - C
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                datasource:
-                    type: __expr__
-                    uid: __expr__
-                expression: A
-                intervalMs: 1000
-                maxDataPoints: 43200
-                refId: C
-                type: threshold
-              refId: C
-              relativeTimeRange: {}
-          execErrState: Error
-          folderUID: integration-loki
-          for: 1m0s
-          labels:
-            severity: warning
-          noDataState: NoData
-          orgID: 1
-          ruleGroup: Logs
-          title: Loki Low Live Replicas
-          uid: Lokilowlivereplicas
-        - annotations:
-            description: |-
-                Log - {{$labels.details}}
-                Msg : {{$labels.msg}}
-                Pod : {{$labels.pod}}
-            summary: 'Loki rate limit alert : Cluster - {{$labels.cluster}}'
-          condition: C
-          data:
-            - datasourceUid: duplo-logging
-              model:
-                datasource:
-                    type: loki
-                    uid: duplo-logging
-                editorMode: code
-                expr: sum(count_over_time({container="loki"} |~ "(?i)rate limit" | json | logfmt | drop __error__, __error_details__ | caller=~".*manager.go.*" | msg="write operation failed" [$__auto])) by (msg, cluster, level, namespace, details)
+                expr: sum(count_over_time({container="loki"} |~ "(?i)rate limit" | json | logfmt | drop __error__, __error_details__ | caller=~".*manager.go.*" | msg="write operation failed" [$__auto])) by (cluster, namespace)
                 instant: true
                 intervalMs: 1000
                 maxDataPoints: 43200

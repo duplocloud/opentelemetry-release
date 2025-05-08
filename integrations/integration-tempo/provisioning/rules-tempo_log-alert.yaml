@@ -7,8 +7,8 @@ spec:
     interval: 60
     rules:
         - annotations:
-            description: Log - {{$labels.msg}} - {{$labels.err}}
-            summary: 'Compactor failed to get ring : Cluster - {{$labels.cluster}}'
+            description: 'Tempo dropped traces in cluster {{ $labels.cluster }}, namespace {{ $labels.namespace }} due to size limits (e.g., >524KB). Review trace volume or increase limits.'
+            summary: 'Tempo trace too large detected in {{ $labels.cluster }}/{{ $labels.namespace }}'
           condition: C
           data:
             - datasourceUid: duplo-logging
@@ -17,64 +17,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({service_name="tempo"} | json | logfmt | drop __error__, __error_details__ | caller=~".*compactor.go.*" | msg="failed to get ring" | err=~".*at least 1 live replicas required, could only find 0.*" | line_format "{{ . }}" [$__auto])) by (msg, cluster,err, level, namespace)
-                instant: true
-                intervalMs: 1000
-                maxDataPoints: 43200
-                queryType: instant
-                refId: A
-              queryType: instant
-              refId: A
-              relativeTimeRange:
-                from: 900
-            - datasourceUid: __expr__
-              model:
-                conditions:
-                    - evaluator:
-                        params:
-                            - 0
-                        type: gt
-                      operator:
-                        type: and
-                      query:
-                        params:
-                            - C
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                datasource:
-                    type: __expr__
-                    uid: __expr__
-                expression: A
-                intervalMs: 1000
-                maxDataPoints: 43200
-                refId: C
-                type: threshold
-              refId: C
-              relativeTimeRange: {}
-          execErrState: Error
-          folderUID: integration-tempo
-          for: 1m0s
-          labels:
-            severity: warning
-          noDataState: NoData
-          orgID: 1
-          ruleGroup: Logs
-          title: Tempo Compactor Alert
-          uid: Tempocompactoralert
-        - annotations:
-            description: 'Log - {{$labels.msg}} - max : {{$labels.max}} - Size : {{$labels.size}}'
-            summary: 'Tempo rate limit error : Cluster - {{$labels.cluster}}'
-          condition: C
-          data:
-            - datasourceUid: duplo-logging
-              model:
-                datasource:
-                    type: loki
-                    uid: duplo-logging
-                editorMode: code
-                expr: sum(count_over_time({service_name="tempo"} | json | logfmt | drop __error__, __error_details__ | caller=~".*rate_limited_logger.*" | msg="TRACE_TOO_LARGE" [$__auto])) by (msg, cluster,err, level, namespace, max, size)
+                expr: sum(count_over_time({service_name="tempo"} | json | logfmt | drop __error__, __error_details__ | caller=~".*rate_limited_logger.*" | msg="TRACE_TOO_LARGE" [$__auto])) by (msg, cluster,err, namespace, max, size)
                 hide: false
                 instant: true
                 intervalMs: 1000
@@ -123,9 +66,8 @@ spec:
           uid: Temporatelimiterror
         - annotations:
             description: |-
-                Pod - {{ $labels.pod }}
-                Log - {{ $labels.msg }}
-            summary: 'Tempo compactor failure logs detected : Cluster - {{ $labels.cluster }}'
+                The compactor in Tempo (cluster: {{ $labels.cluster }}, namespace: {{ $labels.namespace }}) was marked suspect, possibly due to network issues or failure to communicate with other ring members.
+            summary: 'Tempo compactor {{ $labels.cluster }}/{{ $labels.namespace }} is unstable'
           condition: C
           data:
             - datasourceUid: duplo-logging
@@ -134,7 +76,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({service_name="tempo"} |~ "(?i)(Marking duplo-tracing-compactor|Suspect duplo-tracing-compactor)" | json | logfmt | drop __error__, __error_details__ | caller=~".*memberlist_logger.go.*"  [$__auto])) by (msg, cluster, level, namespace, pod)
+                expr: sum(count_over_time({service_name="tempo"} |~ "(?i)(Marking duplo-tracing-compactor|Suspect duplo-tracing-compactor)" | json | logfmt | drop __error__, __error_details__ | caller=~".*memberlist_logger.go.*"  [$__auto])) by (msg, cluster, namespace, pod)
                 hide: false
                 instant: true
                 intervalMs: 1000

@@ -80,7 +80,7 @@ spec:
           labels:
             severity: warning
           name: LokiHasNoInsufficientHealthyReplicas
-          query: min(loki_ring_members{state="ACTIVE"} < 2)
+          query: min by (cluster, namespace) (count(loki_ring_members{state="ACTIVE"}) < 2)
           type: alerting
         - alerts: []
           annotations:
@@ -89,7 +89,7 @@ spec:
           labels:
             severity: critical
           name: LokiCompactorUnhealthy
-          query: max by (cluster, namespace) (loki_ring_members{name="compactor",namespace=~".*",state="Unhealthy"}) > 0
+          query: max by (cluster, namespace) (loki_ring_members{name="compactor",state="Unhealthy"}) > 0
           type: alerting
         - alerts: []
           annotations:
@@ -98,7 +98,7 @@ spec:
           labels:
             severity: warning
           name: LokiDistributorUnhealthy
-          query: max by (cluster, namespace) (loki_ring_members{name="distributor",namespace=~".*",state="Unhealthy"}) > 0
+          query: max by (cluster, namespace) (loki_ring_members{name="distributor",state="Unhealthy"}) > 0
           type: alerting
         - alerts: []
           annotations:
@@ -107,6 +107,6 @@ spec:
           labels:
             severity: warning
           name: LokiIngesterUnhealthy
-          query: max by (cluster, namespace) (loki_ring_members{name="ingester",namespace=~".*",state="Unhealthy"}) > 0
+          query: max by (cluster, namespace) (loki_ring_members{name="ingester",state="Unhealthy"}) > 0
           type: alerting
         

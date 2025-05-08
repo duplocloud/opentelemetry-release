@@ -7,13 +7,8 @@ spec:
     interval: 60
     rules:
         - annotations:
-            description: |-
-                Pod {{$labels.pod}} in namespace {{$labels.namespace}} termination reason  {{$labels.reason}}.
-
-                          - **Instance**: {{$labels.instance}}
-                          - **Service**: {{$labels.service}}
-                          - **Namespace**: {{$labels.namespace}}
-            summary: 'Pod OOM Alert: {{$labels.pod}}'
+            description: 'The pod `{{ $labels.pod }}` in namespace `{{ $labels.namespace }}` (cluster: `{{ $labels.cluster }}`) experienced an OOMKilled event.'
+            summary: OOMKilled pod detected in {{ $labels.namespace }}/{{ $labels.pod }}
           condition: C
           data:
             - datasourceUid: duplo-metrics
@@ -22,17 +17,18 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: kube_pod_container_status_last_terminated_reason{reason="OOMKilled"} > 0
-                hide: false
-                instant: true
+                exemplar: false
+                expr: sum by (pod, cluster, namespace) (kube_pod_container_status_terminated_reason{reason="OOMKilled"})>0
+                format: time_series
+                instant: false
                 intervalMs: 1000
                 legendFormat: __auto
                 maxDataPoints: 43200
-                range: false
+                range: true
                 refId: A
               refId: A
               relativeTimeRange:
-                from: 600
+                from: 900
             - datasourceUid: __expr__
               model:
                 conditions:
@@ -52,21 +48,48 @@ spec:
                 datasource:
                     type: __expr__
                     uid: __expr__
-                expression: A
+                expression: B
                 intervalMs: 1000
                 maxDataPoints: 43200
                 refId: C
                 type: threshold
               refId: C
               relativeTimeRange: {}
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params: []
+                      reducer:
+                        params: []
+                        type: avg
+                      type: query
+                datasource:
+                    name: Expression
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                hide: false
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+              refId: B
+              relativeTimeRange: {}
           execErrState: Error
           folderUID: duplo-common
           for: 1m0s
-          labels:
-            severity: warning
           noDataState: NoData
           orgID: 1
-          ruleGroup: Pod alerts
+          ruleGroup: Pod-alerts
           title: Pod OOM Alert
           uid: PodOOMalert
     title: Pod alerts
