@@ -11,14 +11,18 @@ spec:
             summary: OOMKilled pod detected in {{ $labels.namespace }}/{{ $labels.pod }}
           condition: C
           data:
-            - datasourceUid: duplo-metrics
+            - refId: A
+              relativeTimeRange:
+                from: 900
+                to: 0
+              datasourceUid: duplo-metrics
               model:
                 datasource:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
                 exemplar: false
-                expr: sum by (pod, cluster, namespace) (kube_pod_container_status_terminated_reason{reason="OOMKilled"})>0
+                expr: sum by (pod, cluster, namespace)((kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 15m >= 1) * ignoring(reason) kube_pod_container_status_last_terminated_reason{reason='OOMKilled'} > 0)
                 format: time_series
                 instant: false
                 intervalMs: 1000
@@ -26,10 +30,8 @@ spec:
                 maxDataPoints: 43200
                 range: true
                 refId: A
-              refId: A
-              relativeTimeRange:
-                from: 900
-            - datasourceUid: __expr__
+            - refId: C
+              datasourceUid: __expr__
               model:
                 conditions:
                     - evaluator:
@@ -53,9 +55,8 @@ spec:
                 maxDataPoints: 43200
                 refId: C
                 type: threshold
-              refId: C
-              relativeTimeRange: {}
-            - datasourceUid: __expr__
+            - refId: B
+              datasourceUid: __expr__
               model:
                 conditions:
                     - evaluator:
@@ -76,18 +77,15 @@ spec:
                     type: __expr__
                     uid: __expr__
                 expression: A
-                hide: false
                 intervalMs: 1000
                 maxDataPoints: 43200
                 reducer: last
                 refId: B
                 type: reduce
-              refId: B
-              relativeTimeRange: {}
           execErrState: Error
           folderUID: duplo-common
-          for: 1m0s
-          noDataState: NoData
+          for: 5m0s
+          noDataState: OK
           orgID: 1
           ruleGroup: Pod-alerts
           title: Pod OOM Alert

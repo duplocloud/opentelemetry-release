@@ -84,29 +84,13 @@ spec:
           type: alerting
         - alerts: []
           annotations:
-            message: There are {{ printf "%f" $value }} unhealthy compactor(s).
+            summary: "Unhealthy Loki ring member in {{ $labels.name }} ({{ $labels.cluster }}/{{ $labels.namespace }})"
+            description: "Loki component `{{ $labels.name }}` in cluster `{{ $labels.cluster }}`, namespace `{{ $labels.namespace }}` is marked as unhealthy in the ring."
           duration: 900
           labels:
             severity: critical
-          name: LokiCompactorUnhealthy
-          query: max by (cluster, namespace) (loki_ring_members{name="compactor",state="Unhealthy"}) > 0
+          name: LokiRingMemberUnhealthy
+          query: max by (name, cluster, namespace) (loki_ring_members{state="Unhealthy"}) > 0
           type: alerting
-        - alerts: []
-          annotations:
-            message: There are {{ printf "%f" $value }} unhealthy distributor(s).
-          duration: 900
-          labels:
-            severity: warning
-          name: LokiDistributorUnhealthy
-          query: max by (cluster, namespace) (loki_ring_members{name="distributor",state="Unhealthy"}) > 0
-          type: alerting
-        - alerts: []
-          annotations:
-            message: There are {{ printf "%f" $value }} unhealthy distributor(s).
-          duration: 900
-          labels:
-            severity: warning
-          name: LokiIngesterUnhealthy
-          query: max by (cluster, namespace) (loki_ring_members{name="ingester",state="Unhealthy"}) > 0
-          type: alerting
+
         

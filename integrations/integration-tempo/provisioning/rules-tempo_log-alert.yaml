@@ -118,7 +118,7 @@ spec:
           for: 1m0s
           labels:
             severity: critical
-          noDataState: NoData
+          noDataState: OK
           orgID: 1
           ruleGroup: Logs
           title: Tempo Compactor Failure Alert
