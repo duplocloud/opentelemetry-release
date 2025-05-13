@@ -1,0 +1,14 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Datasource
+metadata:
+  name: duplo-profiling
+spec:
+  name: duplo-profiling
+  type: grafana-pyroscope-datasource
+  editable: true
+  uid: duplo-profiling
+  url: http://duplo-profiling:4040
+  access: proxy
+  basicAuth: false
+  jsonData:
+    minStep: '15s'
