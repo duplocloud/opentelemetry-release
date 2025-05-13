@@ -1,0 +1,62 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Datasource
+metadata:
+  name: duplo-tracing
+spec:
+  name: duplo-tracing
+  type: tempo
+  editable: true
+  uid: duplo-tracing
+  url: http://duplo-tracing-query-frontend:3100
+  access: proxy
+  basicAuth: false
+  jsonData:
+    tracesToLogsV2:
+      customQuery: false
+      datasourceUid: duplo-logging
+      filterBySpanID: true
+      filterByTraceID: true
+      query: ''
+      spanEndTimeShift: ''
+      spanStartTimeShift: ''
+      tags: []
+    tracesToMetrics:
+      datasourceUid: duplo-metrics
+      queries: []
+      tags: []
+    tracesToProfiles:
+      datasourceUid: duplo-profiling
+      profileTypeId: process_cpu:cpu:nanoseconds:cpu:nanoseconds
+    serviceMap:
+      datasourceUid: 'duplo-metrics'
+    nodeGraph:
+      enabled: true
+    search:
+      hide: false
+      filters:
+        - id: 58f4667e
+          operator: =
+          scope: resource
+          tag: k8s.cluster.name
+          value: []
+        - id: 3020ef4f
+          operator: =
+          scope: resource
+          tag: k8s.namespace.name
+          value: []
+        - id: a103888b
+          operator: =
+          scope: resource
+          tag: service.name
+          value: []
+        - id: 4b75ba3d
+          operator: =
+          scope: span
+          tag: name
+          value: []
+    traceQuery:
+      timeShiftEnabled: false
+      spanStartTimeShift: ''
+      spanEndTimeShift: ''
+    spanBar:
+      type: 'Duration'

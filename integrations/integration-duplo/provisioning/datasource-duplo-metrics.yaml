@@ -1,0 +1,21 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Datasource
+metadata:
+  name: duplo-metrics
+spec:
+  name: duplo-metrics
+  uid: duplo-metrics
+  type: prometheus
+  editable: true
+  is_default: true
+  access: proxy
+  url: http://duplo-metrics-nginx:80/prometheus
+  basicAuth: false
+  jsonData:
+    manageAlerts: true
+    prometheusType: Mimir
+    prometheusVersion: 2.13.0
+    timeInterval: 30s
+    exemplarTraceIdDestinations:
+    - name: traceID
+      datasourceUid: duplo-tracing
