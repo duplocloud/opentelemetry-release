@@ -7,8 +7,8 @@ spec:
     interval: 60
     rules:
         - annotations:
-            description: 'The pod `{{ $labels.pod }}` in namespace `{{ $labels.namespace }}` (cluster: `{{ $labels.cluster }}`) experienced an OOMKilled event.'
-            summary: OOMKilled pod detected in {{ $labels.namespace }}/{{ $labels.pod }}
+            description: 'Pod `{{ $labels.pod }}` in namespace `{{ $labels.namespace }}` (cluster: `{{ $labels.cluster }}`) has restarted within the last 5 minutes.'
+            summary: 'Pod restart detected: {{ $labels.namespace }}/{{ $labels.pod }}'
           condition: C
           data:
             - refId: A
@@ -22,13 +22,12 @@ spec:
                     uid: duplo-metrics
                 editorMode: code
                 exemplar: false
-                expr: sum by (pod, cluster, namespace)((kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 15m >= 1) * ignoring(reason) kube_pod_container_status_last_terminated_reason{reason='OOMKilled'} > 0)
-                format: time_series
-                instant: false
+                expr: sum by (cluster, namespace, pod) (increase(kube_pod_container_status_restarts_total[5m]))
+                instant: true
                 intervalMs: 1000
                 legendFormat: __auto
                 maxDataPoints: 43200
-                range: true
+                range: false
                 refId: A
             - refId: C
               datasourceUid: __expr__
@@ -50,38 +49,11 @@ spec:
                 datasource:
                     type: __expr__
                     uid: __expr__
-                expression: B
+                expression: A
                 intervalMs: 1000
                 maxDataPoints: 43200
                 refId: C
                 type: threshold
-            - refId: B
-              datasourceUid: __expr__
-              model:
-                conditions:
-                    - evaluator:
-                        params:
-                            - 0
-                            - 0
-                        type: gt
-                      operator:
-                        type: and
-                      query:
-                        params: []
-                      reducer:
-                        params: []
-                        type: avg
-                      type: query
-                datasource:
-                    name: Expression
-                    type: __expr__
-                    uid: __expr__
-                expression: A
-                intervalMs: 1000
-                maxDataPoints: 43200
-                reducer: last
-                refId: B
-                type: reduce
           execErrState: Error
           folderUID: duplo-common
           for: 5m0s
