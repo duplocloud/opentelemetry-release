@@ -602,7 +602,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
 
     if sent_count == 0:
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
-        
+
 def main() -> None:
     """
     Main function that orchestrates the monitoring data collection process.
@@ -624,8 +624,8 @@ def main() -> None:
     prometheus_url = os.getenv('PROMETHEUS_URL')
     
     # Collect and send data to Loki
-    # collect_and_send_version_data(prometheus_url, labels)
-    # collect_and_send_grafana_usage(prometheus_url, labels)
+    collect_and_send_version_data(prometheus_url, labels)
+    collect_and_send_grafana_usage(prometheus_url, labels)
     collect_and_send_otel_pod_node_usage(prometheus_url, labels)
     
     logger.info("Completed monitoring data collection")
