@@ -59,7 +59,7 @@ spec:
           for: 5m0s
           noDataState: OK
           orgID: 1
-          ruleGroup: Pod-alerts
-          title: Pod OOM Alert
-          uid: PodOOMalert
-    title: Pod alerts
+          ruleGroup: pod-alerts
+          title: Pod Restart Alert
+          uid: Podrestartalert
+    title: pod-alerts

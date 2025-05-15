@@ -1,15 +1,15 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: AlertRuleGroup
 metadata:
-    name: Integration-Loki.log-alerts
+    name: Integration-Mimir.log-alerts
 spec:
-    folderUid: integration-loki
+    folderUid: integration-mimir
     interval: 60
     rules:
         - annotations:
             description: |-
-                Loki is throttling logs in cluster {{ $labels.cluster }}, namespace {{ $labels.namespace }} due to ingestion rate limits. Reduce log volume or adjust limits.
-            summary: 'Loki ingestion rate limit exceeded in {{ $labels.cluster }}/{{ $labels.namespace }}'
+                Mimir rejected a remote-write request because the per-user series limit (8 million) was exceeded. Please investigate the issue.
+            summary: "Mimir ingestion failed: per-user series limit exceeded in {{ $labels.cluster }}/{{ $labels.namespace }}"
           condition: C
           data:
             - datasourceUid: duplo-logging
@@ -18,7 +18,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({container="loki"} |~ "(?i)rate limit" | json | logfmt | drop __error__, __error_details__ | caller=~".*manager.go.*" | msg="write operation failed" [$__auto])) by (cluster, namespace)
+                expr: 'sum(count_over_time({service_name="duplo-metrics"} | json | logfmt | drop __error__, __error_details__ | err=~".*user=anonymous: per-user series limit.*" | line_format "{{ .msg }}" [$__auto])) by (pod, cluster, namespace)'
                 instant: true
                 intervalMs: 1000
                 maxDataPoints: 43200
@@ -62,6 +62,6 @@ spec:
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
-          title: Loki rate limit alert
-          uid: Lokiratelimitalert
+          title: "Mimir Ingestion Failure: Series Limit Exceeded"
+          uid: Mimiringestionfailure
     title: log-alerts

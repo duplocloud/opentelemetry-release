@@ -17,7 +17,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({service_name="tempo"} | json | logfmt | drop __error__, __error_details__ | caller=~".*rate_limited_logger.*" | msg="TRACE_TOO_LARGE" [$__auto])) by (msg, cluster,err, namespace, max, size)
+                expr: sum(count_over_time({service_name="tempo"} | json | logfmt | drop __error__, __error_details__ | caller=~".*rate_limited_logger.*" | msg="TRACE_TOO_LARGE" [$__auto])) by (msg, cluster, namespace, pod)
                 hide: false
                 instant: true
                 intervalMs: 1000
@@ -59,9 +59,9 @@ spec:
           for: 1m0s
           labels:
             severity: warning
-          noDataState: NoData
+          noDataState: OK
           orgID: 1
-          ruleGroup: Logs
+          ruleGroup: log-alerts
           title: Tempo rate limit error
           uid: Temporatelimiterror
         - annotations:
@@ -120,8 +120,8 @@ spec:
             severity: critical
           noDataState: OK
           orgID: 1
-          ruleGroup: Logs
+          ruleGroup: log-alerts
           title: Tempo Compactor Failure Alert
           uid: Tempocompactorfailurealert
         
-    title: Logs
+    title: log-alerts
