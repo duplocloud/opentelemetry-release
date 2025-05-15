@@ -429,14 +429,13 @@ def collect_and_send_grafana_usage(prometheus_url: str, labels: Dict[str, str]) 
 
 def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> None:
     """
-    Collects 24h pod/node resource stats for all clusters/namespaces present in Prometheus data,
-    and pushes a Loki log entry per (cluster, namespace), with pods/nodes as lists of dicts.
+    Collects 24h pod/node resource stats for all clusters/namespaces present in Prometheus data.
+    Pushes a Loki log entry per (cluster, namespace), with pods/nodes as lists of dicts and includes instance_type.
     """
     logger.info("Collecting 24h OTEL pod/node usage statistics")
-
     namespace_regex = labels.get('namespace_filter', '.*otel.*')
 
-    # 1. Pods to exclude: DaemonSet/Job pods
+    # 1. Excluded pods (DaemonSet/Job)
     def excluded_pods_by_owner_kind(kind):
         query = f'kube_pod_owner{{namespace=~"{namespace_regex}",owner_kind="{kind}"}}'
         response = query_prometheus(prometheus_url, query) or {}
@@ -447,7 +446,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
     job_pods = excluded_pods_by_owner_kind("Job")
     excluded_pods = daemonset_pods | job_pods
 
-    # 2. Pod to node mapping
+    # 2. Pod-to-node mapping
     pod_to_node = {}
     pod_node_query = f'kube_pod_info{{namespace=~"{namespace_regex}"}}'
     pod_node_response = query_prometheus(prometheus_url, pod_node_query) or {}
@@ -459,7 +458,22 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
         if cluster and namespace and pod_name and node_name:
             pod_to_node[(cluster, namespace, pod_name)] = node_name
 
-    # 3. Pod resource requests/limits
+    # 3. Node -> instance_type mapping
+    instance_type_query = 'kube_node_labels{job="integrations/kubernetes/kube-state-metrics"}'
+    instance_type_data = query_prometheus(prometheus_url, instance_type_query) or {}
+    node_instance_type = {}
+    for res in instance_type_data.get("data", {}).get("result", []):
+        cluster = res['metric'].get('cluster')
+        node_name = res['metric'].get('label_kubernetes_io_hostname')
+        instance_type = (
+            res['metric'].get('label_node_kubernetes_io_instance_type') or
+            res['metric'].get('label_beta_kubernetes_io_instance_type') or
+            None
+        )
+        if cluster and node_name and instance_type:
+            node_instance_type[(cluster, node_name)] = instance_type
+
+    # 4. Pod resource requests/limits
     def extract_pod_resource_usage(prometheus_query):
         response = query_prometheus(prometheus_url, prometheus_query)
         result = {}
@@ -477,7 +491,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
     cpu_limit = extract_pod_resource_usage(f'sum by(pod,namespace,cluster) (kube_pod_container_resource_limits{{resource="cpu",namespace=~"{namespace_regex}"}})')
     mem_limit = extract_pod_resource_usage(f'sum by(pod,namespace,cluster) (kube_pod_container_resource_limits{{resource="memory",namespace=~"{namespace_regex}"}})')
 
-    # 4. Pod 24h usage
+    # 5. Pod 24h usage
     label_filter = f'namespace=~"{namespace_regex}",container!="",container!="POD"'
     promql_templates = {
         "cpu_avg": f'avg by (pod,namespace,cluster) (avg_over_time(rate(container_cpu_usage_seconds_total{{{label_filter}}}[5m])[24h:5m]))',
@@ -571,14 +585,17 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
     sent_count = 0
     for cluster, namespace in all_ns_keys:
         pods = pods_by_namespace.get((cluster, namespace), [])
-        nodes = sorted(list({pod["node"] for pod in pods}))
+        node_names = sorted(list({pod["node"] for pod in pods}))
         node_list = []
-        for node_name in nodes:
+        for node_name in node_names:
             stats = node_resource_stats(prometheus_url, node_name, cluster)
-            node_info = {"node": node_name}
+            node_info = {
+                "node": node_name,
+                "instance_type": node_instance_type.get((cluster, node_name)),
+            }
             node_info.update({k: round(v, 3) if v is not None else None for k, v in stats.items()})
             node_list.append(node_info)
-        otel_node_count = len(nodes)
+        otel_node_count = len(node_names)
         entry = {
             "metadata": {
                 "cluster": cluster,
