@@ -427,137 +427,170 @@ def collect_and_send_grafana_usage(prometheus_url: str, labels: Dict[str, str]) 
     format_and_send_grafana_usage_data(grafana_usage, labels)
     logger.info("Completed Grafana usage data collection and sending")
 
-def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: Dict[str, str]) -> None:
+def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> None:
     """
-    Collect OTEL pod and node usage data (excluding DaemonSets) and send to Loki.
+    Collects 24-hour average, min, max for OTEL pod/node CPU and memory.
+    Reports unique nodes per-namespace and total, and sends to Loki.
+    Uses per-node queries to ensure label matching for node metrics.
     """
-    logger.info("Collecting OTEL pod and node usage data")
+    logger.info("Collecting 24h OTEL pod/node usage statistics")
 
     namespace_filter = labels.get('namespace_filter', '.*otel.*')
 
-    # Exclude DaemonSets via owner_kind label (if available)
-    # If your Prometheus does not expose `owner_kind`, alternative filters may be needed
-    pod_filter = f'container!="", namespace=~"{namespace_filter}", container!="POD"'
+    # 1. Exclude DaemonSet/Job pods
+    def get_owned_pods(kind):
+        q = (
+            f'kube_pod_owner{{namespace=~"{namespace_filter}",owner_kind="{kind}"}}'
+        )
+        r = query_prometheus(prometheus_url, q) or {}
+        return {i['metric'].get('pod') for i in r.get("data", {}).get("result", [])}
+    ds_pods = get_owned_pods("DaemonSet")
+    job_pods = get_owned_pods("Job")
+    excluded_pods = ds_pods | job_pods
 
-    # CPU usage (millicores) - per pod
-    cpu_query = f'''
-    sum by (pod, node, namespace) (
-      rate(container_cpu_usage_seconds_total{{{pod_filter}}}[5m])
-    )
-    '''
+    # 2. Map pod->node (canonical hostname)
+    pod_node_map = {}
+    pod_node_resp = query_prometheus(
+        prometheus_url, f'kube_pod_info{{namespace=~"{namespace_filter}"}}'
+    ) or {}
+    for r in pod_node_resp.get("data", {}).get("result", []):
+        pod = r['metric'].get('pod')
+        node = r['metric'].get('node')
+        if pod and node:
+            pod_node_map[pod] = node
 
-    # Memory usage (bytes) - per pod
-    mem_query = f'''
-    sum by (pod, node, namespace) (
-      container_memory_rss{{{pod_filter}}}
-    )
-    '''
+    # 3. Gather rolling 24h stats per pod (skip excluded/unknown)
+    pf = f'namespace=~"{namespace_filter}",container!="",container!="POD"'
+    pod_proms = {
+        "cpu_avg": f'avg by (pod,namespace) (avg_over_time(rate(container_cpu_usage_seconds_total{{{pf}}}[5m])[24h:5m]))',
+        "cpu_min": f'min by (pod,namespace) (min_over_time(rate(container_cpu_usage_seconds_total{{{pf}}}[5m])[24h:5m]))',
+        "cpu_max": f'max by (pod,namespace) (max_over_time(rate(container_cpu_usage_seconds_total{{{pf}}}[5m])[24h:5m]))',
+        "mem_avg": f'avg by (pod,namespace) (avg_over_time(container_memory_rss{{{pf}}}[24h]))',
+        "mem_min": f'min by (pod,namespace) (min_over_time(container_memory_rss{{{pf}}}[24h]))',
+        "mem_max": f'max by (pod,namespace) (max_over_time(container_memory_rss{{{pf}}}[24h]))',
+    }
+    pod_stats = {k: query_prometheus(prometheus_url, q) for k, q in pod_proms.items()}
 
-    # Node-level memory utilization (%)
-    node_mem_query = '''
-    100 - (
-      avg by (instance) (
-        node_memory_MemAvailable_bytes{job=~"integrations/(node_exporter|unix)"}
-      )
-      /
-      avg by (instance) (
-        node_memory_MemTotal_bytes{job=~"integrations/(node_exporter|unix)"}
-      )
-      * 100
-    )
-    * on (instance) group_left(label_tenantname)
-    label_replace(
-      kube_node_labels{job="integrations/kubernetes/kube-state-metrics"},
-      "instance",
-      "$1",
-      "label_kubernetes_io_hostname",
-      "(.+)"
-    )
-    '''
+    # Helper for per-pod, keyed-stat lookup
+    def podval(stat, pod, ns):
+        for r in (pod_stats[stat] or {}).get('data', {}).get('result', []):
+            m = r.get('metric', {})
+            if m.get('pod') == pod and m.get('namespace') == ns:
+                return float(r['value'][1])
+        return None
 
-    # Node-level CPU utilization (%)
-    node_cpu_query = '''
-    (sum without(mode) (
-      avg without (cpu) (
-        rate(node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)", mode!="idle"}[2m])
-      )
-    ) * 100)
-    * on (instance) group_left(label_tenantname)
-    label_replace(
-      kube_node_labels{job="integrations/kubernetes/kube-state-metrics"},
-      "instance",
-      "$1",
-      "label_kubernetes_io_hostname",
-      "(.+)"
-    )
-    '''
-
-    # Query all required metrics
-    cpu_data = query_prometheus(prometheus_url, cpu_query)
-    mem_data = query_prometheus(prometheus_url, mem_query)
-    node_cpu_data = query_prometheus(prometheus_url, node_cpu_query)
-    node_mem_data = query_prometheus(prometheus_url, node_mem_query)
-
-    if not cpu_data or not mem_data or not node_cpu_data or not node_mem_data:
-        logger.error("Failed to retrieve resource usage data")
-        return
-
-    current_time = str(int(time.time() * 1e9))
-
-    # --- Process Pod Usage ---
     pod_usage = {}
-    for result in cpu_data['data']['result']:
-        pod = result['metric']['pod']
-        node = result['metric'].get('node', 'unknown')
-        namespace = result['metric'].get('namespace', 'unknown')
-        cpu = float(result['value'][1])
-        pod_usage[pod] = {
-            "namespace": namespace,
+    used_nodes_per_ns = {}
+    for r in (pod_stats['cpu_avg'] or {}).get('data', {}).get('result', []):
+        pod = r['metric'].get('pod')
+        ns = r['metric'].get('namespace')
+        if not pod or not ns or pod in excluded_pods:
+            continue
+        node = pod_node_map.get(pod)
+        if not node:
+            continue
+        used_nodes_per_ns.setdefault(ns, set()).add(node)
+        pod_usage.setdefault(ns, {})
+        pod_usage[ns][pod] = {
             "node": node,
-            "cpu_millicores": round(cpu * 1000, 2)
+            "cpu_millicores_avg": round(podval('cpu_avg', pod, ns)*1000, 4) if podval('cpu_avg', pod, ns) is not None else None,
+            "cpu_millicores_min": round(podval('cpu_min', pod, ns)*1000, 4) if podval('cpu_min', pod, ns) is not None else None,
+            "cpu_millicores_max": round(podval('cpu_max', pod, ns)*1000, 4) if podval('cpu_max', pod, ns) is not None else None,
+            "memory_MB_avg": round(podval('mem_avg', pod, ns) / (1024 * 1024), 3) if podval('mem_avg', pod, ns) is not None else None,
+            "memory_MB_min": round(podval('mem_min', pod, ns) / (1024 * 1024), 3) if podval('mem_min', pod, ns) is not None else None,
+            "memory_MB_max": round(podval('mem_max', pod, ns) / (1024 * 1024), 3) if podval('mem_max', pod, ns) is not None else None,
         }
 
-    for result in mem_data['data']['result']:
-        pod = result['metric']['pod']
-        memory = float(result['value'][1])
-        if pod in pod_usage:
-            pod_usage[pod]["memory_MB"] = round(memory / (1024 * 1024), 2)
-
-    # Send pod-level data
-    send_to_loki(
-        "otel_resource_usage",
-        "prometheus",
-        "otel_pod_node_usage",
-        [[current_time, json.dumps(pod_usage)]]
-    )
-
-    logger.info(f"Sent OTEL pod usage for {len(pod_usage)} pods")
-
-    # --- Process Node Usage ---
+    # --- NODE USAGE via direct per-node (instance=hostname) queries ---
+    import time
+    all_otel_nodes = set(node for ns in used_nodes_per_ns.values() for node in ns)
     node_usage = {}
 
-    for result in node_cpu_data['data']['result']:
-        node = result['metric'].get('instance', 'unknown')
-        cpu_pct = float(result['value'][1])
-        node_usage[node] = {
-            "cpu_percent": round(cpu_pct, 2)
+    def per_node_prometheus_stats(prometheus_url, node, interval="[24h:5m]"):
+        # 1. CPU %
+        cpu_avg_query = f'''
+            avg_over_time(
+                (
+                    sum without (mode)
+                    (
+                        avg without (cpu)
+                        (
+                            rate(node_cpu_seconds_total{{instance="{node}", job=~"integrations/(node_exporter|unix)", mode!="idle"}}[2m])
+                        )
+                    ) * 100
+                ){interval}
+            )
+        '''
+        cpu_min_query = cpu_avg_query.replace("avg_over_time", "min_over_time")
+        cpu_max_query = cpu_avg_query.replace("avg_over_time", "max_over_time")
+
+        # 2. Memory %
+        mem_avg_query = f'''
+            avg_over_time(
+                (
+                    100 -
+                    (
+                        avg by (instance) (
+                            node_memory_MemAvailable_bytes{{instance="{node}", job=~"integrations/(node_exporter|unix)"}}
+                        )
+                        /
+                        avg by (instance) (
+                            node_memory_MemTotal_bytes{{instance="{node}", job=~"integrations/(node_exporter|unix)"}}
+                        )
+                        * 100
+                    )
+                ){interval}
+            )
+        '''
+        mem_min_query = mem_avg_query.replace("avg_over_time", "min_over_time")
+        mem_max_query = mem_avg_query.replace("avg_over_time", "max_over_time")
+
+        def get_first_result(query):
+            data = query_prometheus(prometheus_url, query)
+            try:
+                if data and 'result' in data['data'] and data['data']['result']:
+                    return float(data['data']['result'][0]['value'][1])
+            except Exception as e:
+                logger.error(f"Error getting metric for node {node}: {e}")
+            return None
+
+        return {
+            "cpu_percent_avg": get_first_result(cpu_avg_query),
+            "cpu_percent_min": get_first_result(cpu_min_query),
+            "cpu_percent_max": get_first_result(cpu_max_query),
+            "memory_percent_avg": get_first_result(mem_avg_query),
+            "memory_percent_min": get_first_result(mem_min_query),
+            "memory_percent_max": get_first_result(mem_max_query)
         }
 
-    for result in node_mem_data['data']['result']:
-        node = result['metric'].get('instance', 'unknown')
-        mem_pct = float(result['value'][1])
-        if node in node_usage:
-            node_usage[node]["memory_percent"] = round(mem_pct, 2)
+    for node in all_otel_nodes:
+        stats = per_node_prometheus_stats(prometheus_url, node)
+        # Optionally round for more readable numbers
+        node_usage[node] = {
+            k: round(v, 3) if v is not None else None
+            for k, v in stats.items()
+        }
 
-    # Send node-level data
+    otel_node_count = {ns: len(nodes) for ns, nodes in used_nodes_per_ns.items()}
+    total_otel_node_count = len(all_otel_nodes)
+    out = {
+        "otel_node_count_per_namespace": otel_node_count,
+        "otel_node_count_total": total_otel_node_count,
+        "pods": pod_usage,
+        "nodes": node_usage,
+    }
+
+    current_time_ns = str(int(time.time() * 1e9))
     send_to_loki(
         "otel_resource_usage",
         "prometheus",
-        "otel_node_usage",
-        [[current_time, json.dumps(node_usage)]]
+        "otel_combined_usage_24h",
+        [[current_time_ns, json.dumps(out)]],
     )
-
-    logger.info(f"Sent OTEL node usage for {len(node_usage)} nodes")
+    logger.info(
+        f"Sent usage: {sum(len(pods) for pods in pod_usage.values())} pods, "
+        f"{len(node_usage)} nodes, {total_otel_node_count} unique nodes"
+    )
 
 def main() -> None:
     """
