@@ -427,6 +427,137 @@ def collect_and_send_grafana_usage(prometheus_url: str, labels: Dict[str, str]) 
     format_and_send_grafana_usage_data(grafana_usage, labels)
     logger.info("Completed Grafana usage data collection and sending")
 
+def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: Dict[str, str]) -> None:
+    """
+    Collect OTEL pod and node usage data (excluding DaemonSets) and send to Loki.
+    """
+    logger.info("Collecting OTEL pod and node usage data")
+
+    namespace_filter = labels.get('namespace_filter', '.*otel.*')
+
+    # Exclude DaemonSets via owner_kind label (if available)
+    # If your Prometheus does not expose `owner_kind`, alternative filters may be needed
+    pod_filter = f'container!="", namespace=~"{namespace_filter}", container!="POD"'
+
+    # CPU usage (millicores) - per pod
+    cpu_query = f'''
+    sum by (pod, node, namespace) (
+      rate(container_cpu_usage_seconds_total{{{pod_filter}}}[5m])
+    )
+    '''
+
+    # Memory usage (bytes) - per pod
+    mem_query = f'''
+    sum by (pod, node, namespace) (
+      container_memory_rss{{{pod_filter}}}
+    )
+    '''
+
+    # Node-level memory utilization (%)
+    node_mem_query = '''
+    100 - (
+      avg by (instance) (
+        node_memory_MemAvailable_bytes{job=~"integrations/(node_exporter|unix)"}
+      )
+      /
+      avg by (instance) (
+        node_memory_MemTotal_bytes{job=~"integrations/(node_exporter|unix)"}
+      )
+      * 100
+    )
+    * on (instance) group_left(label_tenantname)
+    label_replace(
+      kube_node_labels{job="integrations/kubernetes/kube-state-metrics"},
+      "instance",
+      "$1",
+      "label_kubernetes_io_hostname",
+      "(.+)"
+    )
+    '''
+
+    # Node-level CPU utilization (%)
+    node_cpu_query = '''
+    (sum without(mode) (
+      avg without (cpu) (
+        rate(node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)", mode!="idle"}[2m])
+      )
+    ) * 100)
+    * on (instance) group_left(label_tenantname)
+    label_replace(
+      kube_node_labels{job="integrations/kubernetes/kube-state-metrics"},
+      "instance",
+      "$1",
+      "label_kubernetes_io_hostname",
+      "(.+)"
+    )
+    '''
+
+    # Query all required metrics
+    cpu_data = query_prometheus(prometheus_url, cpu_query)
+    mem_data = query_prometheus(prometheus_url, mem_query)
+    node_cpu_data = query_prometheus(prometheus_url, node_cpu_query)
+    node_mem_data = query_prometheus(prometheus_url, node_mem_query)
+
+    if not cpu_data or not mem_data or not node_cpu_data or not node_mem_data:
+        logger.error("Failed to retrieve resource usage data")
+        return
+
+    current_time = str(int(time.time() * 1e9))
+
+    # --- Process Pod Usage ---
+    pod_usage = {}
+    for result in cpu_data['data']['result']:
+        pod = result['metric']['pod']
+        node = result['metric'].get('node', 'unknown')
+        namespace = result['metric'].get('namespace', 'unknown')
+        cpu = float(result['value'][1])
+        pod_usage[pod] = {
+            "namespace": namespace,
+            "node": node,
+            "cpu_millicores": round(cpu * 1000, 2)
+        }
+
+    for result in mem_data['data']['result']:
+        pod = result['metric']['pod']
+        memory = float(result['value'][1])
+        if pod in pod_usage:
+            pod_usage[pod]["memory_MB"] = round(memory / (1024 * 1024), 2)
+
+    # Send pod-level data
+    send_to_loki(
+        "otel_resource_usage",
+        "prometheus",
+        "otel_pod_node_usage",
+        [[current_time, json.dumps(pod_usage)]]
+    )
+
+    logger.info(f"Sent OTEL pod usage for {len(pod_usage)} pods")
+
+    # --- Process Node Usage ---
+    node_usage = {}
+
+    for result in node_cpu_data['data']['result']:
+        node = result['metric'].get('instance', 'unknown')
+        cpu_pct = float(result['value'][1])
+        node_usage[node] = {
+            "cpu_percent": round(cpu_pct, 2)
+        }
+
+    for result in node_mem_data['data']['result']:
+        node = result['metric'].get('instance', 'unknown')
+        mem_pct = float(result['value'][1])
+        if node in node_usage:
+            node_usage[node]["memory_percent"] = round(mem_pct, 2)
+
+    # Send node-level data
+    send_to_loki(
+        "otel_resource_usage",
+        "prometheus",
+        "otel_node_usage",
+        [[current_time, json.dumps(node_usage)]]
+    )
+
+    logger.info(f"Sent OTEL node usage for {len(node_usage)} nodes")
 
 def main() -> None:
     """
@@ -449,8 +580,9 @@ def main() -> None:
     prometheus_url = os.getenv('PROMETHEUS_URL')
     
     # Collect and send data to Loki
-    collect_and_send_version_data(prometheus_url, labels)
-    collect_and_send_grafana_usage(prometheus_url, labels)
+    # collect_and_send_version_data(prometheus_url, labels)
+    # collect_and_send_grafana_usage(prometheus_url, labels)
+    collect_and_send_otel_pod_node_usage(prometheus_url, labels)
     
     logger.info("Completed monitoring data collection")
 
