@@ -111,7 +111,6 @@ spec:
           execErrState: Error
           for: 0s
           folderUid: duplo-common
-          id: 1
           labels:
             severity: critical
           noDataState: NoData
@@ -119,7 +118,6 @@ spec:
           ruleGroup: node-exporter-with-labels
           title: Critical Memory usage
           uid: NodeCriticalMemoryUsageWithLabels
-          updated: "2025-01-09T08:12:32.000Z"
         - annotations:
             description: CPU usage at {{ $labels.instance }} has been above 90% for the last 5 minutes, is currently at {{ printf "%.2f" $values.B.Value }}%
             summary: High CPU usage.
@@ -199,7 +197,6 @@ spec:
           execErrState: Error
           for: 5m0s
           folderUid: duplo-common
-          id: 2
           labels:
             severity: critical
           noDataState: NoData

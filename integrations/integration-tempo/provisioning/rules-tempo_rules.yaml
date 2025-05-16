@@ -29,3 +29,5 @@ spec:
           name: cluster_namespace_job_route:tempo_request_duration_seconds_count:sum_rate
           query: sum by (cluster, namespace, job, route) (rate(tempo_request_duration_seconds_count[1m]))
           type: recording
+
+

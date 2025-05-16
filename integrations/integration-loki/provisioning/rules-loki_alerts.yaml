@@ -71,3 +71,26 @@ spec:
           name: LokiCompactorHasNotSuccessfullyRunCompaction
           query: max by (cluster, namespace) (max_over_time(loki_boltdb_shipper_compact_tables_operation_last_successful_run_timestamp_seconds[3h])) == 0
           type: alerting
+        - alerts: []
+          annotations:
+            description: |
+                Detected less than 2 healthy replicas in Loki, cluster {{ $labels.cluster }} {{ $labels.namespace }}. This may indicate a problem with the compactor.
+            summary: Loki cluster has insufficient healthy replicas.
+          duration: 3600
+          labels:
+            severity: warning
+          name: LokiHasNoInsufficientHealthyReplicas
+          query: min by (cluster, namespace) (count(loki_ring_members{state="ACTIVE"}) < 2)
+          type: alerting
+        - alerts: []
+          annotations:
+            summary: "Unhealthy Loki ring member in {{ $labels.name }} ({{ $labels.cluster }}/{{ $labels.namespace }})"
+            description: "Loki component `{{ $labels.name }}` in cluster `{{ $labels.cluster }}`, namespace `{{ $labels.namespace }}` is marked as unhealthy in the ring."
+          duration: 900
+          labels:
+            severity: critical
+          name: LokiRingMemberUnhealthy
+          query: max by (name, cluster, namespace) (loki_ring_members{state="Unhealthy"}) > 0
+          type: alerting
+
+        
