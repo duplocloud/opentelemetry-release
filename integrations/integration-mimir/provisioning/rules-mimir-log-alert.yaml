@@ -1,0 +1,67 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRuleGroup
+metadata:
+    name: Integration-Mimir.log-alerts
+spec:
+    folderUid: integration-mimir
+    interval: 60
+    rules:
+        - annotations:
+            description: |-
+                Mimir rejected a remote-write request because the per-user series limit (8 million) was exceeded. Please investigate the issue.
+            summary: "Mimir ingestion failed: per-user series limit exceeded in {{ $labels.cluster }}/{{ $labels.namespace }}"
+          condition: C
+          data:
+            - datasourceUid: duplo-logging
+              model:
+                datasource:
+                    type: loki
+                    uid: duplo-logging
+                editorMode: code
+                expr: 'sum(count_over_time({service_name="duplo-metrics"} | json | logfmt | drop __error__, __error_details__ | err=~".*user=anonymous: per-user series limit.*" | line_format "{{ .msg }}" [$__auto])) by (pod, cluster, namespace)'
+                instant: true
+                intervalMs: 1000
+                maxDataPoints: 43200
+                queryType: instant
+                refId: A
+              queryType: instant
+              refId: A
+              relativeTimeRange:
+                from: 900
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-loki
+          for: 1m0s
+          labels:
+            severity: warning
+          noDataState: OK
+          orgID: 1
+          ruleGroup: log-alerts
+          title: "Mimir Ingestion Failure: Series Limit Exceeded"
+          uid: Mimiringestionfailure
+    title: log-alerts

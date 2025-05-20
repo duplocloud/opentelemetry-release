@@ -1,0 +1,65 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRuleGroup
+metadata:
+    name: Integration-Kubernetes.pod-alerts
+spec:
+    folderUid: duplo-common
+    interval: 60
+    rules:
+        - annotations:
+            description: 'Pod `{{ $labels.pod }}` in namespace `{{ $labels.namespace }}` (cluster: `{{ $labels.cluster }}`) has restarted within the last 5 minutes.'
+            summary: 'Pod restart detected: {{ $labels.namespace }}/{{ $labels.pod }}'
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 900
+                to: 0
+              datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                exemplar: false
+                expr: sum by (cluster, namespace, pod) (increase(kube_pod_container_status_restarts_total[5m]))
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          execErrState: Error
+          folderUID: duplo-common
+          for: 5m0s
+          noDataState: OK
+          orgID: 1
+          ruleGroup: pod-alerts
+          title: Pod Restart Alert
+          uid: Podrestartalert
+    title: pod-alerts

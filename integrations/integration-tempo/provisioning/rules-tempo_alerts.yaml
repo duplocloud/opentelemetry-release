@@ -17,23 +17,14 @@ spec:
           type: alerting
         - alerts: []
           annotations:
-            message: There are {{ printf "%f" $value }} unhealthy compactor(s).
+            summary: "Unhealthy Tempo ring member in {{ $labels.name }} ({{ $labels.cluster }}/{{ $labels.namespace }})"
+            description: "Tempo component `{{ $labels.name }}` in cluster `{{ $labels.cluster }}`, namespace `{{ $labels.namespace }}` is marked as unhealthy in the ring."
             runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoCompactorUnhealthy
           duration: 900
           labels:
             severity: critical
-          name: TempoCompactorUnhealthy
-          query: max by (cluster, namespace) (tempo_ring_members{name="compactor",namespace=~".*",state="Unhealthy"}) > 0
-          type: alerting
-        - alerts: []
-          annotations:
-            message: There are {{ printf "%f" $value }} unhealthy distributor(s).
-            runbook_url: https://github.com/grafana/tempo/tree/main/operations/tempo-mixin/runbook.md#TempoDistributorUnhealthy
-          duration: 900
-          labels:
-            severity: warning
-          name: TempoDistributorUnhealthy
-          query: max by (cluster, namespace) (tempo_ring_members{name="distributor",namespace=~".*",state="Unhealthy"}) > 0
+          name: TempoRingMemberUnhealthy
+          query: max by (cluster, namespace, name) (tempo_ring_members{state="Unhealthy"}) > 0
           type: alerting
         - alerts: []
           annotations:
@@ -174,4 +165,14 @@ spec:
             severity: critical
           name: TempoIngesterReplayErrors
           query: sum by (cluster, namespace, tenant) (increase(tempo_ingester_replay_errors_total{namespace=~".*"}[5m])) > 0
+          type: alerting
+        - alerts: []
+          annotations:
+            message: Tempo ingester has not received any trace data in the last 5 minutes. Check upstream services or ingestion pipeline.
+            runbook_url: ""
+          duration: 300
+          labels:
+            severity: critical
+          name: TempoIngesterNotReceivedTraceData
+          query: rate(tempo_ingester_bytes_received_total[5m]) < 1
           type: alerting
