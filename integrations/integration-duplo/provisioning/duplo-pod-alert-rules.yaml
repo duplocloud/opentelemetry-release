@@ -56,7 +56,7 @@ spec:
                 type: threshold
           execErrState: Error
           folderUID: duplo-common
-          for: 5m0s
+          for: 0s
           noDataState: OK
           orgID: 1
           ruleGroup: pod-alerts
