@@ -55,7 +55,7 @@ spec:
               refId: C
               relativeTimeRange: {}
           execErrState: Error
-          folderUID: integration-loki
+          folderUID: integration-mimir
           for: 1m0s
           labels:
             severity: warning
