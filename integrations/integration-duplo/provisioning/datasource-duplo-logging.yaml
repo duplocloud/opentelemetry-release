@@ -1,0 +1,26 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Datasource
+metadata:
+  name: duplo-logging
+spec:
+  name: duplo-logging
+  type: loki
+  editable: true
+  uid: duplo-logging
+  access: proxy
+  url: http://duplo-logging-gateway:80
+  basicAuth: false
+  jsonData:
+    maxLines: 1000
+    derivedFields:
+    - datasourceUid: duplo-tracing
+      matcherRegex: '[tT]race_?[iI][dD]"?[:=]"?(\w+)'
+      name: traceID
+      url: '$${__value.raw}'
+      urlDisplayLabel: 'View Trace'
+    - datasourceUid: duplo-tracing
+      matcherRegex: 'service_name'
+      matcherType: 'label'
+      name: serviceName
+      url: '{resource.service.name="$${__value.raw}"}'
+      urlDisplayLabel: 'View Trace'
