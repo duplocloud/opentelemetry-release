@@ -429,8 +429,8 @@ def collect_and_send_grafana_usage(prometheus_url: str, labels: Dict[str, str]) 
 
 def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> None:
     """
-    Collects 24h pod/node resource stats for all clusters/namespaces present in Prometheus data.
-    Pushes a Loki log entry per (cluster, namespace), with pods/nodes as lists of dicts and includes instance_type.
+    Collects 24h pod/node resource stats and otel_node_count for all clusters/namespaces;
+    sends them in a *single* Loki push, one log-line per resource, in your requested JSON format.
     """
     logger.info("Collecting 24h OTEL pod/node usage statistics")
     namespace_regex = labels.get('namespace_filter', '.*otel.*')
@@ -582,42 +582,63 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
 
     import time
     current_time_ns = str(int(time.time() * 1e9))
+    values = []
     sent_count = 0
     for cluster, namespace in all_ns_keys:
         pods = pods_by_namespace.get((cluster, namespace), [])
         node_names = sorted(list({pod["node"] for pod in pods}))
-        node_list = []
-        for node_name in node_names:
-            stats = node_resource_stats(prometheus_url, node_name, cluster)
-            node_info = {
-                "node": node_name,
-                "instance_type": node_instance_type.get((cluster, node_name)),
-            }
-            node_info.update({k: round(v, 3) if v is not None else None for k, v in stats.items()})
-            node_list.append(node_info)
-        otel_node_count = len(node_names)
-        entry = {
+
+        # Log node count entry
+        entry_node_count = {
             "metadata": {
                 "cluster": cluster,
                 "namespace": namespace,
             },
             "spec": {
-                "otel_node_count": otel_node_count,
-                "pods": pods,
-                "nodes": node_list,
+                "otel_node_count": len(node_names)
             }
         }
+        values.append([current_time_ns, json.dumps(entry_node_count)])
+        sent_count += 1
+
+        # Log individual node entries
+        for node_name in node_names:
+            stats = node_resource_stats(prometheus_url, node_name, cluster)
+            node_info = {
+                "metadata": {
+                    "cluster": cluster,
+                    "namespace": namespace,
+                },
+                "spec": {
+                    "node": node_name,
+                    "instance_type": node_instance_type.get((cluster, node_name)),
+                }
+            }
+            node_info["spec"].update({k: round(v, 3) if v is not None else None for k, v in stats.items()})
+            values.append([current_time_ns, json.dumps(node_info)])
+            sent_count += 1
+
+        # Log individual pod entries
+        for pod in pods:
+            pod_info = {
+                "metadata": {
+                    "cluster": cluster,
+                    "namespace": namespace,
+                },
+                "spec": dict(pod)
+            }
+            values.append([current_time_ns, json.dumps(pod_info)])
+            sent_count += 1
+
+    if values:
         send_to_loki(
             "otel_resource_usage",
             "prometheus",
             "otel_combined_usage_24h_per_ns",
-            [[current_time_ns, json.dumps(entry)]]
+            values
         )
-        logger.info(f"Sent usage for cluster={cluster} namespace={namespace}: "
-                    f"{len(pods)} pods, {otel_node_count} nodes")
-        sent_count += 1
-
-    if sent_count == 0:
+        logger.info(f"Sent {sent_count} Loki log entries in one POST")
+    else:
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
 
 def main() -> None:
