@@ -1,9 +1,9 @@
 {{ define "slack.alert.title" }}
-<<DuploPortalName>> - {{ .CommonLabels.cluster }} [{{ .Status | toUpper }}:{{ .Alerts | len }}]
+${AOS_DUPLO_PORTAL_NAME} - {{ .CommonLabels.cluster }} [{{ .Status | toUpper }}:{{ .Alerts | len }}]
 {{ end }}
 
 {{ define "slack.alert.title_link" }}
-https://<<GrafanaURL>>/alerting/list?search={{ .CommonLabels.alertname }}
+https://${AOS_GRAFANA_URL}/alerting/list?search={{ .CommonLabels.alertname }}
 {{ end }}
 
 {{ define "slack.alert.text" }}
@@ -16,7 +16,7 @@ https://<<GrafanaURL>>/alerting/list?search={{ .CommonLabels.alertname }}
   {{ range .Labels.SortedPairs }}• *{{ .Name }}:* `{{ .Value }}`
   {{ end }}
 📖 {{ if .Annotations.runbook_url }}<{{ .Annotations.runbook_url }}|Runbook>{{ else }}No Runbook Available{{ end }}
-🔗 <https://<<GrafanaURL>>/alerting/list?search={{ .Labels.alertname }}|Grafana Dashboard>
+🔗 <https://${AOS_GRAFANA_URL}/alerting/list?search={{ .Labels.alertname }}|Grafana Dashboard>
 
 {{ end }}
 {{ end }}
