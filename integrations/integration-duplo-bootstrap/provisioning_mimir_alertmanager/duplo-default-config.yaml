@@ -24,8 +24,8 @@ receivers:
   - name: duplo-slack-notifications
     slack_configs:
       - send_resolved: true
-        api_url: <<SlackWebhook>>
-        channel: '#<<SlackChannelName>>'
+        api_url: ${AOS_SLACK_WEBHOOK}
+        channel: '#${AOS_SLACK_CHANNEL_NAME}'
         username: Duplo-Metrics-Alertmanager
         color: '{{ if eq .Status "firing" }}#FF0000{{ else }}#36A64F{{ end }}'
         title: '{{ template "slack.alert.title" . }}'

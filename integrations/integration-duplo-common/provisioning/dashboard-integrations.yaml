@@ -513,7 +513,7 @@ spec:
                 query: ""
                 queryType: infinity
               refresh: 1
-              regex: ^(?!.*duplo).*
+              regex: ^(?!.*bootstrap).*
               type: query
     time:
         from: now-5m
