@@ -364,10 +364,7 @@ def collect_grafana_usage(prometheus_url: str) -> Dict[str, int]:
     logger.info("Collecting Grafana usage data")
     
     # PromQL query for Grafana datasource usage
-    query = (
-    "sum by (datasource) (clamp_min((increase(grafana_datasource_request_total[1h]), 0)[24h:1h]) - "
-    "24 * min_over_time(clamp_min(increase(grafana_datasource_request_total[1h]), 0)[24h:1h]), 0))"
-    )
+    query = "sum by (datasource) (clamp_min(sum_over_time(clamp_min(increase(grafana_datasource_request_total[1h]), 0)[24h:1h]) - 24 * min_over_time(clamp_min(increase(grafana_datasource_request_total[1h]), 0)[24h:1h]), 0))"
 
     # Query Prometheus for Grafana usage
     data = query_prometheus(prometheus_url, query)
