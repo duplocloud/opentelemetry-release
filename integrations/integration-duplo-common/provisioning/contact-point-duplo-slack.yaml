@@ -1,9 +1,9 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: AlertContactPoint
 metadata:
-    name: duplo-aos-slack
+    name: duplo-slack
 spec:
-    name: duplo-aos-slack
+    name: duplo-slack
     settings:
       url: ${AOS_SLACK_WEBHOOK}
     disableResolveMessage: false
