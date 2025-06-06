@@ -13,14 +13,14 @@ spec:
         - - tenant
           - =~
           - .*otel.*
-      receiver: duplo-slack
+      receiver: duplo-aos-slack
     - object_matchers:
         - - namespace
           - =~
           - .*otel.*
-      receiver: duplo-slack
+      receiver: duplo-aos-slack
     - object_matchers:
         - - label_tenantname
           - =~
           - .*otel.*
-      receiver: duplo-slack
+      receiver: duplo-aos-slack
