@@ -49,7 +49,7 @@ spec:
           title: Back to Services Overview
           tooltip: ""
           type: link
-          url: /d/service-overview-dashboard/service-overview-dashboard
+          url: /d/service-overview-dashboard/service-overview-dashboard?var-rate_interval=$__auto
         - asDropdown: true
           icon: external link
           includeVars: false
@@ -519,7 +519,7 @@ spec:
                       value:
                         - targetBlank: false
                           title: ""
-                          url: /d/service-span-dashboard/service-span-dashboard??var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-span=${__data.fields.Operation}
+                          url: /d/service-span-dashboard/service-span-dashboard??var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-span=${__data.fields.Operation}&var-rate_interval=$__auto
           gridPos:
             h: 11
             w: 12
@@ -669,7 +669,7 @@ spec:
                       value:
                         - targetBlank: false
                           title: ""
-                          url: /d/service-dashboard/service-dashboard?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}
+                          url: /d/service-dashboard/service-dashboard?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
                     - id: custom.filterable
                       value: true
           gridPos:
@@ -818,7 +818,7 @@ spec:
                     - id: links
                       value:
                         - title: ""
-                          url: /d/service-dashboard/service-dashboard?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}
+                          url: /d/service-dashboard/service-dashboard?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
           gridPos:
             h: 10
             w: 12
@@ -1019,7 +1019,7 @@ spec:
               refresh: 2
               type: interval
     time:
-        from: now-30m
+        from: now-1h
         to: now
     timepicker: {}
     timezone: ""
