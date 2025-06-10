@@ -64,7 +64,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               editorMode: code
-              expr: sum(increase(traces_spanmetrics_calls_total{source="tempo", span_kind="SPAN_KIND_SERVER", service="$app", span_name=~"$route"}[$rate_interval])) by(service)
+              expr: sum(increase(traces_spanmetrics_calls_total{source="tempo", span_kind="SPAN_KIND_SERVER", service="$app", span_name=~"$route"}[$__rate_interval])) by(service)
               instant: false
               legendFormat: '{{label_name}}'
               range: true
