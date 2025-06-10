@@ -105,7 +105,7 @@ spec:
                       value:
                         - targetBlank: false
                           title: ""
-                          url: /d/service-dashboard/service-dashboard?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-service=${__data.fields.Name}
+                          url: /d/service-dashboard/service-dashboard?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
                 - matcher:
                     id: byName
                     options: Technology
@@ -401,7 +401,7 @@ spec:
               refresh: 2
               type: interval
     time:
-        from: now-30m
+        from: now-1h
         to: now
     timepicker: {}
     timezone: ""

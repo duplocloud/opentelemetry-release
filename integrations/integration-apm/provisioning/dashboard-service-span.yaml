@@ -29,7 +29,7 @@ spec:
           title: Back to Services Main
           tooltip: ""
           type: link
-          url: /d/service-dashboard/service-dashboard
+          url: /d/service-dashboard/service-dashboard?var-rate_interval=$__auto
         - asDropdown: true
           icon: external link
           includeVars: false
@@ -424,7 +424,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: false
-              expr: sum by (le) (increase(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"} [$__range]))
+              expr: sum by (le) (increase(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"} [$rate_interval]))
               format: heatmap
               hide: false
               instant: false
@@ -559,7 +559,7 @@ spec:
               refresh: 2
               type: interval
     time:
-        from: now-30m
+        from: now-1h
         to: now
     timepicker: {}
     timezone: ""
