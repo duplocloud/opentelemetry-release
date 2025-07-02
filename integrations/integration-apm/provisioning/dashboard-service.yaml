@@ -26,6 +26,16 @@ spec:
           keepTime: true
           tags: []
           targetBlank: true
+          title: Service Metrics
+          tooltip: ""
+          type: link
+          url: /d/k8s-resources-workload/k8s-compute-resources-workload?var-datasource=duplo-metrics&var-cluster=${cluster}&var-namespace=${namespace}&var-type=$__all&var-workload=${service}&var-lokids=$__all
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
           title: Service Logs
           tooltip: ""
           type: link
