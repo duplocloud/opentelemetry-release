@@ -1384,7 +1384,7 @@ spec:
           title: Network errors and dropped packets
           type: timeseries
     preload: false
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 40
     tags:
         - linuxnode-integration

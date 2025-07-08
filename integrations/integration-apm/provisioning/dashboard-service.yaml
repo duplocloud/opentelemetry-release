@@ -39,7 +39,7 @@ spec:
           title: Service Logs
           tooltip: ""
           type: link
-          url: /a/grafana-lokiexplore-app/explore/service/xyz/logs?var-ds=duplo-logging&var-filters=service_name%7C%3D%7C${service}
+          url: /a/grafana-lokiexplore-app/explore/service/xyz/logs?var-ds=duplo-logging&var-filters=service_name%7C%3D%7C${service}&var-filters=cluster%7C%3D%7C${cluster}&var-filters=namespace%7C%3D%7C${namespace}
         - asDropdown: false
           icon: external link
           includeVars: false

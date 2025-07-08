@@ -258,7 +258,7 @@ spec:
               legendFormat: '{{instance}}'
           title: Disk Capacity
           type: timeseries
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-windows-integration

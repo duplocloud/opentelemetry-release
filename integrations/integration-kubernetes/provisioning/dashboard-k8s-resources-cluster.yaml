@@ -1079,7 +1079,7 @@ spec:
                     'Value #F': Throughput(Read + Write)
                     namespace: Namespace
           type: table
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-integration

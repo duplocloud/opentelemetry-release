@@ -221,7 +221,7 @@ spec:
               instant: true
           title: Volume inodes Usage
           type: gauge
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-integration

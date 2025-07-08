@@ -1530,7 +1530,7 @@ spec:
           title: Memory bounce
           type: timeseries
     preload: false
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 40
     tags:
         - linuxnode-integration

@@ -1007,7 +1007,7 @@ spec:
                     'Value #F': Throughput(Read + Write)
                     pod: Pod
           type: table
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-integration

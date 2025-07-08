@@ -397,7 +397,7 @@ spec:
               legendFormat: Saturation
           title: Net Saturation (Dropped)
           type: timeseries
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-windows-integration

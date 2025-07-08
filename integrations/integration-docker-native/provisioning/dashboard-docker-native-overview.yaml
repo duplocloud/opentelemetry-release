@@ -1209,7 +1209,7 @@ spec:
               refId: Disk writes
           title: Disk I/O
           type: timeseries
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - docker-integration

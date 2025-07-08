@@ -263,7 +263,7 @@ spec:
                     'Value #E': Memory Limits %
                     pod: Pod
           type: table
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-windows-integration

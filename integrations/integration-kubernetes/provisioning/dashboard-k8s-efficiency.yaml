@@ -917,7 +917,7 @@ spec:
               refId: A
           title: Pods Evicted
           type: timeseries
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-integration

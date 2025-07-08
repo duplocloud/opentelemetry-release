@@ -818,7 +818,7 @@ spec:
           title: Error rate
           type: timeseries
     preload: false
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - beyla
