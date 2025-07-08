@@ -296,7 +296,7 @@ spec:
               legendFormat: 'Transmitted : {{ container }}'
           title: Network I/O
           type: timeseries
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-windows-integration

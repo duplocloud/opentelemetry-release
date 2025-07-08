@@ -429,7 +429,7 @@ spec:
                     'Value #H': Memory Usage (Swap)
                     pod: Pod
           type: table
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-integration

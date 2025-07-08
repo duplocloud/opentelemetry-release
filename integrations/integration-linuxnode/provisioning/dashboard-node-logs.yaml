@@ -449,7 +449,7 @@ spec:
           title: Logs
           type: logs
     preload: false
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 40
     tags:
         - linuxnode-integration

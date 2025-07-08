@@ -1044,7 +1044,7 @@ spec:
               legendFormat: '{{instance}} - {{app}}'
           title: Output cache hit ratio
           type: timeseries
-    refresh: 30s
+    refresh: 1m
     rows: []
     schemaVersion: 14
     style: dark

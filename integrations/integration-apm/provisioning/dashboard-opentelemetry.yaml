@@ -817,7 +817,7 @@ spec:
                     http_status_code: Status Code
                     service_name: Application
           type: table
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 40
     tags: []
     templating:

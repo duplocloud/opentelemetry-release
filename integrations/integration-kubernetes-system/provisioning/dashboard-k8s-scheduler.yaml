@@ -403,7 +403,7 @@ spec:
               legendFormat: '{{instance}}'
           title: Goroutines
           type: timeseries
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-integration-system

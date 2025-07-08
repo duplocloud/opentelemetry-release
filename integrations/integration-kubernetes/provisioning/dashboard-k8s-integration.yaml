@@ -444,7 +444,7 @@ spec:
           pluginVersion: 11.2.0
           title: Cluster operations visibility
           type: dashlist
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-integration

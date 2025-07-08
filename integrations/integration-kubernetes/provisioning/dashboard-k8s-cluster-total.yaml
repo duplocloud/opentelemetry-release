@@ -718,7 +718,7 @@ spec:
               legendFormat: __auto
           title: Rate of TCP SYN Retransmits out of all retransmits
           type: timeseries
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-integration

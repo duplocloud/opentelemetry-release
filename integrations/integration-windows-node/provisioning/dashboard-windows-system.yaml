@@ -679,7 +679,7 @@ spec:
           title: NTP delay
           type: timeseries
     preload: false
-    refresh: 30s
+    refresh: 1m
     schemaVersion: 40
     tags:
         - integration-windows-node
