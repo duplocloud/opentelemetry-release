@@ -1,0 +1,19 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+  name: tempo_metrics_alerts
+  namespace: integration-tempo
+spec:
+  rules:
+    - alerts:
+        - name: TempoDistributorError
+          expr: |
+            sum(rate(tempo_discarded_spans_total{pod=~"duplo-tracing-distributor-*", reason="internal_error"}[5m])) > 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: Tempo is discarding spans due to internal errors
+            description: |
+              Tempo distributor pod {{ $labels.pod }} is discarding spans at a rate > 0 due to internal errors (e.g., queue full, export failures).
+              This may lead to trace loss and impact observability.
