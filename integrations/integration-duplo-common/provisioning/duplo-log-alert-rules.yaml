@@ -1,0 +1,66 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRuleGroup
+metadata:
+    name: duplo-common.log-alerts
+spec:
+    folderUid: duplo-common
+    interval: 60
+    rules:
+        - annotations:
+            description: '{{ $labels.container }} instance is failing to flush chunks because the storage is full on {{ $labels.cluster }}/{{ $labels.namespace }}'
+            summary: '{{ $labels.container }} flush failure due to no space left on device in {{ $labels.cluster }}/{{ $labels.namespace }}'
+          condition: C
+          data:
+            - datasourceUid: duplo-logging
+              model:
+                datasource:
+                    type: loki
+                    uid: duplo-logging
+                editorMode: code
+                expr: sum(count_over_time({flags="F"} |~ "(?i)no space left on device" | logfmt | msg="failed to flush" [$__auto])) by (cluster, namespace, container)
+                instant: true
+                intervalMs: 1000
+                maxDataPoints: 43200
+                queryType: instant
+                refId: A
+              queryType: instant
+              refId: A
+              relativeTimeRange:
+                from: 900
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: duplo-common
+          for: 1m0s
+          labels:
+            severity: critical
+          noDataState: OK
+          orgID: 1
+          ruleGroup: log-alerts
+          title: No Space Left on Device Alert
+          uid: Nospaceleftondevicealert
+    title: log-alerts
