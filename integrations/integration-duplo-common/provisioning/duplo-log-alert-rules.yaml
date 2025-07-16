@@ -17,7 +17,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({flags="F"} |~ "(?i)no space left on device" | logfmt | msg="failed to flush" [$__auto])) by (cluster, namespace, container)
+                expr: sum(count_over_time({namespace=~".*otel.*"} |~ "(?i)no space left on device" | logfmt | msg="failed to flush" [$__auto])) by (cluster, namespace, container)
                 instant: true
                 intervalMs: 1000
                 maxDataPoints: 43200
