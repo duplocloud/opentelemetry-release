@@ -10,9 +10,13 @@ route:
   group_by:
     - alertname
   routes:
+    - receiver: duplo-webhook-notifications
+      matchers:
+        - namespace=~"${AOS_NAMESPACE_FILTER}"
+      continue: true
     - receiver: duplo-slack-notifications
       matchers:
-        - namespace=~".*otel.*"
+        - namespace=~"${AOS_NAMESPACE_FILTER}"
         - severity!="info"
         - daemonset!~".*"
         - alertname!="KubeHpaMaxedOut"
@@ -39,5 +43,10 @@ receivers:
         icon_url: '{{ template "slack.default.iconurl" . }}'
   - name: default-receiver
     slack_configs: []
+  - name: duplo-webhook-notifications
+    webhook_configs:
+      - max_alerts: 100
+        send_resolved: true
+        url: ${AOS_AUTOMATION_WEBHOOK}
 templates:
   - duplo_templates.tpl
