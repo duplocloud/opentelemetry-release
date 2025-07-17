@@ -12,20 +12,23 @@ spec:
     - object_matchers:
         - - tenant
           - =~
-          - .*otel.*
+          - ${AOS_NAMESPACE_FILTER}
       receiver: duplo-webhook-notifications
     - object_matchers:
         - - namespace
           - =~
-          - .*otel.*
+          - ${AOS_NAMESPACE_FILTER}
       receiver: duplo-webhook-notifications
     - object_matchers:
         - - label_tenantname
           - =~
-          - .*otel.*
+          - ${AOS_NAMESPACE_FILTER}
       receiver: duplo-webhook-notifications
     - object_matchers:
         - - service_name
           - =
           - duplo-automation
+        - - namespace
+          - =~
+          - ${AOS_NAMESPACE_FILTER}
       receiver: duplo-aos-slack
