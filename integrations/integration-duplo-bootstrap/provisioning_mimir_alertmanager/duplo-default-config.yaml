@@ -13,40 +13,12 @@ route:
     - receiver: duplo-webhook-notifications
       matchers:
         - namespace=~"${AOS_NAMESPACE_FILTER}"
-      continue: true
-    - receiver: duplo-slack-notifications
-      matchers:
-        - namespace=~"${AOS_NAMESPACE_FILTER}"
-        - severity!="info"
-        - daemonset!~".*"
-        - alertname!="KubeHpaMaxedOut"
-        - pod!~"duplo-monitoring-beyla-.*"
-        - pod!~"duplo-monitoring-prometheus-.*"
-        - pod!~"duplo-monitoring-alloy-profiles-.*"
-        - pod!~"duplo-monitoring-alloy-logs-.*"
 receivers:
-  - name: duplo-slack-notifications
-    slack_configs:
-      - send_resolved: true
-        api_url: ${AOS_SLACK_WEBHOOK}
-        channel: '#${AOS_SLACK_CHANNEL_NAME}'
-        username: Duplo-Metrics-Alertmanager
-        color: '{{ if eq .Status "firing" }}#FF0000{{ else }}#36A64F{{ end }}'
-        title: '{{ template "slack.alert.title" . }}'
-        title_link: '{{ template "slack.alert.title_link" . }}'
-        pretext: '{{ template "slack.default.pretext" . }}'
-        text: '{{ template "slack.alert.text" . }}'
-        footer: '{{ template "slack.default.footer" . }}'
-        fallback: '{{ template "slack.default.fallback" . }}'
-        callback_id: '{{ template "slack.default.callbackid" . }}'
-        icon_emoji: '{{ template "slack.default.iconemoji" . }}'
-        icon_url: '{{ template "slack.default.iconurl" . }}'
   - name: default-receiver
     slack_configs: []
   - name: duplo-webhook-notifications
     webhook_configs:
-      - max_alerts: 100
-        send_resolved: true
+      - send_resolved: true
         url: ${AOS_AUTOMATION_WEBHOOK}
 templates:
   - duplo_templates.tpl

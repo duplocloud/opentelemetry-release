@@ -1,0 +1,12 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertContactPoint
+metadata:
+    name: duplo-webhook-notifications
+spec:
+    name: duplo-webhook-notifications
+    settings:
+      url: ${AOS_AUTOMATION_WEBHOOK}
+      httpMethod: POST
+    disableResolveMessage: false
+    type: webhook
+    uid: duplo-webhook-notifications

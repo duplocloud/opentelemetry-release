@@ -13,14 +13,19 @@ spec:
         - - tenant
           - =~
           - .*otel.*
-      receiver: duplo-aos-slack
+      receiver: duplo-webhook-notifications
     - object_matchers:
         - - namespace
           - =~
           - .*otel.*
-      receiver: duplo-aos-slack
+      receiver: duplo-webhook-notifications
     - object_matchers:
         - - label_tenantname
           - =~
           - .*otel.*
+      receiver: duplo-webhook-notifications
+    - object_matchers:
+        - - service_name
+          - =
+          - duplo-automation
       receiver: duplo-aos-slack
