@@ -184,5 +184,5 @@ spec:
           labels:
             severity: critical
           name: TempoDistributorError
-          query: sum(rate(tempo_discarded_spans_total{pod=~"duplo-tracing-distributor-*",reason="internal_error"}[5m])) > 0
+          query: sum by (pod, cluster, namespace) (rate(tempo_discarded_spans_total{reason="internal_error"}[5m])) > 5
           type: alerting
