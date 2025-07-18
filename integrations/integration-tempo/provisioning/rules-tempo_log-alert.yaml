@@ -125,9 +125,10 @@ spec:
           uid: Tempocompactorfailurealert
         - annotations:
             description: |-
-                More than 5 `warn`-level logs detected in Tempo ingester pods over the last 5 minutes.
-                            Investigate memberlist, flushing, or ingestion behavior for tempo ingester.
-            summary: Tempo Ingester Warning Logs Detected
+                More than 5 `WriteTo failed` warnings were detected in Tempo ingester pod `{{ $labels.pod }}` within namespace `{{ $labels.namespace }}` on cluster `{{ $labels.cluster }}` over the last 5 minutes.
+                These errors typically indicate memberlist (gossip protocol) communication issues, which may impact cluster stability or ingestion performance.
+                Investigate underlying network issues or resource pressure on the affected pod.
+            summary: Tempo Ingester Memberlist WriteTo Failures Detected in {{ $labels.cluster }}/{{ $labels.namespace }}/{{ $labels.pod }}
           condition: C
           data:
             - datasourceUid: duplo-logging
@@ -136,8 +137,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: count_over_time({service_name="tempo", pod=~"duplo-tracing-ingester-.*"} | detected_level="warn"[5m])
-                hide: false
+                expr: sum by (cluster, namespace, pod) (count_over_time({pod=~"duplo-tracing-ingester-.*"} |= "WriteTo failed"[5m]))
                 instant: true
                 intervalMs: 1000
                 maxDataPoints: 43200
@@ -182,6 +182,5 @@ spec:
           orgID: 1
           ruleGroup: log-alerts
           title: Tempo-ingester-warning
-          uid: Tempoingesterwarning  
-
+          uid: Tempoingesterwarning
     title: log-alerts
