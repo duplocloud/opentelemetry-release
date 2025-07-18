@@ -176,3 +176,13 @@ spec:
           name: TempoIngesterNotReceivedTraceData
           query: rate(tempo_ingester_bytes_received_total[5m]) < 1
           type: alerting
+        - alerts: []
+          annotations:
+            message: Tempo distributor pod {{ $labels.pod }} is discarding spans at a rate > 0 due to internal errors (e.g., queue full, export failures).This may lead to trace loss and impact observability.
+            runbook_url: ""
+          duration: 300
+          labels:
+            severity: critical
+          name: TempoDistributorError
+          query: sum by (pod, cluster, namespace) (rate(tempo_discarded_spans_total{reason="internal_error"}[5m])) > 5
+          type: alerting

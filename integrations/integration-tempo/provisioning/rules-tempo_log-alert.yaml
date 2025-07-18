@@ -123,10 +123,11 @@ spec:
           ruleGroup: log-alerts
           title: Tempo Compactor Failure Alert
           uid: Tempocompactorfailurealert
-        
         - annotations:
-            description: 'Tempo dropped traces in cluster {{ $labels.cluster }}, namespace {{ $labels.namespace }} due to rate limits. Review trace volume or increase limits.'
-            summary: 'Tempo rate limit detected in {{ $labels.cluster }}/{{ $labels.namespace }}'
+            description: |-
+                More than 5 `warn`-level logs detected in Tempo ingester pods over the last 5 minutes.
+                            Investigate memberlist, flushing, or ingestion behavior for tempo ingester.
+            summary: Tempo Ingester Warning Logs Detected
           condition: C
           data:
             - datasourceUid: duplo-logging
@@ -135,7 +136,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({service_name="tempo"} | json | logfmt | drop __error__, __error_details__ | caller=~".*rate_limited_logger.*" | msg="RATE_LIMITED" [$__auto])) by (msg, cluster, namespace, pod)
+                expr: count_over_time({service_name="tempo", pod=~"duplo-tracing-ingester-.*"} | detected_level="warn"[5m])
                 hide: false
                 instant: true
                 intervalMs: 1000
@@ -151,7 +152,7 @@ spec:
                 conditions:
                     - evaluator:
                         params:
-                            - 0
+                            - 5
                         type: gt
                       operator:
                         type: and
@@ -174,12 +175,13 @@ spec:
               relativeTimeRange: {}
           execErrState: Error
           folderUID: integration-tempo
-          for: 1m0s
+          for: 2m0s
           labels:
             severity: warning
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
-          uid: Temporatelimitalert
-          
+          title: Tempo-ingester-warning
+          uid: Tempoingesterwarning  
+
     title: log-alerts
