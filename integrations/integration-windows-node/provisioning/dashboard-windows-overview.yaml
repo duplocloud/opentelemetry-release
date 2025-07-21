@@ -1293,8 +1293,8 @@ spec:
               options: []
               query:
                 qryType: 1
-              query: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},job)
-              refId: PrometheusVariableQueryEditor-VariableQuery
+                query: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},job)
+                refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               sort: 1
               type: query
