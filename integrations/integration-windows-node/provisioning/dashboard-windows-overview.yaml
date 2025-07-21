@@ -114,7 +114,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -161,7 +161,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -209,7 +209,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -257,7 +257,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -307,7 +307,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -358,7 +358,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -411,7 +411,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -460,7 +460,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -526,7 +526,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -605,7 +605,7 @@ spec:
             tooltip:
                 mode: multi
                 sort: desc
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -667,7 +667,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -753,9 +753,10 @@ spec:
                 placement: bottom
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -850,9 +851,10 @@ spec:
                 placement: bottom
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -951,7 +953,7 @@ spec:
                     - sum
                 show: false
             showHeader: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -1104,9 +1106,10 @@ spec:
                 placement: bottom
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -1189,9 +1192,10 @@ spec:
                 placement: bottom
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -1265,8 +1269,8 @@ spec:
               sort: 1
               type: query
             - current:
-                text: ""
-                value: ""
+                text: "duplo-metrics"
+                value: "duplo-metrics"
               label: Data source
               name: datasource
               options: []
@@ -1281,12 +1285,16 @@ spec:
               datasource:
                 type: prometheus
                 uid: ${datasource}
+              definition: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},job)  
               includeAll: true
               label: Job
               multi: true
               name: job
               options: []
-              query: label_values(windows_os_info{job=~"integrations/windows_exporter"}, job)
+              query:
+                qryType: 1
+              query: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},job)
+              refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               sort: 1
               type: query
@@ -1306,8 +1314,8 @@ spec:
               sort: 1
               type: query
             - current:
-                text: ""
-                value: ""
+                text: "duplo-logging"
+                value: "duplo-logging"
               hide: 2
               label: Loki data source
               name: loki_datasource
@@ -1316,6 +1324,27 @@ spec:
               refresh: 1
               regex: ""
               type: datasource
+            - allValue: .*
+              current:
+                text: ""
+                value: ""
+              datasource:
+                type: prometheus
+                uid: ${datasource}
+              definition: label_values(node_uname_info{job=~"integrations/(node_exporter|unix)"},cluster)
+              includeAll: true
+              label: Cluster
+              multi: true
+              name: cluster
+              options: []
+              query:
+                qryType: 1
+                query: label_values(node_uname_info{job=~"integrations/(node_exporter|unix)"},cluster)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 2
+              regex: ""
+              sort: 1
+              type: query
     time:
         from: now-30m
         to: now
