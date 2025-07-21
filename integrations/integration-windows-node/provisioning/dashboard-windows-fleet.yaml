@@ -181,7 +181,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -232,7 +232,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - refId: A
           title: Integration version
@@ -296,6 +296,8 @@ spec:
                         - targetBlank: false
                           title: Drill down to ${__field.name} ${__value.text}
                           url: d/windows-overview?var-instance=${__data.fields.instance}&${__url_time_range}&${datasource:queryparam}
+                    - id: custom.width
+                      value: 209
                 - matcher:
                     id: byRegexp
                     options: Job
@@ -394,6 +396,12 @@ spec:
                       value: 0
                     - id: unit
                       value: percent
+                - matcher:
+                    id: byName
+                    options: Cluster
+                  properties:
+                    - id: custom.width
+                      value: 217
           gridPos:
             h: 16
             w: 24
@@ -413,11 +421,13 @@ spec:
                     - sum
                 show: true
             showHeader: true
-          pluginVersion: 11.4.0-78571
+            sortBy: []
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
+              editorMode: code
               expr: windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
@@ -425,13 +435,18 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: time() - windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
+              editorMode: code
+              expr: |-
+                max by (instance, cluster) (
+                  time() - windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
+                )
               format: table
               instant: true
               refId: Uptime
             - datasource:
                 type: prometheus
                 uid: ${datasource}
+              editorMode: code
               expr: windows_cs_logical_processors{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
@@ -439,7 +454,13 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: 100 - (avg without (mode,core) (rate(windows_cpu_time_total{mode="idle", job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}[$__rate_interval])*100))
+              editorMode: code
+              expr: |-
+                100 - (
+                  avg without (mode,core) (
+                    rate(windows_cpu_time_total{mode="idle", job=~"integrations/windows_exporter",cluster=~"$cluster",instance=~"$instance"}[$__rate_interval])
+                  ) * 100
+                )
               format: table
               instant: true
               legendFormat: CPU usage
@@ -447,6 +468,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
+              editorMode: code
               expr: windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
@@ -455,13 +477,15 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: 100 - windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"} * 100
+              editorMode: code
+              expr: 100 - (windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}) /(windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}) * 100
               format: table
               instant: true
               refId: Memory usage
             - datasource:
                 type: prometheus
                 uid: ${datasource}
+              editorMode: code
               expr: windows_logical_disk_size_bytes{volume="C:", job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
@@ -469,13 +493,15 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: 100 - windows_logical_disk_free_bytes{volume="C:", job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}/windows_logical_disk_size_bytes{volume="C:", job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}*100
+              editorMode: code
+              expr: 100 - windows_logical_disk_free_bytes{volume="C:", job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}/ windows_logical_disk_size_bytes{volume="C:", job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}*100
               format: table
               instant: true
               refId: 'Disk C: used'
             - datasource:
                 type: prometheus
                 uid: ${datasource}
+              editorMode: code
               expr: count by (instance) (max_over_time(ALERTS{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance", alertstate="firing", severity="critical"}[1m])) * group by (instance) (windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"})
               format: table
               instant: true
@@ -483,6 +509,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
+              editorMode: code
               expr: count by (instance) (max_over_time(ALERTS{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance", alertstate="firing", severity="warning"}[1m])) * group by (instance) (windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"})
               format: table
               instant: true
@@ -496,11 +523,19 @@ spec:
             - id: filterFieldsByName
               options:
                 include:
-                    pattern: job 1$|instance|product|^hostname$|Value.+
+                    pattern: job 1$|instance|cluster|product|^hostname$|Value.+
             - id: organize
               options:
                 excludeByName:
                     'Value #OS Info': true
+                    cluster 1: true
+                    cluster 3: true
+                    cluster 4: true
+                    cluster 5: true
+                    cluster 6: true
+                    cluster 7: true
+                    cluster 8: true
+                includeByName: {}
                 indexByName: {}
                 renameByName:
                     hostname: Hostname
@@ -511,6 +546,10 @@ spec:
               options:
                 regex: 'Value #(.*)'
                 renamePattern: $1
+            - id: renameByRegex
+              options:
+                regex: ^cluster \d+$
+                renamePattern: Cluster
           type: table
         - datasource:
             type: prometheus
@@ -596,9 +635,10 @@ spec:
                 placement: right
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -661,7 +701,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
                         - color: red
                           value: 80
                 unit: percent
@@ -698,9 +737,10 @@ spec:
                 placement: right
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -725,17 +765,46 @@ spec:
                 color:
                     mode: continuous-BlYlRd
                 custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
                     fillOpacity: 1
                     gradientMode: scheme
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
                     lineInterpolation: smooth
                     lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
                     showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
                 decimals: 1
                 links:
                     - title: Drill down to this instance
                       url: d/windows-overview?var-instance=${__field.labels.instance}&var-volume=${__field.labels.volume}&${__url_time_range}
+                mappings: []
                 max: 100
                 min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
                 unit: percent
             overrides:
                 - matcher:
@@ -770,9 +839,10 @@ spec:
                 placement: right
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: v10.0.0
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -797,17 +867,46 @@ spec:
                 color:
                     mode: continuous-BlYlRd
                 custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
                     fillOpacity: 1
                     gradientMode: scheme
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
                     lineInterpolation: smooth
                     lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
                     showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
                 decimals: 1
                 links:
                     - title: Drill down to this instance
                       url: d/windows-overview?var-instance=${__field.labels.instance}&var-volume=${__field.labels.volume}&${__url_time_range}
+                mappings: []
                 max: 100
                 min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
                 unit: percent
             overrides:
                 - matcher:
@@ -842,9 +941,10 @@ spec:
                 placement: right
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: v10.0.0
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -866,16 +966,45 @@ spec:
           description: "Top 25.\n\n**Network errors**:\n\nNetwork errors refer to issues that occur during the transmission of data across a network. \n\nThese errors can result from various factors, including physical issues, jitter, collisions, noise and interference.\n\nMonitoring network errors is essential for diagnosing and resolving issues, as they can indicate problems with network hardware or environmental factors affecting network quality.\n\n**Dropped packets**:\n\nDropped packets occur when data packets traveling through a network are intentionally discarded or lost due to congestion, resource limitations, or network configuration issues. \n\nCommon causes include network congestion, buffer overflows, QoS settings, and network errors, as corrupted or incomplete packets may be discarded by receiving devices.\n\nDropped packets can impact network performance and lead to issues such as degraded voice or video quality in real-time applications.\n"
           fieldConfig:
             defaults:
+                color:
+                    mode: palette-classic
                 custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
                     drawStyle: points
                     fillOpacity: 30
                     gradientMode: opacity
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
                     lineInterpolation: smooth
                     lineWidth: 2
                     pointSize: 5
+                    scaleDistribution:
+                        type: linear
                     showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
                 decimals: 1
+                mappings: []
                 noValue: No errors
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
                 unit: pps
             overrides: []
           gridPos:
@@ -888,11 +1017,13 @@ spec:
             legend:
                 calcs: []
                 displayMode: list
+                placement: bottom
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: v10.0.0
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -934,8 +1065,8 @@ spec:
     templating:
         list:
             - current:
-                text: ""
-                value: ""
+                text: duplo-metrics
+                value: duplo-metrics
               label: Data source
               name: datasource
               options: []
@@ -943,6 +1074,29 @@ spec:
               refresh: 1
               regex: ""
               type: datasource
+            - allValue: .*
+              current:
+                text:
+                    - duploinfra-pp-1-eus2
+                value:
+                    - duploinfra-pp-1-eus2
+              datasource:
+                type: prometheus
+                uid: ${datasource}
+              definition: label_values(node_uname_info{job=~"integrations/(node_exporter|unix)"},cluster)
+              includeAll: true
+              label: Cluster
+              multi: true
+              name: cluster
+              options: []
+              query:
+                qryType: 1
+                query: label_values(node_uname_info{job=~"integrations/(node_exporter|unix)"},cluster)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 2
+              regex: ""
+              sort: 1
+              type: query
             - allValue: .+
               current:
                 text: All
@@ -950,12 +1104,16 @@ spec:
               datasource:
                 type: prometheus
                 uid: ${datasource}
+              definition: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},job)
               includeAll: true
               label: Job
               multi: true
               name: job
               options: []
-              query: label_values(windows_os_info{job=~"integrations/windows_exporter"}, job)
+              query:
+                qryType: 1
+                query: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},job)
+                refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               sort: 1
               type: query
@@ -976,8 +1134,8 @@ spec:
               sort: 1
               type: query
             - current:
-                text: ""
-                value: ""
+                text: duplo-logging
+                value: duplo-logging
               hide: 2
               label: Loki data source
               name: loki_datasource
