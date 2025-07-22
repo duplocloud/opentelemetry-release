@@ -177,30 +177,6 @@ spec:
             overrides:
                 - matcher:
                     id: byName
-                    options: Mounted on
-                  properties:
-                    - id: custom.width
-                      value: "260"
-                - matcher:
-                    id: byName
-                    options: Size
-                  properties:
-                    - id: custom.width
-                      value: "80"
-                - matcher:
-                    id: byName
-                    options: Used
-                  properties:
-                    - id: custom.width
-                      value: "80"
-                - matcher:
-                    id: byName
-                    options: Available
-                  properties:
-                    - id: custom.width
-                      value: "80"
-                - matcher:
-                    id: byName
                     options: Used, %
                   properties:
                     - id: custom.cellOptions
@@ -669,8 +645,8 @@ spec:
     templating:
         list:
             - current:
-                text: duplo-metrics
-                value: duplo-metrics
+                text: ""
+                value: ""
               label: Data source
               name: datasource
               options: []
@@ -735,8 +711,8 @@ spec:
               sort: 1
               type: query
             - current:
-                text: duplo-logging
-                value: duplo-logging
+                text: ""
+                value: ""
               hide: 2
               label: Loki data source
               name: loki_datasource

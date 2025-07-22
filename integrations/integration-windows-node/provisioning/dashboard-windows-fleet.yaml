@@ -296,8 +296,6 @@ spec:
                         - targetBlank: false
                           title: Drill down to ${__field.name} ${__value.text}
                           url: d/windows-overview?var-instance=${__data.fields.instance}&${__url_time_range}&${datasource:queryparam}
-                    - id: custom.width
-                      value: 209
                 - matcher:
                     id: byRegexp
                     options: Job
@@ -309,18 +307,6 @@ spec:
                         - targetBlank: false
                           title: Filter by ${__field.name}
                           url: d/windows-fleet?var-${__field.name}=${__value.text}&${__url_time_range}&${datasource:queryparam}
-                - matcher:
-                    id: byName
-                    options: Cores
-                  properties:
-                    - id: custom.width
-                      value: "120"
-                - matcher:
-                    id: byName
-                    options: CPU usage
-                  properties:
-                    - id: custom.width
-                      value: "120"
                     - id: custom.cellOptions
                       value:
                         mode: basic
@@ -336,20 +322,8 @@ spec:
                       value: 0
                     - id: unit
                       value: percent
-                - matcher:
-                    id: byName
-                    options: Memory total
-                  properties:
-                    - id: custom.width
-                      value: "120"
                     - id: unit
                       value: bytes
-                - matcher:
-                    id: byName
-                    options: Memory usage
-                  properties:
-                    - id: custom.width
-                      value: "120"
                     - id: custom.cellOptions
                       value:
                         mode: basic
@@ -365,20 +339,8 @@ spec:
                       value: 0
                     - id: unit
                       value: percent
-                - matcher:
-                    id: byName
-                    options: 'Disk C: total'
-                  properties:
-                    - id: custom.width
-                      value: "120"
                     - id: unit
                       value: bytes
-                - matcher:
-                    id: byName
-                    options: 'Disk C: used'
-                  properties:
-                    - id: custom.width
-                      value: "120"
                     - id: custom.cellOptions
                       value:
                         mode: basic
@@ -396,12 +358,6 @@ spec:
                       value: 0
                     - id: unit
                       value: percent
-                - matcher:
-                    id: byName
-                    options: Cluster
-                  properties:
-                    - id: custom.width
-                      value: 217
           gridPos:
             h: 16
             w: 24
@@ -1065,8 +1021,8 @@ spec:
     templating:
         list:
             - current:
-                text: "duplo-metrics"
-                value: "duplo-metrics"
+                text: """"
+                value: """"
               label: Data source
               name: datasource
               options: []
@@ -1134,8 +1090,8 @@ spec:
               sort: 1
               type: query
             - current:
-                text: duplo-logging
-                value: duplo-logging
+                text: ""
+                value: ""
               hide: 2
               label: Loki data source
               name: loki_datasource
