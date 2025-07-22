@@ -1245,8 +1245,8 @@ spec:
               sort: 1
               type: query
             - current:
-                text: """"
-                value: """"
+                text: ""
+                value: ""
               label: Data source
               name: datasource
               options: []
@@ -1290,8 +1290,8 @@ spec:
               sort: 1
               type: query
             - current:
-                text: """"
-                value: """"
+                text: ""
+                value: ""
               hide: 2
               label: Loki data source
               name: loki_datasource
