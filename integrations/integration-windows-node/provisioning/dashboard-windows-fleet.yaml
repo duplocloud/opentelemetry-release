@@ -1021,8 +1021,8 @@ spec:
     templating:
         list:
             - current:
-                text: """"
-                value: """"
+                text: ""
+                value: ""
               label: Data source
               name: datasource
               options: []
