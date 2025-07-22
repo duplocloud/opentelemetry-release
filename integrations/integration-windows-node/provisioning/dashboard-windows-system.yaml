@@ -48,7 +48,7 @@ spec:
               tagKeys: job,instance,level
               textFormat: '{{message}}'
               titleFormat: Service failed
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 0
     links:
@@ -708,7 +708,7 @@ spec:
               datasource:
                 type: prometheus
                 uid: ${datasource}
-              definition: label_values(node_uname_info{job=~"integrations/(node_exporter|unix)"},cluster)
+              definition: label_values(windows_os_info{job=~"integrations/windows_exporter"},cluster)
               description: ""
               includeAll: true
               label: Cluster
@@ -717,7 +717,7 @@ spec:
               options: []
               query:
                 qryType: 1
-                query: label_values(node_uname_info{job=~"integrations/(node_exporter|unix)"},cluster)
+                query: label_values(windows_os_info{job=~"integrations/windows_exporter"},cluster)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               regex: ""

@@ -1065,8 +1065,8 @@ spec:
     templating:
         list:
             - current:
-                text: duplo-metrics
-                value: duplo-metrics
+                text: "duplo-metrics"
+                value: "duplo-metrics"
               label: Data source
               name: datasource
               options: []
@@ -1077,13 +1077,13 @@ spec:
             - allValue: .*
               current:
                 text:
-                    - duploinfra-pp-1-eus2
+                    - ""
                 value:
-                    - duploinfra-pp-1-eus2
+                    - ""
               datasource:
                 type: prometheus
                 uid: ${datasource}
-              definition: label_values(node_uname_info{job=~"integrations/(node_exporter|unix)"},cluster)
+              definition: label_values(windows_os_info{job=~"integrations/windows_exporter"},cluster)
               includeAll: true
               label: Cluster
               multi: true
@@ -1091,7 +1091,7 @@ spec:
               options: []
               query:
                 qryType: 1
-                query: label_values(node_uname_info{job=~"integrations/(node_exporter|unix)"},cluster)
+                query: label_values(windows_os_info{job=~"integrations/windows_exporter"},cluster)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               regex: ""
