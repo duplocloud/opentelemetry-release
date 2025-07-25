@@ -183,4 +183,61 @@ spec:
           ruleGroup: log-alerts
           title: Tempo-ingester-warning
           uid: Tempoingesterwarning
+        - annotations:
+            description: pod {{ $labels.pod }} in namespace {{ $labels.namespace }} on cluster {{ $labels.cluster }} is dropping trace data because Tempo has zero live ingesters.
+            summary: Tempo has no live replicas in namespace {{ $labels.namespace }}  in cluster {{ $labels.cluster }}
+          condition: C
+          data:
+            - datasourceUid: duplo-logging
+              model:
+                datasource:
+                    type: loki
+                    uid: duplo-logging
+                editorMode: code
+                expr: "sum(count_over_time({service_name=\"alloy\"} |= \"no more retries left\" \n|~ \"could only find 0 - unhealthy instances\" [$__auto])) by (cluster, namespace)"
+                instant: true
+                intervalMs: 1000
+                maxDataPoints: 43200
+                queryType: instant
+                refId: A
+              queryType: instant
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: OK
+          folderUID: integration-tempo
+          for: 2m0s
+          labels:
+            severity: critical
+          noDataState: NoData
+          orgID: 1
+          ruleGroup: log-alerts
+          title: TempoExporterNoLiveReplicas
+          uid: Tempoexporternolivereplicas
     title: log-alerts
