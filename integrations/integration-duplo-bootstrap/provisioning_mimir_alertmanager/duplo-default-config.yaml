@@ -14,6 +14,12 @@ route:
       matchers:
         - namespace=~".*otel.*"
         - severity!="info"
+        - alertname!="KubeHpaMaxedOut"
+        - pod!~".+"
+    - receiver: duplo-slack-notifications
+      matchers:
+        - namespace=~".*otel.*"
+        - severity!="info"
         - daemonset!~".*"
         - alertname!="KubeHpaMaxedOut"
         - pod!~"duplo-monitoring-beyla-.*"
