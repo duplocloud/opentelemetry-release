@@ -131,7 +131,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -376,6 +376,7 @@ spec:
                 reducer:
                     - sum
                 show: true
+            frameIndex: 7
             showHeader: true
             sortBy: []
           pluginVersion: 11.5.2
@@ -472,10 +473,69 @@ spec:
               refId: WARNING
           title: Fleet overview
           transformations:
-            - id: joinByField
+            - id: merge
+              options: {}
+            - id: groupBy
               options:
-                byField: instance
-                mode: outer
+                fields:
+                    Instance:
+                        aggregations: []
+                        operation: groupby
+                    Product:
+                        aggregations: []
+                        operation: aggregate
+                    'Value #CPU usage':
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
+                    'Value #CRITICAL':
+                        aggregations:
+                            - lastNotNull
+                    'Value #Cores':
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
+                    'Value #Disk C: total':
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
+                    'Value #Disk C: used':
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
+                    'Value #Memory total':
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
+                    'Value #Memory usage':
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
+                    'Value #Uptime':
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
+                    'Value #WARNING':
+                        aggregations:
+                            - lastNotNull
+                    cluster:
+                        aggregations: []
+                        operation: groupby
+                    instance:
+                        aggregations: []
+                        operation: groupby
+                    job:
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
+                    product:
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
+                    volume:
+                        aggregations:
+                            - lastNotNull
+                        operation: aggregate
             - id: filterFieldsByName
               options:
                 include:
@@ -506,6 +566,10 @@ spec:
               options:
                 regex: ^cluster \d+$
                 renamePattern: Cluster
+            - id: renameByRegex
+              options:
+                regex: (.*) \(lastNotNull\)
+                renamePattern: $1
           type: table
         - datasource:
             type: prometheus
@@ -657,6 +721,7 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
+                          value: null
                         - color: red
                           value: 80
                 unit: percent
@@ -759,6 +824,7 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
+                          value: null
                         - color: red
                           value: 80
                 unit: percent
@@ -861,6 +927,7 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
+                          value: null
                         - color: red
                           value: 80
                 unit: percent
@@ -1016,7 +1083,7 @@ spec:
     preload: false
     refresh: 1m
     schemaVersion: 40
-    tags:
+    tags: 
         - integration-windows-node
     templating:
         list:
@@ -1032,10 +1099,9 @@ spec:
               type: datasource
             - allValue: .*
               current:
-                text:
-                    - ""
+                text: All
                 value:
-                    - ""
+                    - $__all
               datasource:
                 type: prometheus
                 uid: ${datasource}
