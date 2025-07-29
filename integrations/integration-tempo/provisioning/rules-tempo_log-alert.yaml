@@ -59,6 +59,7 @@ spec:
           for: 1m0s
           labels:
             severity: warning
+            owner: duplo
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
@@ -118,6 +119,7 @@ spec:
           for: 1m0s
           labels:
             severity: critical
+            owner: duplo
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
@@ -178,14 +180,15 @@ spec:
           for: 2m0s
           labels:
             severity: warning
+            owner: duplo
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
           title: Tempo-ingester-warning
           uid: Tempoingesterwarning
         - annotations:
-            description: pod {{ $labels.pod }} in namespace {{ $labels.namespace }} on cluster {{ $labels.cluster }} is dropping trace data because Tempo has zero live ingesters.
-            summary: Tempo has no live replicas in namespace {{ $labels.namespace }}  in cluster {{ $labels.cluster }}
+            description: Detected an "Exporting failed." error log level=error from pod {{ $labels.pod }}, namespace {{ $labels.namespace }}, cluster {{ $labels.cluster }} in the last 5 minutes.
+            summary: 'Exporting failed error in alloy service on pod {{ $labels.pod }} (namespace: {{ $labels.namespace }}, cluster: {{ $labels.cluster }})'
           condition: C
           data:
             - datasourceUid: duplo-logging
@@ -194,13 +197,16 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: "sum(count_over_time({service_name=\"alloy\"} |= \"no more retries left\" \n|~ \"could only find 0 - unhealthy instances\" [$__auto])) by (cluster, namespace)"
+                expr: |-
+                    sum by (cluster, namespace, pod) (
+                      count_over_time({service_name="alloy"} |= "Exporting failed." | logfmt | level="error"[5m])
+                    )
                 instant: true
                 intervalMs: 1000
                 maxDataPoints: 43200
-                queryType: instant
+                queryType: range
                 refId: A
-              queryType: instant
+              queryType: range
               refId: A
               relativeTimeRange:
                 from: 600
@@ -209,7 +215,7 @@ spec:
                 conditions:
                     - evaluator:
                         params:
-                            - 0
+                            - 5
                         type: gt
                       operator:
                         type: and
@@ -232,12 +238,13 @@ spec:
               relativeTimeRange: {}
           execErrState: OK
           folderUID: integration-tempo
-          for: 2m0s
+          for: 5m0s
           labels:
+            owner: duplo
             severity: critical
           noDataState: NoData
           orgID: 1
           ruleGroup: log-alerts
-          title: TempoExporterNoLiveReplicas
-          uid: Tempoexporternolivereplicas
+          title: AlloyExportingFailed
+          uid: Alloyexportingfailed
     title: log-alerts
