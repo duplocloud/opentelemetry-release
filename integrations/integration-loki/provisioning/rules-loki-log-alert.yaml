@@ -59,6 +59,7 @@ spec:
           for: 1m0s
           labels:
             severity: warning
+            owner: duplo
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts

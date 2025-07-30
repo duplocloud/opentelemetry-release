@@ -57,6 +57,9 @@ spec:
           execErrState: Error
           folderUID: duplo-common
           for: 0s
+          labels:
+            severity: critical
+            owner: duplo
           noDataState: OK
           orgID: 1
           ruleGroup: pod-alerts
@@ -115,6 +118,7 @@ spec:
           for: 2m0s
           labels:
             severity: critical
+            owner: duplo
           noDataState: NoData
           notification_settings:
             group_by: null
