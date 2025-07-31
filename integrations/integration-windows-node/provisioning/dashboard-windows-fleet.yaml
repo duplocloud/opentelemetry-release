@@ -307,6 +307,10 @@ spec:
                         - targetBlank: false
                           title: Filter by ${__field.name}
                           url: d/windows-fleet?var-${__field.name}=${__value.text}&${__url_time_range}&${datasource:queryparam}
+                - matcher:
+                    id: byName
+                    options: CPU usage
+                  properties:      
                     - id: custom.cellOptions
                       value:
                         mode: basic
@@ -322,8 +326,16 @@ spec:
                       value: 0
                     - id: unit
                       value: percent
+                - matcher:
+                    id: byName
+                    options: Memory total
+                  properties:      
                     - id: unit
                       value: bytes
+                - matcher:
+                    id: byName
+                    options: Memory usage
+                  properties:      
                     - id: custom.cellOptions
                       value:
                         mode: basic
@@ -339,8 +351,16 @@ spec:
                       value: 0
                     - id: unit
                       value: percent
+                - matcher:
+                    id: byName
+                    options: 'Disk C: total'
+                  properties:        
                     - id: unit
                       value: bytes
+                - matcher:
+                    id: byName
+                    options: 'Disk C: used'
+                  properties:        
                     - id: custom.cellOptions
                       value:
                         mode: basic
