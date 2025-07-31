@@ -177,7 +177,7 @@ spec:
               relativeTimeRange: {}
           execErrState: Error
           folderUID: integration-tempo
-          for: 2m0s
+          for: 1m0s
           labels:
             severity: warning
             owner: duplo
@@ -204,9 +204,9 @@ spec:
                 instant: true
                 intervalMs: 1000
                 maxDataPoints: 43200
-                queryType: range
+                queryType: instant
                 refId: A
-              queryType: range
+              queryType: instant
               refId: A
               relativeTimeRange:
                 from: 600
@@ -236,13 +236,13 @@ spec:
                 type: threshold
               refId: C
               relativeTimeRange: {}
-          execErrState: OK
+          execErrState: Error
           folderUID: integration-tempo
-          for: 5m0s
+          for: 1m0s
           labels:
             owner: duplo
             severity: critical
-          noDataState: NoData
+          noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
           title: AlloyExportingFailed

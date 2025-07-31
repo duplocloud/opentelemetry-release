@@ -1,0 +1,74 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRuleGroup
+metadata:
+    name: integration-tempo.metrics-alerts
+spec:
+    folderUid: integration-tempo
+    interval: 60
+    rules:
+        - annotations:
+            description: |-
+                Tempo distributor pod {{ $labels.pod }} in cluster {{ $labels.cluster }}, namespace {{ $labels.namespace }}
+                is discarding spans at a rate > 10/sec due to internal errors (e.g., queue full, failed export, quorum issue).
+
+                This may cause loss of trace data and affect observability. Investigate upstream exporter logs and Tempo distributor health.
+            summary: Tempo is discarding spans due to internal errors in {{ $labels.cluster }}/{{ $labels.namespace }}
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: |-
+                    sum by (pod, cluster, namespace) (
+                      rate(tempo_discarded_spans_total{reason="internal_error"}[5m])
+                    )
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 10
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-tempo
+          for: 0s
+          labels:
+            severity: critical
+            owner: duplo
+          noDataState: OK
+          orgID: 1
+          ruleGroup: metrics-alerts
+          title: Tempo-distributor-error
+          uid: Tempodistributorerror
+    title: metrics-alerts

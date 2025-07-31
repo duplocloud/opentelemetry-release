@@ -58,8 +58,7 @@ spec:
           folderUID: duplo-common
           for: 0s
           labels:
-            severity: critical
-            owner: duplo
+            severity: warning
           noDataState: OK
           orgID: 1
           ruleGroup: pod-alerts
@@ -113,13 +112,13 @@ spec:
                 type: threshold
               refId: C
               relativeTimeRange: {}
-          execErrState: OK
+          execErrState: Error
           folderUID: duplo-common
-          for: 2m0s
+          for: 1m0s
           labels:
             severity: critical
             owner: duplo
-          noDataState: NoData
+          noDataState: OK
           notification_settings:
             group_by: null
             mute_time_intervals: null
