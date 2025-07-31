@@ -12,9 +12,9 @@ route:
   routes:
     - receiver: duplo-slack-notifications
       matchers:
-        - namespace=~${AOS_NAMESPACE_FILTER}
+        - namespace=~".*otel.*"
         - severity!="info"
-        - daemonset!~"duplo-monitoring-.*"
+        - daemonset!~".*"
         - alertname!="KubeHpaMaxedOut"
         - pod!~"duplo-monitoring-beyla-.*"
         - pod!~"duplo-monitoring-prometheus-.*"
