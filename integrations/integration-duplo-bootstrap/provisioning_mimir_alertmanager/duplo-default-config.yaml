@@ -13,6 +13,13 @@ route:
     - receiver: duplo-webhook-notifications
       matchers:
         - namespace=~"${AOS_NAMESPACE_FILTER}"
+        - severity!="info"
+        - daemonset!~"duplo-monitoring-.*"
+        - alertname!="KubeHpaMaxedOut"
+        - pod!~"duplo-monitoring-beyla-.*"
+        - pod!~"duplo-monitoring-prometheus-.*"
+        - pod!~"duplo-monitoring-alloy-profiles-.*"
+        - pod!~"duplo-monitoring-alloy-logs-.*"
 receivers:
   - name: default-receiver
     slack_configs: []

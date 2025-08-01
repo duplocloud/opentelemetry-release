@@ -25,10 +25,15 @@ spec:
           - ${AOS_NAMESPACE_FILTER}
       receiver: duplo-webhook-notifications
     - object_matchers:
-        - - service_name
+        - - owner
           - =
-          - duplo-automation
-        - - namespace
-          - =~
-          - ${AOS_NAMESPACE_FILTER}
+          - duplo
+      receiver: duplo-webhook-notifications
+    - object_matchers:
+        - - owner
+          - =
+          - duplo
+        - - alertname
+          - =
+          - AlertmanagerWebhookFailed
       receiver: duplo-aos-slack
