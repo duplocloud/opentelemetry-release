@@ -114,7 +114,7 @@ spec:
               relativeTimeRange: {}
           execErrState: Error
           folderUID: duplo-common
-          for: 1m0s
+          for: 0s
           labels:
             severity: critical
             owner: duplo
