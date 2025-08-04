@@ -117,10 +117,6 @@ spec:
             owner: duplo
             severity: critical
           noDataState: OK
-          notification_settings:
-            group_by: null
-            mute_time_intervals: null
-            receiver: duplo-aos-slack
           orgID: 1
           ruleGroup: pod-alerts
           title: AlertmanagerWebhookFailed
