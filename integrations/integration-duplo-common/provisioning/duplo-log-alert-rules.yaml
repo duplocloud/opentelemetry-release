@@ -17,7 +17,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({${AOS_NAMESPACE_FILTER}} |~ "(?i)no space left on device" | logfmt | msg="failed to flush" [$__auto])) by (cluster, namespace, container)
+                expr: sum(count_over_time({${AOS_NAMESPACE_FILTER}} |~ "(?i)no space left on device" [$__auto])) by (cluster, namespace, container)
                 instant: true
                 intervalMs: 1000
                 maxDataPoints: 43200
@@ -55,7 +55,7 @@ spec:
               relativeTimeRange: {}
           execErrState: Error
           folderUID: duplo-common
-          for: 1m0s
+          for: 0s
           labels:
             severity: critical
             owner: duplo
