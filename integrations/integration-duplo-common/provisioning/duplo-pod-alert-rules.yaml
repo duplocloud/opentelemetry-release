@@ -62,7 +62,7 @@ spec:
           noDataState: OK
           orgID: 1
           ruleGroup: pod-alerts
-          title: Pod Restart Alert
+          title: PodRestartAlert
           uid: Podrestartalert
         - annotations:
             description: The Mimir Alertmanager is responding with up=0. Check pod health, service endpoints, or network access.

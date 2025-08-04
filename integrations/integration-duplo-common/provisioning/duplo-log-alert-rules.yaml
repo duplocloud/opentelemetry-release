@@ -62,7 +62,7 @@ spec:
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
-          title: No Space Left on Device Alert
+          title: NoSpaceLeftonDeviceAlert
           uid: Nospaceleftondevicealert
         - annotations:
             description: Detected an "Exporting failed." error log level=error from pod {{ $labels.pod }}, namespace {{ $labels.namespace }}, cluster {{ $labels.cluster }} in the last 5 minutes.

@@ -63,7 +63,7 @@ spec:
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
-          title: Tempo rate limit error
+          title: TempoRateLimitError
           uid: Temporatelimiterror
         - annotations:
             description: |-
@@ -123,7 +123,7 @@ spec:
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
-          title: Tempo Compactor Failure Alert
+          title: TempoCompactorFailureAlert
           uid: Tempocompactorfailurealert
         - annotations:
             description: |-
@@ -184,6 +184,6 @@ spec:
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
-          title: Tempo-ingester-warning
+          title: TempoIngesterWarning
           uid: Tempoingesterwarning
     title: log-alerts

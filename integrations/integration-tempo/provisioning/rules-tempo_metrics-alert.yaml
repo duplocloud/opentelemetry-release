@@ -69,6 +69,6 @@ spec:
           noDataState: OK
           orgID: 1
           ruleGroup: metrics-alerts
-          title: Tempo-distributor-error
+          title: TempoDistributorError
           uid: Tempodistributorerror
     title: metrics-alerts
