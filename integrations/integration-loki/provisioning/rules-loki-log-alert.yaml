@@ -56,7 +56,7 @@ spec:
               relativeTimeRange: {}
           execErrState: Error
           folderUID: integration-loki
-          for: 1m0s
+          for: 0s
           labels:
             severity: warning
             owner: duplo
