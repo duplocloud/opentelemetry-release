@@ -63,6 +63,6 @@ spec:
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
-          title: Loki rate limit alert
+          title: LokiRateLimitAlert
           uid: Lokiratelimitalert
     title: log-alerts
