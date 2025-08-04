@@ -65,8 +65,8 @@ spec:
           title: Pod Restart Alert
           uid: Podrestartalert
         - annotations:
-            description: The Alertmanager is responding with up=0. Check pod health, service endpoints, or network access.
-            summary: Alertmanager is unreachable in {{ $labels.cluster }}/{{ $labels.namespace }}
+            description: The Mimir Alertmanager is responding with up=0. Check pod health, service endpoints, or network access.
+            summary: Mimir Alertmanager is unreachable in {{ $labels.cluster }}/{{ $labels.namespace }}
           condition: C
           data:
             - datasourceUid: duplo-metrics
@@ -119,12 +119,8 @@ spec:
             severity: critical
             owner: duplo
           noDataState: OK
-          notification_settings:
-            group_by: null
-            mute_time_intervals: null
-            receiver: duplo-aos-slack
           orgID: 1
           ruleGroup: pod-alerts
-          title: AlertmanagerDown
-          uid: Alertmanagerdown
+          title: MimirAlertmanagerDown
+          uid: Mimiralertmanagerdown
     title: pod-alerts
