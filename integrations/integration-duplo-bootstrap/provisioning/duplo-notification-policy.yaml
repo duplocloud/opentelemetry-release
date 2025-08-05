@@ -12,15 +12,28 @@ spec:
     - object_matchers:
         - - tenant
           - =~
-          - .*otel.*
-      receiver: duplo-aos-slack
+          - ${AOS_NAMESPACE_FILTER}
+      receiver: duplo-webhook-notifications
     - object_matchers:
         - - namespace
           - =~
-          - .*otel.*
-      receiver: duplo-aos-slack
+          - ${AOS_NAMESPACE_FILTER}
+      receiver: duplo-webhook-notifications
     - object_matchers:
         - - label_tenantname
           - =~
-          - .*otel.*
+          - ${AOS_NAMESPACE_FILTER}
+      receiver: duplo-webhook-notifications
+    - object_matchers:
+        - - owner
+          - =
+          - duplo
+      receiver: duplo-webhook-notifications
+    - object_matchers:
+        - - owner
+          - =
+          - duplo
+        - - alertname
+          - =
+          - AlertmanagerWebhookFailed
       receiver: duplo-aos-slack
