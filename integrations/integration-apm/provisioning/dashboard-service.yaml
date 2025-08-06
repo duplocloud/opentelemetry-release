@@ -427,7 +427,7 @@ spec:
             overrides: []
           gridPos:
             h: 11
-            w: 12
+            w: 24
             x: 0
             "y": 12
           id: 5
@@ -525,159 +525,6 @@ spec:
                         mode: fixed
                 - matcher:
                     id: byName
-                    options: Operation
-                  properties:
-                    - id: custom.filterable
-                      value: true
-                    - id: links
-                      value:
-                        - targetBlank: false
-                          title: ""
-                          url: /d/service-span-dashboard/service-span-dashboard??var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-span=${__data.fields.Operation}&var-rate_interval=$__auto
-          gridPos:
-            h: 11
-            w: 12
-            x: 12
-            "y": 12
-          id: 6
-          maxDataPoints: 100
-          options:
-            cellHeight: sm
-            footer:
-                countRows: false
-                enablePagination: true
-                fields: ""
-                reducer:
-                    - sum
-                show: false
-            frameIndex: 2
-            showHeader: true
-            sortBy:
-                - desc: true
-                  displayName: Errors
-          pluginVersion: 11.5.2
-          targets:
-            - datasource:
-                type: prometheus
-                uid: duplo-metrics
-              editorMode: code
-              exemplar: false
-              expr: histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (le,span_name))
-              hide: false
-              instant: false
-              interval: ""
-              legendFormat: ""
-              range: true
-              refId: serviceOverviewOperationsDuration
-            - datasource:
-                type: prometheus
-                uid: duplo-metrics
-              editorMode: code
-              exemplar: false
-              expr: (sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", status_code="STATUS_CODE_ERROR"} [$rate_interval])) by (span_name) OR sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (span_name) * 0) / sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (span_name)
-              hide: false
-              instant: false
-              interval: ""
-              legendFormat: ""
-              range: true
-              refId: serviceOverviewOperationsErrors
-            - datasource:
-                type: prometheus
-                uid: duplo-metrics
-              editorMode: code
-              exemplar: false
-              expr: sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (span_name)
-              hide: false
-              instant: false
-              interval: ""
-              legendFormat: ""
-              range: true
-              refId: serviceOverviewOperationsRate
-          title: Operations
-          transformations:
-            - id: timeSeriesTable
-              options:
-                serviceOverviewOperationsDuration:
-                    timeField: Time
-                serviceOverviewOperationsDuration-Instant:
-                    timeField: Time
-                serviceOverviewOperationsErrors:
-                    stat: lastNotNull
-                    timeField: Time
-                serviceOverviewOperationsErrors-Instant:
-                    stat: lastNotNull
-                    timeField: Time
-                serviceOverviewOperationsRate:
-                    timeField: Time
-                serviceOverviewOperationsRate-Instant:
-                    timeField: Time
-            - id: joinByField
-              options:
-                byField: span_name
-                mode: outer
-            - id: organize
-              options:
-                excludeByName: {}
-                includeByName: {}
-                indexByName: {}
-                renameByName:
-                    'Trend #serviceOverviewOperationsDuration': Duration, p95
-                    'Trend #serviceOverviewOperationsErrors': Errors
-                    'Trend #serviceOverviewOperationsRate': Rate
-                    span_name: Operation
-          type: table
-        - datasource:
-            type: prometheus
-            uid: duplo-metrics
-          fieldConfig:
-            defaults:
-                color:
-                    mode: thresholds
-                custom:
-                    align: center
-                    cellOptions:
-                        type: auto
-                    filterable: false
-                    inspect: false
-                mappings: []
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: semi-dark-green
-                          value: null
-            overrides:
-                - matcher:
-                    id: byName
-                    options: Duration, p95
-                  properties:
-                    - id: unit
-                      value: s
-                    - id: color
-                      value:
-                        fixedColor: orange
-                        mode: fixed
-                - matcher:
-                    id: byName
-                    options: Errors
-                  properties:
-                    - id: unit
-                      value: percentunit
-                    - id: color
-                      value:
-                        fixedColor: dark-red
-                        mode: fixed
-                - matcher:
-                    id: byName
-                    options: Rate
-                  properties:
-                    - id: unit
-                      value: reqps
-                    - id: color
-                      value:
-                        fixedColor: '#15a425'
-                        mode: fixed
-                - matcher:
-                    id: byName
                     options: Name
                   properties:
                     - id: links
@@ -692,7 +539,7 @@ spec:
             w: 12
             x: 0
             "y": 23
-          id: 7
+          id: 6
           maxDataPoints: 100
           options:
             cellHeight: sm
@@ -840,7 +687,7 @@ spec:
             w: 12
             x: 12
             "y": 23
-          id: 8
+          id: 7
           maxDataPoints: 100
           options:
             cellHeight: sm
