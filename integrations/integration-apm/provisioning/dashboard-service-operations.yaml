@@ -151,10 +151,10 @@ spec:
                           title: ""
                           url: /d/service-span-dashboard/service-span-dashboard??var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-span=${__data.fields.Operation}&var-rate_interval=$__auto
           gridPos:
-            h: 11
-            w: 12
-            x: 12
-            "y": 12
+            h: 23
+            w: 24
+            x: 0
+            "y": 3
           id: 2
           maxDataPoints: 100
           options:
