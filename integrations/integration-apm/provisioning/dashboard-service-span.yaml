@@ -29,7 +29,7 @@ spec:
           title: Back to Services Main
           tooltip: ""
           type: link
-          url: /d/service-dashboard/service-dashboard?var-rate_interval=$__auto
+          url: /d/service-overview-dashboard/service-overview-dashboard?var-rate_interval=$__auto
         - asDropdown: true
           icon: external link
           includeVars: false
