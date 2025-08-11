@@ -77,7 +77,7 @@ spec:
                 editorMode: code
                 expr: |-
                     sum by (cluster, namespace, pod) (
-                      count_over_time({service_name="alloy"} |= "Exporting failed." | logfmt | level="error"[5m])
+                      count_over_time({service_name="alloy"} |= "Exporting failed." | logfmt | level="error"[1m])
                     )
                 instant: true
                 intervalMs: 1000
@@ -116,7 +116,7 @@ spec:
               relativeTimeRange: {}
           execErrState: Error
           folderUID: integration-tempo
-          for: 0s
+          for: 5m0s
           labels:
             owner: duplo
             severity: critical
