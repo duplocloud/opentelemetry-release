@@ -243,7 +243,7 @@ spec:
                       value: ""
           gridPos:
             h: 4
-            w: 4
+            w: 6
             x: 0
             "y": 4
           id: 2
@@ -303,8 +303,8 @@ spec:
                       value: ""
           gridPos:
             h: 4
-            w: 4
-            x: 4
+            w: 6
+            x: 6
             "y": 4
           id: 3
           options:
@@ -373,7 +373,7 @@ spec:
           gridPos:
             h: 4
             w: 4
-            x: 8
+            x: 12
             "y": 4
           id: 4
           options:
@@ -444,7 +444,7 @@ spec:
           gridPos:
             h: 4
             w: 4
-            x: 12
+            x: 16
             "y": 4
           id: 5
           options:
