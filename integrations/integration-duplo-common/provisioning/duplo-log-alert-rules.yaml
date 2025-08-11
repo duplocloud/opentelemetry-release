@@ -116,7 +116,7 @@ spec:
               relativeTimeRange: {}
           execErrState: Error
           folderUID: integration-tempo
-          for: 5m0s
+          for: 0s
           labels:
             owner: duplo
             severity: critical
