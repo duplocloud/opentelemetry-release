@@ -243,7 +243,7 @@ spec:
                       value: ""
           gridPos:
             h: 4
-            w: 4
+            w: 6
             x: 0
             "y": 4
           id: 2
@@ -267,7 +267,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: count(container_last_seen{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet",job=~"$job",tenant=~"$tenant",instance=~"$instance", id=~"/system.slice/docker.+", name!=""})
+              expr: count(container_last_seen{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet",job=~"$job",tenant=~"$tenant",instance=~"$instance", name!=""})
               format: time_series
               instant: false
               legendFormat: '{{instance}}: Containers'
@@ -303,8 +303,8 @@ spec:
                       value: ""
           gridPos:
             h: 4
-            w: 4
-            x: 4
+            w: 6
+            x: 6
             "y": 4
           id: 3
           options:
@@ -327,7 +327,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: count (sum by (image) (container_last_seen{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet",job=~"$job",tenant=~"$tenant",instance=~"$instance", id=~"/system.slice/docker.+", name!=""}))
+              expr: count (sum by (image) (container_last_seen{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet",job=~"$job",tenant=~"$tenant",instance=~"$instance", name!=""}))
               format: time_series
               instant: false
               legendFormat: '{{instance}}: Images'
@@ -373,7 +373,7 @@ spec:
           gridPos:
             h: 4
             w: 4
-            x: 8
+            x: 12
             "y": 4
           id: 4
           options:
@@ -396,7 +396,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: avg by (job,instance, name) (rate(container_cpu_usage_seconds_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet",job=~"$job",tenant=~"$tenant",instance=~"$instance", id=~"/system.slice/docker.+", name!=""}[$__rate_interval])) * 100
+              expr: avg by (job,instance, name) (rate(container_cpu_usage_seconds_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet",job=~"$job",tenant=~"$tenant",instance=~"$instance", name!=""}[$__rate_interval])) * 100
               format: time_series
               instant: false
               legendFormat: '{{instance}}'
@@ -444,7 +444,7 @@ spec:
           gridPos:
             h: 4
             w: 4
-            x: 12
+            x: 16
             "y": 4
           id: 5
           options:
@@ -467,7 +467,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: "sum(\n  container_spec_memory_reservation_limit_bytes{asserts_env=~\"$env\", asserts_site=~\"$site\", job!=\"kubelet\",job=~\"$job\",tenant=~\"$tenant\",instance=~\"$instance\", id=~\"/system.slice/docker.+\", name!=\"\"}\n  )\n/ \navg(\n    machine_memory_bytes{asserts_env=~\"$env\", asserts_site=~\"$site\", job!=\"kubelet\",job=~\"$job\",instance=~\"$instance\"}\n) * 100\n"
+              expr: "sum(\n  container_spec_memory_reservation_limit_bytes{asserts_env=~\"$env\", asserts_site=~\"$site\", job!=\"kubelet\",job=~\"$job\",tenant=~\"$tenant\",instance=~\"$instance\", name!=\"\"}\n  )\n/ \navg(\n    machine_memory_bytes{asserts_env=~\"$env\", asserts_site=~\"$site\", job!=\"kubelet\",job=~\"$job\",instance=~\"$instance\"}\n) * 100\n"
               format: time_series
               instant: false
               legendFormat: '{{instance}}: Memory reserved'
@@ -515,7 +515,7 @@ spec:
           gridPos:
             h: 4
             w: 4
-            x: 16
+            x: 20
             "y": 4
           id: 6
           options:
@@ -540,7 +540,7 @@ spec:
               editorMode: code
               expr: |
                 avg(
-                  sum by (instance) (container_memory_usage_bytes{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet",job=~"$job",tenant=~"$tenant",instance=~"$instance", id=~"/system.slice/docker.+", name!=""})
+                  sum by (instance) (container_memory_usage_bytes{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet",job=~"$job",tenant=~"$tenant",instance=~"$instance", name!=""})
                   /
                   avg by (instance) (machine_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet",job=~"$job",tenant=~"$tenant",instance=~"$instance"})
                 ) * 100
@@ -646,7 +646,7 @@ spec:
               editorMode: code
               expr: |
                 100 *
-                  rate(container_cpu_usage_seconds_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
+                  rate(container_cpu_usage_seconds_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
               format: time_series
               instant: false
               legendFormat: '{{name}}'
@@ -746,7 +746,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: container_memory_usage_bytes{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}
+              expr: container_memory_usage_bytes{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}
               format: time_series
               instant: false
               legendFormat: '{{name}}'
@@ -856,7 +856,7 @@ spec:
               editorMode: code
               expr: |
                 8 *
-                  rate(container_network_receive_bytes_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
+                  rate(container_network_receive_bytes_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
               format: time_series
               instant: false
               legendFormat: '{{name}}/{{interface}} receive'
@@ -867,7 +867,7 @@ spec:
               editorMode: code
               expr: |
                 8 *
-                  rate(container_network_transmit_bytes_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
+                  rate(container_network_transmit_bytes_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
               format: time_series
               instant: false
               legendFormat: '{{name}}/{{interface}} transmit'
@@ -976,7 +976,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: rate(container_network_receive_packets_dropped_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
+              expr: rate(container_network_receive_packets_dropped_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
               format: time_series
               instant: false
               legendFormat: '{{name}}/{{interface}} rx drops'
@@ -985,7 +985,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: rate(container_network_transmit_packets_dropped_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
+              expr: rate(container_network_transmit_packets_dropped_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
               format: time_series
               instant: false
               legendFormat: '{{name}}/{{interface}} tx drops'
@@ -994,7 +994,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: rate(container_network_receive_errors_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
+              expr: rate(container_network_receive_errors_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
               format: time_series
               instant: false
               legendFormat: '{{name}}/{{interface}} rx errors'
@@ -1003,7 +1003,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: rate(container_network_transmit_errors_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
+              expr: rate(container_network_transmit_errors_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
               format: time_series
               instant: false
               legendFormat: '{{name}}/{{interface}} tx errors'
@@ -1097,7 +1097,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: container_fs_usage_bytes{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",instance=~"$instance",tenant=~"$tenant",name=~"$name"}
+              expr: container_fs_usage_bytes{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",instance=~"$instance",tenant=~"$tenant",name=~"$name"}
               format: time_series
               instant: false
               legendFormat: '{{name}}/{{device}}'
@@ -1193,7 +1193,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: rate(container_fs_reads_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
+              expr: rate(container_fs_reads_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
               format: time_series
               instant: false
               legendFormat: '{{name}}/{{device}} read'
@@ -1202,7 +1202,7 @@ spec:
                 type: prometheus
                 uid: ${prometheus_datasource}
               editorMode: code
-              expr: rate(container_fs_writes_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", id=~"/system.slice/docker.+", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
+              expr: rate(container_fs_writes_total{asserts_env=~"$env", asserts_site=~"$site", job!="kubelet", name!="",job=~"$job",tenant=~"$tenant",instance=~"$instance",name=~"$name"}[$__rate_interval])
               format: time_series
               instant: false
               legendFormat: '{{name}}/{{device}} write'
@@ -1356,7 +1356,7 @@ spec:
               datasource:
                 type: prometheus
                 uid: ${prometheus_datasource}
-              definition: label_values(container_last_seen{job!="kubelet", id=~"/system.slice/docker.+", name!="", job=~"$job", instance=~"$instance", tenant=~"$tenant"},name)
+              definition: label_values(container_last_seen{job!="kubelet", name!="", job=~"$job", instance=~"$instance", tenant=~"$tenant"},name)
               hide: 0
               includeAll: true
               label: Name
@@ -1365,7 +1365,7 @@ spec:
               options: []
               query:
                 qryType: 1
-                query: label_values(container_last_seen{job!="kubelet", id=~"/system.slice/docker.+", name!="", job=~"$job", instance=~"$instance", tenant=~"$tenant"},name)
+                query: label_values(container_last_seen{job!="kubelet", name!="", job=~"$job", instance=~"$instance", tenant=~"$tenant"},name)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               regex: ""
