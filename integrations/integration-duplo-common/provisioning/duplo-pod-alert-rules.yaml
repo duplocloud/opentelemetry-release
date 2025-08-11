@@ -75,8 +75,8 @@ spec:
                 editorMode: code
                 expr: |-
                     sum by (cluster, namespace, pod) (
-                      count_over_time({service_name="duplo-automation"} |= "alertmanagerWebhookFailed" [5m]))
-                intervalMs: 1000
+                      count_over_time({service_name="duplo-automation"} |= "alertmanagerWebhookFailed" [1m]))
+                intervalMs: 60000
                 maxDataPoints: 43200
                 queryType: instant
                 refId: A
@@ -104,7 +104,7 @@ spec:
                     type: __expr__
                     uid: __expr__
                 expression: A
-                intervalMs: 1000
+                intervalMs: 60000
                 maxDataPoints: 43200
                 refId: C
                 type: threshold

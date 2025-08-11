@@ -10,6 +10,14 @@ spec:
   orgId: 1
   routes:
     - object_matchers:
+        - - owner
+          - =
+          - duplo
+        - - alertname
+          - =
+          - AlertmanagerWebhookFailed
+      receiver: duplo-aos-slack
+    - object_matchers:
         - - tenant
           - =~
           - ${AOS_NAMESPACE_FILTER}
@@ -29,11 +37,3 @@ spec:
           - =
           - duplo
       receiver: duplo-webhook-notifications
-    - object_matchers:
-        - - owner
-          - =
-          - duplo
-        - - alertname
-          - =
-          - AlertmanagerWebhookFailed
-      receiver: duplo-aos-slack
