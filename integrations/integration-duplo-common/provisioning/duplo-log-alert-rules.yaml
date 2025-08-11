@@ -17,7 +17,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({${AOS_NAMESPACE_FILTER}} |~ "(?i)no space left on device" [$__auto])) by (cluster, namespace, container)
+                expr: sum(count_over_time({namespace=${AOS_NAMESPACE_FILTER}} |~ "(?i)no space left on device" [5m])) by (cluster, namespace, container)
                 instant: true
                 intervalMs: 1000
                 maxDataPoints: 43200
