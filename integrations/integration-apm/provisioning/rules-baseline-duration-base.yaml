@@ -1,0 +1,34 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: baseline-duration-base
+    namespace: app-o11y
+spec:
+    rules:
+        - labels: {}
+          name: appo11y:duration:p95
+          query: histogram_quantile(0.95, sum by (k8s_cluster_name, k8s_namespace_name, service, span_name, le) (rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)))
+          type: recording
+        - labels:
+            span_name: __aggregated__
+          name: appo11y:duration:p95
+          query: histogram_quantile(0.95, sum by (k8s_cluster_name, k8s_namespace_name, service, le) (rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)))
+          type: recording
+        - labels: {}
+          name: appo11y:duration:p99
+          query: histogram_quantile(0.99, sum by (k8s_cluster_name, k8s_namespace_name, service, span_name, le) (rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)))
+          type: recording
+        - labels:
+            span_name: __aggregated__
+          name: appo11y:duration:p99
+          query: histogram_quantile(0.99, sum by (k8s_cluster_name, k8s_namespace_name, service, le) (rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)))
+          type: recording
+        - labels: {}
+          name: appo11y:duration:avg
+          query: sum(rate(traces_spanmetrics_latency_sum{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)) by (k8s_cluster_name, k8s_namespace_name, service, span_name) / (sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)) by (k8s_cluster_name, k8s_namespace_name, service, span_name))
+          type: recording
+        - labels:
+            span_name: __aggregated__
+          name: appo11y:duration:avg
+          query: sum(rate(traces_spanmetrics_latency_sum{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)) by (k8s_cluster_name, k8s_namespace_name, service) / (sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)) by (k8s_cluster_name, k8s_namespace_name, service))
+          type: recording
