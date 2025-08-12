@@ -178,7 +178,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: false
-              expr: histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (le,span_name))
+              expr: appo11y:duration:p95{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name!="__aggregated__"}
               hide: false
               instant: false
               interval: ""
@@ -190,7 +190,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: false
-              expr: (sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", status_code="STATUS_CODE_ERROR"} [$rate_interval])) by (span_name) OR sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (span_name) * 0) / sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (span_name)
+              expr: appo11y:error:ratio{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name!="__aggregated__"}
               hide: false
               instant: false
               interval: ""
@@ -202,7 +202,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: false
-              expr: sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (span_name)
+              expr: appo11y:request:rate5m{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name!="__aggregated__"}
               hide: false
               instant: false
               interval: ""
@@ -233,7 +233,22 @@ spec:
                 mode: outer
             - id: organize
               options:
-                excludeByName: {}
+                excludeByName: 
+                    'Trend #serviceOverviewOperationsDuration': false
+                    'Trend #serviceOverviewOperationsErrors': false
+                    'Trend #serviceOverviewOperationsRate': false
+                    __name__ 1: true
+                    __name__ 2: true
+                    __name__ 3: true
+                    k8s_cluster_name 1: true
+                    k8s_cluster_name 2: true
+                    k8s_cluster_name 3: true
+                    k8s_namespace_name 1: true
+                    k8s_namespace_name 2: true
+                    k8s_namespace_name 3: true
+                    service 1: true
+                    service 2: true
+                    service 3: true
                 includeByName: {}
                 indexByName: {}
                 renameByName:
