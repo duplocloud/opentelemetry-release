@@ -1,0 +1,23 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: PrometheusRuleGroup
+metadata:
+    name: baseline-duration
+    namespace: app-o11y
+spec:
+    rules:
+        - labels: {}
+          name: appo11y:duration:p95:prediction
+          query: quantile_over_time(0.5, appo11y:duration:p95[1h]) unless (appo11y:request:rate5m unless appo11y:request:rate5m:select)
+          type: recording
+        - labels: {}
+          name: appo11y:duration:p95:stddev
+          query: avg_over_time(appo11y:duration:p95:stddev_1h[1d2h])
+          type: recording
+        - labels: {}
+          name: appo11y:duration:p95:anomaly_lower_threshold
+          query: clamp_min(min without (prediction_type) (label_replace(last_over_time(appo11y:duration:p95:prediction[1m]) - last_over_time(appo11y:duration:p95:stddev[1m]) * on () group_left () appo11y:duration:threshold_by_stddev, "prediction_type", "stddev", "", "") or label_replace(last_over_time(appo11y:duration:p95:prediction[1m]) - last_over_time(appo11y:duration:p95:prediction[1m]) * on () group_left () appo11y:duration:threshold_margin, "prediction_type", "margin", "", "")), 0)
+          type: recording
+        - labels: {}
+          name: appo11y:duration:p95:anomaly_upper_threshold
+          query: max without (prediction_type) (label_replace(last_over_time(appo11y:duration:p95:prediction[1m]) + last_over_time(appo11y:duration:p95:stddev[1m]) * on () group_left () appo11y:duration:threshold_by_stddev, "prediction_type", "stddev", "", "") or label_replace(last_over_time(appo11y:duration:p95:prediction[1m]) + last_over_time(appo11y:duration:p95:prediction[1m]) * on () group_left () appo11y:duration:threshold_margin, "prediction_type", "margin", "", ""))
+          type: recording
