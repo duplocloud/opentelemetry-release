@@ -1,8 +1,8 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-apm
-    name: service-dashboard
+    folder: integration-apm-v3
+    name: service-dashboard-v3
 spec:
     annotations:
         list:
@@ -26,7 +26,7 @@ spec:
           keepTime: true
           tags: []
           targetBlank: true
-          title: Service Metrics
+          title: Service Infra Metrics
           tooltip: ""
           type: link
           url: /d/k8s-resources-workload/k8s-compute-resources-workload?var-datasource=duplo-metrics&var-cluster=${cluster}&var-namespace=${namespace}&var-type=$__all&var-workload=${service}&var-lokids=$__all
@@ -59,13 +59,23 @@ spec:
           title: Back to Services Overview
           tooltip: ""
           type: link
-          url: /d/service-overview-dashboard/service-overview-dashboard?var-rate_interval=$__auto
+          url: /d/service-overview-dashboard-v3/service-overview-dashboard-v3?var-rate_interval=$__auto
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: Service Operations
+          tooltip: ""
+          type: link
+          url: /d/service-operations-dashboard-v3/service-operations-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
         - asDropdown: true
           icon: external link
           includeVars: false
           keepTime: true
           tags:
-            - apm
+            - apm-v3
             - service
             - tempo-mg
           targetBlank: false
@@ -531,7 +541,7 @@ spec:
                       value:
                         - targetBlank: false
                           title: ""
-                          url: /d/service-dashboard/service-dashboard?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
+                          url: /d/service-dashboard-v3/service-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
                     - id: custom.filterable
                       value: true
           gridPos:
@@ -681,7 +691,7 @@ spec:
                     - id: links
                       value:
                         - title: ""
-                          url: /d/service-dashboard/service-dashboard?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
+                          url: /d/service-dashboard-v3/service-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
           gridPos:
             h: 10
             w: 12
@@ -785,7 +795,7 @@ spec:
     refresh: ""
     schemaVersion: 40
     tags:
-        - apm
+        - apm-v3
         - service
         - tempo-mg
         - main
@@ -888,4 +898,4 @@ spec:
     timepicker: {}
     timezone: ""
     title: Service Dashboard
-    uid: service-dashboard
+    uid: service-dashboard-v3

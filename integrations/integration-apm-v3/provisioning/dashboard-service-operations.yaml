@@ -1,8 +1,8 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-apm
-    name: service-operations-dashboard
+    folder: integration-apm-v3
+    name: service-operations-dashboard-v3
 spec:
     annotations:
         list:
@@ -56,16 +56,16 @@ spec:
           keepTime: true
           tags: []
           targetBlank: false
-          title: Back to Services Overview
+          title: Back to Main Services
           tooltip: ""
           type: link
-          url: /d/service-dashboard/service-dashboard?var-rate_interval=$__auto
+          url: /d/service-dashboard-v3/service-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
         - asDropdown: true
           icon: external link
           includeVars: false
           keepTime: true
           tags:
-            - apm
+            - apm-v3
             - service
             - tempo-mg
           targetBlank: false
@@ -149,7 +149,7 @@ spec:
                       value:
                         - targetBlank: false
                           title: ""
-                          url: /d/service-span-dashboard/service-span-dashboard??var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-span=${__data.fields.Operation}&var-rate_interval=$__auto
+                          url: /d/service-span-dashboard-v3/service-span-dashboard-v3??var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-span=${__data.fields.Operation}&var-rate_interval=$__auto
           gridPos:
             h: 23
             w: 24
@@ -245,10 +245,10 @@ spec:
     refresh: ""
     schemaVersion: 40
     tags:
-        - apm
+        - apm-v3
         - service
         - tempo-mg
-        - main
+        - operations
     templating:
         list:
             - allowCustomValue: false
@@ -348,4 +348,4 @@ spec:
     timepicker: {}
     timezone: ""
     title: Service Operations Dashboard
-    uid: service-operations-dashboard
+    uid: service-operations-dashboard-v3

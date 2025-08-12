@@ -1,8 +1,8 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-apm
-    name: service-overview-dashboard
+    folder: integration-apm-v3
+    name: service-overview-dashboard-v3
 spec:
     annotations:
         list:
@@ -35,7 +35,7 @@ spec:
           includeVars: false
           keepTime: true
           tags:
-            - apm
+            - apm-v3
             - service
             - tempo-mg
           targetBlank: false
@@ -105,7 +105,7 @@ spec:
                       value:
                         - targetBlank: false
                           title: ""
-                          url: /d/service-dashboard/service-dashboard?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
+                          url: /d/service-dashboard-v3/service-dashboard-v3?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
                 - matcher:
                     id: byName
                     options: Technology
@@ -300,7 +300,7 @@ spec:
     refresh: ""
     schemaVersion: 40
     tags:
-        - apm
+        - apm-v3
         - service
         - tempo-mg
         - overview
@@ -409,4 +409,4 @@ spec:
     timepicker: {}
     timezone: ""
     title: Service Overview Dashboard
-    uid: service-overview-dashboard
+    uid: service-overview-dashboard-v3
