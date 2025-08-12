@@ -125,7 +125,6 @@ spec:
             x: 0
             "y": 0
           id: 7
-          maxDataPoints: 100
           options:
             cellHeight: md
             footer:

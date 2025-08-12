@@ -156,7 +156,6 @@ spec:
             x: 0
             "y": 3
           id: 2
-          maxDataPoints: 100
           links:
             - targetBlank: true
               title: Drill Down To Traces
@@ -247,7 +246,6 @@ spec:
             x: 8
             "y": 3
           id: 3
-          maxDataPoints: 100
           links:
             - targetBlank: true
               title: Drill Down To Traces
@@ -367,7 +365,6 @@ spec:
             x: 16
             "y": 3
           id: 4
-          maxDataPoints: 100
           links:
             - targetBlank: true
               title: Drill Down To Traces
@@ -450,7 +447,6 @@ spec:
             x: 0
             "y": 12
           id: 5
-          maxDataPoints: 100
           options:
             displayMode: gradient
             legend:
@@ -559,7 +555,6 @@ spec:
             x: 0
             "y": 23
           id: 6
-          maxDataPoints: 100
           options:
             cellHeight: sm
             footer:
@@ -707,7 +702,6 @@ spec:
             x: 12
             "y": 23
           id: 7
-          maxDataPoints: 100
           options:
             cellHeight: sm
             footer:
