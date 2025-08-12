@@ -147,7 +147,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: false
-              expr: histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (le,k8s_cluster_name,k8s_namespace_name,service))
+              expr: appo11y:duration:p95{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}
               hide: false
               instant: false
               interval: ""
@@ -159,7 +159,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: false
-              expr: (sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", status_code="STATUS_CODE_ERROR"} [$rate_interval])) by (k8s_cluster_name,k8s_namespace_name,service) OR sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (k8s_cluster_name,k8s_namespace_name,service) * 0) / sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (k8s_cluster_name,k8s_namespace_name,service)
+              expr: appo11y:error:ratio{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}
               hide: false
               instant: false
               interval: ""
@@ -171,7 +171,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: false
-              expr: sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (k8s_cluster_name,k8s_namespace_name,service)
+              expr: appo11y:request:rate5m{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}
               hide: false
               instant: false
               interval: ""
@@ -263,6 +263,7 @@ spec:
                     process_runtime_version: true
                     service_version: true
                     source: true
+                    span_name: true
                     telemetry_auto_version: true
                     telemetry_distro_name: true
                     telemetry_distro_version: true
