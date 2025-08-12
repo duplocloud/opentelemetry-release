@@ -148,7 +148,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: true
-              expr: sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"} [$rate_interval])) by (service)
+              expr: appo11y:request:rate5m{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"}
               hide: false
               instant: true
               interval: ""
@@ -239,7 +239,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: true
-              expr: (sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span", status_code="STATUS_CODE_ERROR"} [$rate_interval])) by (service) OR sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"} [$rate_interval])) by (service) * 0) / sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"} [$rate_interval])) by (service)
+              expr: appo11y:error:ratio{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"}
               hide: false
               instant: false
               interval: ""
@@ -350,7 +350,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: true
-              expr: histogram_quantile(0.99, sum(rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"} [$rate_interval])) by (le,service))
+              expr: appo11y:duration:p99{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"}
               hide: false
               instant: false
               interval: ""
@@ -362,7 +362,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: true
-              expr: histogram_quantile(0.95, sum(rate(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"} [$rate_interval])) by (le,service))
+              expr: appo11y:duration:p95{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"}
               hide: false
               instant: false
               interval: ""
@@ -374,7 +374,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: true
-              expr: sum(rate(traces_spanmetrics_latency_sum{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"} [$rate_interval])) by (service) / (sum(rate(traces_spanmetrics_latency_count{span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval])) by (service))
+              expr: appo11y:duration:avg{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name=~"$span"}
               hide: false
               instant: false
               interval: ""
