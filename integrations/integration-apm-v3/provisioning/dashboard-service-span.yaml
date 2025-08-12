@@ -39,7 +39,7 @@ spec:
           title: Back to Main Services
           tooltip: ""
           type: link
-          url: /d/service-dashboard-v3/service-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
+          url: /d/service-dashboard-v3/service-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-rate_interval=$__auto
         - asDropdown: true
           icon: external link
           includeVars: false

@@ -69,7 +69,7 @@ spec:
           title: Service Operations
           tooltip: ""
           type: link
-          url: /d/service-operations-dashboard-v3/service-operations-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${__data.fields.Name}&var-rate_interval=$__auto
+          url: /d/service-operations-dashboard-v3/service-operations-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-rate_interval=$__auto
         - asDropdown: true
           icon: external link
           includeVars: false
