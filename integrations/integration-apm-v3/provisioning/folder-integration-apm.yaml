@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-apm-v3
+spec:
+    title: Integration-APM-V3
+    uid: integration-apm-v3
