@@ -1,98 +1,39 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: AlertRuleGroup
 metadata:
-    name: Integration-Kubernetes.pod-alerts
+    name: duplo-common.log-alerts
 spec:
     folderUid: duplo-common
     interval: 60
     rules:
         - annotations:
-            description: 'Pod `{{ $labels.pod }}` in namespace `{{ $labels.namespace }}` (cluster: `{{ $labels.cluster }}`) has restarted within the last 5 minutes.'
-            summary: 'Pod restart detected: {{ $labels.namespace }}/{{ $labels.pod }}'
+            description: '{{ $labels.container }} instance is failing to flush chunks because the storage is full on {{ $labels.cluster }}/{{ $labels.namespace }}'
+            summary: '{{ $labels.container }} flush failure due to no space left on device in {{ $labels.cluster }}/{{ $labels.namespace }}'
           condition: C
           data:
-            - refId: A
-              relativeTimeRange:
-                from: 900
-                to: 0
-              datasourceUid: duplo-metrics
+            - datasourceUid: duplo-logging
               model:
                 datasource:
-                    type: prometheus
-                    uid: duplo-metrics
+                    type: loki
+                    uid: duplo-logging
                 editorMode: code
-                exemplar: false
-                expr: sum by (cluster, namespace, pod) (increase(kube_pod_container_status_restarts_total[5m]))
+                expr: sum(count_over_time({namespace=~${AOS_NAMESPACE_FILTER}} |~ "(?i)no space left on device" [1m])) by (cluster, namespace, container)
                 instant: true
                 intervalMs: 1000
-                legendFormat: __auto
                 maxDataPoints: 43200
-                range: false
+                queryType: instant
                 refId: A
-            - refId: C
-              datasourceUid: __expr__
-              model:
-                conditions:
-                    - evaluator:
-                        params:
-                            - 0
-                        type: gt
-                      operator:
-                        type: and
-                      query:
-                        params:
-                            - C
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                datasource:
-                    type: __expr__
-                    uid: __expr__
-                expression: A
-                intervalMs: 1000
-                maxDataPoints: 43200
-                refId: C
-                type: threshold
-          execErrState: Error
-          folderUID: duplo-common
-          for: 0s
-          labels:
-            severity: warning
-          noDataState: OK
-          orgID: 1
-          ruleGroup: pod-alerts
-          title: PodRestartAlert
-          uid: Podrestartalert
-        - annotations:
-            description: The Mimir Alertmanager is responding with up=0. Check pod health, service endpoints, or network access.
-            summary: Mimir Alertmanager is unreachable in {{ $labels.cluster }}/{{ $labels.namespace }}
-          condition: C
-          data:
-            - datasourceUid: duplo-metrics
-              model:
-                datasource:
-                    type: prometheus
-                    uid: duplo-metrics
-                editorMode: code
-                expr: min by (cluster, namespace) (up{service="duplo-metrics-alertmanager"})
-                hide: false
-                instant: true
-                intervalMs: 1000
-                legendFormat: __auto
-                maxDataPoints: 43200
-                range: false
-                refId: A
+              queryType: instant
               refId: A
               relativeTimeRange:
-                from: 600
+                from: 900
             - datasourceUid: __expr__
               model:
                 conditions:
                     - evaluator:
                         params:
                             - 0
-                        type: eq
+                        type: gt
                       operator:
                         type: and
                       query:
@@ -118,9 +59,70 @@ spec:
           labels:
             severity: critical
             owner: duplo
-          noDataState: Alerting
+          noDataState: OK
           orgID: 1
-          ruleGroup: pod-alerts
-          title: MimirAlertmanagerDown
-          uid: Mimiralertmanagerdown
-    title: pod-alerts
+          ruleGroup: log-alerts
+          title: NoSpaceLeftonDeviceAlert
+          uid: Nospaceleftondevicealert
+        - annotations:
+            description: Detected an "Exporting failed." error log level=error from pod {{ $labels.pod }}, namespace {{ $labels.namespace }}, cluster {{ $labels.cluster }} in the last 5 minutes.
+            summary: 'Exporting failed error in alloy service on pod {{ $labels.pod }} (namespace: {{ $labels.namespace }}, cluster: {{ $labels.cluster }})'
+          condition: C
+          data:
+            - datasourceUid: duplo-logging
+              model:
+                datasource:
+                    type: loki
+                    uid: duplo-logging
+                editorMode: code
+                expr: |-
+                    sum by (cluster, namespace, pod) (
+                      count_over_time({service_name="alloy"} |= "Exporting failed." | logfmt | level="error"[1m])
+                    )
+                instant: true
+                intervalMs: 1000
+                maxDataPoints: 43200
+                queryType: instant
+                refId: A
+              queryType: instant
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 5
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-tempo
+          for: 0s
+          labels:
+            owner: duplo
+            severity: critical
+          noDataState: OK
+          orgID: 1
+          ruleGroup: log-alerts
+          title: AlloyExportingFailed
+          uid: Alloyexportingfailed  
+    title: log-alerts
