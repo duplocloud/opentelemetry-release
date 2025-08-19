@@ -473,7 +473,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: false
-              expr: sum by (le) (increase(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service"} [$rate_interval]))
+              expr: appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}
               format: heatmap
               hide: false
               instant: false
