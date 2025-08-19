@@ -460,7 +460,9 @@ spec:
             namePlacement: auto
             orientation: vertical
             reduceOptions:
-                calcs: []
+                calcs: [
+                  "sum"
+                ]
                 fields: ""
                 values: false
             showUnfilled: false
