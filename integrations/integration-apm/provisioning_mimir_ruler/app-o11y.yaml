@@ -32,6 +32,12 @@ groups:
           expr: sum(rate(traces_spanmetrics_latency_sum{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)) by (k8s_cluster_name, k8s_namespace_name, service) / (sum(rate(traces_spanmetrics_latency_count{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m)) by (k8s_cluster_name, k8s_namespace_name, service))
           labels:
             span_name: __aggregated__
+        - record: appo11y:duration:distribution
+          expr: sum by (k8s_cluster_name, k8s_namespace_name, service, span_name, le) (increase(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m))
+        - record: appo11y:duration:distribution
+          expr: sum by (k8s_cluster_name, k8s_namespace_name, service, le) (increase(traces_spanmetrics_latency_bucket{source="tempo", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m] offset 1m))
+          labels:
+            span_name: __aggregated__
     - name: baseline-error-ratio
       interval: 1m
       rules:
