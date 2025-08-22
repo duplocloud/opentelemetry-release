@@ -123,4 +123,63 @@ spec:
           ruleGroup: pod-alerts
           title: MimirAlertmanagerDown
           uid: Mimiralertmanagerdown
+        - annotations:
+            description: A Alertmanager Webhook Failed log was detected on pod {{ $labels.pod }} in namespace {{ $labels.namespace }} within cluster {{ $labels.cluster }}.
+            summary: 'Alertmanager Webhook Failed event detected on pod {{ $labels.pod }} (namespace: {{ $labels.namespace }}, cluster: {{ $labels.cluster }})'
+          condition: C
+          data:
+            - datasourceUid: duplo-logging
+              model:
+                datasource:
+                    type: loki
+                    uid: duplo-logging
+                editorMode: code
+                expr: |-
+                    sum by (cluster, namespace, pod) (
+                      count_over_time({service_name="duplo-automation"} |= "alertmanagerWebhookFailed" [1m]))
+                intervalMs: 60000
+                maxDataPoints: 43200
+                queryType: instant
+                refId: A
+              queryType: instant
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 60000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: duplo-common
+          for: 0s
+          labels:
+            owner: duplo
+            severity: critical
+          noDataState: OK
+          orgID: 1
+          ruleGroup: pod-alerts
+          title: AlertmanagerWebhookFailed
+          uid: AlertmanagerWebhookFailed
     title: pod-alerts
