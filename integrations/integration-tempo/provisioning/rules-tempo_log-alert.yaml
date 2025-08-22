@@ -56,13 +56,14 @@ spec:
               relativeTimeRange: {}
           execErrState: Error
           folderUID: integration-tempo
-          for: 1m0s
+          for: 0s
           labels:
             severity: warning
+            owner: duplo
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
-          title: Tempo rate limit error
+          title: TempoRateLimitError
           uid: Temporatelimiterror
         - annotations:
             description: |-
@@ -115,13 +116,74 @@ spec:
               relativeTimeRange: {}
           execErrState: Error
           folderUID: integration-tempo
-          for: 1m0s
+          for: 0s
           labels:
             severity: critical
+            owner: duplo
           noDataState: OK
           orgID: 1
           ruleGroup: log-alerts
-          title: Tempo Compactor Failure Alert
+          title: TempoCompactorFailureAlert
           uid: Tempocompactorfailurealert
-        
+        - annotations:
+            description: |-
+                More than 5 `WriteTo failed` warnings were detected in Tempo ingester pod `{{ $labels.pod }}` within namespace `{{ $labels.namespace }}` on cluster `{{ $labels.cluster }}` over the last 5 minutes.
+                These errors typically indicate memberlist (gossip protocol) communication issues, which may impact cluster stability or ingestion performance.
+                Investigate underlying network issues or resource pressure on the affected pod.
+            summary: Tempo Ingester Memberlist WriteTo Failures Detected in {{ $labels.cluster }}/{{ $labels.namespace }}/{{ $labels.pod }}
+          condition: C
+          data:
+            - datasourceUid: duplo-logging
+              model:
+                datasource:
+                    type: loki
+                    uid: duplo-logging
+                editorMode: code
+                expr: sum by (cluster, namespace, pod) (count_over_time({pod=~"duplo-tracing-ingester-.*"} |= "WriteTo failed"[5m]))
+                instant: true
+                intervalMs: 1000
+                maxDataPoints: 43200
+                queryType: instant
+                refId: A
+              queryType: instant
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 5
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-tempo
+          for: 0s
+          labels:
+            severity: warning
+            owner: duplo
+          noDataState: OK
+          orgID: 1
+          ruleGroup: log-alerts
+          title: TempoIngesterWarning
+          uid: Tempoingesterwarning
     title: log-alerts

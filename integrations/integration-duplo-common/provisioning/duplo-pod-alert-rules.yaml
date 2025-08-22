@@ -57,11 +57,72 @@ spec:
           execErrState: Error
           folderUID: duplo-common
           for: 0s
+          labels:
+            severity: warning
           noDataState: OK
           orgID: 1
           ruleGroup: pod-alerts
-          title: Pod Restart Alert
+          title: PodRestartAlert
           uid: Podrestartalert
+        - annotations:
+            description: The Mimir Alertmanager is responding with up=0. Check pod health, service endpoints, or network access.
+            summary: Mimir Alertmanager is unreachable in {{ $labels.cluster }}/{{ $labels.namespace }}
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: min by (cluster, namespace) (up{service="duplo-metrics-alertmanager"})
+                hide: false
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: eq
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: duplo-common
+          for: 0s
+          labels:
+            severity: critical
+            owner: duplo
+          noDataState: Alerting
+          orgID: 1
+          ruleGroup: pod-alerts
+          title: MimirAlertmanagerDown
+          uid: Mimiralertmanagerdown
         - annotations:
             description: A Alertmanager Webhook Failed log was detected on pod {{ $labels.pod }} in namespace {{ $labels.namespace }} within cluster {{ $labels.cluster }}.
             summary: 'Alertmanager Webhook Failed event detected on pod {{ $labels.pod }} (namespace: {{ $labels.namespace }}, cluster: {{ $labels.cluster }})'
