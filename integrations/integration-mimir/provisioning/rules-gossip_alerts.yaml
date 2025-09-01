@@ -13,7 +13,7 @@ spec:
           labels:
             severity: warning
           name: MimirGossipMembersTooHigh
-          query: max by (cluster, namespace) (memberlist_client_cluster_members_count) > (sum by (cluster, namespace) (up{job=~".+/(admin-api|alertmanager|compactor.*|distributor.*|ingester.*|querier.*|ruler|ruler-querier.*|store-gateway.*|cortex|mimir|mimir-write.*|mimir-read.*|mimir-backend.*)"}) + 10)
+          query: max by (cluster, namespace) (memberlist_client_cluster_members_count{cluster="duplo-metrics"}) > (sum by (cluster, namespace) (up{job=~".+/(admin-api|alertmanager|compactor.*|distributor.*|ingester.*|querier.*|ruler|ruler-querier.*|store-gateway.*|cortex|mimir|mimir-write.*|mimir-read.*|mimir-backend.*)"}) + 10)
           type: alerting
         - alerts:
             - annotations:
@@ -32,7 +32,7 @@ spec:
           labels:
             severity: warning
           name: MimirGossipMembersTooLow
-          query: min by (cluster, namespace) (memberlist_client_cluster_members_count) < (sum by (cluster, namespace) (up{job=~".+/(admin-api|alertmanager|compactor.*|distributor.*|ingester.*|querier.*|ruler|ruler-querier.*|store-gateway.*|cortex|mimir|mimir-write.*|mimir-read.*|mimir-backend.*)"}) * 0.5)
+          query: min by (cluster, namespace) (memberlist_client_cluster_members_count{cluster="duplo-metrics"}) < (sum by (cluster, namespace) (up{job=~".+/(admin-api|alertmanager|compactor.*|distributor.*|ingester.*|querier.*|ruler|ruler-querier.*|store-gateway.*|cortex|mimir|mimir-write.*|mimir-read.*|mimir-backend.*)"}) * 0.5)
           type: alerting
         - alerts: []
           annotations:
