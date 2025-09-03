@@ -91,8 +91,8 @@ spec:
                 conditions:
                     - evaluator:
                         params:
-                            - 0
-                        type: eq
+                            - 1
+                        type: lt
                       operator:
                         type: and
                       query:
@@ -116,8 +116,8 @@ spec:
           folderUID: duplo-common
           for: 0s
           labels:
-            severity: critical
             owner: duplo
+            severity: critical
           noDataState: Alerting
           orgID: 1
           ruleGroup: pod-alerts
