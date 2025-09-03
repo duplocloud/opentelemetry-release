@@ -6,7 +6,7 @@ metadata:
 spec:
     annotations:
         list: []
-    editable: true
+    editable: false
     gnetId: null
     graphTooltip: 0
     hideControls: false
