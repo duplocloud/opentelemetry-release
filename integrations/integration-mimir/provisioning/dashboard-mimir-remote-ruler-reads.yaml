@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: ntegration-mimir
+    folder: integration-mimir
     name: mimir-remote-ruler-reads
 spec:
     __requires:
