@@ -4,6 +4,11 @@ metadata:
     folder: integration-mimir
     name: mimir-queries
 spec:
+    __requires:
+        - id: grafana
+          name: Grafana
+          type: grafana
+          version: 8.0.0
     annotations:
         list: []
     editable: false
@@ -26,6 +31,13 @@ spec:
           height: 250px
           panels:
             - datasource: $datasource
+              description: |+
+                ### Queue duration
+                <p>
+                The query-scheduler is an optional service that moves the internal queue from the query-frontend into a separate component.
+                If the query-scheduler is deployed, these panels will show "No data."
+                </p>
+
               fieldConfig:
                 defaults:
                     custom:
@@ -99,7 +111,7 @@ spec:
                     thresholds:
                         mode: absolute
                         steps: []
-                    unit: ms
+                    unit: short
                 overrides: []
               id: 2
               links: []
@@ -127,7 +139,7 @@ spec:
               title: Retries
               type: timeseries
               yaxes:
-                - format: short
+                - format: ms
                   label: null
                   logBase: 1
                   max: null
@@ -140,6 +152,13 @@ spec:
                   min: null
                   show: false
             - datasource: $datasource
+              description: |+
+                ### Queue length
+                <p>
+                The query-scheduler is an optional service that moves the internal queue from the query-frontend into a separate component.
+                If the query-scheduler is deployed, these panels will show "No data."
+                </p>
+
               fieldConfig:
                 defaults:
                     custom:
@@ -175,6 +194,13 @@ spec:
               title: Queue length (per pod)
               type: timeseries
             - datasource: $datasource
+              description: |+
+                ### Queue length
+                <p>
+                The query-scheduler is an optional service that moves the internal queue from the query-frontend into a separate component.
+                If the query-scheduler is deployed, these panels will show "No data."
+                </p>
+
               fieldConfig:
                 defaults:
                     custom:
@@ -220,6 +246,13 @@ spec:
           height: 250px
           panels:
             - datasource: $datasource
+              description: |+
+                ### Queue duration
+                <p>
+                  The query-scheduler is an optional service that moves the internal queue from the query-frontend into a separate component.
+                  If the query-scheduler is not deployed, these panels will show "No data."
+                </p>
+
               fieldConfig:
                 defaults:
                     custom:
@@ -277,6 +310,13 @@ spec:
                   min: null
                   show: false
             - datasource: $datasource
+              description: |+
+                ### Queue length
+                <p>
+                  The query-scheduler is an optional service that moves the internal queue from the query-frontend into a separate component.
+                  If the query-scheduler is not deployed, these panels will show "No data."
+                </p>
+
               fieldConfig:
                 defaults:
                     custom:
@@ -312,6 +352,13 @@ spec:
               title: Queue length (per pod)
               type: timeseries
             - datasource: $datasource
+              description: |+
+                ### Queue length
+                <p>
+                  The query-scheduler is an optional service that moves the internal queue from the query-frontend into a separate component.
+                  If the query-scheduler is not deployed, these panels will show "No data."
+                </p>
+
               fieldConfig:
                 defaults:
                     custom:
@@ -436,16 +483,11 @@ spec:
                     or
                     (
                       label_replace(
-                        # Query metrics before and after dskit cache refactor.
                         sum (
-                          rate(thanos_cache_memcached_hits_total{name="frontend-cache", $read_path_matcher}[$__rate_interval])
-                          or ignoring(backend)
                           rate(thanos_cache_hits_total{name="frontend-cache", $read_path_matcher}[$__rate_interval])
                         )
                         /
                         sum (
-                          rate(thanos_cache_memcached_requests_total{name=~"frontend-cache", $read_path_matcher}[$__rate_interval])
-                          or ignoring(backend)
                           rate(thanos_cache_requests_total{name=~"frontend-cache", $read_path_matcher}[$__rate_interval])
                         ),
                         "request_type", "query_range", "", "")
@@ -651,15 +693,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum by (le) (cluster_job:cortex_ingester_queried_series_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})) * 1
+                - expr: histogram_quantile(0.99, sum by (le) (cluster_job:cortex_ingester_queried_series_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})) * 1
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum by (le) (cluster_job:cortex_ingester_queried_series_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})) * 1
+                - expr: histogram_quantile(0.50, sum by (le) (cluster_job:cortex_ingester_queried_series_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})) * 1
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B
-                - expr: 1 * sum(cluster_job:cortex_ingester_queried_series_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"}) / sum(cluster_job:cortex_ingester_queried_series_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})
+                - expr: 1 * sum(cluster_job:cortex_ingester_queried_series_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"}) / sum(cluster_job:cortex_ingester_queried_series_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -695,15 +737,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum by (le) (cluster_job:cortex_ingester_queried_samples_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})) * 1
+                - expr: histogram_quantile(0.99, sum by (le) (cluster_job:cortex_ingester_queried_samples_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})) * 1
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum by (le) (cluster_job:cortex_ingester_queried_samples_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})) * 1
+                - expr: histogram_quantile(0.50, sum by (le) (cluster_job:cortex_ingester_queried_samples_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})) * 1
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B
-                - expr: 1 * sum(cluster_job:cortex_ingester_queried_samples_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"}) / sum(cluster_job:cortex_ingester_queried_samples_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})
+                - expr: 1 * sum(cluster_job:cortex_ingester_queried_samples_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"}) / sum(cluster_job:cortex_ingester_queried_samples_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -739,15 +781,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum by (le) (cluster_job:cortex_ingester_queried_exemplars_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})) * 1
+                - expr: histogram_quantile(0.99, sum by (le) (cluster_job:cortex_ingester_queried_exemplars_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})) * 1
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum by (le) (cluster_job:cortex_ingester_queried_exemplars_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})) * 1
+                - expr: histogram_quantile(0.50, sum by (le) (cluster_job:cortex_ingester_queried_exemplars_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})) * 1
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B
-                - expr: 1 * sum(cluster_job:cortex_ingester_queried_exemplars_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"}) / sum(cluster_job:cortex_ingester_queried_exemplars_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})
+                - expr: 1 * sum(cluster_job:cortex_ingester_queried_exemplars_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"}) / sum(cluster_job:cortex_ingester_queried_exemplars_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -790,7 +832,7 @@ spec:
                 tooltip:
                     mode: multi
                     sort: none
-              span: 3
+              span: 4
               targets:
                 - expr: histogram_quantile(0.99, sum(rate(cortex_querier_storegateway_instances_hit_per_query_bucket{$read_path_matcher}[$__rate_interval])) by (le)) * 1
                   format: time_series
@@ -847,7 +889,7 @@ spec:
                 tooltip:
                     mode: multi
                     sort: none
-              span: 3
+              span: 4
               targets:
                 - expr: histogram_quantile(0.99, sum(rate(cortex_querier_storegateway_refetches_per_query_bucket{$read_path_matcher}[$__rate_interval])) by (le)) * 1
                   format: time_series
@@ -916,7 +958,7 @@ spec:
                 tooltip:
                     mode: multi
                     sort: none
-              span: 3
+              span: 4
               targets:
                 - expr: sum(rate(cortex_querier_blocks_consistency_checks_failed_total{$read_path_matcher}[$__rate_interval])) / sum(rate(cortex_querier_blocks_consistency_checks_total{$read_path_matcher}[$__rate_interval]))
                   format: time_series
@@ -924,6 +966,15 @@ spec:
                   legendLink: null
               title: Consistency checks failed
               type: timeseries
+          repeat: null
+          repeatIteration: null
+          repeatRowId: null
+          showTitle: true
+          title: Querier
+          titleSize: h6
+        - collapse: false
+          height: 250px
+          panels:
             - datasource: $datasource
               description: |+
                 ### Rejected queries
@@ -956,7 +1007,7 @@ spec:
                 tooltip:
                     mode: multi
                     sort: none
-              span: 3
+              span: 4
               targets:
                 - expr: sum by (reason) (rate(cortex_querier_queries_rejected_total{$read_path_matcher}[$__rate_interval])) / ignoring (reason) group_left sum(rate(cortex_querier_request_duration_seconds_count{$read_path_matcher, route=~"(prometheus|api_prom)_api_v1_query(_range)?"}[$__rate_interval]))
                   format: time_series
@@ -964,11 +1015,83 @@ spec:
                   legendLink: null
               title: Rejected queries
               type: timeseries
+            - datasource: $datasource
+              description: |+
+                ### Estimated per-query memory consumption
+                The esimated memory consumption of all queries evaluated by queriers. Only applicable if the Mimir query engine (MQE) is enabled and the query was evaluated with MQE.
+
+              id: 20
+              options:
+                calculate: true
+                calculation:
+                    xBuckets:
+                        mode: count
+                        value: 60
+                    yBuckets:
+                        mode: count
+                        value: 40
+                cellGap: 0
+                cellValues:
+                    unit: reqps
+                legend:
+                    show: false
+                tooltip:
+                    yHistogram: true
+                yAxis:
+                    min: 0
+                    unit: bytes
+              span: 4
+              targets:
+                - expr: sum(rate(cortex_mimir_query_engine_estimated_query_peak_memory_consumption{$read_path_matcher}[$__rate_interval]))
+                  format: time_series
+                  legendFormat: Estimated memory consumption
+                  legendLink: null
+              title: Estimated per-query memory consumption
+              type: heatmap
+            - datasource: $datasource
+              description: |+
+                ### Fallback to Prometheus' query engine
+                The rate of queries that fell back to Prometheus' query engine in queriers. Only applicable if the Mimir query engine (MQE) is enabled.
+
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 1
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    min: 0
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: reqps
+                overrides: []
+              id: 21
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: multi
+                    sort: none
+              span: 4
+              targets:
+                - expr: sum(rate(cortex_mimir_query_engine_unsupported_queries_total{$read_path_matcher}[$__rate_interval])) or vector(0)
+                  format: time_series
+                  legendFormat: Queries
+                  legendLink: null
+              title: Fallback to Prometheus' query engine
+              type: timeseries
           repeat: null
           repeatIteration: null
           repeatRowId: null
           showTitle: true
-          title: Querier
+          title: ""
           titleSize: h6
         - collapse: false
           height: 250px
@@ -992,7 +1115,7 @@ spec:
                         steps: []
                     unit: short
                 overrides: []
-              id: 20
+              id: 22
               links: []
               options:
                 legend:
@@ -1051,7 +1174,7 @@ spec:
                           value:
                             fixedColor: '#7EB26D'
                             mode: fixed
-              id: 21
+              id: 23
               links: []
               options:
                 legend:
@@ -1090,7 +1213,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 22
+              id: 24
               links: []
               nullPointMode: null as zero
               options:
@@ -1138,25 +1261,30 @@ spec:
           height: 250px
           panels:
             - datasource: $datasource
+              description: |+
+                ### Blocks queried / sec by compaction level
+                Increased volume of lower levels (for example levels 1 and 2) can indicate that the compactor is not keeping up.
+                In that case the store-gateway will start serving more blocks which aren't that well compacted.
+
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 1
-                        lineWidth: 1
+                        fillOpacity: 100
+                        lineWidth: 0
                         pointSize: 5
                         showPoints: never
                         spanNulls: false
                         stacking:
                             group: A
-                            mode: none
+                            mode: normal
                     min: 0
                     thresholds:
                         mode: absolute
                         steps: []
                     unit: ops
                 overrides: []
-              id: 23
+              id: 25
               links: []
               options:
                 legend:
@@ -1166,11 +1294,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum(rate(cortex_bucket_store_series_blocks_queried_sum{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum by (level) (rate(cortex_bucket_store_series_blocks_queried_sum{component="store-gateway",level=~"[0-4]",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
-                  legendFormat: blocks
+                  legendFormat: '{{level}}'
                   legendLink: null
-              title: Blocks queried / sec
+                - expr: sum(rate(cortex_bucket_store_series_blocks_queried_sum{component="store-gateway",level!~"[0-4]",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
+                  format: time_series
+                  legendFormat: 5+
+                  legendLink: null
+              title: Blocks queried / sec by compaction level
               type: timeseries
             - datasource: $datasource
               fieldConfig:
@@ -1191,7 +1323,7 @@ spec:
                         steps: []
                     unit: binBps
                 overrides: []
-              id: 24
+              id: 26
               links: []
               options:
                 legend:
@@ -1204,7 +1336,7 @@ spec:
                 - expr: |
                     sum by(data_type) (
                       # Exclude "chunks refetched".
-                      rate(cortex_bucket_store_series_data_size_fetched_bytes_sum{component="store-gateway", stage!="refetched", cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])
+                      rate(cortex_bucket_store_series_data_size_fetched_bytes_sum{component="store-gateway", stage!="refetched", cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval])
                     )
                   format: time_series
                   legendFormat: '{{data_type}}'
@@ -1230,7 +1362,7 @@ spec:
                         steps: []
                     unit: binBps
                 overrides: []
-              id: 25
+              id: 27
               links: []
               options:
                 legend:
@@ -1243,7 +1375,7 @@ spec:
                 - expr: |
                     sum by(data_type) (
                       # Exclude "chunks processed" to only count "chunks returned", other than postings and series.
-                      rate(cortex_bucket_store_series_data_size_touched_bytes_sum{component="store-gateway", stage!="processed",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])
+                      rate(cortex_bucket_store_series_data_size_touched_bytes_sum{component="store-gateway", stage!="processed",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval])
                     )
                   format: time_series
                   legendFormat: '{{data_type}}'
@@ -1278,7 +1410,7 @@ spec:
                         steps: []
                     unit: s
                 overrides: []
-              id: 26
+              id: 28
               links: []
               options:
                 legend:
@@ -1289,9 +1421,9 @@ spec:
               span: 4
               targets:
                 - expr: |
-                    sum by(stage) (rate(cortex_bucket_store_series_request_stage_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum by(stage) (rate(cortex_bucket_store_series_request_stage_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                     /
-                    sum by(stage) (rate(cortex_bucket_store_series_request_stage_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum by(stage) (rate(cortex_bucket_store_series_request_stage_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{stage}}'
                   legendLink: null
@@ -1316,7 +1448,7 @@ spec:
                         steps: []
                     unit: s
                 overrides: []
-              id: 27
+              id: 29
               links: []
               options:
                 legend:
@@ -1327,7 +1459,7 @@ spec:
               span: 4
               targets:
                 - expr: |
-                    histogram_quantile(0.99, sum by(stage, le) (rate(cortex_bucket_store_series_request_stage_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])))
+                    histogram_quantile(0.99, sum by(stage, le) (rate(cortex_bucket_store_series_request_stage_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval])))
                   format: time_series
                   legendFormat: '{{stage}}'
                   legendLink: null
@@ -1359,7 +1491,7 @@ spec:
                         steps: []
                     unit: percentunit
                 overrides: []
-              id: 28
+              id: 30
               links: []
               options:
                 legend:
@@ -1373,9 +1505,9 @@ spec:
                     # Clamping min to 0 because if preloading not useful at all, then the actual value we get is
                     # slightly negative because of the small overhead introduced by preloading.
                     clamp_min(1 - (
-                        sum(rate(cortex_bucket_store_series_batch_preloading_wait_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                        sum(rate(cortex_bucket_store_series_batch_preloading_wait_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                         /
-                        sum(rate(cortex_bucket_store_series_batch_preloading_load_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                        sum(rate(cortex_bucket_store_series_batch_preloading_load_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                     ), 0)
                   format: time_series
                   legendFormat: '% of time reduced by preloading'
@@ -1417,7 +1549,7 @@ spec:
                         steps: []
                     unit: short
                 overrides: []
-              id: 29
+              id: 31
               links: []
               options:
                 legend:
@@ -1427,7 +1559,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: cortex_bucket_store_blocks_loaded{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}
+                - expr: cortex_bucket_store_blocks_loaded{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -1468,7 +1600,7 @@ spec:
                           value:
                             fixedColor: '#7EB26D'
                             mode: fixed
-              id: 30
+              id: 32
               links: []
               options:
                 legend:
@@ -1478,11 +1610,11 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum(rate(cortex_bucket_store_block_loads_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) - sum(rate(cortex_bucket_store_block_load_failures_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_bucket_store_block_loads_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval])) - sum(rate(cortex_bucket_store_block_load_failures_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: successful
                   legendLink: null
-                - expr: sum(rate(cortex_bucket_store_block_load_failures_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_bucket_store_block_load_failures_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: failed
                   legendLink: null
@@ -1523,7 +1655,7 @@ spec:
                           value:
                             fixedColor: '#7EB26D'
                             mode: fixed
-              id: 31
+              id: 33
               links: []
               options:
                 legend:
@@ -1533,11 +1665,11 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum(rate(cortex_bucket_store_block_drops_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) - sum(rate(cortex_bucket_store_block_drop_failures_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_bucket_store_block_drops_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval])) - sum(rate(cortex_bucket_store_block_drop_failures_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: successful
                   legendLink: null
-                - expr: sum(rate(cortex_bucket_store_block_drop_failures_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_bucket_store_block_drop_failures_total{component="store-gateway",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: failed
                   legendLink: null
@@ -1571,7 +1703,7 @@ spec:
                         steps: []
                     unit: short
                 overrides: []
-              id: 32
+              id: 34
               links: []
               options:
                 legend:
@@ -1581,7 +1713,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: cortex_bucket_store_indexheader_lazy_load_total{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"} - cortex_bucket_store_indexheader_lazy_unload_total{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}
+                - expr: cortex_bucket_store_indexheader_lazy_load_total{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"} - cortex_bucket_store_indexheader_lazy_unload_total{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -1606,7 +1738,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 33
+              id: 35
               links: []
               nullPointMode: null as zero
               options:
@@ -1617,15 +1749,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(cortex_bucket_store_indexheader_lazy_load_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(cortex_bucket_store_indexheader_lazy_load_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 99th Percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum(rate(cortex_bucket_store_indexheader_lazy_load_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.50, sum(rate(cortex_bucket_store_indexheader_lazy_load_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 50th Percentile
                   refId: B
-                - expr: sum(rate(cortex_bucket_store_indexheader_lazy_load_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) * 1e3 / sum(rate(cortex_bucket_store_indexheader_lazy_load_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_bucket_store_indexheader_lazy_load_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval])) * 1e3 / sum(rate(cortex_bucket_store_indexheader_lazy_load_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -1667,7 +1799,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 34
+              id: 36
               links: []
               nullPointMode: null as zero
               options:
@@ -1678,15 +1810,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(cortex_bucket_stores_gate_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))",gate="index_header"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(cortex_bucket_stores_gate_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))",gate="index_header"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 99th Percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum(rate(cortex_bucket_stores_gate_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))",gate="index_header"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.50, sum(rate(cortex_bucket_stores_gate_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))",gate="index_header"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 50th Percentile
                   refId: B
-                - expr: sum(rate(cortex_bucket_stores_gate_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))",gate="index_header"}[$__rate_interval])) * 1e3 / sum(rate(cortex_bucket_stores_gate_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))",gate="index_header"}[$__rate_interval]))
+                - expr: sum(rate(cortex_bucket_stores_gate_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))",gate="index_header"}[$__rate_interval])) * 1e3 / sum(rate(cortex_bucket_stores_gate_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))",gate="index_header"}[$__rate_interval]))
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -1734,7 +1866,7 @@ spec:
                         steps: []
                     unit: percentunit
                 overrides: []
-              id: 35
+              id: 37
               links: []
               options:
                 legend:
@@ -1745,9 +1877,9 @@ spec:
               span: 4
               targets:
                 - expr: |
-                    sum(rate(cortex_bucket_store_series_hash_cache_hits_total{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_bucket_store_series_hash_cache_hits_total{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                     /
-                    sum(rate(cortex_bucket_store_series_hash_cache_requests_total{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_bucket_store_series_hash_cache_requests_total{cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: hit ratio
                   legendLink: null
@@ -1773,7 +1905,7 @@ spec:
                         steps: []
                     unit: percentunit
                 overrides: []
-              id: 36
+              id: 38
               links: []
               options:
                 legend:
@@ -1784,9 +1916,9 @@ spec:
               span: 4
               targets:
                 - expr: |
-                    sum(rate(thanos_store_index_cache_hits_total{item_type="ExpandedPostings",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(thanos_store_index_cache_hits_total{item_type="ExpandedPostings",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                     /
-                    sum(rate(thanos_store_index_cache_requests_total{item_type="ExpandedPostings",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(thanos_store_index_cache_requests_total{item_type="ExpandedPostings",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: hit ratio
                   legendLink: null
@@ -1812,7 +1944,7 @@ spec:
                         steps: []
                     unit: percentunit
                 overrides: []
-              id: 37
+              id: 39
               links: []
               options:
                 legend:
@@ -1823,9 +1955,9 @@ spec:
               span: 4
               targets:
                 - expr: |
-                    sum(rate(cortex_cache_memory_hits_total{name="chunks-attributes-cache",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_cache_memory_hits_total{name="chunks-attributes-cache",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                     /
-                    sum(rate(cortex_cache_memory_requests_total{name="chunks-attributes-cache",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_cache_memory_requests_total{name="chunks-attributes-cache",cluster=~"$cluster", job=~"($namespace)/((store-gateway.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: hit ratio
                   legendLink: null
@@ -1920,7 +2052,7 @@ spec:
             - current:
                 selected: true
                 text: All
-                value: cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|mimir-backend.*|mimir-read.*|querier.*|query-frontend.*|query-scheduler.*|ruler-querier.*|ruler-query-frontend.*|ruler-query-scheduler.*))"
+                value: cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|querier.*|query-frontend.*|query-scheduler.*|ruler-querier.*|ruler-query-frontend.*|ruler-query-scheduler.*))"
               hide: 0
               includeAll: false
               label: Read path
@@ -1929,14 +2061,14 @@ spec:
               options:
                 - selected: true
                   text: All
-                  value: cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|mimir-backend.*|mimir-read.*|querier.*|query-frontend.*|query-scheduler.*|ruler-querier.*|ruler-query-frontend.*|ruler-query-scheduler.*))"
+                  value: cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|querier.*|query-frontend.*|query-scheduler.*|ruler-querier.*|ruler-query-frontend.*|ruler-query-scheduler.*))"
                 - selected: false
                   text: Main
-                  value: cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|mimir-backend.*|mimir-read.*|querier.*|query-frontend.*|query-scheduler.*))"
+                  value: cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|querier.*|query-frontend.*|query-scheduler.*))"
                 - selected: false
                   text: Remote ruler
                   value: cluster=~"$cluster"\, job=~"($namespace)/((ruler-querier.*|ruler-query-frontend.*|ruler-query-scheduler.*))"
-              query: 'All : cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|mimir-backend.*|mimir-read.*|querier.*|query-frontend.*|query-scheduler.*|ruler-querier.*|ruler-query-frontend.*|ruler-query-scheduler.*))",Main : cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|mimir-backend.*|mimir-read.*|querier.*|query-frontend.*|query-scheduler.*))",Remote ruler : cluster=~"$cluster"\, job=~"($namespace)/((ruler-querier.*|ruler-query-frontend.*|ruler-query-scheduler.*))"'
+              query: 'All : cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|querier.*|query-frontend.*|query-scheduler.*|ruler-querier.*|ruler-query-frontend.*|ruler-query-scheduler.*))",Main : cluster=~"$cluster"\, job=~"($namespace)/((cortex|mimir|querier.*|query-frontend.*|query-scheduler.*))",Remote ruler : cluster=~"$cluster"\, job=~"($namespace)/((ruler-querier.*|ruler-query-frontend.*|ruler-query-scheduler.*))"'
               skipUrlSync: false
               type: custom
               useTags: false
@@ -1968,3 +2100,4 @@ spec:
     timezone: utc
     title: Mimir / Queries
     uid: mimir-queries
+

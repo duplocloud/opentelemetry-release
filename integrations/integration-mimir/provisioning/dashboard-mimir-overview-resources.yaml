@@ -1,9 +1,14 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-mimir
+    folder:  integration-mimir
     name: mimir-overview-resources
 spec:
+    __requires:
+        - id: grafana
+          name: Grafana
+          type: grafana
+          version: 8.0.0
     annotations:
         list: []
     editable: false
@@ -54,7 +59,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester|mimir-write"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -89,7 +94,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester|mimir-write"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -124,7 +129,7 @@ spec:
                     sort: desc
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester|mimir-write"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -185,7 +190,7 @@ spec:
                         (
                           container_fs_writes_bytes_total{
                             cluster=~"$cluster", namespace=~"$namespace",
-                            container=~"distributor|ingester|mimir-write",
+                            container=~"distributor|ingester",
                             device!~".*sda.*"
                           }
                         ),
@@ -245,7 +250,7 @@ spec:
                         (
                           container_fs_writes_bytes_total{
                             cluster=~"$cluster", namespace=~"$namespace",
-                            container=~"distributor|ingester|mimir-write",
+                            container=~"distributor|ingester",
                             device!~".*sda.*"
                           }
                         ),
@@ -294,8 +299,8 @@ spec:
               targets:
                 - expr: |
                     max by(persistentvolumeclaim) (
-                      kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(distributor|ingester|mimir-write).*"} /
-                      kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(distributor|ingester|mimir-write).*"}
+                      kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(distributor|ingester).*"} /
+                      kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(distributor|ingester).*"}
                     )
                   format: time_series
                   legendFormat: '{{persistentvolumeclaim}}'
@@ -340,7 +345,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -375,7 +380,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -410,7 +415,7 @@ spec:
                     sort: desc
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -454,7 +459,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter|mimir-backend"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -489,7 +494,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter|mimir-backend"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -524,7 +529,7 @@ spec:
                     sort: desc
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter|mimir-backend"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -585,7 +590,7 @@ spec:
                         (
                           container_fs_writes_bytes_total{
                             cluster=~"$cluster", namespace=~"$namespace",
-                            container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter|mimir-backend",
+                            container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter",
                             device!~".*sda.*"
                           }
                         ),
@@ -645,7 +650,7 @@ spec:
                         (
                           container_fs_writes_bytes_total{
                             cluster=~"$cluster", namespace=~"$namespace",
-                            container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter|mimir-backend",
+                            container=~"query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter",
                             device!~".*sda.*"
                           }
                         ),
@@ -694,8 +699,8 @@ spec:
               targets:
                 - expr: |
                     max by(persistentvolumeclaim) (
-                      kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter|mimir-backend).*"} /
-                      kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter|mimir-backend).*"}
+                      kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter).*"} /
+                      kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(query-scheduler|ruler-query-scheduler|ruler|store-gateway|compactor|alertmanager|overrides-exporter).*"}
                     )
                   format: time_series
                   legendFormat: '{{persistentvolumeclaim}}'
@@ -793,3 +798,4 @@ spec:
     timezone: utc
     title: Mimir / Overview resources
     uid: mimir-overview-resources
+

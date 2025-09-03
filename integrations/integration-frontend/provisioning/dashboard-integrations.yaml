@@ -21,7 +21,7 @@ spec:
                 type: dashboard
               type: dashboard
     description: Frontend monitoring dashboard using metrics collected with Grafana Faro SDK.
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 0
     links: []

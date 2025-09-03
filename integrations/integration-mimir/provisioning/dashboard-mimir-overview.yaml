@@ -4,6 +4,11 @@ metadata:
     folder: integration-mimir
     name: mimir-overview
 spec:
+    __requires:
+        - id: grafana
+          name: Grafana
+          type: grafana
+          version: 8.0.0
     annotations:
         list: []
     editable: false
@@ -29,11 +34,11 @@ spec:
                 The 'Status' panel shows an overview on the cluster health over the time.
                 To investigate failures, see a specific dashboard:
 
-                - <a target="_blank" href="./d/mimir-writes/mimir-writes?${__url_time_range}&${__all_variables}">Writes</a>
-                - <a target="_blank" href="./d/mimir-reads/mimir-reads?${__url_time_range}&${__all_variables}">Reads</a>
-                - <a target="_blank" href="./d/mimir-ruler/mimir-ruler?${__url_time_range}&${__all_variables}">Rule evaluations</a>
-                - <a target="_blank" href="./d/mimir-alertmanager/mimir-alertmanager?${__url_time_range}&${__all_variables}">Alerting notifications</a>
-                - <a target="_blank" href="./d/mimir-object-store/mimir-object-store?${__url_time_range}&${__all_variables}">Object storage</a>
+                - <a target="_blank" href="./d/8280707b8f16e7b87b840fc1cc92d4c5/mimir-writes?${__url_time_range}&${__all_variables}">Writes</a>
+                - <a target="_blank" href="./d/e327503188913dc38ad571c647eef643/mimir-reads?${__url_time_range}&${__all_variables}">Reads</a>
+                - <a target="_blank" href="./d/631e15d5d85afb2ca8e35d62984eeaa0/mimir-ruler?${__url_time_range}&${__all_variables}">Rule evaluations</a>
+                - <a target="_blank" href="./d/b0d38d318bbddd80476246d4930f9e55/mimir-alertmanager?${__url_time_range}&${__all_variables}">Alerting notifications</a>
+                - <a target="_blank" href="./d/e1324ee2a434f4158c00a9ee279d3292/mimir-object-store?${__url_time_range}&${__all_variables}">Object storage</a>
               datasource: null
               description: ""
               id: 1
@@ -64,16 +69,16 @@ spec:
                     uid: $datasource
                   exemplar: false
                   expr: |-
-                    (
+                    ((
                         # gRPC errors are not tracked as 5xx but "error".
-                        sum(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics",status_code=~"5.*|error"}[$__rate_interval])))
+                        sum(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write",status_code=~"5.*|error"}[$__rate_interval])))
                         or
                         # Handle the case no failure has been tracked yet.
                         vector(0)
                     )
                     /
-                    sum(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"}[$__rate_interval])))
-                     < ($latency_metrics * -Inf)
+                    sum(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"}[$__rate_interval])))
+                    ) and on() (vector($latency_metrics) == -1)
                   instant: false
                   legendFormat: Writes
                   range: true
@@ -81,16 +86,16 @@ spec:
                     uid: $datasource
                   exemplar: false
                   expr: |-
-                    (
+                    ((
                         # gRPC errors are not tracked as 5xx but "error".
-                        sum(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics",status_code=~"5.*|error"}[$__rate_interval]))
+                        sum(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write",status_code=~"5.*|error"}[$__rate_interval]))
                         or
                         # Handle the case no failure has been tracked yet.
                         vector(0)
                     )
                     /
-                    sum(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"}[$__rate_interval]))
-                     < ($latency_metrics * +Inf)
+                    sum(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"}[$__rate_interval]))
+                    ) and on() (vector($latency_metrics) == 1)
                   instant: false
                   legendFormat: Writes
                   range: true
@@ -98,16 +103,16 @@ spec:
                     uid: $datasource
                   exemplar: false
                   expr: |-
-                    (
+                    ((
                         # gRPC errors are not tracked as 5xx but "error".
-                        sum(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+",status_code=~"5.*|error"}[$__rate_interval])))
+                        sum(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+",status_code=~"5.*|error"}[$__rate_interval])))
                         or
                         # Handle the case no failure has been tracked yet.
                         vector(0)
                     )
                     /
-                    sum(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"}[$__rate_interval])))
-                     < ($latency_metrics * -Inf)
+                    sum(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"}[$__rate_interval])))
+                    ) and on() (vector($latency_metrics) == -1)
                   instant: false
                   legendFormat: Reads
                   range: true
@@ -115,16 +120,16 @@ spec:
                     uid: $datasource
                   exemplar: false
                   expr: |-
-                    (
+                    ((
                         # gRPC errors are not tracked as 5xx but "error".
-                        sum(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+",status_code=~"5.*|error"}[$__rate_interval]))
+                        sum(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+",status_code=~"5.*|error"}[$__rate_interval]))
                         or
                         # Handle the case no failure has been tracked yet.
                         vector(0)
                     )
                     /
-                    sum(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"}[$__rate_interval]))
-                     < ($latency_metrics * +Inf)
+                    sum(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"}[$__rate_interval]))
+                    ) and on() (vector($latency_metrics) == 1)
                   instant: false
                   legendFormat: Reads
                   range: true
@@ -134,17 +139,17 @@ spec:
                   expr: |
                     (
                       (
-                          sum(rate(cortex_prometheus_rule_evaluation_failures_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                          sum(rate(cortex_prometheus_rule_evaluation_failures_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                           +
                           # Consider missed evaluations as failures.
-                          sum(rate(cortex_prometheus_rule_group_iterations_missed_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                          sum(rate(cortex_prometheus_rule_group_iterations_missed_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                       )
                       or
                       # Handle the case no failure has been tracked yet.
                       vector(0)
                     )
                     /
-                    sum(rate(cortex_prometheus_rule_evaluations_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_prometheus_rule_evaluations_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                   instant: false
                   legendFormat: Rule evaluations
                   range: true
@@ -154,21 +159,21 @@ spec:
                   expr: |
                     (
                       # Failed notifications from ruler to Alertmanager (handling the case the ruler metrics are missing).
-                      ((sum(rate(cortex_prometheus_notifications_errors_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                      ((sum(rate(cortex_prometheus_notifications_errors_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                     ) or vector(0))
                       +
                       # Failed notifications from Alertmanager to receivers (handling the case the alertmanager metrics are missing).
-                      ((sum(cluster_job_integration:cortex_alertmanager_notifications_failed_total:rate5m{cluster=~"$cluster", job=~"($namespace)/((alertmanager|cortex|mimir|mimir-backend.*))"})
+                      ((sum(cluster_job_integration:cortex_alertmanager_notifications_failed_total:rate5m{cluster=~"$cluster", job=~"($namespace)/((alertmanager|cortex|mimir))"}) or vector(0)
                     ) or vector(0))
                     )
                     /
                     (
                       # Total notifications from ruler to Alertmanager (handling the case the ruler metrics are missing).
-                      ((sum(rate(cortex_prometheus_notifications_sent_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                      ((sum(rate(cortex_prometheus_notifications_sent_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                     ) or vector(0))
                       +
                       # Total notifications from Alertmanager to receivers (handling the case the alertmanager metrics are missing).
-                      ((sum(cluster_job_integration:cortex_alertmanager_notifications_total:rate5m{cluster=~"$cluster", job=~"($namespace)/((alertmanager|cortex|mimir|mimir-backend.*))"})
+                      ((sum(cluster_job_integration:cortex_alertmanager_notifications_total:rate5m{cluster=~"$cluster", job=~"($namespace)/((alertmanager|cortex|mimir))"}) or vector(0)
                     ) or vector(0))
                     )
                   instant: false
@@ -211,7 +216,7 @@ spec:
         - collapse: false
           height: 250px
           panels:
-            - content: "These panels show an overview on the write path. \nTo examine the write path in detail, see a specific dashboard:\n\n- <a target=\"_blank\" href=\"./d/mimir-writes/mimir-writes?${__url_time_range}&${__all_variables}\">Writes</a>\n- <a target=\"_blank\" href=\"./d/mimir-writes-resources/mimir-writes-resources?${__url_time_range}&${__all_variables}\">Writes resources</a>\n- <a target=\"_blank\" href=\"./d/mimir-writes-networking/mimir-writes-networking?${__url_time_range}&${__all_variables}\">Writes networking</a>\n- <a target=\"_blank\" href=\"./d/mimir-overview-resources/mimir-overview-resources?${__url_time_range}&${__all_variables}\">Overview resources</a>\n- <a target=\"_blank\" href=\"./d/mimir-overview-networking/mimir-overview-networking?${__url_time_range}&${__all_variables}\">Overview networking</a>\n"
+            - content: "These panels show an overview on the write path. \nTo examine the write path in detail, see a specific dashboard:\n\n- <a target=\"_blank\" href=\"./d/8280707b8f16e7b87b840fc1cc92d4c5/mimir-writes?${__url_time_range}&${__all_variables}\">Writes</a>\n- <a target=\"_blank\" href=\"./d/bc9160e50b52e89e0e49c840fea3d379/mimir-writes-resources?${__url_time_range}&${__all_variables}\">Writes resources</a>\n- <a target=\"_blank\" href=\"./d/978c1cb452585c96697a238eaac7fe2d/mimir-writes-networking?${__url_time_range}&${__all_variables}\">Writes networking</a>\n- <a target=\"_blank\" href=\"./d/a9b92d3c4d1af325d872a9e9a7083d71/mimir-overview-resources?${__url_time_range}&${__all_variables}\">Overview resources</a>\n- <a target=\"_blank\" href=\"./d/e15c71d372cc541367a088f10d9fcd92/mimir-overview-networking?${__url_time_range}&${__all_variables}\">Overview networking</a>\n"
               datasource: null
               description: ""
               id: 4
@@ -311,6 +316,86 @@ spec:
                           value:
                             fixedColor: '#7EB26D'
                             mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 1xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EAB839'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 2xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 3xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#6ED0E0'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 4xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EF843C'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 5xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: Canceled
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#A9A9A9'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: OK
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: Success
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: cancel
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#A9A9A9'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: error
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
               id: 5
               links: []
               options:
@@ -322,20 +407,20 @@ spec:
               span: 3
               targets:
                 - expr: |-
-                    sum by (status) (
-                      label_replace(label_replace(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"}[$__rate_interval]),
+                    (sum by (status) (
+                      label_replace(label_replace(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"}[$__rate_interval]),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
-                     < ($latency_metrics * +Inf)
+                    ) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendFormat: '{{status}}'
                   refId: A_classic
                 - expr: |-
-                    sum by (status) (
-                      label_replace(label_replace(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"}[$__rate_interval])),
+                    (sum by (status) (
+                      label_replace(label_replace(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"}[$__rate_interval])),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
-                     < ($latency_metrics * -Inf)
+                    ) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendFormat: '{{status}}'
                   refId: A
@@ -371,33 +456,33 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:cortex_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"})) * 1e3 < ($latency_metrics * +Inf)
+                - expr: (histogram_quantile(0.99, sum by (le) (cluster_job_route:cortex_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"})) * 1e3) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A_classic
-                - expr: histogram_quantile(0.99, sum (cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"})) * 1e3 < ($latency_metrics * -Inf)
+                - expr: (histogram_quantile(0.99, sum (cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"})) * 1e3) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A_native
-                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:cortex_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"})) * 1e3 < ($latency_metrics * +Inf)
+                - expr: (histogram_quantile(0.50, sum by (le) (cluster_job_route:cortex_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"})) * 1e3) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B_classic
-                - expr: histogram_quantile(0.50, sum (cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"})) * 1e3 < ($latency_metrics * -Inf)
+                - expr: (histogram_quantile(0.50, sum (cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"})) * 1e3) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B_native
                 - expr: |-
-                    1e3 * sum(cluster_job_route:cortex_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"}) /
-                    sum(cluster_job_route:cortex_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"})
-                     < ($latency_metrics * +Inf)
+                    (1e3 * sum(cluster_job_route:cortex_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"}) /
+                    sum(cluster_job_route:cortex_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"})
+                    ) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendFormat: Average
                   refId: C_classic
                 - expr: |-
-                    1e3 * sum(histogram_sum(cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"})) /
-                    sum(histogram_count(cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics"}))
-                     < ($latency_metrics * -Inf)
+                    (1e3 * sum(histogram_sum(cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"})) /
+                    sum(histogram_count(cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))", route=~"/distributor.Distributor/Push|/httpgrpc.*|api_(v1|prom)_push|otlp_v1_metrics|api_v1_push_influx_write"}))
+                    ) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendFormat: Average
                   refId: C_native
@@ -432,11 +517,11 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: sum(cluster_namespace_job:cortex_distributor_received_samples:rate5m{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))"})
+                - expr: sum(cluster_namespace_job:cortex_distributor_received_samples:rate5m{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))"})
                   format: time_series
                   legendFormat: samples / sec
                   legendLink: null
-                - expr: sum(cluster_namespace_job:cortex_distributor_received_exemplars:rate5m{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir|mimir-write.*))"})
+                - expr: sum(cluster_namespace_job:cortex_distributor_received_exemplars:rate5m{cluster=~"$cluster", job=~"($namespace)/((distributor.*|cortex|mimir))"})
                   format: time_series
                   legendFormat: exemplars / sec
                   legendLink: null
@@ -451,7 +536,7 @@ spec:
         - collapse: false
           height: 250px
           panels:
-            - content: "These panels show an overview on the read path. \nTo examine the read path in detail, see a specific dashboard:\n\n- <a target=\"_blank\" href=\"./d/mimir-reads/mimir-reads?${__url_time_range}&${__all_variables}\">Reads</a>\n- <a target=\"_blank\" href=\"./d/mimir-reads-resources/mimir-reads-resources?${__url_time_range}&${__all_variables}\">Reads resources</a>\n- <a target=\"_blank\" href=\"./d/mimir-reads-networking/mimir-reads-networking?${__url_time_range}&${__all_variables}\">Reads networking</a>\n- <a target=\"_blank\" href=\"./d/mimir-overview-resources/mimir-overview-resources?${__url_time_range}&${__all_variables}\">Overview resources</a>\n- <a target=\"_blank\" href=\"./d/mimir-overview-networking/mimir-overview-networking?${__url_time_range}&${__all_variables}\">Overview networking</a>\n- <a target=\"_blank\" href=\"./d/mimir-queries/mimir-queries?${__url_time_range}&${__all_variables}\">Queries</a>\n- <a target=\"_blank\" href=\"./d/mimir-compactor/mimir-compactor?${__url_time_range}&${__all_variables}\">Compactor</a>\n"
+            - content: "These panels show an overview on the read path. \nTo examine the read path in detail, see a specific dashboard:\n\n- <a target=\"_blank\" href=\"./d/e327503188913dc38ad571c647eef643/mimir-reads?${__url_time_range}&${__all_variables}\">Reads</a>\n- <a target=\"_blank\" href=\"./d/cc86fd5aa9301c6528986572ad974db9/mimir-reads-resources?${__url_time_range}&${__all_variables}\">Reads resources</a>\n- <a target=\"_blank\" href=\"./d/54b2a0a4748b3bd1aefa92ce5559a1c2/mimir-reads-networking?${__url_time_range}&${__all_variables}\">Reads networking</a>\n- <a target=\"_blank\" href=\"./d/a9b92d3c4d1af325d872a9e9a7083d71/mimir-overview-resources?${__url_time_range}&${__all_variables}\">Overview resources</a>\n- <a target=\"_blank\" href=\"./d/e15c71d372cc541367a088f10d9fcd92/mimir-overview-networking?${__url_time_range}&${__all_variables}\">Overview networking</a>\n- <a target=\"_blank\" href=\"./d/b3abe8d5c040395cc36615cb4334c92d/mimir-queries?${__url_time_range}&${__all_variables}\">Queries</a>\n- <a target=\"_blank\" href=\"./d/1b3443aea86db629e6efdb7d05c53823/mimir-compactor?${__url_time_range}&${__all_variables}\">Compactor</a>\n"
               datasource: null
               description: ""
               id: 8
@@ -551,6 +636,86 @@ spec:
                           value:
                             fixedColor: '#7EB26D'
                             mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 1xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EAB839'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 2xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 3xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#6ED0E0'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 4xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EF843C'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 5xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: Canceled
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#A9A9A9'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: OK
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: Success
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: cancel
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#A9A9A9'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: error
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
               id: 9
               links: []
               options:
@@ -562,20 +727,20 @@ spec:
               span: 3
               targets:
                 - expr: |-
-                    sum by (status) (
-                      label_replace(label_replace(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"}[$__rate_interval]),
+                    (sum by (status) (
+                      label_replace(label_replace(rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"}[$__rate_interval]),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
-                     < ($latency_metrics * +Inf)
+                    ) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendFormat: '{{status}}'
                   refId: A_classic
                 - expr: |-
-                    sum by (status) (
-                      label_replace(label_replace(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"}[$__rate_interval])),
+                    (sum by (status) (
+                      label_replace(label_replace(histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"}[$__rate_interval])),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
-                     < ($latency_metrics * -Inf)
+                    ) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendFormat: '{{status}}'
                   refId: A
@@ -611,33 +776,33 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:cortex_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"})) * 1e3 < ($latency_metrics * +Inf)
+                - expr: (histogram_quantile(0.99, sum by (le) (cluster_job_route:cortex_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"})) * 1e3) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A_classic
-                - expr: histogram_quantile(0.99, sum (cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"})) * 1e3 < ($latency_metrics * -Inf)
+                - expr: (histogram_quantile(0.99, sum (cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"})) * 1e3) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A_native
-                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:cortex_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"})) * 1e3 < ($latency_metrics * +Inf)
+                - expr: (histogram_quantile(0.50, sum by (le) (cluster_job_route:cortex_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"})) * 1e3) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B_classic
-                - expr: histogram_quantile(0.50, sum (cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"})) * 1e3 < ($latency_metrics * -Inf)
+                - expr: (histogram_quantile(0.50, sum (cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"})) * 1e3) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B_native
                 - expr: |-
-                    1e3 * sum(cluster_job_route:cortex_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"}) /
-                    sum(cluster_job_route:cortex_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"})
-                     < ($latency_metrics * +Inf)
+                    (1e3 * sum(cluster_job_route:cortex_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"}) /
+                    sum(cluster_job_route:cortex_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"})
+                    ) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendFormat: Average
                   refId: C_classic
                 - expr: |-
-                    1e3 * sum(histogram_sum(cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"})) /
-                    sum(histogram_count(cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))", route=~"(prometheus|api_prom)_api_v1_.+"}))
-                     < ($latency_metrics * -Inf)
+                    (1e3 * sum(histogram_sum(cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"})) /
+                    sum(histogram_count(cluster_job_route:cortex_request_duration_seconds:sum_rate{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))", route=~"(prometheus|api_prom)_api_v1_.+"}))
+                    ) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendFormat: Average
                   refId: C_native
@@ -782,17 +947,17 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: sum by (route) (rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))",route=~"(prometheus|api_prom)(_api_v1_query|_api_v1_query_range|_api_v1_labels|_api_v1_label_name_values|_api_v1_series|_api_v1_read|_api_v1_metadata|_api_v1_query_exemplars|_api_v1_cardinality_active_series|_api_v1_cardinality_label_names|_api_v1_cardinality_label_values)"}[$__rate_interval])) < ($latency_metrics * +Inf)
+                - expr: (sum by (route) (rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))",route=~"(prometheus|api_prom)(_api_v1_query|_api_v1_query_range|_api_v1_labels|_api_v1_label_name_values|_api_v1_series|_api_v1_read|_api_v1_metadata|_api_v1_query_exemplars|_api_v1_cardinality_active_series|_api_v1_cardinality_label_names|_api_v1_cardinality_label_values)"}[$__rate_interval]))) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendLink: null
-                - expr: sum by (route) (histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))",route=~"(prometheus|api_prom)(_api_v1_query|_api_v1_query_range|_api_v1_labels|_api_v1_label_name_values|_api_v1_series|_api_v1_read|_api_v1_metadata|_api_v1_query_exemplars|_api_v1_cardinality_active_series|_api_v1_cardinality_label_names|_api_v1_cardinality_label_values)"}[$__rate_interval]))) < ($latency_metrics * -Inf)
+                - expr: (sum by (route) (histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))",route=~"(prometheus|api_prom)(_api_v1_query|_api_v1_query_range|_api_v1_labels|_api_v1_label_name_values|_api_v1_series|_api_v1_read|_api_v1_metadata|_api_v1_query_exemplars|_api_v1_cardinality_active_series|_api_v1_cardinality_label_names|_api_v1_cardinality_label_values)"}[$__rate_interval])))) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendLink: null
-                - expr: sum (rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))",route=~"(prometheus|api_prom)_api_v1_.*",route!~"(prometheus|api_prom)(_api_v1_query|_api_v1_query_range|_api_v1_labels|_api_v1_label_name_values|_api_v1_series|_api_v1_read|_api_v1_metadata|_api_v1_query_exemplars|_api_v1_cardinality_active_series|_api_v1_cardinality_label_names|_api_v1_cardinality_label_values)"}[$__rate_interval])) < ($latency_metrics * +Inf)
+                - expr: (sum (rate(cortex_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))",route=~"(prometheus|api_prom)_api_v1_.*",route!~"(prometheus|api_prom)(_api_v1_query|_api_v1_query_range|_api_v1_labels|_api_v1_label_name_values|_api_v1_series|_api_v1_read|_api_v1_metadata|_api_v1_query_exemplars|_api_v1_cardinality_active_series|_api_v1_cardinality_label_names|_api_v1_cardinality_label_values)"}[$__rate_interval]))) and on() (vector($latency_metrics) == 1)
                   format: time_series
                   legendFormat: other
                   legendLink: null
-                - expr: sum (histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir|mimir-read.*))",route=~"(prometheus|api_prom)_api_v1_.*",route!~"(prometheus|api_prom)(_api_v1_query|_api_v1_query_range|_api_v1_labels|_api_v1_label_name_values|_api_v1_series|_api_v1_read|_api_v1_metadata|_api_v1_query_exemplars|_api_v1_cardinality_active_series|_api_v1_cardinality_label_names|_api_v1_cardinality_label_values)"}[$__rate_interval]))) < ($latency_metrics * -Inf)
+                - expr: (sum (histogram_count(rate(cortex_request_duration_seconds{cluster=~"$cluster", job=~"($namespace)/((query-frontend.*|cortex|mimir))",route=~"(prometheus|api_prom)_api_v1_.*",route!~"(prometheus|api_prom)(_api_v1_query|_api_v1_query_range|_api_v1_labels|_api_v1_label_name_values|_api_v1_series|_api_v1_read|_api_v1_metadata|_api_v1_query_exemplars|_api_v1_cardinality_active_series|_api_v1_cardinality_label_names|_api_v1_cardinality_label_values)"}[$__rate_interval])))) and on() (vector($latency_metrics) == -1)
                   format: time_series
                   legendFormat: other
                   legendLink: null
@@ -811,11 +976,11 @@ spec:
                 These panels show an overview on the recording and alerting rules evaluation.
                 To examine the rules evaluation and alerts notifications in detail, see a specific dashboard:
 
-                - <a target="_blank" href="./d/mimir-ruler/mimir-ruler?${__url_time_range}&${__all_variables}">Ruler</a>
-                - <a target="_blank" href="./d/mimir-alertmanager/mimir-alertmanager?${__url_time_range}&${__all_variables}">Alertmanager</a>
-                - <a target="_blank" href="./d/mimir-alertmanager-resources/mimir-alertmanager-resources?${__url_time_range}&${__all_variables}">Alertmanager resources</a>
-                - <a target="_blank" href="./d/mimir-overview-resources/mimir-overview-resources?${__url_time_range}&${__all_variables}">Overview resources</a>
-                - <a target="_blank" href="./d/mimir-overview-networking/mimir-overview-networking?${__url_time_range}&${__all_variables}">Overview networking</a>
+                - <a target="_blank" href="./d/631e15d5d85afb2ca8e35d62984eeaa0/mimir-ruler?${__url_time_range}&${__all_variables}">Ruler</a>
+                - <a target="_blank" href="./d/b0d38d318bbddd80476246d4930f9e55/mimir-alertmanager?${__url_time_range}&${__all_variables}">Alertmanager</a>
+                - <a target="_blank" href="./d/a6883fb22799ac74479c7db872451092/mimir-alertmanager-resources?${__url_time_range}&${__all_variables}">Alertmanager resources</a>
+                - <a target="_blank" href="./d/a9b92d3c4d1af325d872a9e9a7083d71/mimir-overview-resources?${__url_time_range}&${__all_variables}">Overview resources</a>
+                - <a target="_blank" href="./d/e15c71d372cc541367a088f10d9fcd92/mimir-overview-networking?${__url_time_range}&${__all_variables}">Overview networking</a>
               datasource: null
               description: ""
               id: 12
@@ -870,17 +1035,17 @@ spec:
               span: 3
               targets:
                 - expr: |
-                    sum(rate(cortex_prometheus_rule_evaluations_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_prometheus_rule_evaluations_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                     -
-                    sum(rate(cortex_prometheus_rule_evaluation_failures_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_prometheus_rule_evaluation_failures_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: success
                   legendLink: null
-                - expr: sum(rate(cortex_prometheus_rule_evaluation_failures_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_prometheus_rule_evaluation_failures_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: failed
                   legendLink: null
-                - expr: sum(rate(cortex_prometheus_rule_group_iterations_missed_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_prometheus_rule_group_iterations_missed_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: missed
                   legendLink: null
@@ -916,9 +1081,9 @@ spec:
               span: 3
               targets:
                 - expr: |
-                    sum (rate(cortex_prometheus_rule_evaluation_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum (rate(cortex_prometheus_rule_evaluation_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                       /
-                    sum (rate(cortex_prometheus_rule_evaluation_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum (rate(cortex_prometheus_rule_evaluation_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: average
                   legendLink: null
@@ -970,14 +1135,14 @@ spec:
               span: 3
               targets:
                 - expr: |
-                    sum(rate(cortex_prometheus_notifications_sent_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_prometheus_notifications_sent_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                       -
-                    sum(rate(cortex_prometheus_notifications_errors_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_prometheus_notifications_errors_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: successful
                   legendLink: null
                 - expr: |
-                    sum(rate(cortex_prometheus_notifications_errors_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_prometheus_notifications_errors_total{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: failed
                   legendLink: null
@@ -996,8 +1161,8 @@ spec:
                 These panels show an overview on the long-term storage (object storage).
                 To examine the storage in detail, see a specific dashboard:
 
-                - <a target="_blank" href="./d/mimir-object-store/mimir-object-store?${__url_time_range}&${__all_variables}">Object store</a>
-                - <a target="_blank" href="./d/mimir-compactor/mimir-compactor?${__url_time_range}&${__all_variables}">Compactor</a>
+                - <a target="_blank" href="./d/e1324ee2a434f4158c00a9ee279d3292/mimir-object-store?${__url_time_range}&${__all_variables}">Object store</a>
+                - <a target="_blank" href="./d/1b3443aea86db629e6efdb7d05c53823/mimir-compactor?${__url_time_range}&${__all_variables}">Compactor</a>
               datasource: null
               description: ""
               id: 16
@@ -1144,7 +1309,7 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: sum(max by(user) (max_over_time(cortex_bucket_blocks_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[15m])))
+                - expr: sum(max by(user) (max_over_time(cortex_bucket_blocks_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[15m])))
                   format: time_series
                   legendFormat: blocks
                   legendLink: null
@@ -1264,3 +1429,4 @@ spec:
     timezone: utc
     title: Mimir / Overview
     uid: mimir-overview
+

@@ -16,7 +16,7 @@ spec:
               name: Annotations & Alerts
               type: dashboard
     description: 'Inspect the cardinality of your Prometheus metrics '
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 0
     links: []

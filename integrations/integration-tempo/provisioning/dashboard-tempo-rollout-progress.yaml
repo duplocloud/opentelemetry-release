@@ -214,8 +214,8 @@ spec:
           steppedLine: false
           targets:
             - expr: |
-                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"opentelemetry_proto_collector_trace_v1_traceservice_export",status_code=~"2.+"}[$__rate_interval])) /
-                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"opentelemetry_proto_collector_trace_v1_traceservice_export"}[$__rate_interval]))
+                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"(opentelemetry_proto_collector_trace_v1_traceservice_export|otlp_v1_traces)",status_code=~"2.+"}[$__rate_interval])) /
+                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"(opentelemetry_proto_collector_trace_v1_traceservice_export|otlp_v1_traces)"}[$__rate_interval]))
               format: null
               instant: false
               interval: ""
@@ -303,8 +303,8 @@ spec:
           steppedLine: false
           targets:
             - expr: |
-                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"opentelemetry_proto_collector_trace_v1_traceservice_export",status_code=~"4.+"}[$__rate_interval])) /
-                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"opentelemetry_proto_collector_trace_v1_traceservice_export"}[$__rate_interval]))
+                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"(opentelemetry_proto_collector_trace_v1_traceservice_export|otlp_v1_traces)",status_code=~"4.+"}[$__rate_interval])) /
+                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"(opentelemetry_proto_collector_trace_v1_traceservice_export|otlp_v1_traces)"}[$__rate_interval]))
               format: null
               instant: false
               interval: ""
@@ -390,8 +390,8 @@ spec:
           steppedLine: false
           targets:
             - expr: |
-                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"opentelemetry_proto_collector_trace_v1_traceservice_export",status_code=~"5.+"}[$__rate_interval])) /
-                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"opentelemetry_proto_collector_trace_v1_traceservice_export"}[$__rate_interval]))
+                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"(opentelemetry_proto_collector_trace_v1_traceservice_export|otlp_v1_traces)",status_code=~"5.+"}[$__rate_interval])) /
+                sum(rate(tempo_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"(opentelemetry_proto_collector_trace_v1_traceservice_export|otlp_v1_traces)"}[$__rate_interval]))
               format: null
               instant: false
               interval: ""
@@ -479,7 +479,7 @@ spec:
           steppedLine: false
           targets:
             - expr: |
-                histogram_quantile(0.99, sum by (le) (tempo_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"opentelemetry_proto_collector_trace_v1_traceservice_export"}))
+                histogram_quantile(0.99, sum by (le) (tempo_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"(opentelemetry_proto_collector_trace_v1_traceservice_export|otlp_v1_traces)"}))
               format: null
               instant: false
               interval: ""
@@ -1009,45 +1009,43 @@ spec:
                 sort:
                     - field: container
           type: table
-        - aliasColors: {}
-          bars: false
-          dashLength: 10
-          dashes: false
-          datasource: $datasource
-          fill: 1
+        - datasource: $datasource
+          fieldConfig:
+            defaults:
+                custom:
+                    drawStyle: line
+                    fillOpacity: 1
+                    lineWidth: 1
+                    pointSize: 5
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                thresholds:
+                    mode: absolute
+                    steps: []
+                unit: s
+            overrides: []
           gridPos:
             h: 8
             w: 8
             x: 16
             "y": 8
           id: 12
-          legend:
-            avg: false
-            current: false
-            max: false
-            min: false
-            show: true
-            total: false
-            values: false
-          lines: true
-          linewidth: 1
           links: []
-          nullPointMode: null as zero
-          percentage: false
-          pointradius: 5
-          points: false
-          renderer: flot
-          seriesOverrides: []
-          spaceLength: 10
-          span: 6
-          stack: false
-          steppedLine: false
+          options:
+            legend:
+                showLegend: true
+            tooltip:
+                mode: single
+                sort: none
           targets:
             - expr: |
                 1 - (
-                  avg_over_time(histogram_quantile(0.99, sum by (le) (tempo_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"opentelemetry_proto_collector_trace_v1_traceservice_export"} offset 24h))[1h:])
+                  avg_over_time(histogram_quantile(0.99, sum by (le) (tempo_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"(opentelemetry_proto_collector_trace_v1_traceservice_export|otlp_v1_traces)"} offset 24h))[1h:])
                   /
-                  avg_over_time(histogram_quantile(0.99, sum by (le) (tempo_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"opentelemetry_proto_collector_trace_v1_traceservice_export"}))[1h:])
+                  avg_over_time(histogram_quantile(0.99, sum by (le) (tempo_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/cortex-gw(-internal)?", route=~"(opentelemetry_proto_collector_trace_v1_traceservice_export|otlp_v1_traces)"}))[1h:])
                 )
               format: time_series
               interval: 1m
@@ -1063,21 +1061,8 @@ spec:
               interval: 1m
               legendFormat: reads
               legendLink: null
-          thresholds: []
-          timeFrom: null
-          timeShift: null
           title: Latency vs 24h ago
-          tooltip:
-            shared: true
-            sort: 2
-            value_type: individual
-          type: graph
-          xaxis:
-            buckets: null
-            mode: time
-            name: null
-            show: true
-            values: []
+          type: timeseries
           yaxes:
             - format: percentunit
               label: null
@@ -1178,5 +1163,6 @@ spec:
             - 7d
             - 30d
     timezone: utc
-    title: Tempo / Rollout progress
+    title: Rollout progress
     uid: tempo-rollout-progress
+

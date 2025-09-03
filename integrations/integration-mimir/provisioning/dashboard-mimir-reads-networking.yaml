@@ -4,6 +4,11 @@ metadata:
     folder: integration-mimir
     name: mimir-reads-networking
 spec:
+    __requires:
+        - id: grafana
+          name: Grafana
+          type: grafana
+          version: 8.0.0
     annotations:
         list: []
     editable: false
@@ -54,7 +59,7 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: sum by(pod) (rate(container_network_receive_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read).*"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_network_receive_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier).*"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -89,7 +94,7 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: sum by(pod) (rate(container_network_transmit_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read).*"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_network_transmit_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier).*"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -126,11 +131,11 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: avg(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read).*"})
+                - expr: avg(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier).*"})
                   format: time_series
                   legendFormat: avg
                   legendLink: null
-                - expr: max(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read).*"})
+                - expr: max(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier).*"})
                   format: time_series
                   legendFormat: highest
                   legendLink: null
@@ -170,15 +175,15 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: avg(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read).*"}))
+                - expr: avg(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier).*"}))
                   format: time_series
                   legendFormat: avg
                   legendLink: null
-                - expr: max(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read).*"}))
+                - expr: max(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier).*"}))
                   format: time_series
                   legendFormat: highest
                   legendLink: null
-                - expr: min(cortex_tcp_connections_limit{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read).*"})
+                - expr: min(cortex_tcp_connections_limit{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(query-frontend|querier|ruler-query-frontend|ruler-querier).*"})
                   format: time_series
                   legendFormat: limit
                   legendLink: null
@@ -1115,3 +1120,4 @@ spec:
     timezone: utc
     title: Mimir / Reads networking
     uid: mimir-reads-networking
+

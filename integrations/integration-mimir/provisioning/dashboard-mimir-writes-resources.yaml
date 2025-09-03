@@ -4,6 +4,11 @@ metadata:
     folder: integration-mimir
     name: mimir-writes-resources
 spec:
+    __requires:
+        - id: grafana
+          name: Grafana
+          type: grafana
+          version: 8.0.0
     annotations:
         list: []
     editable: false
@@ -54,7 +59,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester|mimir-write"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -89,7 +94,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester|mimir-write"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -124,7 +129,7 @@ spec:
                     sort: desc
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester|mimir-write"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"distributor|ingester"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -339,7 +344,20 @@ spec:
                         mode: absolute
                         steps: []
                     unit: short
-                overrides: []
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                        - id: custom.lineStyle
+                          value:
+                            fill: dash
               id: 7
               links: []
               options:
@@ -350,9 +368,13 @@ spec:
                     sort: desc
               span: 6
               targets:
-                - expr: sum by(pod) (cortex_ingester_memory_series{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir|mimir-write.*))"})
+                - expr: sum by(pod) (cortex_ingester_memory_series{cluster=~"$cluster", job=~"($namespace)/((ingester.*|cortex|mimir))"})
                   format: time_series
                   legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min by(namespace) (cortex_ingester_instance_limits{namespace="$namespace", limit="max_series"})
+                  format: time_series
+                  legendFormat: limit
                   legendLink: null
               title: In-memory series
               type: timeseries
@@ -870,3 +892,4 @@ spec:
     timezone: utc
     title: Mimir / Writes resources
     uid: mimir-writes-resources
+

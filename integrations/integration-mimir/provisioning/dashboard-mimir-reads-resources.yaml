@@ -4,6 +4,11 @@ metadata:
     folder: integration-mimir
     name: mimir-reads-resources
 spec:
+    __requires:
+        - id: grafana
+          name: Grafana
+          type: grafana
+          version: 8.0.0
     annotations:
         list: []
     editable: false
@@ -54,7 +59,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -89,7 +94,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -124,7 +129,7 @@ spec:
                     sort: desc
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier|mimir-read"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -974,7 +979,7 @@ spec:
                     sort: none
               span: 6
               targets:
-                - expr: sum by(pod) (cortex_prometheus_rule_group_rules{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir|mimir-backend.*))"})
+                - expr: sum by(pod) (cortex_prometheus_rule_group_rules{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -1685,3 +1690,4 @@ spec:
     timezone: utc
     title: Mimir / Reads resources
     uid: mimir-reads-resources
+

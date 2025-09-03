@@ -4,6 +4,11 @@ metadata:
     folder: integration-mimir
     name: mimir-compactor
 spec:
+    __requires:
+        - id: grafana
+          name: Grafana
+          type: grafana
+          version: 8.0.0
     annotations:
         list: []
     editable: false
@@ -82,15 +87,15 @@ spec:
                     sort: none
               span: 3
               targets:
-                - expr: sum(rate(cortex_compactor_runs_started_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_compactor_runs_started_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: started
                   legendLink: null
-                - expr: sum(rate(cortex_compactor_runs_completed_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_compactor_runs_completed_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: completed
                   legendLink: null
-                - expr: sum(rate(cortex_compactor_runs_failed_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_compactor_runs_failed_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: failed
                   legendLink: null
@@ -118,12 +123,12 @@ spec:
               targets:
                 - expr: |
                     (
-                      cortex_compactor_tenants_processing_succeeded{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"} +
-                      cortex_compactor_tenants_processing_failed{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"} +
-                      cortex_compactor_tenants_skipped{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}
+                      cortex_compactor_tenants_processing_succeeded{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"} +
+                      cortex_compactor_tenants_processing_failed{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"} +
+                      cortex_compactor_tenants_skipped{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}
                     )
                     /
-                    cortex_compactor_tenants_discovered{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"} > 0
+                    cortex_compactor_tenants_discovered{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"} > 0
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -228,9 +233,9 @@ spec:
                 - expr: |
                     max by(pod)
                     (
-                      (time() * (max_over_time(cortex_compactor_last_successful_run_timestamp_seconds{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[1h]) !=bool 0))
+                      (time() * (max_over_time(cortex_compactor_last_successful_run_timestamp_seconds{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[1h]) !=bool 0))
                       -
-                      max_over_time(cortex_compactor_last_successful_run_timestamp_seconds{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[1h])
+                      max_over_time(cortex_compactor_last_successful_run_timestamp_seconds{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[1h])
                     )
                   format: table
                   instant: true
@@ -377,9 +382,9 @@ spec:
                 - expr: |
                     max by(pod)
                     (
-                      (time() * (max_over_time(cortex_compactor_last_successful_run_timestamp_seconds{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[1h]) !=bool 0))
+                      (time() * (max_over_time(cortex_compactor_last_successful_run_timestamp_seconds{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[1h]) !=bool 0))
                       -
-                      max_over_time(cortex_compactor_last_successful_run_timestamp_seconds{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[1h])
+                      max_over_time(cortex_compactor_last_successful_run_timestamp_seconds{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[1h])
                     )
                   format: table
                   instant: true
@@ -471,14 +476,77 @@ spec:
                 tooltip:
                     mode: multi
                     sort: none
-              span: 4
+              span: 3
               targets:
-                - expr: sum(cortex_bucket_index_estimated_compaction_jobs{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}) and (sum(rate(cortex_bucket_index_estimated_compaction_jobs_errors_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) == 0)
+                - expr: sum(cortex_bucket_index_estimated_compaction_jobs{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}) and (sum(rate(cortex_bucket_index_estimated_compaction_jobs_errors_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) == 0)
                   format: time_series
                   legendFormat: Jobs
                   legendLink: null
               title: Estimated Compaction Jobs
               type: timeseries
+            - datasource: $datasource
+              description: |+
+                ### Source blocks age
+                The difference between the maximum timestamp of the block being compacted and the current time.
+                A steadily increasing value indicates that the compactor cannot keep up with the produced blocks by the ingesters.
+                Increase the number of compactors when this value is consistently increasing.
+
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 1
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    min: 0
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: ms
+                overrides: []
+              id: 6
+              links: []
+              nullPointMode: null as zero
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: multi
+                    sort: none
+              span: 3
+              targets:
+                - expr: histogram_quantile(0.99, sum(rate(cortex_compactor_block_max_time_delta_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) by (le)) * 1e3
+                  format: time_series
+                  legendFormat: 99th Percentile
+                  refId: A
+                - expr: histogram_quantile(0.50, sum(rate(cortex_compactor_block_max_time_delta_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) by (le)) * 1e3
+                  format: time_series
+                  legendFormat: 50th Percentile
+                  refId: B
+                - expr: sum(rate(cortex_compactor_block_max_time_delta_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) * 1e3 / sum(rate(cortex_compactor_block_max_time_delta_seconds_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
+                  format: time_series
+                  legendFormat: Average
+                  refId: C
+              title: Source blocks age
+              type: timeseries
+              yaxes:
+                - format: ms
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: 0
+                  show: true
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: false
             - datasource: $datasource
               description: |+
                 ### TSDB compactions / sec
@@ -502,7 +570,7 @@ spec:
                         steps: []
                     unit: ops
                 overrides: []
-              id: 6
+              id: 7
               links: []
               options:
                 legend:
@@ -510,9 +578,9 @@ spec:
                 tooltip:
                     mode: multi
                     sort: none
-              span: 4
+              span: 3
               targets:
-                - expr: sum(rate(prometheus_tsdb_compactions_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(prometheus_tsdb_compactions_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: compactions
                   legendLink: null
@@ -541,7 +609,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 7
+              id: 8
               links: []
               nullPointMode: null as zero
               options:
@@ -550,17 +618,17 @@ spec:
                 tooltip:
                     mode: multi
                     sort: none
-              span: 4
+              span: 3
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(prometheus_tsdb_compaction_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(prometheus_tsdb_compaction_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 99th Percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum(rate(prometheus_tsdb_compaction_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.50, sum(rate(prometheus_tsdb_compaction_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 50th Percentile
                   refId: B
-                - expr: sum(rate(prometheus_tsdb_compaction_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) * 1e3 / sum(rate(prometheus_tsdb_compaction_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(prometheus_tsdb_compaction_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) * 1e3 / sum(rate(prometheus_tsdb_compaction_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -607,7 +675,7 @@ spec:
                         steps: []
                     unit: short
                 overrides: []
-              id: 8
+              id: 9
               links: []
               options:
                 legend:
@@ -617,7 +685,7 @@ spec:
                     sort: none
               span: 6
               targets:
-                - expr: avg(max by(user) (cortex_bucket_blocks_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}))
+                - expr: avg(max by(user) (cortex_bucket_blocks_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}))
                   format: time_series
                   legendFormat: avg
                   legendLink: null
@@ -646,7 +714,7 @@ spec:
                         steps: []
                     unit: short
                 overrides: []
-              id: 9
+              id: 10
               links: []
               options:
                 legend:
@@ -656,7 +724,7 @@ spec:
                     sort: none
               span: 6
               targets:
-                - expr: topk(10, max by(user) (cortex_bucket_blocks_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}))
+                - expr: topk(10, max by(user) (cortex_bucket_blocks_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}))
                   format: time_series
                   legendFormat: '{{user}}'
                   legendLink: null
@@ -690,7 +758,7 @@ spec:
                         steps: []
                     unit: ops
                 overrides: []
-              id: 10
+              id: 11
               links: []
               options:
                 legend:
@@ -701,7 +769,7 @@ spec:
               span: 6
               targets:
                 - expr: |
-                    sum(rate(cortex_compactor_blocks_marked_for_deletion_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_compactor_blocks_marked_for_deletion_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: blocks
                   legendLink: null
@@ -742,7 +810,7 @@ spec:
                           value:
                             fixedColor: '#7EB26D'
                             mode: fixed
-              id: 11
+              id: 12
               links: []
               options:
                 legend:
@@ -753,12 +821,12 @@ spec:
               span: 6
               targets:
                 - expr: |
-                    sum(rate(cortex_compactor_blocks_cleaned_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_compactor_blocks_cleaned_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: successful
                   legendLink: null
                 - expr: |
-                    sum(rate(cortex_compactor_block_cleanup_failures_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_compactor_block_cleanup_failures_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: failed
                   legendLink: null
@@ -808,7 +876,7 @@ spec:
                           value:
                             fixedColor: '#7EB26D'
                             mode: fixed
-              id: 12
+              id: 13
               links: []
               options:
                 legend:
@@ -819,14 +887,14 @@ spec:
               span: 6
               targets:
                 - expr: |
-                    sum(rate(cortex_compactor_meta_syncs_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_compactor_meta_syncs_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                     -
-                    sum(rate(cortex_compactor_meta_sync_failures_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_compactor_meta_sync_failures_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: successful
                   legendLink: null
                 - expr: |
-                    sum(rate(cortex_compactor_meta_sync_failures_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                    sum(rate(cortex_compactor_meta_sync_failures_total{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: failed
                   legendLink: null
@@ -851,7 +919,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 13
+              id: 14
               links: []
               nullPointMode: null as zero
               options:
@@ -862,15 +930,15 @@ spec:
                     sort: none
               span: 6
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(cortex_compactor_meta_sync_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(cortex_compactor_meta_sync_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 99th Percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum(rate(cortex_compactor_meta_sync_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.50, sum(rate(cortex_compactor_meta_sync_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 50th Percentile
                   refId: B
-                - expr: sum(rate(cortex_compactor_meta_sync_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval])) * 1e3 / sum(rate(cortex_compactor_meta_sync_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))"}[$__rate_interval]))
+                - expr: sum(rate(cortex_compactor_meta_sync_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval])) * 1e3 / sum(rate(cortex_compactor_meta_sync_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))"}[$__rate_interval]))
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -917,7 +985,7 @@ spec:
                         steps: []
                     unit: reqps
                 overrides: []
-              id: 14
+              id: 15
               links: []
               options:
                 legend:
@@ -940,7 +1008,7 @@ spec:
                     min: 0
                     noValue: "0"
                     unit: percentunit
-              id: 15
+              id: 16
               links: []
               options:
                 legend:
@@ -975,7 +1043,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 16
+              id: 17
               links: []
               nullPointMode: null as zero
               options:
@@ -1032,7 +1100,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 17
+              id: 18
               links: []
               nullPointMode: null as zero
               options:
@@ -1098,7 +1166,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 18
+              id: 19
               links: []
               nullPointMode: null as zero
               options:
@@ -1155,7 +1223,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 19
+              id: 20
               links: []
               nullPointMode: null as zero
               options:
@@ -1212,7 +1280,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 20
+              id: 21
               links: []
               nullPointMode: null as zero
               options:
@@ -1269,7 +1337,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 21
+              id: 22
               links: []
               nullPointMode: null as zero
               options:
@@ -1377,6 +1445,14 @@ spec:
                             mode: fixed
                     - matcher:
                         id: byName
+                        options: Canceled
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#A9A9A9'
+                            mode: fixed
+                    - matcher:
+                        id: byName
                         options: OK
                       properties:
                         - id: color
@@ -1407,7 +1483,7 @@ spec:
                           value:
                             fixedColor: '#7EB26D'
                             mode: fixed
-              id: 22
+              id: 23
               links: []
               options:
                 legend:
@@ -1419,7 +1495,7 @@ spec:
               targets:
                 - expr: |
                     sum by (status) (
-                      label_replace(label_replace(rate(cortex_kv_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))", kv_name=~".+"}[$__rate_interval]),
+                      label_replace(label_replace(rate(cortex_kv_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))", kv_name=~".+"}[$__rate_interval]),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
                   format: time_series
@@ -1446,7 +1522,7 @@ spec:
                         steps: []
                     unit: ms
                 overrides: []
-              id: 23
+              id: 24
               links: []
               nullPointMode: null as zero
               options:
@@ -1457,15 +1533,15 @@ spec:
                     sort: none
               span: 6
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(cortex_kv_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))", kv_name=~".+"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(cortex_kv_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))", kv_name=~".+"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 99th Percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum(rate(cortex_kv_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))", kv_name=~".+"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.50, sum(rate(cortex_kv_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))", kv_name=~".+"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 50th Percentile
                   refId: B
-                - expr: sum(rate(cortex_kv_request_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))", kv_name=~".+"}[$__rate_interval])) * 1e3 / sum(rate(cortex_kv_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir|mimir-backend.*))", kv_name=~".+"}[$__rate_interval]))
+                - expr: sum(rate(cortex_kv_request_duration_seconds_sum{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))", kv_name=~".+"}[$__rate_interval])) * 1e3 / sum(rate(cortex_kv_request_duration_seconds_count{cluster=~"$cluster", job=~"($namespace)/((compactor.*|cortex|mimir))", kv_name=~".+"}[$__rate_interval]))
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -1577,3 +1653,4 @@ spec:
     timezone: utc
     title: Mimir / Compactor
     uid: mimir-compactor
+
