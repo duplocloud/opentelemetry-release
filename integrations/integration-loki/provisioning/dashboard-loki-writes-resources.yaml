@@ -1,19 +1,14 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-mimir
-    name: mimir-writes-networking
+    folder: integration-loki
+    name: loki-writes-resources
 spec:
-    __requires:
-        - id: grafana
-          name: Grafana
-          type: grafana
-          version: 8.0.0
     annotations:
         list: []
     editable: false
     gnetId: null
-    graphTooltip: 1
+    graphTooltip: 0
     hideControls: false
     links:
         - asDropdown: true
@@ -21,11 +16,11 @@ spec:
           includeVars: true
           keepTime: true
           tags:
-            - mimir
+            - loki
           targetBlank: false
-          title: Mimir dashboards
+          title: Loki Dashboards
           type: dashboards
-    refresh: 5m
+    refresh: 10s
     rows:
         - collapse: false
           height: 250px
@@ -35,79 +30,7 @@ spec:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: normal
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: Bps
-                overrides: []
-              id: 1
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 3
-              targets:
-                - expr: sum by(pod) (rate(container_network_receive_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(distributor|ingester).*"}[$__rate_interval]))
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-              title: Receive bandwidth
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: normal
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: Bps
-                overrides: []
-              id: 2
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 3
-              targets:
-                - expr: sum by(pod) (rate(container_network_transmit_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(distributor|ingester).*"}[$__rate_interval]))
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-              title: Transmit bandwidth
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                custom:
-                    fillOpacity: 0
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 1
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -115,11 +38,138 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
                     unit: short
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+              id: 1
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"}[$__rate_interval]))
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor", resource="cpu"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"})
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: CPU
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+              id: 2
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor", resource="memory"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"} > 0)
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: Memory (workingset)
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
                 overrides: []
               id: 3
               links: []
@@ -127,235 +177,17 @@ spec:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
+                    mode: single
                     sort: none
-              span: 3
+              span: 4
               targets:
-                - expr: avg(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(distributor|ingester).*"})
-                  format: time_series
-                  legendFormat: avg
-                  legendLink: null
-                - expr: max(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(distributor|ingester).*"})
-                  format: time_series
-                  legendFormat: highest
-                  legendLink: null
-              title: Inflight requests (per pod)
-              type: timeseries
-            - datasource: $datasource
-              description: |
-                ### Ingress TCP connections (per pod)
-                The number of ingress TCP connections (HTTP and gRPC protocol).
-              fieldConfig:
-                custom:
-                    fillOpacity: 0
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 1
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: short
-                overrides: []
-              id: 4
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 3
-              targets:
-                - expr: avg(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(distributor|ingester).*"}))
-                  format: time_series
-                  legendFormat: avg
-                  legendLink: null
-                - expr: max(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(distributor|ingester).*"}))
-                  format: time_series
-                  legendFormat: highest
-                  legendLink: null
-                - expr: min(cortex_tcp_connections_limit{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?(distributor|ingester).*"})
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-              title: Ingress TCP connections (per pod)
-              type: timeseries
-          repeat: null
-          repeatIteration: null
-          repeatRowId: null
-          showTitle: true
-          title: Summary
-          titleSize: h6
-        - collapse: false
-          height: 250px
-          panels:
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: normal
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: Bps
-                overrides: []
-              id: 5
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 3
-              targets:
-                - expr: sum by(pod) (rate(container_network_receive_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?distributor.*"}[$__rate_interval]))
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/distributor"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-              title: Receive bandwidth
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: normal
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: Bps
-                overrides: []
-              id: 6
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 3
-              targets:
-                - expr: sum by(pod) (rate(container_network_transmit_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?distributor.*"}[$__rate_interval]))
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-              title: Transmit bandwidth
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                custom:
-                    fillOpacity: 0
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 1
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: short
-                overrides: []
-              id: 7
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 3
-              targets:
-                - expr: avg(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?distributor.*"})
-                  format: time_series
-                  legendFormat: avg
-                  legendLink: null
-                - expr: max(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?distributor.*"})
-                  format: time_series
-                  legendFormat: highest
-                  legendLink: null
-              title: Inflight requests (per pod)
-              type: timeseries
-            - datasource: $datasource
-              description: |
-                ### Ingress TCP connections (per pod)
-                The number of ingress TCP connections (HTTP and gRPC protocol).
-              fieldConfig:
-                custom:
-                    fillOpacity: 0
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 1
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: short
-                overrides: []
-              id: 8
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 3
-              targets:
-                - expr: avg(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?distributor.*"}))
-                  format: time_series
-                  legendFormat: avg
-                  legendLink: null
-                - expr: max(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?distributor.*"}))
-                  format: time_series
-                  legendFormat: highest
-                  legendLink: null
-                - expr: min(cortex_tcp_connections_limit{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?distributor.*"})
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-              title: Ingress TCP connections (per pod)
+              title: Memory (go heap inuse)
+              tooltip:
+                sort: 2
               type: timeseries
           repeat: null
           repeatIteration: null
@@ -371,6 +203,206 @@ spec:
                 defaults:
                     custom:
                         drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: short
+                overrides: []
+              id: 4
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 1
+              targets:
+                - expr: sum by(pod) (loki_ingester_memory_streams{cluster=~"$cluster", job=~"($namespace)/(.*ingester.*)"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+              title: In-memory streams
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: short
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+              id: 5
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 1
+              targets:
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"}[$__rate_interval]))
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", resource="cpu"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"})
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: CPU
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+              id: 6
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 1
+              targets:
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", resource="memory"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"} > 0)
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: Memory (workingset)
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides: []
+              id: 7
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 1
+              targets:
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/(.*ingester.*)"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+              title: Memory (go heap inuse)
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
                         fillOpacity: 100
                         lineWidth: 0
                         pointSize: 5
@@ -379,7 +411,41 @@ spec:
                         stacking:
                             group: A
                             mode: normal
-                    min: 0
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: Bps
+                overrides: []
+              id: 8
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 1
+              targets:
+                - expr: |
+                    sum by(instance, device) (rate(node_disk_written_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
+                  format: time_series
+                  legendFormat: '{{pod}} - {{device}}'
+                  legendLink: null
+              title: Disk Writes
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 100
+                        lineWidth: 0
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: normal
                     thresholds:
                         mode: absolute
                         steps: []
@@ -391,34 +457,34 @@ spec:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
+                    mode: single
                     sort: none
-              span: 3
+              span: 1
               targets:
-                - expr: sum by(pod) (rate(container_network_receive_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?ingester.*"}[$__rate_interval]))
+                - expr: |
+                    sum by(instance, device) (rate(node_disk_read_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
                   format: time_series
-                  legendFormat: '{{pod}}'
+                  legendFormat: '{{pod}} - {{device}}'
                   legendLink: null
-              title: Receive bandwidth
+              title: Disk Reads
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
+                        fillOpacity: 10
+                        lineWidth: 1
                         pointSize: 5
                         showPoints: never
                         spanNulls: false
                         stacking:
                             group: A
-                            mode: normal
-                    min: 0
+                            mode: none
                     thresholds:
                         mode: absolute
                         steps: []
-                    unit: Bps
+                    unit: percentunit
                 overrides: []
               id: 10
               links: []
@@ -426,104 +492,15 @@ spec:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
+                    mode: single
                     sort: none
-              span: 3
+              span: 1
               targets:
-                - expr: sum by(pod) (rate(container_network_transmit_bytes_total{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?ingester.*"}[$__rate_interval]))
+                - expr: max by(persistentvolumeclaim) (kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(.*ingester.*).*"} / kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(.*ingester.*).*"})
                   format: time_series
-                  legendFormat: '{{pod}}'
+                  legendFormat: '{{persistentvolumeclaim}}'
                   legendLink: null
-              title: Transmit bandwidth
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                custom:
-                    fillOpacity: 0
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 1
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: short
-                overrides: []
-              id: 11
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 3
-              targets:
-                - expr: avg(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?ingester.*"})
-                  format: time_series
-                  legendFormat: avg
-                  legendLink: null
-                - expr: max(cortex_inflight_requests{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?ingester.*"})
-                  format: time_series
-                  legendFormat: highest
-                  legendLink: null
-              title: Inflight requests (per pod)
-              type: timeseries
-            - datasource: $datasource
-              description: |
-                ### Ingress TCP connections (per pod)
-                The number of ingress TCP connections (HTTP and gRPC protocol).
-              fieldConfig:
-                custom:
-                    fillOpacity: 0
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 1
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: short
-                overrides: []
-              id: 12
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 3
-              targets:
-                - expr: avg(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?ingester.*"}))
-                  format: time_series
-                  legendFormat: avg
-                  legendLink: null
-                - expr: max(sum by(pod) (cortex_tcp_connections{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?ingester.*"}))
-                  format: time_series
-                  legendFormat: highest
-                  legendLink: null
-                - expr: min(cortex_tcp_connections_limit{cluster=~"$cluster", namespace=~"$namespace",pod=~"(.*mimir-)?ingester.*"})
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-              title: Ingress TCP connections (per pod)
+              title: Disk Space Utilization
               type: timeseries
           repeat: null
           repeatIteration: null
@@ -534,7 +511,7 @@ spec:
     schemaVersion: 14
     style: dark
     tags:
-        - mimir
+        - loki
     templating:
         list:
             - current:
@@ -548,21 +525,21 @@ spec:
               refresh: 1
               regex: ""
               type: datasource
-            - allValue: .*
+            - allValue: null
               current:
                 text: prod
                 value: prod
               datasource: $datasource
               hide: 0
-              includeAll: true
+              includeAll: false
               label: cluster
               multi: false
               name: cluster
               options: []
-              query: label_values(cortex_build_info, cluster)
+              query: label_values(loki_build_info, cluster)
               refresh: 1
               regex: ""
-              sort: 1
+              sort: 2
               tagValuesQuery: ""
               tags: []
               tagsQuery: ""
@@ -579,10 +556,10 @@ spec:
               multi: false
               name: namespace
               options: []
-              query: label_values(cortex_build_info{cluster=~"$cluster"}, namespace)
+              query: label_values(loki_build_info{cluster=~"$cluster"}, namespace)
               refresh: 1
               regex: ""
-              sort: 1
+              sort: 2
               tagValuesQuery: ""
               tags: []
               tagsQuery: ""
@@ -614,6 +591,6 @@ spec:
             - 7d
             - 30d
     timezone: utc
-    title: Mimir / Writes networking
-    uid: mimir-writes-networking
+    title: Loki / Writes Resources
+    uid: loki-writes-resources
 

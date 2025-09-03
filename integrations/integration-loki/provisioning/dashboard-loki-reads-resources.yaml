@@ -1,19 +1,14 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-mimir
-    name: mimir-reads-resources
+    folder: integration-loki
+    name: loki-reads-resources
 spec:
-    __requires:
-        - id: grafana
-          name: Grafana
-          type: grafana
-          version: 8.0.0
     annotations:
         list: []
     editable: false
     gnetId: null
-    graphTooltip: 1
+    graphTooltip: 0
     hideControls: false
     links:
         - asDropdown: true
@@ -21,11 +16,11 @@ spec:
           includeVars: true
           keepTime: true
           tags:
-            - mimir
+            - loki
           targetBlank: false
-          title: Mimir dashboards
+          title: Loki Dashboards
           type: dashboards
-    refresh: 5m
+    refresh: 10s
     rows:
         - collapse: false
           height: 250px
@@ -35,85 +30,142 @@ spec:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
+                        fillOpacity: 10
+                        lineWidth: 1
                         pointSize: 5
                         showPoints: never
                         spanNulls: false
                         stacking:
                             group: A
-                            mode: normal
-                    min: 0
+                            mode: none
                     thresholds:
                         mode: absolute
                         steps: []
                     unit: short
-                overrides: []
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
               id: 1
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
+                    mode: single
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"query-frontend"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"query-frontend", resource="cpu"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"query-frontend"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"query-frontend"})
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
               title: CPU
+              tooltip:
+                sort: 2
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
+                        fillOpacity: 10
+                        lineWidth: 1
                         pointSize: 5
                         showPoints: never
                         spanNulls: false
                         stacking:
                             group: A
-                            mode: normal
-                    min: 0
+                            mode: none
                     thresholds:
                         mode: absolute
                         steps: []
                     unit: bytes
-                overrides: []
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
               id: 2
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
+                    mode: single
                     sort: none
               span: 4
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"query-frontend"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"query-frontend", resource="memory"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"query-frontend"} > 0)
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
               title: Memory (workingset)
+              tooltip:
+                sort: 2
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
+                        fillOpacity: 10
+                        lineWidth: 1
                         pointSize: 5
                         showPoints: never
                         spanNulls: false
                         stacking:
                             group: A
-                            mode: normal
-                    min: 0
+                            mode: none
                     thresholds:
                         mode: absolute
                         steps: []
@@ -125,21 +177,23 @@ spec:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
+                    mode: single
+                    sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend|querier|ruler-query-frontend|ruler-querier"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/query-frontend"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
               title: Memory (go heap inuse)
+              tooltip:
+                sort: 2
               type: timeseries
           repeat: null
           repeatIteration: null
           repeatRowId: null
           showTitle: true
-          title: Summary
+          title: Query Frontend
           titleSize: h6
         - collapse: false
           height: 250px
@@ -149,7 +203,7 @@ spec:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -157,7 +211,6 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
@@ -173,9 +226,6 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
                     - matcher:
                         id: byName
                         options: limit
@@ -186,39 +236,38 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
               id: 4
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
+                    mode: single
+                    sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"query-scheduler"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend"})
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend",resource="cpu"})
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"query-scheduler", resource="cpu"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"query-scheduler"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"query-scheduler"})
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
               title: CPU
+              tooltip:
+                sort: 2
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -226,7 +275,6 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
@@ -242,9 +290,6 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
                     - matcher:
                         id: byName
                         options: limit
@@ -255,39 +300,38 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
               id: 5
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
+                    mode: single
+                    sort: none
               span: 4
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"query-scheduler"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend"} > 0)
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend",resource="memory"})
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"query-scheduler", resource="memory"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"query-scheduler"} > 0)
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
               title: Memory (workingset)
+              tooltip:
+                sort: 2
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -295,7 +339,6 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
@@ -307,21 +350,23 @@ spec:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
+                    mode: single
+                    sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-frontend"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/query-scheduler"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
               title: Memory (go heap inuse)
+              tooltip:
+                sort: 2
               type: timeseries
           repeat: null
           repeatIteration: null
           repeatRowId: null
           showTitle: true
-          title: Query-frontend
+          title: Query Scheduler
           titleSize: h6
         - collapse: false
           height: 250px
@@ -331,7 +376,7 @@ spec:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -339,7 +384,6 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
@@ -355,9 +399,6 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
                     - matcher:
                         id: byName
                         options: limit
@@ -368,39 +409,38 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
               id: 7
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
-              span: 4
+                    mode: single
+                    sort: none
+              span: 2
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"querier"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler"})
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler",resource="cpu"})
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"querier", resource="cpu"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"querier"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"querier"})
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
               title: CPU
+              tooltip:
+                sort: 2
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -408,7 +448,6 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
@@ -424,9 +463,6 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
                     - matcher:
                         id: byName
                         options: limit
@@ -437,39 +473,38 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
               id: 8
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
-              span: 4
+                    mode: single
+                    sort: none
+              span: 2
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"querier"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler"} > 0)
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler",resource="memory"})
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"querier", resource="memory"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"querier"} > 0)
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
               title: Memory (workingset)
+              tooltip:
+                sort: 2
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -477,7 +512,6 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
@@ -489,169 +523,94 @@ spec:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
-              span: 4
+                    mode: single
+                    sort: none
+              span: 2
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"query-scheduler"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/querier"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
               title: Memory (go heap inuse)
+              tooltip:
+                sort: 2
               type: timeseries
-          repeat: null
-          repeatIteration: null
-          repeatRowId: null
-          showTitle: true
-          title: Query-scheduler
-          titleSize: h6
-        - collapse: false
-          height: 250px
-          panels:
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
-                        lineWidth: 1
+                        fillOpacity: 100
+                        lineWidth: 0
                         pointSize: 5
                         showPoints: never
                         spanNulls: false
                         stacking:
                             group: A
-                            mode: none
-                    min: 0
+                            mode: normal
                     thresholds:
                         mode: absolute
                         steps: []
-                    unit: short
-                overrides:
-                    - matcher:
-                        id: byName
-                        options: request
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#FFC000'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-                    - matcher:
-                        id: byName
-                        options: limit
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#E02F44'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
+                    unit: Bps
+                overrides: []
               id: 10
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
-              span: 4
+                    mode: single
+                    sort: none
+              span: 2
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"querier"}[$__rate_interval]))
+                - expr: |
+                    sum by(instance, device) (rate(node_disk_written_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container="querier", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
                   format: time_series
-                  legendFormat: '{{pod}}'
+                  legendFormat: '{{pod}} - {{device}}'
                   legendLink: null
-                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace",container=~"querier"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace",container=~"querier"})
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"querier",resource="cpu"})
-                  format: time_series
-                  legendFormat: request
-                  legendLink: null
-              title: CPU
+              title: Disk Writes
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
-                        lineWidth: 1
+                        fillOpacity: 100
+                        lineWidth: 0
                         pointSize: 5
                         showPoints: never
                         spanNulls: false
                         stacking:
                             group: A
-                            mode: none
-                    min: 0
+                            mode: normal
                     thresholds:
                         mode: absolute
                         steps: []
-                    unit: bytes
-                overrides:
-                    - matcher:
-                        id: byName
-                        options: request
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#FFC000'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-                    - matcher:
-                        id: byName
-                        options: limit
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#E02F44'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
+                    unit: Bps
+                overrides: []
               id: 11
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
-              span: 4
+                    mode: single
+                    sort: none
+              span: 2
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"querier"})
+                - expr: |
+                    sum by(instance,device) (rate(node_disk_read_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container="querier", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
                   format: time_series
-                  legendFormat: '{{pod}}'
+                  legendFormat: '{{pod}} - {{device}}'
                   legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"querier"} > 0)
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"querier",resource="memory"})
-                  format: time_series
-                  legendFormat: request
-                  legendLink: null
-              title: Memory (workingset)
+              title: Disk Reads
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -659,11 +618,10 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
-                    unit: bytes
+                    unit: percentunit
                 overrides: []
               id: 12
               links: []
@@ -671,15 +629,15 @@ spec:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
-              span: 4
+                    mode: single
+                    sort: none
+              span: 2
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"querier"})
+                - expr: max by(persistentvolumeclaim) (kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*querier.*"} / kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*querier.*"})
                   format: time_series
-                  legendFormat: '{{pod}}'
+                  legendFormat: '{{persistentvolumeclaim}}'
                   legendLink: null
-              title: Memory (go heap inuse)
+              title: Disk Space Utilization
               type: timeseries
           repeat: null
           repeatIteration: null
@@ -695,7 +653,7 @@ spec:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -703,7 +661,6 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
@@ -719,9 +676,6 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
                     - matcher:
                         id: byName
                         options: limit
@@ -732,39 +686,38 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
               id: 13
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
+                    mode: single
+                    sort: none
+              span: 2
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container="index-gateway"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester"})
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester",resource="cpu"})
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container="index-gateway", resource="cpu"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container="index-gateway"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container="index-gateway"})
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
               title: CPU
+              tooltip:
+                sort: 2
               type: timeseries
             - datasource: $datasource
               fieldConfig:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -772,27 +725,646 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
                     unit: bytes
-                overrides: []
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
               id: 14
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
+                    mode: single
+                    sort: none
+              span: 2
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container="index-gateway"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container="index-gateway", resource="memory"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container="index-gateway"} > 0)
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: Memory (workingset)
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides: []
+              id: 15
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/index-gateway"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
               title: Memory (go heap inuse)
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 100
+                        lineWidth: 0
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: normal
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: Bps
+                overrides: []
+              id: 16
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: |
+                    sum by(instance, device) (rate(node_disk_written_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container="index-gateway", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
+                  format: time_series
+                  legendFormat: '{{pod}} - {{device}}'
+                  legendLink: null
+              title: Disk Writes
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 100
+                        lineWidth: 0
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: normal
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: Bps
+                overrides: []
+              id: 17
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: |
+                    sum by(instance, device) (rate(node_disk_read_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container="index-gateway", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
+                  format: time_series
+                  legendFormat: '{{pod}} - {{device}}'
+                  legendLink: null
+              title: Disk Reads
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: percentunit
+                overrides: []
+              id: 18
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: max by(persistentvolumeclaim) (kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*index-gateway.*"} / kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*index-gateway.*"})
+                  format: time_series
+                  legendFormat: '{{persistentvolumeclaim}}'
+                  legendLink: null
+              title: Disk Space Utilization
+              type: timeseries
+          repeat: null
+          repeatIteration: null
+          repeatRowId: null
+          showTitle: true
+          title: Index Gateway
+          titleSize: h6
+        - collapse: false
+          height: 250px
+          panels:
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: short
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+              id: 19
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"bloom-gateway"}[$__rate_interval]))
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"bloom-gateway", resource="cpu"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"bloom-gateway"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"bloom-gateway"})
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: CPU
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+              id: 20
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"bloom-gateway"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"bloom-gateway", resource="memory"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"bloom-gateway"} > 0)
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: Memory (workingset)
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides: []
+              id: 21
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/bloom-gateway"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+              title: Memory (go heap inuse)
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 100
+                        lineWidth: 0
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: normal
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: Bps
+                overrides: []
+              id: 22
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: |
+                    sum by(instance, device) (rate(node_disk_written_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container="bloom-gateway", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
+                  format: time_series
+                  legendFormat: '{{pod}} - {{device}}'
+                  legendLink: null
+              title: Disk Writes
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 100
+                        lineWidth: 0
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: normal
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: Bps
+                overrides: []
+              id: 23
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: |
+                    sum by(instance, device) (rate(node_disk_read_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container="bloom-gateway", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
+                  format: time_series
+                  legendFormat: '{{pod}} - {{device}}'
+                  legendLink: null
+              title: Disk Reads
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: percentunit
+                overrides: []
+              id: 24
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 2
+              targets:
+                - expr: max by(persistentvolumeclaim) (kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*bloom-gateway.*"} / kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*bloom-gateway.*"})
+                  format: time_series
+                  legendFormat: '{{persistentvolumeclaim}}'
+                  legendLink: null
+              title: Disk Space Utilization
+              type: timeseries
+          repeat: null
+          repeatIteration: null
+          repeatRowId: null
+          showTitle: true
+          title: Bloom Gateway
+          titleSize: h6
+        - collapse: false
+          height: 250px
+          panels:
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: short
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+              id: 25
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"}[$__rate_interval]))
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", resource="cpu"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"})
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: CPU
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+              id: 26
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", resource="memory"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"} > 0)
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: Memory (workingset)
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides: []
+              id: 27
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/(.*ingester|partition-ingester).*"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+              title: Memory (go heap inuse)
+              tooltip:
+                sort: 2
               type: timeseries
           repeat: null
           repeatIteration: null
@@ -808,7 +1380,7 @@ spec:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -816,170 +1388,22 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: bytes
-                overrides:
-                    - matcher:
-                        id: byName
-                        options: request
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#FFC000'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-                    - matcher:
-                        id: byName
-                        options: limit
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#E02F44'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-              id: 15
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
-              targets:
-                - expr: max by(pod) (container_memory_rss{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester"})
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester"} > 0)
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester",resource="memory"})
-                  format: time_series
-                  legendFormat: request
-                  legendLink: null
-              title: Memory (RSS)
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 0
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: bytes
-                overrides:
-                    - matcher:
-                        id: byName
-                        options: request
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#FFC000'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-                    - matcher:
-                        id: byName
-                        options: limit
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#E02F44'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-              id: 16
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
-              targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester"})
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester"} > 0)
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"ingester",resource="memory"})
-                  format: time_series
-                  legendFormat: request
-                  legendLink: null
-              title: Memory (workingset)
-              type: timeseries
-          repeat: null
-          repeatIteration: null
-          repeatRowId: null
-          showTitle: true
-          title: ""
-          titleSize: h6
-        - collapse: false
-          height: 250px
-          panels:
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 1
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
                     unit: short
                 overrides: []
-              id: 17
+              id: 28
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
+                    mode: single
                     sort: none
-              span: 6
+              span: 3
               targets:
-                - expr: sum by(pod) (cortex_prometheus_rule_group_rules{cluster=~"$cluster", job=~"($namespace)/((ruler|cortex|mimir))"})
+                - expr: sum by(pod) (loki_prometheus_rule_group_rules{cluster=~"$cluster", job=~"($namespace)/ruler"}) or sum by(pod) (cortex_prometheus_rule_group_rules{cluster=~"$cluster", job=~"($namespace)/ruler"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -990,7 +1414,7 @@ spec:
                 defaults:
                     custom:
                         drawStyle: line
-                        fillOpacity: 0
+                        fillOpacity: 10
                         lineWidth: 1
                         pointSize: 5
                         showPoints: never
@@ -998,7 +1422,6 @@ spec:
                         stacking:
                             group: A
                             mode: none
-                    min: 0
                     thresholds:
                         mode: absolute
                         steps: []
@@ -1014,9 +1437,6 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
                     - matcher:
                         id: byName
                         options: limit
@@ -1027,32 +1447,131 @@ spec:
                             mode: fixed
                         - id: custom.fillOpacity
                           value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-              id: 18
+              id: 29
               links: []
               options:
                 legend:
                     showLegend: true
                 tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
+                    mode: single
+                    sort: none
+              span: 3
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"ruler"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"ruler"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace",container=~"ruler"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace",container=~"ruler"})
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"ruler",resource="cpu"})
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"ruler", resource="cpu"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"ruler"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"ruler"})
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
               title: CPU
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: request
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#FFC000'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+                    - matcher:
+                        id: byName
+                        options: limit
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E02F44'
+                            mode: fixed
+                        - id: custom.fillOpacity
+                          value: 0
+              id: 30
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 3
+              targets:
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"ruler"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"ruler", resource="memory"} > 0)
+                  format: time_series
+                  legendFormat: request
+                  legendLink: null
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"ruler"} > 0)
+                  format: time_series
+                  legendFormat: limit
+                  legendLink: null
+              title: Memory (workingset)
+              tooltip:
+                sort: 2
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: bytes
+                overrides: []
+              id: 31
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 3
+              targets:
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/ruler"})
+                  format: time_series
+                  legendFormat: '{{pod}}'
+                  legendLink: null
+              title: Memory (go heap inuse)
+              tooltip:
+                sort: 2
               type: timeseries
           repeat: null
           repeatIteration: null
@@ -1060,555 +1579,10 @@ spec:
           showTitle: true
           title: Ruler
           titleSize: h6
-        - collapse: false
-          height: 250px
-          panels:
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 0
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: bytes
-                overrides:
-                    - matcher:
-                        id: byName
-                        options: request
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#FFC000'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-                    - matcher:
-                        id: byName
-                        options: limit
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#E02F44'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-              id: 19
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
-              targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"ruler"})
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"ruler"} > 0)
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"ruler",resource="memory"})
-                  format: time_series
-                  legendFormat: request
-                  legendLink: null
-              title: Memory (workingset)
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 0
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: bytes
-                overrides: []
-              id: 20
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
-              targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"ruler"})
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-              title: Memory (go heap inuse)
-              type: timeseries
-          repeat: null
-          repeatIteration: null
-          repeatRowId: null
-          showTitle: true
-          title: ""
-          titleSize: h6
-        - collapse: false
-          height: 250px
-          panels:
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 0
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: short
-                overrides:
-                    - matcher:
-                        id: byName
-                        options: request
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#FFC000'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-                    - matcher:
-                        id: byName
-                        options: limit
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#E02F44'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-              id: 21
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
-              targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway"}[$__rate_interval]))
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway"})
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway",resource="cpu"})
-                  format: time_series
-                  legendFormat: request
-                  legendLink: null
-              title: CPU
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 0
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: bytes
-                overrides: []
-              id: 22
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
-              targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway"})
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-              title: Memory (go heap inuse)
-              type: timeseries
-          repeat: null
-          repeatIteration: null
-          repeatRowId: null
-          showTitle: true
-          title: Store-gateway
-          titleSize: h6
-        - collapse: false
-          height: 250px
-          panels:
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 0
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: bytes
-                overrides:
-                    - matcher:
-                        id: byName
-                        options: request
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#FFC000'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-                    - matcher:
-                        id: byName
-                        options: limit
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#E02F44'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-              id: 23
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
-              targets:
-                - expr: max by(pod) (container_memory_rss{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway"})
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway"} > 0)
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway",resource="memory"})
-                  format: time_series
-                  legendFormat: request
-                  legendLink: null
-              title: Memory (RSS)
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 0
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: bytes
-                overrides:
-                    - matcher:
-                        id: byName
-                        options: request
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#FFC000'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-                    - matcher:
-                        id: byName
-                        options: limit
-                      properties:
-                        - id: color
-                          value:
-                            fixedColor: '#E02F44'
-                            mode: fixed
-                        - id: custom.fillOpacity
-                          value: 0
-                        - id: custom.lineStyle
-                          value:
-                            fill: dash
-              id: 24
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: desc
-              span: 6
-              targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway"})
-                  format: time_series
-                  legendFormat: '{{pod}}'
-                  legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway"} > 0)
-                  format: time_series
-                  legendFormat: limit
-                  legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace",container=~"store-gateway",resource="memory"})
-                  format: time_series
-                  legendFormat: request
-                  legendLink: null
-              title: Memory (workingset)
-              type: timeseries
-          repeat: null
-          repeatIteration: null
-          repeatRowId: null
-          showTitle: true
-          title: ""
-          titleSize: h6
-        - collapse: false
-          height: 250px
-          panels:
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: normal
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: Bps
-                overrides: []
-              id: 25
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 4
-              targets:
-                - expr: |+
-                    sum by(instance, pod, device) (
-                      rate(
-                        node_disk_written_bytes_total[$__rate_interval]
-                      )
-                    )
-                    +
-                    ignoring(pod) group_right() (
-                      label_replace(
-                        count by(
-                          instance,
-                          pod,
-                          device
-                        )
-                        (
-                          container_fs_writes_bytes_total{
-                            cluster=~"$cluster", namespace=~"$namespace",
-                            container=~"store-gateway",
-                            device!~".*sda.*"
-                          }
-                        ),
-                        "device",
-                        "$1",
-                        "device",
-                        "/dev/(.*)"
-                      ) * 0
-                    )
-
-                  format: time_series
-                  legendFormat: '{{pod}} - {{device}}'
-                  legendLink: null
-              title: Disk writes
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 100
-                        lineWidth: 0
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: normal
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: Bps
-                overrides: []
-              id: 26
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 4
-              targets:
-                - expr: |+
-                    sum by(instance, pod, device) (
-                      rate(
-                        node_disk_read_bytes_total[$__rate_interval]
-                      )
-                    ) + ignoring(pod) group_right() (
-                      label_replace(
-                        count by(
-                          instance,
-                          pod,
-                          device
-                        )
-                        (
-                          container_fs_writes_bytes_total{
-                            cluster=~"$cluster", namespace=~"$namespace",
-                            container=~"store-gateway",
-                            device!~".*sda.*"
-                          }
-                        ),
-                        "device",
-                        "$1",
-                        "device",
-                        "/dev/(.*)"
-                      ) * 0
-                    )
-
-                  format: time_series
-                  legendFormat: '{{pod}} - {{device}}'
-                  legendLink: null
-              title: Disk reads
-              type: timeseries
-            - datasource: $datasource
-              fieldConfig:
-                custom:
-                    fillOpacity: 0
-                defaults:
-                    custom:
-                        drawStyle: line
-                        fillOpacity: 1
-                        lineWidth: 1
-                        pointSize: 5
-                        showPoints: never
-                        spanNulls: false
-                        stacking:
-                            group: A
-                            mode: none
-                    min: 0
-                    thresholds:
-                        mode: absolute
-                        steps: []
-                    unit: percentunit
-                overrides: []
-              id: 27
-              links: []
-              options:
-                legend:
-                    showLegend: true
-                tooltip:
-                    mode: multi
-                    sort: none
-              span: 4
-              targets:
-                - expr: |
-                    max by(persistentvolumeclaim) (
-                      kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(store-gateway).*"} /
-                      kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(store-gateway).*"}
-                    )
-                  format: time_series
-                  legendFormat: '{{persistentvolumeclaim}}'
-                  legendLink: null
-              title: Disk space utilization
-              type: timeseries
-          repeat: null
-          repeatIteration: null
-          repeatRowId: null
-          showTitle: true
-          title: ""
-          titleSize: h6
     schemaVersion: 14
     style: dark
     tags:
-        - mimir
+        - loki
     templating:
         list:
             - current:
@@ -1622,21 +1596,21 @@ spec:
               refresh: 1
               regex: ""
               type: datasource
-            - allValue: .*
+            - allValue: null
               current:
                 text: prod
                 value: prod
               datasource: $datasource
               hide: 0
-              includeAll: true
+              includeAll: false
               label: cluster
               multi: false
               name: cluster
               options: []
-              query: label_values(cortex_build_info, cluster)
+              query: label_values(loki_build_info, cluster)
               refresh: 1
               regex: ""
-              sort: 1
+              sort: 2
               tagValuesQuery: ""
               tags: []
               tagsQuery: ""
@@ -1653,10 +1627,10 @@ spec:
               multi: false
               name: namespace
               options: []
-              query: label_values(cortex_build_info{cluster=~"$cluster"}, namespace)
+              query: label_values(loki_build_info{cluster=~"$cluster"}, namespace)
               refresh: 1
               regex: ""
-              sort: 1
+              sort: 2
               tagValuesQuery: ""
               tags: []
               tagsQuery: ""
@@ -1688,6 +1662,6 @@ spec:
             - 7d
             - 30d
     timezone: utc
-    title: Mimir / Reads resources
-    uid: mimir-reads-resources
+    title: Loki / Reads Resources
+    uid: loki-reads-resources
 
