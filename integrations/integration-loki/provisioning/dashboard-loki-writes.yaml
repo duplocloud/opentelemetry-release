@@ -6,7 +6,7 @@ metadata:
 spec:
     annotations:
         list: []
-    editable: false
+    editable: true
     gnetId: null
     graphTooltip: 0
     hideControls: false
@@ -141,7 +141,7 @@ spec:
               targets:
                 - expr: |
                     sum by (status) (
-                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}[$__rate_interval]),
+                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}[$__rate_interval]),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
                   format: time_series
@@ -178,15 +178,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})) * 1e3
+                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})) * 1e3
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})) * 1e3
+                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})) * 1e3
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B
-                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})
+                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -234,7 +234,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}[$__rate_interval])) by (le,pod)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}[$__rate_interval])) by (le,pod)) * 1e3
                   format: time_series
                   interval: 1m
                   intervalFactor: 2
@@ -247,7 +247,7 @@ spec:
           repeatIteration: null
           repeatRowId: null
           showTitle: true
-          title: Write Path
+          title: Distributor
           titleSize: h6
         - collapse: false
           height: 250px
@@ -280,7 +280,7 @@ spec:
                     sort: none
               span: 6
               targets:
-                - expr: sum (rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write",}[$__rate_interval])) / sum(rate(loki_distributor_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write",}[$__rate_interval]))
+                - expr: sum (rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/distributor",}[$__rate_interval])) / sum(rate(loki_distributor_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/distributor",}[$__rate_interval]))
                   format: time_series
                   legendFormat: bytes
                   legendLink: null
@@ -315,7 +315,7 @@ spec:
               span: 6
               stack: true
               targets:
-                - expr: sum by (tenant) (rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write",}[$__rate_interval])) / ignoring(tenant) group_left sum(rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write",}[$__rate_interval]))
+                - expr: sum by (tenant) (rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/distributor",}[$__rate_interval])) / ignoring(tenant) group_left sum(rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/distributor",}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{tenant}}'
                   legendLink: null
@@ -338,7 +338,915 @@ spec:
           repeatIteration: null
           repeatRowId: null
           showTitle: true
-          title: Write Path - Structured Metadata
+          title: Distributor - Structured Metadata
+          titleSize: h6
+        - collapse: false
+          height: 250px
+          panels:
+            - aliasColors:
+                1xx: '#EAB839'
+                2xx: '#7EB26D'
+                3xx: '#6ED0E0'
+                4xx: '#EF843C'
+                5xx: '#E24D42'
+                OK: '#7EB26D'
+                cancel: '#A9A9A9'
+                error: '#E24D42'
+                success: '#7EB26D'
+              datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 100
+                        lineWidth: 0
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: normal
+                    min: 0
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: short
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: 1xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EAB839'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 2xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 3xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#6ED0E0'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 4xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EF843C'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 5xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: OK
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: cancel
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#A9A9A9'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: error
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: success
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+              fill: 10
+              id: 6
+              linewidth: 0
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              stack: true
+              targets:
+                - expr: |
+                    sum by (status) (
+                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"}[$__rate_interval]),
+                      "status", "${1}xx", "status_code", "([0-9]).."),
+                      "status", "${1}", "status_code", "([a-zA-Z]+)"))
+                  format: time_series
+                  legendFormat: '{{status}}'
+                  refId: A
+              title: QPS
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: ms
+                overrides: []
+              id: 7
+              links: []
+              nullPointMode: null as zero
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"})) * 1e3
+                  format: time_series
+                  legendFormat: 99th percentile
+                  refId: A
+                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"})) * 1e3
+                  format: time_series
+                  legendFormat: 50th percentile
+                  refId: B
+                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"})
+                  format: time_series
+                  legendFormat: Average
+                  refId: C
+              title: Latency
+              type: timeseries
+              yaxes:
+                - format: ms
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: 0
+                  show: true
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: false
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: ms
+                overrides: []
+              id: 8
+              links: []
+              nullPointMode: null as zero
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"}[$__rate_interval])) by (le,pod)) * 1e3
+                  format: time_series
+                  interval: 1m
+                  intervalFactor: 2
+                  legendFormat: __auto
+                  refId: A
+                  step: 10
+              title: Per Pod Latency (p99)
+              type: timeseries
+          repeat: null
+          repeatIteration: null
+          repeatRowId: null
+          showTitle: true
+          title: Ingester - Zone Aware
+          titleSize: h6
+        - collapse: false
+          height: 250px
+          panels:
+            - aliasColors:
+                1xx: '#EAB839'
+                2xx: '#7EB26D'
+                3xx: '#6ED0E0'
+                4xx: '#EF843C'
+                5xx: '#E24D42'
+                OK: '#7EB26D'
+                cancel: '#A9A9A9'
+                error: '#E24D42'
+                success: '#7EB26D'
+              datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 100
+                        lineWidth: 0
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: normal
+                    min: 0
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: short
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: 1xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EAB839'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 2xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 3xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#6ED0E0'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 4xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EF843C'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 5xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: OK
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: cancel
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#A9A9A9'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: error
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: success
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+              fill: 10
+              id: 9
+              linewidth: 0
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              stack: true
+              targets:
+                - expr: |
+                    sum by (status) (
+                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"}[$__rate_interval]),
+                      "status", "${1}xx", "status_code", "([0-9]).."),
+                      "status", "${1}", "status_code", "([a-zA-Z]+)"))
+                  format: time_series
+                  legendFormat: '{{status}}'
+                  refId: A
+              title: QPS
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: ms
+                overrides: []
+              id: 10
+              links: []
+              nullPointMode: null as zero
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"})) * 1e3
+                  format: time_series
+                  legendFormat: 99th percentile
+                  refId: A
+                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"})) * 1e3
+                  format: time_series
+                  legendFormat: 50th percentile
+                  refId: B
+                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"})
+                  format: time_series
+                  legendFormat: Average
+                  refId: C
+              title: Latency
+              type: timeseries
+              yaxes:
+                - format: ms
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: 0
+                  show: true
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: false
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: ms
+                overrides: []
+              id: 11
+              links: []
+              nullPointMode: null as zero
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"}[$__rate_interval])) by (le,pod)) * 1e3
+                  format: time_series
+                  interval: 1m
+                  intervalFactor: 2
+                  legendFormat: __auto
+                  refId: A
+                  step: 10
+              title: Per Pod Latency (p99)
+              type: timeseries
+          repeat: null
+          repeatIteration: null
+          repeatRowId: null
+          showTitle: true
+          title: Ingester
+          titleSize: h6
+        - collapse: false
+          height: 250px
+          panels:
+            - aliasColors:
+                1xx: '#EAB839'
+                2xx: '#7EB26D'
+                3xx: '#6ED0E0'
+                4xx: '#EF843C'
+                5xx: '#E24D42'
+                OK: '#7EB26D'
+                cancel: '#A9A9A9'
+                error: '#E24D42'
+                success: '#7EB26D'
+              datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 100
+                        lineWidth: 0
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: normal
+                    min: 0
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: short
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: 1xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EAB839'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 2xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 3xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#6ED0E0'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 4xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EF843C'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 5xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: OK
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: cancel
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#A9A9A9'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: error
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: success
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+              fill: 10
+              id: 12
+              linewidth: 0
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              stack: true
+              targets:
+                - expr: |
+                    sum by (status) (
+                      label_replace(label_replace(rate(loki_index_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval]),
+                      "status", "${1}xx", "status_code", "([0-9]).."),
+                      "status", "${1}", "status_code", "([a-zA-Z]+)"))
+                  format: time_series
+                  legendFormat: '{{status}}'
+                  refId: A
+              title: QPS
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: ms
+                overrides: []
+              id: 13
+              links: []
+              nullPointMode: null as zero
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: histogram_quantile(0.99, sum(rate(loki_index_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval])) by (le)) * 1e3
+                  format: time_series
+                  legendFormat: 99th Percentile
+                  refId: A
+                - expr: histogram_quantile(0.50, sum(rate(loki_index_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval])) by (le)) * 1e3
+                  format: time_series
+                  legendFormat: 50th Percentile
+                  refId: B
+                - expr: sum(rate(loki_index_request_duration_seconds_sum{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval])) * 1e3 / sum(rate(loki_index_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval]))
+                  format: time_series
+                  legendFormat: Average
+                  refId: C
+              title: Latency
+              type: timeseries
+              yaxes:
+                - format: ms
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: 0
+                  show: true
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: false
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: ms
+                overrides: []
+              id: 14
+              links: []
+              nullPointMode: null as zero
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: histogram_quantile(0.99, sum(rate(loki_index_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval])) by (le,pod)) * 1e3
+                  format: time_series
+                  interval: 1m
+                  intervalFactor: 2
+                  legendFormat: __auto
+                  refId: A
+                  step: 10
+              title: Per Pod Latency (p99)
+              type: timeseries
+          repeat: null
+          repeatIteration: null
+          repeatRowId: null
+          showTitle: true
+          title: Index
+          titleSize: h6
+        - collapse: false
+          height: 250px
+          panels:
+            - aliasColors:
+                1xx: '#EAB839'
+                2xx: '#7EB26D'
+                3xx: '#6ED0E0'
+                4xx: '#EF843C'
+                5xx: '#E24D42'
+                OK: '#7EB26D'
+                cancel: '#A9A9A9'
+                error: '#E24D42'
+                success: '#7EB26D'
+              datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 100
+                        lineWidth: 0
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: normal
+                    min: 0
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: short
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: 1xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EAB839'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 2xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 3xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#6ED0E0'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 4xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#EF843C'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: 5xx
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: OK
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: cancel
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#A9A9A9'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: error
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#E24D42'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: success
+                      properties:
+                        - id: color
+                          value:
+                            fixedColor: '#7EB26D'
+                            mode: fixed
+              fill: 10
+              id: 15
+              linewidth: 0
+              links: []
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              stack: true
+              targets:
+                - expr: |
+                    sum by (status) (
+                      label_replace(label_replace(rate(loki_boltdb_shipper_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval]),
+                      "status", "${1}xx", "status_code", "([0-9]).."),
+                      "status", "${1}", "status_code", "([a-zA-Z]+)"))
+                  format: time_series
+                  legendFormat: '{{status}}'
+                  refId: A
+              title: QPS
+              type: timeseries
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: ms
+                overrides: []
+              id: 16
+              links: []
+              nullPointMode: null as zero
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: histogram_quantile(0.99, sum(rate(loki_boltdb_shipper_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval])) by (le)) * 1e3
+                  format: time_series
+                  legendFormat: 99th Percentile
+                  refId: A
+                - expr: histogram_quantile(0.50, sum(rate(loki_boltdb_shipper_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval])) by (le)) * 1e3
+                  format: time_series
+                  legendFormat: 50th Percentile
+                  refId: B
+                - expr: sum(rate(loki_boltdb_shipper_request_duration_seconds_sum{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval])) * 1e3 / sum(rate(loki_boltdb_shipper_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval]))
+                  format: time_series
+                  legendFormat: Average
+                  refId: C
+              title: Latency
+              type: timeseries
+              yaxes:
+                - format: ms
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: 0
+                  show: true
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: false
+            - datasource: $datasource
+              fieldConfig:
+                defaults:
+                    custom:
+                        drawStyle: line
+                        fillOpacity: 10
+                        lineWidth: 1
+                        pointSize: 5
+                        showPoints: never
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                    thresholds:
+                        mode: absolute
+                        steps: []
+                    unit: ms
+                overrides: []
+              id: 17
+              links: []
+              nullPointMode: null as zero
+              options:
+                legend:
+                    showLegend: true
+                tooltip:
+                    mode: single
+                    sort: none
+              span: 4
+              targets:
+                - expr: histogram_quantile(0.99, sum(rate(loki_boltdb_shipper_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval])) by (le,pod)) * 1e3
+                  format: time_series
+                  interval: 1m
+                  intervalFactor: 2
+                  legendFormat: __auto
+                  refId: A
+                  step: 10
+              title: Per Pod Latency (p99)
+              type: timeseries
+          repeat: null
+          repeatIteration: null
+          repeatRowId: null
+          showTitle: true
+          title: BoltDB Index
           titleSize: h6
     schemaVersion: 14
     style: dark
@@ -425,3 +1333,4 @@ spec:
     timezone: utc
     title: Loki / Writes
     uid: loki-writes
+

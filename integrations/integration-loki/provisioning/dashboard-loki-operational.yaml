@@ -6,7 +6,7 @@ metadata:
 spec:
     annotations:
         list: []
-    editable: false
+    editable: true
     gnetId: null
     graphTooltip: 0
     hideControls: false
@@ -80,7 +80,7 @@ spec:
                 sum by (status) (
                 label_replace(
                   label_replace(
-                        rate(loki_request_duration_seconds_count{cluster="$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-read", route=~"api_prom_query|api_prom_label|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values"}[$__rate_interval]),
+                        rate(loki_request_duration_seconds_count{cluster="$cluster", job=~"($namespace)/query-frontend", route=~"api_prom_query|api_prom_label|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values"}[$__rate_interval]),
                   "status", "${1}xx", "status_code", "([0-9]).."),
                 "status", "${1}", "status_code", "([a-z]+)")
                 )
@@ -164,7 +164,7 @@ spec:
                 sum by (status) (
                 label_replace(
                   label_replace(
-                          rate(loki_request_duration_seconds_count{cluster="$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push"}[$__rate_interval]),
+                          rate(loki_request_duration_seconds_count{cluster="$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push"}[$__rate_interval]),
                    "status", "${1}xx", "status_code", "([0-9]).."),
                 "status", "${1}", "status_code", "([a-z]+)"))
               legendFormat: '{{status}}'
@@ -189,6 +189,85 @@ spec:
             - format: short
               label: null
               logBase: 10
+              max: null
+              min: null
+              show: true
+            - format: short
+              label: null
+              logBase: 1
+              max: null
+              min: null
+              show: true
+          yaxis:
+            align: false
+            alignLevel: null
+        - aliasColors: {}
+          bars: false
+          dashLength: 10
+          dashes: false
+          datasource: $datasource
+          fieldConfig:
+            defaults:
+                custom: {}
+                unit: ops
+            overrides: []
+          fill: 1
+          fillGradient: 0
+          gridPos:
+            h: 5
+            w: 4
+            x: 8
+            "y": 1
+          hiddenSeries: false
+          id: 11
+          legend:
+            avg: false
+            current: false
+            hideEmpty: false
+            hideZero: false
+            max: false
+            min: false
+            show: false
+            total: false
+            values: false
+          lines: true
+          linewidth: 1
+          nullPointMode: "null"
+          options:
+            dataLinks: []
+          panels: []
+          percentage: false
+          pointradius: 2
+          points: false
+          renderer: flot
+          seriesOverrides: []
+          spaceLength: 10
+          stack: false
+          steppedLine: false
+          targets:
+            - expr: "topk(5, sum by (name,level) (rate(promtail_custom_bad_words_total{cluster=\"$cluster\", exported_namespace=\"$namespace\"}[$__interval])) - \nsum by (name,level) (rate(promtail_custom_bad_words_total{cluster=\"$cluster\", exported_namespace=\"$namespace\"}[$__interval] offset 1h)))"
+              legendFormat: '{{name}}-{{level}}'
+              refId: A
+          thresholds: []
+          timeFrom: null
+          timeRegions: []
+          timeShift: null
+          title: Bad Words
+          tooltip:
+            shared: true
+            sort: 2
+            value_type: individual
+          type: timeseries
+          xaxis:
+            buckets: null
+            mode: time
+            name: null
+            show: true
+            values: []
+          yaxes:
+            - format: short
+              label: null
+              logBase: 1
               max: null
               min: null
               show: true
@@ -479,13 +558,13 @@ spec:
           stack: false
           steppedLine: false
           targets:
-            - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push", cluster=~"$cluster"})) * 1e3
+            - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push", cluster=~"$cluster"})) * 1e3
               legendFormat: ".99"
               refId: A
-            - expr: histogram_quantile(0.75, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push", cluster=~"$cluster"})) * 1e3
+            - expr: histogram_quantile(0.75, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push", cluster=~"$cluster"})) * 1e3
               legendFormat: ".9"
               refId: B
-            - expr: histogram_quantile(0.5, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"api_prom_push|loki_api_v1_push", cluster=~"$cluster"})) * 1e3
+            - expr: histogram_quantile(0.5, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push", cluster=~"$cluster"})) * 1e3
               legendFormat: ".5"
               refId: C
           thresholds: []
@@ -564,13 +643,13 @@ spec:
           stack: false
           steppedLine: false
           targets:
-            - expr: histogram_quantile(0.99, sum by (le) (cluster_job:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", cluster=~"$cluster"})) * 1e3
+            - expr: histogram_quantile(0.99, sum by (le) (cluster_job:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/distributor", cluster=~"$cluster"})) * 1e3
               legendFormat: ".99"
               refId: A
-            - expr: histogram_quantile(0.9, sum by (le) (cluster_job:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", cluster=~"$cluster"})) * 1e3
+            - expr: histogram_quantile(0.9, sum by (le) (cluster_job:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/distributor", cluster=~"$cluster"})) * 1e3
               legendFormat: ".9"
               refId: B
-            - expr: histogram_quantile(0.5, sum by (le) (cluster_job:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", cluster=~"$cluster"})) * 1e3
+            - expr: histogram_quantile(0.5, sum by (le) (cluster_job:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/distributor", cluster=~"$cluster"})) * 1e3
               legendFormat: ".5"
               refId: C
           thresholds: []
@@ -649,9 +728,9 @@ spec:
           steppedLine: false
           targets:
             - expr: |-
-                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
+                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/distributor", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
                 /
-                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write"}[$__rate_interval])) by (route) > 0
+                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/distributor"}[$__rate_interval])) by (route) > 0
               interval: ""
               legendFormat: '{{route}}'
               refId: A
@@ -732,14 +811,14 @@ spec:
           stack: false
           steppedLine: false
           targets:
-            - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", route="/logproto.Pusher/Push", cluster=~"$cluster"})) * 1e3
+            - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push", cluster=~"$cluster"})) * 1e3
               legendFormat: ".99"
               refId: A
-            - expr: histogram_quantile(0.9, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", route="/logproto.Pusher/Push", cluster=~"$cluster"})) * 1e3
+            - expr: histogram_quantile(0.9, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push", cluster=~"$cluster"})) * 1e3
               hide: false
               legendFormat: ".9"
               refId: B
-            - expr: histogram_quantile(0.5, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", route="/logproto.Pusher/Push", cluster=~"$cluster"})) * 1e3
+            - expr: histogram_quantile(0.5, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push", cluster=~"$cluster"})) * 1e3
               hide: false
               legendFormat: ".5"
               refId: C
@@ -819,9 +898,9 @@ spec:
           steppedLine: false
           targets:
             - expr: |-
-                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write", status_code!~"5[0-9]{2}", route="/logproto.Pusher/Push"}[$__rate_interval])) by (route)
+                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(ingester.*|partition-ingester.*)", status_code!~"5[0-9]{2}", route="/logproto.Pusher/Push"}[$__rate_interval])) by (route)
                 /
-                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write", route="/logproto.Pusher/Push"}[$__rate_interval])) by (route) > 0
+                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"}[$__rate_interval])) by (route) > 0
               interval: ""
               legendFormat: '{{route}}'
               refId: A
@@ -904,13 +983,13 @@ spec:
           stack: false
           steppedLine: false
           targets:
-            - expr: histogram_quantile(0.99, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-read", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"}))
+            - expr: histogram_quantile(0.99, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/querier", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"}))
               legendFormat: '{{route}}-.99'
               refId: A
-            - expr: histogram_quantile(0.9, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-read", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"}))
+            - expr: histogram_quantile(0.9, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/querier", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"}))
               legendFormat: '{{route}}-.9'
               refId: B
-            - expr: histogram_quantile(0.5, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-read", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"}))
+            - expr: histogram_quantile(0.5, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/querier", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"}))
               legendFormat: '{{route}}-.5'
               refId: C
           thresholds: []
@@ -989,13 +1068,13 @@ spec:
           stack: false
           steppedLine: false
           targets:
-            - expr: histogram_quantile(0.99, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-read", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"})) * 1e3
+            - expr: histogram_quantile(0.99, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/querier", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"})) * 1e3
               legendFormat: .99-{{route}}
               refId: A
-            - expr: histogram_quantile(0.9, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-read", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"})) * 1e3
+            - expr: histogram_quantile(0.9, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/querier", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"})) * 1e3
               legendFormat: .9-{{route}}
               refId: B
-            - expr: histogram_quantile(0.5, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-read", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"})) * 1e3
+            - expr: histogram_quantile(0.5, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/querier", route=~"api_prom_query|api_prom_labels|api_prom_label_name_values|loki_api_v1_query|loki_api_v1_query_range|loki_api_v1_label|loki_api_v1_label_name_values", cluster="$cluster"})) * 1e3
               legendFormat: .5-{{route}}
               refId: C
           thresholds: []
@@ -1074,9 +1153,9 @@ spec:
           steppedLine: false
           targets:
             - expr: |-
-                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-read", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
+                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/querier", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
                 /
-                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-read"}[$__rate_interval])) by (route) > 0
+                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/querier"}[$__rate_interval])) by (route) > 0
               interval: ""
               legendFormat: '{{route}}'
               refId: A
@@ -1158,13 +1237,13 @@ spec:
           stack: false
           steppedLine: false
           targets:
-            - expr: histogram_quantile(0.99, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs", cluster="$cluster"})) * 1e3
+            - expr: histogram_quantile(0.99, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(ingester.*|partition-ingester.*)", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs", cluster="$cluster"})) * 1e3
               legendFormat: .99-{{route}}
               refId: A
-            - expr: histogram_quantile(0.9, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs", cluster="$cluster"})) * 1e3
+            - expr: histogram_quantile(0.9, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(ingester.*|partition-ingester.*)", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs", cluster="$cluster"})) * 1e3
               legendFormat: .9-{{route}}
               refId: B
-            - expr: histogram_quantile(0.5, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs", cluster="$cluster"})) * 1e3
+            - expr: histogram_quantile(0.5, sum by (le,route) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"($namespace)/(ingester.*|partition-ingester.*)", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs", cluster="$cluster"})) * 1e3
               legendFormat: .5-{{route}}
               refId: C
           thresholds: []
@@ -1243,9 +1322,9 @@ spec:
           steppedLine: false
           targets:
             - expr: |-
-                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write", status_code!~"5[0-9]{2}", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs"}[$__rate_interval])) by (route)
+                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(ingester.*|partition-ingester.*)", status_code!~"5[0-9]{2}", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs"}[$__rate_interval])) by (route)
                 /
-                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs"}[$__rate_interval])) by (route) > 0
+                sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(ingester.*|partition-ingester.*)", route=~"/logproto.Querier/Query|/logproto.Querier/Label|/logproto.Querier/Series|/logproto.Querier/QuerySample|/logproto.Querier/GetChunkIDs"}[$__rate_interval])) by (route) > 0
               interval: ""
               legendFormat: '{{route}}'
               refId: A
@@ -1490,7 +1569,7 @@ spec:
               stack: false
               steppedLine: false
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", pod=~"(loki.*|enterprise-logs)-write.*"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~".*distributor.*"}[$__rate_interval]))
                   intervalFactor: 3
                   legendFormat: '{{pod}}'
                   refId: A
@@ -1568,7 +1647,7 @@ spec:
               stack: false
               steppedLine: false
               targets:
-                - expr: go_memstats_heap_inuse_bytes{cluster="$cluster", namespace="$namespace", pod=~"(loki.*|enterprise-logs)-write.*"}
+                - expr: go_memstats_heap_inuse_bytes{cluster="$cluster", namespace="$namespace", container=~".*distributor.*"}
                   instant: false
                   intervalFactor: 3
                   legendFormat: '{{pod}}'
@@ -1644,7 +1723,7 @@ spec:
               stack: false
               steppedLine: false
               targets:
-                - expr: sum(rate({cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write"} | logfmt | level="error"[$__auto]))
+                - expr: sum(rate({cluster="$cluster", namespace="$namespace", job=~"($namespace)/distributor"} | logfmt | level="error"[$__auto]))
                   refId: A
               thresholds: []
               timeFrom: null
@@ -1692,7 +1771,7 @@ spec:
                 wrapLogMessage: true
               panels: []
               targets:
-                - expr: '{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write"} |= "level=error"'
+                - expr: '{cluster="$cluster", namespace="$namespace", job=~"($namespace)/distributor"} |= "level=error"'
                   refId: A
               timeFrom: null
               timeShift: null
@@ -1736,9 +1815,9 @@ spec:
               steppedLine: false
               targets:
                 - expr: |-
-                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
+                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/distributor", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
                     /
-                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-write"}[$__rate_interval])) by (route) > 0
+                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/distributor"}[$__rate_interval])) by (route) > 0
                   interval: ""
                   intervalFactor: 1
                   legendFormat: '{{route}}'
@@ -2004,7 +2083,341 @@ spec:
                 align: false
                 alignLevel: null
           targets: []
-          title: Write Path
+          title: Distributor
+          type: row
+        - collapsed: true
+          datasource: null
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 28
+          id: 19
+          panels:
+            - aliasColors: {}
+              bars: false
+              dashLength: 10
+              dashes: false
+              datasource: $datasource
+              fill: 1
+              fillGradient: 0
+              gridPos:
+                h: 7
+                w: 6
+                x: 0
+                "y": 29
+              hiddenSeries: false
+              id: 36
+              legend:
+                avg: false
+                current: false
+                max: false
+                min: false
+                show: false
+                total: false
+                values: false
+              lines: false
+              linewidth: 1
+              nullPointMode: "null"
+              options:
+                dataLinks: []
+              panels: []
+              percentage: false
+              pointradius: 1
+              points: true
+              renderer: flot
+              seriesOverrides: []
+              spaceLength: 10
+              stack: false
+              steppedLine: false
+              targets:
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~".*ingester.*"}[$__rate_interval]))
+                  intervalFactor: 3
+                  legendFormat: '{{pod}}'
+                  refId: A
+              thresholds: []
+              timeFrom: null
+              timeRegions: []
+              timeShift: null
+              title: CPU Usage
+              tooltip:
+                shared: true
+                sort: 2
+                value_type: individual
+              type: timeseries
+              xaxis:
+                buckets: null
+                mode: time
+                name: null
+                show: true
+                values: []
+              yaxes:
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: true
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: true
+              yaxis:
+                align: false
+                alignLevel: null
+            - aliasColors: {}
+              bars: false
+              dashLength: 10
+              dashes: false
+              datasource: $datasource
+              fieldConfig:
+                defaults:
+                    unit: binBps
+              fill: 1
+              fillGradient: 0
+              gridPos:
+                h: 7
+                w: 6
+                x: 0
+                "y": 36
+              hiddenSeries: false
+              id: 37
+              legend:
+                avg: false
+                current: false
+                hideEmpty: false
+                hideZero: false
+                max: false
+                min: false
+                show: false
+                total: false
+                values: false
+              lines: false
+              linewidth: 1
+              nullPointMode: "null"
+              options:
+                dataLinks: []
+              panels: []
+              percentage: false
+              pointradius: 1
+              points: true
+              renderer: flot
+              seriesOverrides: []
+              spaceLength: 10
+              stack: false
+              steppedLine: false
+              targets:
+                - expr: go_memstats_heap_inuse_bytes{cluster="$cluster", namespace="$namespace", container=~".*ingester.*"}
+                  instant: false
+                  intervalFactor: 3
+                  legendFormat: '{{pod}}'
+                  refId: A
+              thresholds: []
+              timeFrom: null
+              timeRegions: []
+              timeShift: null
+              title: Memory Usage
+              tooltip:
+                shared: true
+                sort: 2
+                value_type: individual
+              type: timeseries
+              xaxis:
+                buckets: null
+                mode: time
+                name: null
+                show: true
+                values: []
+              yaxes:
+                - format: bytes
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: true
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: true
+              yaxis:
+                align: false
+                alignLevel: null
+            - aliasColors: {}
+              bars: true
+              dashLength: 10
+              dashes: false
+              datasource: $loki_datasource
+              fill: 1
+              fillGradient: 0
+              gridPos:
+                h: 3
+                w: 18
+                x: 12
+                "y": 29
+              hiddenSeries: false
+              id: 38
+              legend:
+                avg: false
+                current: false
+                max: false
+                min: false
+                show: false
+                total: false
+                values: false
+              lines: false
+              linewidth: 1
+              nullPointMode: "null"
+              options:
+                dataLinks: []
+              panels: []
+              percentage: false
+              pointradius: 2
+              points: false
+              renderer: flot
+              seriesOverrides:
+                - alias: '{}'
+                  color: '#F2495C'
+              spaceLength: 10
+              stack: false
+              steppedLine: false
+              targets:
+                - expr: sum(rate({cluster="$cluster", namespace="$namespace", job=~"($namespace)/(ingester.*|partition-ingester.*)"} | logfmt | level="error"[$__auto]))
+                  refId: A
+              thresholds: []
+              timeFrom: null
+              timeRegions: []
+              timeShift: null
+              title: Error Log Rate
+              tooltip:
+                shared: true
+                sort: 2
+                value_type: individual
+              type: timeseries
+              xaxis:
+                buckets: null
+                mode: time
+                name: null
+                show: false
+                values: []
+              yaxes:
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: true
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: false
+              yaxis:
+                align: false
+                alignLevel: null
+            - datasource: $loki_datasource
+              gridPos:
+                h: 18
+                w: 18
+                x: 12
+                "y": 32
+              id: 39
+              options:
+                showLabels: false
+                showTime: false
+                sortOrder: Descending
+                wrapLogMessage: true
+              panels: []
+              targets:
+                - expr: '{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(ingester.*|partition-ingester.*)"} |= "level=error"'
+                  refId: A
+              timeFrom: null
+              timeShift: null
+              title: Logs
+              type: logs
+            - aliasColors: {}
+              bars: false
+              dashLength: 10
+              dashes: false
+              datasource: $datasource
+              fill: 0
+              fillGradient: 0
+              gridPos:
+                h: 7
+                w: 6
+                x: 0
+                "y": 41
+              hiddenSeries: false
+              id: 67
+              legend:
+                avg: false
+                current: false
+                max: false
+                min: false
+                show: false
+                total: false
+                values: false
+              lines: true
+              linewidth: 1
+              nullPointMode: "null"
+              options:
+                dataLinks: []
+              panels: []
+              percentage: false
+              pointradius: 1
+              points: false
+              renderer: flot
+              seriesOverrides: []
+              spaceLength: 10
+              stack: false
+              steppedLine: false
+              targets:
+                - expr: |-
+                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(ingester.*|partition-ingester.*)", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
+                    /
+                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(ingester.*|partition-ingester.*)"}[$__rate_interval])) by (route) > 0
+                  interval: ""
+                  intervalFactor: 1
+                  legendFormat: '{{route}}'
+                  refId: A
+              thresholds: []
+              timeFrom: null
+              timeRegions: []
+              timeShift: null
+              title: Success Rate
+              tooltip:
+                shared: true
+                sort: 2
+                value_type: individual
+              type: timeseries
+              xaxis:
+                buckets: null
+                mode: time
+                name: null
+                show: true
+                values: []
+              yaxes:
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: true
+                - format: short
+                  label: null
+                  logBase: 1
+                  max: null
+                  min: null
+                  show: true
+              yaxis:
+                align: false
+                alignLevel: null
+          targets: []
+          title: Ingester
           type: row
         - collapsed: true
           datasource: null
@@ -2054,7 +2467,7 @@ spec:
               stack: false
               steppedLine: false
               targets:
-                - expr: topk(10,sum by (tenant) (loki_ingester_memory_streams{cluster="$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write"}))
+                - expr: topk(10,sum by (tenant) (loki_ingester_memory_streams{cluster="$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)"}))
                   interval: ""
                   legendFormat: '{{ tenant }}'
                   refId: A
@@ -2129,7 +2542,7 @@ spec:
               stack: false
               steppedLine: false
               targets:
-                - expr: topk(10, sum by (tenant) (rate(loki_ingester_streams_created_total{cluster="$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write"}[$__rate_interval]) > 0))
+                - expr: topk(10, sum by (tenant) (rate(loki_ingester_streams_created_total{cluster="$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)"}[$__rate_interval]) > 0))
                   interval: ""
                   legendFormat: '{{ tenant }}'
                   refId: A
@@ -2216,11 +2629,11 @@ spec:
               stack: false
               steppedLine: false
               targets:
-                - expr: sum(rate(loki_ingester_chunks_flushed_total{cluster="$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write"}[$__rate_interval]))
+                - expr: sum(rate(loki_ingester_chunks_flushed_total{cluster="$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)"}[$__rate_interval]))
                   interval: ""
                   legendFormat: Chunks
                   refId: A
-                - expr: sum(increase(loki_chunk_store_deduped_chunks_total{cluster="$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-write"}[$__rate_interval]))/sum(increase(loki_ingester_chunks_flushed_total{cluster="$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-write"}[$__rate_interval])) < 1
+                - expr: sum(increase(loki_chunk_store_deduped_chunks_total{cluster="$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)"}[$__rate_interval]))/sum(increase(loki_ingester_chunks_flushed_total{cluster="$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)"}[$__rate_interval])) < 1
                   interval: ""
                   legendFormat: De-Dupe Ratio
                   refId: B
@@ -2281,7 +2694,7 @@ spec:
               panels: []
               reverseYBuckets: false
               targets:
-                - expr: sum(rate(loki_ingester_chunk_size_bytes_bucket{cluster="$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write"}[$__rate_interval])) by (le)
+                - expr: sum(rate(loki_ingester_chunk_size_bytes_bucket{cluster="$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)"}[$__rate_interval])) by (le)
                   format: heatmap
                   instant: false
                   interval: ""
@@ -2346,7 +2759,7 @@ spec:
               stack: true
               steppedLine: false
               targets:
-                - expr: sum by(reason) (rate(loki_ingester_chunks_flushed_total{cluster=~"$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write", namespace=~"$namespace"}[$__rate_interval])) / ignoring(reason) group_left sum(rate(loki_ingester_chunks_flushed_total{cluster=~"$cluster",job=~"($namespace)/(loki.*|enterprise-logs)-write", namespace=~"$namespace"}[$__rate_interval]))
+                - expr: sum by(reason) (rate(loki_ingester_chunks_flushed_total{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", namespace=~"$namespace"}[$__rate_interval])) / ignoring(reason) group_left sum(rate(loki_ingester_chunks_flushed_total{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", namespace=~"$namespace"}[$__rate_interval]))
                   interval: ""
                   legendFormat: '{{ reason }}'
               thresholds: []
@@ -2408,7 +2821,7 @@ spec:
               panels: []
               reverseYBuckets: false
               targets:
-                - expr: sum by (le) (rate(loki_ingester_chunk_utilization_bucket{cluster="$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-write"}[$__rate_interval]))
+                - expr: sum by (le) (rate(loki_ingester_chunk_utilization_bucket{cluster="$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)"}[$__rate_interval]))
                   format: heatmap
                   instant: false
                   interval: ""
@@ -2485,7 +2898,7 @@ spec:
               stack: false
               steppedLine: false
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", pod=~"(loki.*|enterprise-logs)-read.*"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~".*querier.*"}[$__rate_interval]))
                   intervalFactor: 3
                   legendFormat: '{{pod}}'
                   refId: A
@@ -2563,7 +2976,7 @@ spec:
               stack: false
               steppedLine: false
               targets:
-                - expr: go_memstats_heap_inuse_bytes{cluster="$cluster", namespace="$namespace", pod=~"(loki.*|enterprise-logs)-read.*"}
+                - expr: go_memstats_heap_inuse_bytes{cluster="$cluster", namespace="$namespace", container=~".*querier.*"}
                   instant: false
                   intervalFactor: 3
                   legendFormat: '{{pod}}'
@@ -2639,7 +3052,7 @@ spec:
               stack: false
               steppedLine: false
               targets:
-                - expr: sum(rate({cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-read"} | logfmt |  level="error"[$__auto]))
+                - expr: sum(rate({cluster="$cluster", namespace="$namespace", job=~"($namespace)/querier"} | logfmt |  level="error"[$__auto]))
                   refId: A
               thresholds: []
               timeFrom: null
@@ -2687,7 +3100,7 @@ spec:
                 wrapLogMessage: true
               panels: []
               targets:
-                - expr: '{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-read"} |= "level=error"'
+                - expr: '{cluster="$cluster", namespace="$namespace", job=~"($namespace)/querier"} |= "level=error"'
                   refId: A
               timeFrom: null
               timeShift: null
@@ -2731,9 +3144,9 @@ spec:
               steppedLine: false
               targets:
                 - expr: |-
-                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-read", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
+                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/querier", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
                     /
-                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-read"}[$__rate_interval])) by (route) > 0
+                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/querier"}[$__rate_interval])) by (route) > 0
                   interval: ""
                   intervalFactor: 1
                   legendFormat: '{{route}}'
@@ -2771,341 +3184,7 @@ spec:
                 align: false
                 alignLevel: null
           targets: []
-          title: Read Path
-          type: row
-        - collapsed: true
-          datasource: null
-          gridPos:
-            h: 1
-            w: 24
-            x: 0
-            "y": 31
-          id: 64
-          panels:
-            - aliasColors: {}
-              bars: false
-              dashLength: 10
-              dashes: false
-              datasource: $datasource
-              fill: 1
-              fillGradient: 0
-              gridPos:
-                h: 7
-                w: 6
-                x: 0
-                "y": 32
-              hiddenSeries: false
-              id: 68
-              legend:
-                avg: false
-                current: false
-                max: false
-                min: false
-                show: false
-                total: false
-                values: false
-              lines: false
-              linewidth: 1
-              nullPointMode: "null"
-              options:
-                dataLinks: []
-              panels: []
-              percentage: false
-              pointradius: 1
-              points: true
-              renderer: flot
-              seriesOverrides: []
-              spaceLength: 10
-              stack: false
-              steppedLine: false
-              targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", pod=~"(loki.*|enterprise-logs)-read.*"}[$__rate_interval]))
-                  intervalFactor: 3
-                  legendFormat: '{{pod}}'
-                  refId: A
-              thresholds: []
-              timeFrom: null
-              timeRegions: []
-              timeShift: null
-              title: CPU Usage
-              tooltip:
-                shared: true
-                sort: 2
-                value_type: individual
-              type: timeseries
-              xaxis:
-                buckets: null
-                mode: time
-                name: null
-                show: true
-                values: []
-              yaxes:
-                - format: short
-                  label: null
-                  logBase: 1
-                  max: null
-                  min: null
-                  show: true
-                - format: short
-                  label: null
-                  logBase: 1
-                  max: null
-                  min: null
-                  show: true
-              yaxis:
-                align: false
-                alignLevel: null
-            - aliasColors: {}
-              bars: false
-              dashLength: 10
-              dashes: false
-              datasource: $datasource
-              fieldConfig:
-                defaults:
-                    unit: binBps
-              fill: 1
-              fillGradient: 0
-              gridPos:
-                h: 7
-                w: 6
-                x: 0
-                "y": 39
-              hiddenSeries: false
-              id: 69
-              legend:
-                avg: false
-                current: false
-                hideEmpty: false
-                hideZero: false
-                max: false
-                min: false
-                show: false
-                total: false
-                values: false
-              lines: false
-              linewidth: 1
-              nullPointMode: "null"
-              options:
-                dataLinks: []
-              panels: []
-              percentage: false
-              pointradius: 1
-              points: true
-              renderer: flot
-              seriesOverrides: []
-              spaceLength: 10
-              stack: false
-              steppedLine: false
-              targets:
-                - expr: go_memstats_heap_inuse_bytes{cluster="$cluster", namespace="$namespace", pod=~"(loki.*|enterprise-logs)-backend.*"}
-                  instant: false
-                  intervalFactor: 3
-                  legendFormat: '{{pod}}'
-                  refId: A
-              thresholds: []
-              timeFrom: null
-              timeRegions: []
-              timeShift: null
-              title: Memory Usage
-              tooltip:
-                shared: true
-                sort: 2
-                value_type: individual
-              type: timeseries
-              xaxis:
-                buckets: null
-                mode: time
-                name: null
-                show: true
-                values: []
-              yaxes:
-                - format: bytes
-                  label: null
-                  logBase: 1
-                  max: null
-                  min: null
-                  show: true
-                - format: short
-                  label: null
-                  logBase: 1
-                  max: null
-                  min: null
-                  show: true
-              yaxis:
-                align: false
-                alignLevel: null
-            - aliasColors: {}
-              bars: true
-              dashLength: 10
-              dashes: false
-              datasource: $loki_datasource
-              fill: 1
-              fillGradient: 0
-              gridPos:
-                h: 3
-                w: 18
-                x: 12
-                "y": 32
-              hiddenSeries: false
-              id: 65
-              legend:
-                avg: false
-                current: false
-                max: false
-                min: false
-                show: false
-                total: false
-                values: false
-              lines: false
-              linewidth: 1
-              nullPointMode: "null"
-              options:
-                dataLinks: []
-              panels: []
-              percentage: false
-              pointradius: 2
-              points: false
-              renderer: flot
-              seriesOverrides:
-                - alias: '{}'
-                  color: '#F2495C'
-              spaceLength: 10
-              stack: false
-              steppedLine: false
-              targets:
-                - expr: sum(rate({cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-backend"} | logfmt |  level="error"[$__auto]))
-                  refId: A
-              thresholds: []
-              timeFrom: null
-              timeRegions: []
-              timeShift: null
-              title: Error Log Rate
-              tooltip:
-                shared: true
-                sort: 2
-                value_type: individual
-              type: timeseries
-              xaxis:
-                buckets: null
-                mode: time
-                name: null
-                show: false
-                values: []
-              yaxes:
-                - format: short
-                  label: null
-                  logBase: 1
-                  max: null
-                  min: null
-                  show: true
-                - format: short
-                  label: null
-                  logBase: 1
-                  max: null
-                  min: null
-                  show: false
-              yaxis:
-                align: false
-                alignLevel: null
-            - datasource: $loki_datasource
-              gridPos:
-                h: 18
-                w: 18
-                x: 12
-                "y": 35
-              id: 66
-              options:
-                showLabels: false
-                showTime: false
-                sortOrder: Descending
-                wrapLogMessage: true
-              panels: []
-              targets:
-                - expr: '{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-backend"} |= "level=error"'
-                  refId: A
-              timeFrom: null
-              timeShift: null
-              title: Logs
-              type: logs
-            - aliasColors: {}
-              bars: false
-              dashLength: 10
-              dashes: false
-              datasource: $datasource
-              fill: 0
-              fillGradient: 0
-              gridPos:
-                h: 7
-                w: 6
-                x: 0
-                "y": 46
-              hiddenSeries: false
-              id: 70
-              legend:
-                avg: false
-                current: false
-                max: false
-                min: false
-                show: false
-                total: false
-                values: false
-              lines: true
-              linewidth: 1
-              nullPointMode: "null"
-              options:
-                dataLinks: []
-              panels: []
-              percentage: false
-              pointradius: 1
-              points: false
-              renderer: flot
-              seriesOverrides: []
-              spaceLength: 10
-              stack: false
-              steppedLine: false
-              targets:
-                - expr: |-
-                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-backend", status_code!~"5[0-9]{2}"}[$__rate_interval])) by (route)
-                    /
-                    sum(rate(loki_request_duration_seconds_count{cluster="$cluster", namespace="$namespace", job=~"($namespace)/(loki.*|enterprise-logs)-backend"}[$__rate_interval])) by (route) > 0
-                  interval: ""
-                  intervalFactor: 1
-                  legendFormat: '{{route}}'
-                  refId: A
-              thresholds: []
-              timeFrom: null
-              timeRegions: []
-              timeShift: null
-              title: Success Rate
-              tooltip:
-                shared: true
-                sort: 2
-                value_type: individual
-              type: timeseries
-              xaxis:
-                buckets: null
-                mode: time
-                name: null
-                show: true
-                values: []
-              yaxes:
-                - format: short
-                  label: null
-                  logBase: 1
-                  max: null
-                  min: null
-                  show: true
-                - format: short
-                  label: null
-                  logBase: 1
-                  max: null
-                  min: null
-                  show: true
-              yaxis:
-                align: false
-                alignLevel: null
-          targets: []
-          title: Backend Path
+          title: Querier
           type: row
         - collapsed: true
           datasource: null
@@ -5433,3 +5512,4 @@ spec:
     timezone: utc
     title: Loki / Operational
     uid: loki-operational
+
