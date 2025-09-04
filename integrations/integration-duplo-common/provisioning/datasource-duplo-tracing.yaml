@@ -7,7 +7,7 @@ spec:
   type: tempo
   editable: true
   uid: duplo-tracing
-  url: http://duplo-tracing-query-frontend:3100
+  url: http://duplo-tracing-query-frontend:3200
   access: proxy
   basicAuth: false
   jsonData:
