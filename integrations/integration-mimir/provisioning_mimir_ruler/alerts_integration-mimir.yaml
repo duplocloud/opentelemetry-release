@@ -135,7 +135,7 @@ groups:
             message: One or more Mimir instances in {{ $labels.cluster }}/{{ $labels.namespace }} consistently sees a higher than expected number of gossip members.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirgossipmemberstoohigh
           expr: |
-            max by (cluster, namespace) (memberlist_client_cluster_members_count)
+            max by (cluster, namespace) (memberlist_client_cluster_members_count{cluster="duplo-metrics"})
             >
             (sum by (cluster, namespace) (up{job=~".*/(admin-api|alertmanager|compactor.*|distributor.*|ingester.*|query-frontend.*|querier.*|ruler|ruler-querier.*|store-gateway.*|cortex|mimir)"}) + 10)
           for: 20m
@@ -146,7 +146,7 @@ groups:
             message: One or more Mimir instances in {{ $labels.cluster }}/{{ $labels.namespace }} consistently sees a lower than expected number of gossip members.
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirgossipmemberstoolow
           expr: |
-            min by (cluster, namespace) (memberlist_client_cluster_members_count)
+            min by (cluster, namespace) (memberlist_client_cluster_members_count{cluster="duplo-metrics"})
             <
             (sum by (cluster, namespace) (up{job=~".+/(admin-api|alertmanager|compactor.*|distributor.*|ingester.*|query-frontend.*|querier.*|ruler|ruler-querier.*|store-gateway.*|cortex|mimir)"}) * 0.5)
           for: 20m
