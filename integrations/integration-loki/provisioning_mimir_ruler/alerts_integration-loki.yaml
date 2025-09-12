@@ -30,7 +30,7 @@ groups:
                 {{ $labels.cluster }} {{ $labels.job }} {{ $labels.route }} is experiencing {{ printf "%.2f" $value }}s 99th percentile latency.
             summary: Loki request error latency is high.
           expr: |
-            cluster_namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*|/schedulerpb.SchedulerForQuerier/QuerierLoop"} > 1
+            cluster_namespace_job_route:loki_request_duration_seconds:99quantile{route!~"(?i).*tail.*|/schedulerpb.SchedulerForQuerier/QuerierLoop"} > 30
           for: 15m
           labels:
             severity: critical
