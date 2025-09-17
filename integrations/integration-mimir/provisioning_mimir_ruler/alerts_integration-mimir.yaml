@@ -251,7 +251,7 @@ groups:
           expr: |
             cluster_namespace_job_route:cortex_request_duration_seconds:99quantile{route!~"metrics|/frontend.Frontend/Process|ready|/schedulerpb.SchedulerForFrontend/FrontendLoop|/schedulerpb.SchedulerForQuerier/QuerierLoop|debug_pprof"}
                >
-            2.5
+            30
           for: 15m
           labels:
             severity: warning
