@@ -844,14 +844,14 @@ spec:
               datasource:
                 type: prometheus
                 uid: ${datasource}
-              definition: label_values(service_name)
+              definition: label_values(traces_spanmetrics_calls_total{source="tempo", span_kind!="SPAN_KIND_CLIENT"},service_name)
               includeAll: true
               label: Service
               multi: true
               name: Service
               options: []
               query:
-                query: label_values(service_name)
+                query: label_values(traces_spanmetrics_calls_total{source="tempo", span_kind!="SPAN_KIND_CLIENT"},service_name)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               regex: ""
