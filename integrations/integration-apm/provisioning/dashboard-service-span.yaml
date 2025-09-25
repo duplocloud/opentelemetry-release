@@ -485,14 +485,14 @@ spec:
               datasource:
                 type: prometheus
                 uid: duplo-metrics
-              definition: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name="$cluster", k8s_namespace_name="$namespace"},service)
+              definition: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name="$cluster", k8s_namespace_name="$namespace", span_kind!="SPAN_KIND_CLIENT"},service)
               description: ""
               label: Service
               name: service
               options: []
               query:
                 qryType: 1
-                query: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name="$cluster", k8s_namespace_name="$namespace"},service)
+                query: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name="$cluster", k8s_namespace_name="$namespace", span_kind!="SPAN_KIND_CLIENT"},service)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               regex: ""

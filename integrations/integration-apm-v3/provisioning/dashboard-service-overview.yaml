@@ -182,7 +182,7 @@ spec:
                 uid: duplo-metrics
               editorMode: code
               exemplar: false
-              expr: group by (telemetry_sdk_language, service) (label_replace(traces_target_info{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", job=~".*/$service"}, "service", "$1", "job", ".*/(.*)"))
+              expr: group by (telemetry_sdk_language, service) (label_replace(traces_target_info{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", job=~".*/$service"}, "service", "$1", "job", ".*/(.*)"))and on (service) (sum by (service) (rate(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", span_kind=~"SPAN_KIND_SERVER|SPAN_KIND_CONSUMER"}[5m])) > 0)
               hide: false
               instant: false
               interval: ""
@@ -348,7 +348,7 @@ spec:
               datasource:
                 type: prometheus
                 uid: duplo-metrics
-              definition: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace"},service)
+              definition: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", span_kind!="SPAN_KIND_CLIENT"},service)
               description: ""
               includeAll: true
               label: Service
@@ -356,7 +356,7 @@ spec:
               options: []
               query:
                 qryType: 1
-                query: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace"},service)
+                query: label_values(traces_spanmetrics_calls_total{source="tempo", k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", span_kind!="SPAN_KIND_CLIENT"},service)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               regex: ""
