@@ -1270,7 +1270,7 @@ spec:
               options: []
               query: loki
               refresh: 1
-              regex: /.*(Logs).*/
+              regex: ""
               type: datasource
     time:
         from: now-15m
