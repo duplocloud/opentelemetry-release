@@ -3,7 +3,7 @@ groups:
     - name: node-exporter-filesystem
       rules:
         - alert: NodeFilesystemAlmostOutOfSpace
-          expr: (node_filesystem_avail_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_size_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 5 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
+          expr: (node_filesystem_avail_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_size_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 5 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 30m
           labels:
             severity: warning
@@ -11,7 +11,7 @@ groups:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available space left.
             summary: Filesystem has less than 5% space left.
         - alert: NodeFilesystemAlmostOutOfSpace
-          expr: (node_filesystem_avail_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_size_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 3 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
+          expr: (node_filesystem_avail_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_size_bytes{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 3 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 30m
           labels:
             severity: critical
@@ -19,7 +19,7 @@ groups:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available space left.
             summary: Filesystem has less than 3% space left.
         - alert: NodeFilesystemFilesFillingUp
-          expr: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 40 and predict_linear(node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""}[6h], 24 * 60 * 60) < 0 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
+          expr: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 40 and predict_linear(node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""}[6h], 24 * 60 * 60) < 0 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 1h
           labels:
             severity: warning
@@ -27,7 +27,7 @@ groups:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available inodes left and is filling up.
             summary: Filesystem is predicted to run out of inodes within the next 24 hours.
         - alert: NodeFilesystemFilesFillingUp
-          expr: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 20 and predict_linear(node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""}[6h], 4 * 60 * 60) < 0 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
+          expr: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 20 and predict_linear(node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""}[6h], 4 * 60 * 60) < 0 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 1h
           labels:
             severity: critical
@@ -35,7 +35,7 @@ groups:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available inodes left and is filling up fast.
             summary: Filesystem is predicted to run out of inodes within the next 4 hours.
         - alert: NodeFilesystemAlmostOutOfFiles
-          expr: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 5 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
+          expr: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 5 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 1h
           labels:
             severity: warning
@@ -43,7 +43,7 @@ groups:
             description: Filesystem on {{ $labels.device }}, mounted on {{ $labels.mountpoint }}, at {{ $labels.instance }} has only {{ printf "%.2f" $value }}% available inodes left.
             summary: Filesystem has less than 5% inodes left.
         - alert: NodeFilesystemAlmostOutOfFiles
-          expr: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 3 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0)
+          expr: (node_filesystem_files_free{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} / node_filesystem_files{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} * 100 < 3 and node_filesystem_readonly{fstype!="",job=~"integrations/(node_exporter|unix)",mountpoint!=""} == 0) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 1h
           labels:
             severity: critical
@@ -53,7 +53,7 @@ groups:
     - name: node-exporter
       rules:
         - alert: NodeCPUHighUsage
-          expr: sum without (mode) (avg without (cpu) (rate(node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)",mode!~"idle|iowait"}[2m]))) * 100 > 90
+          expr: (sum without (mode) (avg without (cpu) (rate(node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)",mode!~"idle|iowait"}[2m]))) * 100 > 90) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 15m
           labels:
             asserts_alert_category: failure
@@ -66,7 +66,7 @@ groups:
                 Note that 'iowait' CPU mode is excluded from total utilization.
             summary: High CPU usage.
         - alert: NodeClockNotSynchronising
-          expr: min_over_time(node_timex_sync_status{job=~"integrations/(node_exporter|unix)"}[5m]) == 0 and node_timex_maxerror_seconds{job=~"integrations/(node_exporter|unix)"} >= 16
+          expr: (min_over_time(node_timex_sync_status{job=~"integrations/(node_exporter|unix)"}[5m]) == 0 and node_timex_maxerror_seconds{job=~"integrations/(node_exporter|unix)"} >= 16) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 10m
           labels:
             asserts_alert_category: failure
@@ -77,7 +77,7 @@ groups:
             description: Clock at {{ $labels.instance }} is not synchronising. Ensure NTP is configured on this host.
             summary: Clock not synchronising.
         - alert: NodeClockSkewDetected
-          expr: (node_timex_offset_seconds{job=~"integrations/(node_exporter|unix)"} > 0.05 and deriv(node_timex_offset_seconds{job=~"integrations/(node_exporter|unix)"}[5m]) >= 0) or (node_timex_offset_seconds{job=~"integrations/(node_exporter|unix)"} < -0.05 and deriv(node_timex_offset_seconds{job=~"integrations/(node_exporter|unix)"}[5m]) <= 0)
+          expr: (node_timex_offset_seconds{job=~"integrations/(node_exporter|unix)"} > 0.05 and deriv(node_timex_offset_seconds{job=~"integrations/(node_exporter|unix)"}[5m]) >= 0) or (node_timex_offset_seconds{job=~"integrations/(node_exporter|unix)"} < -0.05 and deriv(node_timex_offset_seconds{job=~"integrations/(node_exporter|unix)"}[5m]) <= 0) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 10m
           labels:
             asserts_alert_category: failure
@@ -88,7 +88,7 @@ groups:
             description: Clock at {{ $labels.instance }} is out of sync by more than 0.05s. Ensure NTP is configured correctly on this host.
             summary: Clock skew detected.
         - alert: NodeDiskIOSaturation
-          expr: rate(node_disk_io_time_weighted_seconds_total{device!="",job=~"integrations/(node_exporter|unix)"}[5m]) > 10
+          expr: (rate(node_disk_io_time_weighted_seconds_total{device!="",job=~"integrations/(node_exporter|unix)"}[5m]) > 10) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 30m
           labels:
             asserts_alert_category: failure
@@ -101,7 +101,7 @@ groups:
                 This symptom might indicate disk saturation.
             summary: Disk IO queue is high.
         - alert: NodeFileDescriptorLimit
-          expr: (node_filefd_allocated{job=~"integrations/(node_exporter|unix)"} * 100 / node_filefd_maximum{job=~"integrations/(node_exporter|unix)"} > 70)
+          expr: (node_filefd_allocated{job=~"integrations/(node_exporter|unix)"} * 100 / node_filefd_maximum{job=~"integrations/(node_exporter|unix)"} > 70) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 15m
           labels:
             asserts_alert_category: failure
@@ -112,14 +112,14 @@ groups:
             description: File descriptors limit at {{ $labels.instance }} is currently at {{ printf "%.2f" $value }}%.
             summary: Kernel is predicted to exhaust file descriptors limit soon.
         - alert: NodeHasRebooted
-          expr: (time() - node_boot_time_seconds{job=~"integrations/(node_exporter|unix)"}) < 600 and (time() - (node_boot_time_seconds{job=~"integrations/(node_exporter|unix)"} offset 10m)) > 600
+          expr: ((time() - node_boot_time_seconds{job=~"integrations/(node_exporter|unix)"}) < 600 and (time() - (node_boot_time_seconds{job=~"integrations/(node_exporter|unix)"} offset 10m)) > 600) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           labels:
             severity: info
           annotations:
             description: Node {{ $labels.instance }} has rebooted {{ $value | humanize }} seconds ago.
             summary: Node has rebooted.
         - alert: NodeHighNumberConntrackEntriesUsed
-          expr: (node_nf_conntrack_entries{job=~"integrations/(node_exporter|unix)"} / node_nf_conntrack_entries_limit) > 0.75
+          expr: ((node_nf_conntrack_entries{job=~"integrations/(node_exporter|unix)"} / node_nf_conntrack_entries_limit) > 0.75) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           labels:
             asserts_alert_category: failure
             asserts_entity_type: Node
@@ -129,7 +129,7 @@ groups:
             description: '{{ $labels.instance }} {{ $value | humanizePercentage }} of conntrack entries are used.'
             summary: Number of conntrack are getting close to the limit.
         - alert: NodeMemoryHighUtilization
-          expr: 100 - (node_memory_MemAvailable_bytes{job=~"integrations/(node_exporter|unix)"} / node_memory_MemTotal_bytes{job=~"integrations/(node_exporter|unix)"} * 100) > 90
+          expr: (100 - (node_memory_MemAvailable_bytes{job=~"integrations/(node_exporter|unix)"} / node_memory_MemTotal_bytes{job=~"integrations/(node_exporter|unix)"} * 100) > 90) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 15m
           labels:
             asserts_alert_category: failure
@@ -141,7 +141,7 @@ groups:
                 Memory is filling up at {{ $labels.instance }}, has been above 90% for the last 15 minutes, is currently at {{ printf "%.2f" $value }}%.
             summary: Host is running out of memory.
         - alert: NodeMemoryMajorPagesFaults
-          expr: rate(node_vmstat_pgmajfault{job=~"integrations/(node_exporter|unix)"}[5m]) > 500
+          expr: (rate(node_vmstat_pgmajfault{job=~"integrations/(node_exporter|unix)"}[5m]) > 500) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 15m
           labels:
             asserts_alert_category: failure
@@ -154,7 +154,7 @@ groups:
                 Please check that there is enough memory available at this instance.
             summary: Memory major page faults are occurring at very high rate.
         - alert: NodeNetworkReceiveErrs
-          expr: rate(node_network_receive_errs_total{job=~"integrations/(node_exporter|unix)"}[2m]) / rate(node_network_receive_packets_total{job=~"integrations/(node_exporter|unix)"}[2m]) > 0.01
+          expr: (rate(node_network_receive_errs_total{job=~"integrations/(node_exporter|unix)"}[2m]) / rate(node_network_receive_packets_total{job=~"integrations/(node_exporter|unix)"}[2m]) > 0.01) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 1h
           labels:
             asserts_alert_category: failure
@@ -165,7 +165,7 @@ groups:
             description: '{{ $labels.instance }} interface {{ $labels.device }} has encountered {{ printf "%.0f" $value }} receive errors in the last two minutes.'
             summary: Network interface is reporting many receive errors.
         - alert: NodeNetworkTransmitErrs
-          expr: rate(node_network_transmit_errs_total{job=~"integrations/(node_exporter|unix)"}[2m]) / rate(node_network_transmit_packets_total{job=~"integrations/(node_exporter|unix)"}[2m]) > 0.01
+          expr: (rate(node_network_transmit_errs_total{job=~"integrations/(node_exporter|unix)"}[2m]) / rate(node_network_transmit_packets_total{job=~"integrations/(node_exporter|unix)"}[2m]) > 0.01) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 1h
           labels:
             asserts_alert_category: failure
@@ -176,7 +176,7 @@ groups:
             description: '{{ $labels.instance }} interface {{ $labels.device }} has encountered {{ printf "%.0f" $value }} transmit errors in the last two minutes.'
             summary: Network interface is reporting many transmit errors.
         - alert: NodeProcessesCountIsHigh
-          expr: node_procs_running{job=~"integrations/(node_exporter|unix)"} > 400
+          expr: (node_procs_running{job=~"integrations/(node_exporter|unix)"} > 400) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 5m
           labels:
             severity: warning
@@ -184,7 +184,7 @@ groups:
             description: There is {{ $value }} running processes on {{ $labels.instance }}.
             summary: There is more than 400 running processes on host.
         - alert: NodeRAIDDegraded
-          expr: node_md_disks_required{device!="",job=~"integrations/(node_exporter|unix)"} - ignoring (state) (node_md_disks{device!="",job=~"integrations/(node_exporter|unix)",state="active"}) > 0
+          expr: (node_md_disks_required{device!="",job=~"integrations/(node_exporter|unix)"} - ignoring (state) (node_md_disks{device!="",job=~"integrations/(node_exporter|unix)",state="active"}) > 0) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 15m
           labels:
             asserts_alert_category: failure
@@ -195,7 +195,7 @@ groups:
             description: RAID array '{{ $labels.device }}' at {{ $labels.instance }} is in degraded state due to one or more disks failures. Number of spare drives is insufficient to fix issue automatically.
             summary: RAID Array is degraded.
         - alert: NodeRAIDDiskFailure
-          expr: node_md_disks{device!="",job=~"integrations/(node_exporter|unix)",state="failed"} > 0
+          expr: (node_md_disks{device!="",job=~"integrations/(node_exporter|unix)",state="failed"} > 0) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           labels:
             asserts_alert_category: failure
             asserts_entity_type: Node
@@ -205,7 +205,7 @@ groups:
             description: At least one device in RAID array at {{ $labels.instance }} failed. Array '{{ $labels.device }}' needs attention and possibly a disk swap.
             summary: Failed device in RAID array.
         - alert: NodeSystemSaturation
-          expr: node_load1{job=~"integrations/(node_exporter|unix)"} / count without (cpu, mode) (node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)",mode="idle"}) > 2
+          expr: (node_load1{job=~"integrations/(node_exporter|unix)"} / count without (cpu, mode) (node_cpu_seconds_total{job=~"integrations/(node_exporter|unix)",mode="idle"}) > 2) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 15m
           labels:
             asserts_alert_category: failure
@@ -218,7 +218,7 @@ groups:
                 This might indicate this instance resources saturation and can cause it becoming unresponsive.
             summary: System saturated, load per core is very high.
         - alert: NodeSystemdServiceCrashlooping
-          expr: increase(node_systemd_service_restart_total{job=~"integrations/(node_exporter|unix)"}[5m]) > 2
+          expr: (increase(node_systemd_service_restart_total{job=~"integrations/(node_exporter|unix)"}[5m]) > 2) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 15m
           labels:
             asserts_alert_category: failure
@@ -229,7 +229,7 @@ groups:
             description: Systemd service {{ $labels.name }} has been restarted too many times at {{ $labels.instance }} for the last 15 minutes. Please check if service is crash looping.
             summary: Systemd service keeps restaring, possibly crash looping.
         - alert: NodeSystemdServiceFailed
-          expr: node_systemd_unit_state{job=~"integrations/(node_exporter|unix)",state="failed"} == 1
+          expr: (node_systemd_unit_state{job=~"integrations/(node_exporter|unix)",state="failed"} == 1) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           for: 5m
           labels:
             asserts_alert_category: failure
@@ -242,7 +242,7 @@ groups:
                 If this service is not required anymore, remove it or run `systemctl reset-failed {{ $labels.name }}` in order to reset the failed counter.
             summary: Systemd service has entered failed state.
         - alert: NodeTextFileCollectorScrapeError
-          expr: node_textfile_scrape_error{job=~"integrations/(node_exporter|unix)"} == 1
+          expr: (node_textfile_scrape_error{job=~"integrations/(node_exporter|unix)"} == 1) * on (instance) group_left(label_tenantname, label_allocationtags) label_replace(kube_node_labels{cluster=~".*", job="integrations/kubernetes/kube-state-metrics"},"instance","$1","label_kubernetes_io_hostname","(.+)")
           labels:
             asserts_alert_category: failure
             asserts_entity_type: Node
