@@ -682,7 +682,7 @@ spec:
                     TENANT_NAME:
                         - $tenant
               refresh: 1
-              regex: ""
+              regex: "/([^:]+)$/"
               skipUrlSync: false
               sort: 0
               type: query
