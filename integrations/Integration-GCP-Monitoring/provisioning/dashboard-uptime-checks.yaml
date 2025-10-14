@@ -1,0 +1,1181 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: Integration-GCP-Monitoring
+    name: uptime-checks
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links:
+        - asDropdown: true
+          icon: dashboard
+          includeVars: false
+          keepTime: false
+          tags: []
+          targetBlank: true
+          title: Uptime Checks Overview Dashboard
+          tooltip: Open Dashboard
+          type: link
+          url: /d/yarztjd/uptime-checks-overview
+    panels:
+        - datasource:
+            type: stackdriver
+            uid: $datasource
+          description: Shows whether uptime checks are passing or failing over time
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings:
+                    - options:
+                        "1":
+                            color: green
+                            text: Passed
+                      type: value
+                    - options:
+                        "0":
+                            color: red
+                            text: Failed
+                      type: value
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                        - color: green
+                          value: 1
+                unit: short
+            overrides: []
+          gridPos:
+            h: 6
+            w: 8
+            x: 0
+            "y": 0
+          id: 7
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - last
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: grafana-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.label.check_id
+                    - =
+                    - $check_id
+                    - AND
+                    - metric.label.checker_location
+                    - =~
+                    - $location
+                    - AND
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/uptime_check/check_passed
+                groupBys:
+                    - metric.label.check_id
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Uptime check status
+          transformations:
+            - id: calculateField
+              options:
+                binary:
+                    left:
+                        matcher:
+                            id: byType
+                            options: number
+                    right:
+                        matcher:
+                            id: byName
+                            options: $location
+                mode: windowFunctions
+                reduce:
+                    reducer: sum
+                replaceFields: true
+                unary:
+                    fieldName: $location
+                    operator: floor
+                window:
+                    reducer: mean
+                    windowAlignment: trailing
+                    windowSize: 0.1
+                    windowSizeMode: percentage
+          type: stat
+        - datasource:
+            type: stackdriver
+            uid: $datasource
+          description: Average request latency for uptime checks
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 6
+            w: 8
+            x: 8
+            "y": 0
+          id: 3
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_MEAN
+                filters:
+                    - metric.label.checker_location
+                    - =~
+                    - $location
+                    - AND
+                    - metric.label.check_id
+                    - =
+                    - $check_id
+                    - AND
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/uptime_check/request_latency
+                groupBys:
+                    - resource.label.check_id
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Request latency
+          type: stat
+        - datasource:
+            type: stackdriver
+            uid: $datasource
+          description: Time until SSL certificate expires (in days)
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                decimals: 0
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                        - color: green
+                          value: 14
+                unit: d
+            overrides: []
+          gridPos:
+            h: 6
+            w: 8
+            x: 16
+            "y": 0
+          id: 2
+          options:
+            colorMode: value
+            graphMode: none
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_MEAN
+                filters:
+                    - metric.label.checker_location
+                    - =~
+                    - $location
+                    - AND
+                    - metric.label.check_id
+                    - =
+                    - $check_id
+                    - AND
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/uptime_check/time_until_ssl_cert_expires
+                groupBys:
+                    - resource.label.check_id
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: SSL certificate expiry
+          type: stat
+        - datasource:
+            type: stackdriver
+            uid: $datasource
+          description: Shows whether uptime checks are passing or failing over time
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: opacity
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: true
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings:
+                    - options:
+                        "1":
+                            color: green
+                            text: Passed
+                      type: value
+                    - options:
+                        "0":
+                            color: red
+                            text: Failed
+                      type: value
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                        - color: green
+                          value: 1
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 24
+            x: 0
+            "y": 6
+          id: 9
+          options:
+            legend:
+                calcs:
+                    - min
+                    - lastNotNull
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.label.checker_location
+                    - =~
+                    - $location
+                    - AND
+                    - metric.label.check_id
+                    - =
+                    - $check_id
+                    - AND
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/uptime_check/check_passed
+                groupBys:
+                    - resource.label.check_id
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Uptime check status
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: $datasource
+          description: Average request latency for uptime checks
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 14
+          id: 8
+          options:
+            legend:
+                calcs:
+                    - min
+                    - max
+                    - mean
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.label.checker_location
+                    - =~
+                    - $location
+                    - AND
+                    - metric.label.check_id
+                    - =
+                    - $check_id
+                    - AND
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/uptime_check/request_latency
+                groupBys:
+                    - resource.label.check_id
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Request latency
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: $datasource
+          description: Indicates if response content matches expected content
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings:
+                    - options:
+                        "0":
+                            color: green
+                            text: Match
+                      type: value
+                    - options:
+                        "1":
+                            color: red
+                            text: Mismatch
+                      type: value
+                max: 1
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 1
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 14
+          id: 6
+          options:
+            legend:
+                calcs:
+                    - lastNotNull
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.label.checker_location
+                    - =~
+                    - $location
+                    - AND
+                    - metric.label.check_id
+                    - =
+                    - $check_id
+                    - AND
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/uptime_check/content_mismatch
+                groupBys:
+                    - resource.label.check_id
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Content mismatch
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: $datasource
+          description: HTTP status codes returned by uptime checks
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: true
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings:
+                    - options:
+                        from: 200
+                        result:
+                            color: green
+                        to: 299
+                      type: range
+                    - options:
+                        from: 300
+                        result:
+                            color: blue
+                        to: 399
+                      type: range
+                    - options:
+                        from: 400
+                        result:
+                            color: orange
+                        to: 499
+                      type: range
+                    - options:
+                        from: 500
+                        result:
+                            color: red
+                        to: 599
+                      type: range
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 22
+          id: 4
+          options:
+            legend:
+                calcs:
+                    - lastNotNull
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.label.checker_location
+                    - =~
+                    - $location
+                    - AND
+                    - metric.label.check_id
+                    - =
+                    - $check_id
+                    - AND
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/uptime_check/http_status
+                groupBys:
+                    - resource.label.check_id
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: HTTP status codes
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: $datasource
+          description: Error codes encountered during uptime checks
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: true
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 22
+          id: 5
+          options:
+            legend:
+                calcs:
+                    - lastNotNull
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.label.checker_location
+                    - =~
+                    - $location
+                    - AND
+                    - metric.label.check_id
+                    - =
+                    - $check_id
+                    - AND
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/uptime_check/error_code
+                groupBys:
+                    - resource.label.check_id
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Error codes
+          type: timeseries
+    preload: false
+    schemaVersion: 41
+    tags:
+        - Cloud Monitoring
+        - GCP
+        - Uptime
+    templating:
+        list:
+            - allowCustomValue: false
+              current:
+                text: duplo-gcp
+                value: eezqmqatxplvkd
+              includeAll: false
+              label: Datasource
+              name: datasource
+              options: []
+              query: stackdriver
+              refresh: 1
+              regex: /^duplo/
+              type: datasource
+            - allowCustomValue: false
+              current:
+                text: cx-app-foxbackstage
+                value: cx-app-foxbackstage
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              description: GCP Project ID
+              label: Projects
+              name: project
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: duplo-logs
+                projects:
+                    - label: duplo-logs
+                      value: duplo-logs
+                    - label: cx-app-foxbackstage
+                      value: cx-app-foxbackstage
+                    - label: cx-app-nutanixcampus
+                      value: cx-app-nutanixcampus
+                    - label: cx-app-adobe
+                      value: cx-app-adobe
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
+                selectedQueryType: projects
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ^(?!.*duplo-logs).*
+              type: query
+            - allowCustomValue: false
+              current:
+                text: adobe-uptime-EwwwtwZ97bk
+                value: adobe-uptime-EwwwtwZ97bk
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              definition: ""
+              description: Uptime check identifier
+              includeAll: false
+              label: Check ID
+              name: check_id
+              options: []
+              query:
+                "0": '{'
+                "1": '"'
+                "2": l
+                "3": a
+                "4": b
+                "5": e
+                "6": l
+                "7": K
+                "8": e
+                "9": "y"
+                "10": '"'
+                "11": ':'
+                "12": ' '
+                "13": '"'
+                "14": r
+                "15": e
+                "16": s
+                "17": o
+                "18": u
+                "19": r
+                "20": c
+                "21": e
+                "22": .
+                "23": l
+                "24": a
+                "25": b
+                "26": e
+                "27": l
+                "28": .
+                "29": c
+                "30": h
+                "31": e
+                "32": c
+                "33": k
+                "34": _
+                "35": i
+                "36": d
+                "37": '"'
+                "38": ','
+                "39": ' '
+                "40": '"'
+                "41": p
+                "42": r
+                "43": o
+                "44": j
+                "45": e
+                "46": c
+                "47": t
+                "48": "N"
+                "49": a
+                "50": m
+                "51": e
+                "52": '"'
+                "53": ':'
+                "54": ' '
+                "55": '"'
+                "56": $
+                "57": p
+                "58": r
+                "59": o
+                "60": j
+                "61": e
+                "62": c
+                "63": t
+                "64": '"'
+                "65": ','
+                "66": ' '
+                "67": '"'
+                "68": s
+                "69": e
+                "70": l
+                "71": e
+                "72": c
+                "73": t
+                "74": e
+                "75": d
+                "76": M
+                "77": e
+                "78": t
+                "79": r
+                "80": i
+                "81": c
+                "82": T
+                "83": "y"
+                "84": p
+                "85": e
+                "86": '"'
+                "87": ':'
+                "88": ' '
+                "89": '"'
+                "90": m
+                "91": o
+                "92": "n"
+                "93": i
+                "94": t
+                "95": o
+                "96": r
+                "97": i
+                "98": "n"
+                "99": g
+                "100": .
+                "101": g
+                "102": o
+                "103": o
+                "104": g
+                "105": l
+                "106": e
+                "107": a
+                "108": p
+                "109": i
+                "110": s
+                "111": .
+                "112": c
+                "113": o
+                "114": m
+                "115": /
+                "116": u
+                "117": p
+                "118": t
+                "119": i
+                "120": m
+                "121": e
+                "122": _
+                "123": c
+                "124": h
+                "125": e
+                "126": c
+                "127": k
+                "128": /
+                "129": c
+                "130": h
+                "131": e
+                "132": c
+                "133": k
+                "134": _
+                "135": p
+                "136": a
+                "137": s
+                "138": s
+                "139": e
+                "140": d
+                "141": '"'
+                "142": ','
+                "143": ' '
+                "144": '"'
+                "145": s
+                "146": e
+                "147": l
+                "148": e
+                "149": c
+                "150": t
+                "151": e
+                "152": d
+                "153": Q
+                "154": u
+                "155": e
+                "156": r
+                "157": "y"
+                "158": T
+                "159": "y"
+                "160": p
+                "161": e
+                "162": '"'
+                "163": ':'
+                "164": ' '
+                "165": '"'
+                "166": l
+                "167": a
+                "168": b
+                "169": e
+                "170": l
+                "171": V
+                "172": a
+                "173": l
+                "174": u
+                "175": e
+                "176": s
+                "177": '"'
+                "178": ','
+                "179": ' '
+                "180": '"'
+                "181": r
+                "182": e
+                "183": f
+                "184": I
+                "185": d
+                "186": '"'
+                "187": ':'
+                "188": ' '
+                "189": '"'
+                "190": C
+                "191": l
+                "192": o
+                "193": u
+                "194": d
+                "195": M
+                "196": o
+                "197": "n"
+                "198": i
+                "199": t
+                "200": o
+                "201": r
+                "202": i
+                "203": "n"
+                "204": g
+                "205": V
+                "206": a
+                "207": r
+                "208": i
+                "209": a
+                "210": b
+                "211": l
+                "212": e
+                "213": Q
+                "214": u
+                "215": e
+                "216": r
+                "217": "y"
+                "218": E
+                "219": d
+                "220": i
+                "221": t
+                "222": o
+                "223": r
+                "224": '-'
+                "225": V
+                "226": a
+                "227": r
+                "228": i
+                "229": a
+                "230": b
+                "231": l
+                "232": e
+                "233": Q
+                "234": u
+                "235": e
+                "236": r
+                "237": "y"
+                "238": '"'
+                "239": '}'
+                labelKey: metric.label.check_id
+                loading: false
+                projectName: $project
+                projects:
+                    - label: duplo-logs
+                      value: duplo-logs
+                    - label: cx-app-foxbackstage
+                      value: cx-app-foxbackstage
+                    - label: cx-app-nutanixcampus
+                      value: cx-app-nutanixcampus
+                    - label: cx-app-adobe
+                      value: cx-app-adobe
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: monitoring.googleapis.com/uptime_check/check_passed
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: monitoring.googleapis.com
+                sloServices:
+                    - label: Adobe - 99.99% Availibility SLOs
+                      value: custom-srv-windows-slos
+                    - label: cx-app-adobe/default
+                      value: gae:cx-app-adobe_default
+              refresh: 2
+              type: query
+            - allowCustomValue: false
+              current:
+                text: eur-belgium
+                value: eur-belgium
+              datasource:
+                type: stackdriver
+                uid: $datasource
+              definition: ""
+              description: GCP Uptime Check Location
+              includeAll: true
+              label: Location
+              multi: true
+              name: location
+              options: []
+              query:
+                labelKey: metric.label.checker_location
+                loading: false
+                projectName: $project
+                projects:
+                    - label: duplo-logs
+                      value: duplo-logs
+                    - label: cx-app-foxbackstage
+                      value: cx-app-foxbackstage
+                    - label: cx-app-nutanixcampus
+                      value: cx-app-nutanixcampus
+                    - label: cx-app-adobe
+                      value: cx-app-adobe
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: monitoring.googleapis.com/uptime_check/check_passed
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: monitoring.googleapis.com
+                sloServices:
+                    - label: Adobe - 99.99% Availibility SLOs
+                      value: custom-srv-windows-slos
+                    - label: cx-app-adobe/default
+                      value: gae:cx-app-adobe_default
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-1h
+        to: now
+    timepicker: {}
+    timezone: browser
+    title: Uptime Checks
+    uid: uptime-checks
+
