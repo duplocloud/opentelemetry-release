@@ -165,6 +165,8 @@ spec:
                     thresholdsStyle:
                         mode: "off"
                 mappings: []
+                max: 2
+                min: 0
                 thresholds:
                     mode: absolute
                     steps:
@@ -455,16 +457,6 @@ spec:
               query:
                 labelKey: ""
                 loading: false
-                projectName: duplo-logs
-                projects:
-                    - label: duplo-logs
-                      value: duplo-logs
-                    - label: cx-app-foxbackstage
-                      value: cx-app-foxbackstage
-                    - label: cx-app-nutanixcampus
-                      value: cx-app-nutanixcampus
-                    - label: cx-app-adobe
-                      value: cx-app-adobe
                 refId: CloudMonitoringVariableQueryEditor-VariableQuery
                 selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
                 selectedQueryType: projects
@@ -489,25 +481,11 @@ spec:
                 labelKey: ""
                 loading: false
                 projectName: $project
-                projects:
-                    - label: duplo-logs
-                      value: duplo-logs
-                    - label: cx-app-foxbackstage
-                      value: cx-app-foxbackstage
-                    - label: cx-app-nutanixcampus
-                      value: cx-app-nutanixcampus
-                    - label: cx-app-adobe
-                      value: cx-app-adobe
                 refId: CloudMonitoringVariableQueryEditor-VariableQuery
                 selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
                 selectedQueryType: sloServices
                 selectedSLOService: $Slo
                 selectedService: actions.googleapis.com
-                sloServices:
-                    - label: Adobe - 99.99% Availibility SLOs
-                      value: custom-srv-windows-slos
-                    - label: cx-app-adobe/default
-                      value: gae:cx-app-adobe_default
               refresh: 1
               regex: ""
               type: query
@@ -527,25 +505,11 @@ spec:
                 labelKey: ""
                 loading: false
                 projectName: $project
-                projects:
-                    - label: duplo-logs
-                      value: duplo-logs
-                    - label: cx-app-foxbackstage
-                      value: cx-app-foxbackstage
-                    - label: cx-app-nutanixcampus
-                      value: cx-app-nutanixcampus
-                    - label: cx-app-adobe
-                      value: cx-app-adobe
                 refId: CloudMonitoringVariableQueryEditor-VariableQuery
                 selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
                 selectedQueryType: slo
                 selectedSLOService: $slo
                 selectedService: actions.googleapis.com
-                sloServices:
-                    - label: Adobe - 99.99% Availibility SLOs
-                      value: custom-srv-windows-slos
-                    - label: cx-app-adobe/default
-                      value: gae:cx-app-adobe_default
               refresh: 1
               regex: ""
               type: query

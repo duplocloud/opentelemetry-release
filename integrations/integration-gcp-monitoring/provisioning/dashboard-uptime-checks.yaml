@@ -834,16 +834,6 @@ spec:
               query:
                 labelKey: ""
                 loading: false
-                projectName: duplo-logs
-                projects:
-                    - label: duplo-logs
-                      value: duplo-logs
-                    - label: cx-app-foxbackstage
-                      value: cx-app-foxbackstage
-                    - label: cx-app-nutanixcampus
-                      value: cx-app-nutanixcampus
-                    - label: cx-app-adobe
-                      value: cx-app-adobe
                 refId: CloudMonitoringVariableQueryEditor-VariableQuery
                 selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
                 selectedQueryType: projects
@@ -854,9 +844,6 @@ spec:
               regex: ^(?!.*duplo-logs).*
               type: query
             - allowCustomValue: false
-              current:
-                text: adobe-uptime-EwwwtwZ97bk
-                value: adobe-uptime-EwwwtwZ97bk
               datasource:
                 type: stackdriver
                 uid: duplo-gcp
@@ -1110,25 +1097,11 @@ spec:
                 labelKey: metric.label.check_id
                 loading: false
                 projectName: $project
-                projects:
-                    - label: duplo-logs
-                      value: duplo-logs
-                    - label: cx-app-foxbackstage
-                      value: cx-app-foxbackstage
-                    - label: cx-app-nutanixcampus
-                      value: cx-app-nutanixcampus
-                    - label: cx-app-adobe
-                      value: cx-app-adobe
                 refId: CloudMonitoringVariableQueryEditor-VariableQuery
                 selectedMetricType: monitoring.googleapis.com/uptime_check/check_passed
                 selectedQueryType: labelValues
                 selectedSLOService: ""
                 selectedService: monitoring.googleapis.com
-                sloServices:
-                    - label: Adobe - 99.99% Availibility SLOs
-                      value: custom-srv-windows-slos
-                    - label: cx-app-adobe/default
-                      value: gae:cx-app-adobe_default
               refresh: 2
               type: query
             - allowCustomValue: false
@@ -1149,25 +1122,11 @@ spec:
                 labelKey: metric.label.checker_location
                 loading: false
                 projectName: $project
-                projects:
-                    - label: duplo-logs
-                      value: duplo-logs
-                    - label: cx-app-foxbackstage
-                      value: cx-app-foxbackstage
-                    - label: cx-app-nutanixcampus
-                      value: cx-app-nutanixcampus
-                    - label: cx-app-adobe
-                      value: cx-app-adobe
                 refId: CloudMonitoringVariableQueryEditor-VariableQuery
                 selectedMetricType: monitoring.googleapis.com/uptime_check/check_passed
                 selectedQueryType: labelValues
                 selectedSLOService: ""
                 selectedService: monitoring.googleapis.com
-                sloServices:
-                    - label: Adobe - 99.99% Availibility SLOs
-                      value: custom-srv-windows-slos
-                    - label: cx-app-adobe/default
-                      value: gae:cx-app-adobe_default
               refresh: 1
               regex: ""
               type: query
