@@ -480,6 +480,7 @@ spec:
               query:
                 labelKey: ""
                 loading: false
+                projectName: $project
                 refId: CloudMonitoringVariableQueryEditor-VariableQuery
                 selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
                 selectedQueryType: sloServices
@@ -508,6 +509,7 @@ spec:
               query:
                 labelKey: ""
                 loading: false
+                projectName: $project
                 refId: CloudMonitoringVariableQueryEditor-VariableQuery
                 selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
                 selectedQueryType: slo
