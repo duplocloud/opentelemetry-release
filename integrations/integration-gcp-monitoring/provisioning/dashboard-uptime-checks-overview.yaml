@@ -777,16 +777,6 @@ spec:
                 "386": '}'
                 labelKey: ""
                 loading: false
-                projectName: duplo-logs
-                projects:
-                    - label: duplo-logs
-                      value: duplo-logs
-                    - label: cx-app-foxbackstage
-                      value: cx-app-foxbackstage
-                    - label: cx-app-nutanixcampus
-                      value: cx-app-nutanixcampus
-                    - label: cx-app-adobe
-                      value: cx-app-adobe
                 refId: CloudMonitoringVariableQueryEditor-VariableQuery
                 selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
                 selectedQueryType: projects
