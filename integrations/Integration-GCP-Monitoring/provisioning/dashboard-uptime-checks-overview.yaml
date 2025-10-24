@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: Integration-GCP-Monitoring
+    folder: integration-gcp-monitoring
     name: uptime-checks-overview
 spec:
     annotations:
@@ -142,7 +142,7 @@ spec:
                       value:
                         - targetBlank: true
                           title: Open Uptime Check Dashboard
-                          url: /d/0a32a8df-662a-41f5-ad78-357701d529b6/uptime-checks?var-project=${project}&var-check_id=${__data.fields["Check ID"]}&var-location=$__all
+                          url: /d/uptime-checks/uptime-checks?var-project=${project}&var-check_id=${__data.fields["Check ID"]}&var-location=$__all
                 - matcher:
                     id: byName
                     options: Location

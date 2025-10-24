@@ -5,14 +5,9 @@ metadata:
 spec:
     access: proxy
     jsonData:
-        authenticationType: jwt
-        clientEmail: stackdriver@duplo-logs.iam.gserviceaccount.com
-        defaultProject: duplo-logs
-        tokenUri: https://oauth2.googleapis.com/token
+        authenticationType: gce
     name: duplo-gcp
     orgId: 1
-    secureJsonFields:
-        privateKey: true
     type: stackdriver
     typeLogoUrl: public/app/plugins/datasource/cloud-monitoring/img/cloud_monitoring_logo.svg
     uid: duplo-gcp

@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: Integration-GCP-Monitoring
+    folder: integration-gcp-monitoring
     name: uptime-checks
 spec:
     annotations:
@@ -28,7 +28,7 @@ spec:
           title: Uptime Checks Overview Dashboard
           tooltip: Open Dashboard
           type: link
-          url: /d/yarztjd/uptime-checks-overview
+          url: /d/uptime-checks-overview/uptime-checks-overview
     panels:
         - datasource:
             type: stackdriver
@@ -810,7 +810,7 @@ spec:
             - allowCustomValue: false
               current:
                 text: duplo-gcp
-                value: eezqmqatxplvkd
+                value: duplo-gcp
               includeAll: false
               label: Datasource
               name: datasource

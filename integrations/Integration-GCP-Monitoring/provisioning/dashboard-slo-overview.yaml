@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: Integration-GCP-Monitoring
+    folder: integration-gcp-monitoring
     name: slo-overview
 spec:
     annotations:
@@ -433,7 +433,7 @@ spec:
             - allowCustomValue: false
               current:
                 text: duplo-gcp
-                value: eezqmqatxplvkd
+                value: duplo-gcp
               label: Datasource
               name: datasource
               options: []
