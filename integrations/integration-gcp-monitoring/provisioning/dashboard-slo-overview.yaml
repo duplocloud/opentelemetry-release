@@ -486,11 +486,6 @@ spec:
                 selectedQueryType: sloServices
                 selectedSLOService: $Slo
                 selectedService: actions.googleapis.com
-                sloServices:
-                    - label: Adobe - 99.99% Availibility SLOs
-                      value: custom-srv-windows-slos
-                    - label: cx-app-adobe/default
-                      value: gae:cx-app-adobe_default
               refresh: 1
               regex: ""
               type: query
@@ -515,11 +510,6 @@ spec:
                 selectedQueryType: slo
                 selectedSLOService: $slo
                 selectedService: actions.googleapis.com
-                sloServices:
-                    - label: Adobe - 99.99% Availibility SLOs
-                      value: custom-srv-windows-slos
-                    - label: cx-app-adobe/default
-                      value: gae:cx-app-adobe_default
               refresh: 1
               regex: ""
               type: query
