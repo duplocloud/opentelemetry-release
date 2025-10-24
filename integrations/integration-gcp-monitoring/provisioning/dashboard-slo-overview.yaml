@@ -513,8 +513,8 @@ spec:
               type: query
             - allowCustomValue: false
               current:
-                text: YcEXYOWZQoO1SN1nmrrP-g
-                value: YcEXYOWZQoO1SN1nmrrP-g
+                text: All
+                value: $__all
               datasource:
                 type: stackdriver
                 uid: ${datasource}
