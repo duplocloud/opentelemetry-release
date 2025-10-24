@@ -1,0 +1,13 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Datasource
+metadata:
+    name: duplo-gcp
+spec:
+    access: proxy
+    jsonData:
+        authenticationType: gce
+    name: duplo-gcp
+    orgId: 1
+    type: stackdriver
+    typeLogoUrl: public/app/plugins/datasource/cloud-monitoring/img/cloud_monitoring_logo.svg
+    uid: duplo-gcp

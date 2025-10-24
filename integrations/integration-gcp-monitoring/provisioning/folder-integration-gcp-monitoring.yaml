@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-gcp-monitoring
+spec:
+    title: Integration-GCP-Monitoring
+    uid: integration-gcp-monitoring
