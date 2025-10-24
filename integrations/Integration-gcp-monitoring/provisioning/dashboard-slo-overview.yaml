@@ -1,0 +1,559 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-gcp-monitoring
+    name: slo-overview
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - collapsed: false
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 0
+          id: 2
+          panels: []
+          repeat: slo_id
+          title: $project - $slo_id
+          type: row
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                max: 2
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: percentunit
+            overrides: []
+          gridPos:
+            h: 9
+            w: 6
+            x: 0
+            "y": 1
+          id: 1
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{service}} - {{slo}} - {{selector}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              promQLQuery:
+                expr: |4+
+                projectName: duplo-logs
+                step: 10s
+              queryType: slo
+              refId: A
+              sloQuery:
+                alignmentPeriod: cloud-monitoring-auto
+                goal: 0.9999
+                lookbackPeriod: ""
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+                selectorName: select_slo_health
+                serviceId: $slo
+                serviceName: $slo
+                sloId: $slo_id
+                sloName: $slo_id
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/billing/bytes_ingested_hourly
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: duplo-logs
+          title: SLI Value
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: percentunit
+            overrides: []
+          gridPos:
+            h: 9
+            w: 6
+            x: 6
+            "y": 1
+          id: 3
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{service}} - {{slo}} - {{selector}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              promQLQuery:
+                expr: |4+
+                projectName: duplo-logs
+                step: 10s
+              queryType: slo
+              refId: A
+              sloQuery:
+                alignmentPeriod: cloud-monitoring-auto
+                goal: 0.9999
+                lookbackPeriod: ""
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+                selectorName: select_slo_budget_fraction
+                serviceId: $slo
+                serviceName: $slo
+                sloId: $slo_id
+                sloName: $slo_id
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/billing/bytes_ingested_hourly
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: duplo-logs
+          title: SLI Error Budget Remaining
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                fieldMinMax: false
+                mappings: []
+                max: 2
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: percentunit
+            overrides: []
+          gridPos:
+            h: 9
+            w: 6
+            x: 12
+            "y": 1
+          id: 4
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{service}} - {{slo}} - {{selector}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              promQLQuery:
+                expr: |4+
+                projectName: duplo-logs
+                step: 10s
+              queryType: slo
+              refId: A
+              sloQuery:
+                alignmentPeriod: cloud-monitoring-auto
+                goal: 0.9999
+                lookbackPeriod: 5m
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+                selectorName: select_slo_burn_rate
+                serviceId: $slo
+                serviceName: $slo
+                sloId: $slo_id
+                sloName: $slo_id
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/billing/bytes_ingested_hourly
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: duplo-logs
+          title: SLO Burn Rate
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                max: 2
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: percentunit
+            overrides: []
+          gridPos:
+            h: 9
+            w: 6
+            x: 18
+            "y": 1
+          id: 5
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - aliasBy: '{{service}} - {{slo}} - {{selector}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              promQLQuery:
+                expr: |4+
+                projectName: duplo-logs
+                step: 10s
+              queryType: slo
+              refId: A
+              sloQuery:
+                alignmentPeriod: cloud-monitoring-auto
+                goal: 0.9999
+                lookbackPeriod: 5m
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+                selectorName: select_slo_compliance
+                serviceId: $slo
+                serviceName: $slo
+                sloId: $slo_id
+                sloName: $slo_id
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.type
+                    - =
+                    - monitoring.googleapis.com/billing/bytes_ingested_hourly
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: duplo-logs
+          title: SLO Compliance
+          type: timeseries
+    preload: false
+    schemaVersion: 41
+    tags:
+        - Cloud Monitoring
+        - GCP
+        - SLO
+    templating:
+        list:
+            - allowCustomValue: false
+              current:
+                text: duplo-gcp
+                value: duplo-gcp
+              label: Datasource
+              name: datasource
+              options: []
+              query: stackdriver
+              refresh: 1
+              regex: ""
+              type: datasource
+            - allowCustomValue: false
+              current:
+                text: cx-app-adobe
+                value: cx-app-adobe
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              label: Project
+              name: project
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: duplo-logs
+                projects:
+                    - label: duplo-logs
+                      value: duplo-logs
+                    - label: cx-app-foxbackstage
+                      value: cx-app-foxbackstage
+                    - label: cx-app-nutanixcampus
+                      value: cx-app-nutanixcampus
+                    - label: cx-app-adobe
+                      value: cx-app-adobe
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
+                selectedQueryType: projects
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ^(?!.*duplo-logs).*
+              type: query
+            - allowCustomValue: false
+              current:
+                text: custom-srv-windows-slos
+                value: custom-srv-windows-slos
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              label: SLO
+              name: slo
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                projects:
+                    - label: duplo-logs
+                      value: duplo-logs
+                    - label: cx-app-foxbackstage
+                      value: cx-app-foxbackstage
+                    - label: cx-app-nutanixcampus
+                      value: cx-app-nutanixcampus
+                    - label: cx-app-adobe
+                      value: cx-app-adobe
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
+                selectedQueryType: sloServices
+                selectedSLOService: $Slo
+                selectedService: actions.googleapis.com
+                sloServices:
+                    - label: Adobe - 99.99% Availibility SLOs
+                      value: custom-srv-windows-slos
+                    - label: cx-app-adobe/default
+                      value: gae:cx-app-adobe_default
+              refresh: 1
+              regex: ""
+              type: query
+            - allowCustomValue: false
+              current:
+                text: YcEXYOWZQoO1SN1nmrrP-g
+                value: YcEXYOWZQoO1SN1nmrrP-g
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              includeAll: true
+              label: SLO ID
+              name: slo_id
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                projects:
+                    - label: duplo-logs
+                      value: duplo-logs
+                    - label: cx-app-foxbackstage
+                      value: cx-app-foxbackstage
+                    - label: cx-app-nutanixcampus
+                      value: cx-app-nutanixcampus
+                    - label: cx-app-adobe
+                      value: cx-app-adobe
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
+                selectedQueryType: slo
+                selectedSLOService: $slo
+                selectedService: actions.googleapis.com
+                sloServices:
+                    - label: Adobe - 99.99% Availibility SLOs
+                      value: custom-srv-windows-slos
+                    - label: cx-app-adobe/default
+                      value: gae:cx-app-adobe_default
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-1h
+        to: now
+    timepicker: {}
+    timezone: browser
+    title: SLO Overview
+    uid: slo-overview
+
