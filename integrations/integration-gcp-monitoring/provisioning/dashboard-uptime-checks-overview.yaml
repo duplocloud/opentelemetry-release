@@ -34,7 +34,7 @@ spec:
           type: row
         - datasource:
             type: stackdriver
-            uid: $datasource
+            uid: duplo-gcp
           description: Project-wise uptime checks with location, status, latency, and SSL certificate expiry
           fieldConfig:
             defaults:
@@ -196,7 +196,7 @@ spec:
           targets:
             - datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: false
@@ -216,7 +216,7 @@ spec:
                 view: FULL
             - datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: false
@@ -236,7 +236,7 @@ spec:
                 view: FULL
             - datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: false
@@ -379,7 +379,7 @@ spec:
                     - $__all
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               definition: ""
               description: GCP Project ID
               includeAll: true

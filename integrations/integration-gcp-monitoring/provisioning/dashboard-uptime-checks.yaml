@@ -32,7 +32,7 @@ spec:
     panels:
         - datasource:
             type: stackdriver
-            uid: $datasource
+            uid: duplo-gcp
           description: Shows whether uptime checks are passing or failing over time
           fieldConfig:
             defaults:
@@ -82,7 +82,7 @@ spec:
             - aliasBy: '{{metric.label.checker_location}}'
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: true
@@ -136,7 +136,7 @@ spec:
           type: stat
         - datasource:
             type: stackdriver
-            uid: $datasource
+            uid: duplo-gcp
           description: Average request latency for uptime checks
           fieldConfig:
             defaults:
@@ -176,7 +176,7 @@ spec:
             - aliasBy: '{{metric.label.checker_location}}'
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: true
@@ -206,7 +206,7 @@ spec:
           type: stat
         - datasource:
             type: stackdriver
-            uid: $datasource
+            uid: duplo-gcp
           description: Time until SSL certificate expires (in days)
           fieldConfig:
             defaults:
@@ -247,7 +247,7 @@ spec:
             - aliasBy: '{{metric.label.checker_location}}'
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: true
@@ -277,7 +277,7 @@ spec:
           type: stat
         - datasource:
             type: stackdriver
-            uid: $datasource
+            uid: duplo-gcp
           description: Shows whether uptime checks are passing or failing over time
           fieldConfig:
             defaults:
@@ -353,7 +353,7 @@ spec:
             - aliasBy: '{{metric.label.checker_location}}'
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: true
@@ -383,7 +383,7 @@ spec:
           type: timeseries
         - datasource:
             type: stackdriver
-            uid: $datasource
+            uid: duplo-gcp
           description: Average request latency for uptime checks
           fieldConfig:
             defaults:
@@ -450,7 +450,7 @@ spec:
             - aliasBy: '{{metric.label.checker_location}}'
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: true
@@ -480,7 +480,7 @@ spec:
           type: timeseries
         - datasource:
             type: stackdriver
-            uid: $datasource
+            uid: duplo-gcp
           description: Indicates if response content matches expected content
           fieldConfig:
             defaults:
@@ -557,7 +557,7 @@ spec:
             - aliasBy: '{{metric.label.checker_location}}'
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: true
@@ -587,7 +587,7 @@ spec:
           type: timeseries
         - datasource:
             type: stackdriver
-            uid: $datasource
+            uid: duplo-gcp
           description: HTTP status codes returned by uptime checks
           fieldConfig:
             defaults:
@@ -676,7 +676,7 @@ spec:
             - aliasBy: '{{metric.label.checker_location}}'
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: true
@@ -706,7 +706,7 @@ spec:
           type: timeseries
         - datasource:
             type: stackdriver
-            uid: $datasource
+            uid: duplo-gcp
           description: Error codes encountered during uptime checks
           fieldConfig:
             defaults:
@@ -771,7 +771,7 @@ spec:
             - aliasBy: '{{metric.label.checker_location}}'
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               hide: false
               queryType: timeSeriesList
               range: true
@@ -859,7 +859,7 @@ spec:
                 value: adobe-uptime-EwwwtwZ97bk
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               definition: ""
               description: Uptime check identifier
               includeAll: false
@@ -1137,7 +1137,7 @@ spec:
                 value: eur-belgium
               datasource:
                 type: stackdriver
-                uid: $datasource
+                uid: duplo-gcp
               definition: ""
               description: GCP Uptime Check Location
               includeAll: true
