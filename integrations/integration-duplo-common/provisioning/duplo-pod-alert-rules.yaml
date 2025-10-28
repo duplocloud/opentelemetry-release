@@ -22,7 +22,22 @@ spec:
                     uid: duplo-metrics
                 editorMode: code
                 exemplar: false
-                expr: sum by (cluster, namespace, pod) (increase(kube_pod_container_status_restarts_total[5m]))
+                expr: |-
+                    (
+                      sum by (cluster, namespace, pod, container, reason) (
+                          increase(kube_pod_container_status_restarts_total[5m]) 
+                          * on(cluster, namespace, pod, container) group_left(reason)
+                          kube_pod_container_status_last_terminated_reason
+                      )
+                    )
+                    or
+                    (
+                      sum by (cluster, namespace, pod, container) (
+                          increase(kube_pod_container_status_restarts_total[5m])
+                          unless on(cluster, namespace, pod, container)
+                          kube_pod_container_status_last_terminated_reason
+                      )
+                    )
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
