@@ -52,6 +52,27 @@ try {
     Write-Host "DUPLO_TENANT_NAME:" $DUPLO_TENANT_NAME
     Write-Host "HOSTNAME:" $HOSTNAME
 
+    # --- NEW: Fetch AWS account ID + private IP from IMDSv2 (minimal change) ---
+    try {
+        $imdsToken = Invoke-RestMethod -Method PUT -Uri "http://169.254.169.254/latest/api/token" -Headers @{"X-aws-ec2-metadata-token-ttl-seconds"="21600"} -TimeoutSec 2
+        if ($imdsToken) {
+            $imdsHeaders = @{"X-aws-ec2-metadata-token"=$imdsToken}
+            $iid = Invoke-RestMethod -Method GET -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document" -Headers $imdsHeaders -TimeoutSec 2
+            $AWS_ACCOUNT_ID = $iid.accountId
+            $HOST_PRIVATE_IP = $iid.privateIp
+            if (-not $HOST_PRIVATE_IP -or $HOST_PRIVATE_IP -eq "") {
+                $HOST_PRIVATE_IP = (Invoke-RestMethod -Method GET -Uri "http://169.254.169.254/latest/meta-data/local-ipv4" -Headers $imdsHeaders -TimeoutSec 2)
+            }
+            Write-Host "AWS_ACCOUNT_ID:" $AWS_ACCOUNT_ID
+            Write-Host "HOST_PRIVATE_IP:" $HOST_PRIVATE_IP
+        } else {
+            Write-Host "WARNING: Could not get IMDS token; account_id/host_ip may be empty."
+        }
+    } catch {
+        Write-Host "WARNING: IMDS query failed; account_id/host_ip may be empty."
+    }
+    # --- END NEW ---
+
     Write-Host "Downloading Alloy Windows Installer"
     $DOWNLOAD_URL = "https://github.com/grafana/alloy/releases/download/v1.4.3/alloy-installer-windows-amd64.exe.zip"
     $OUTPUT_ZIP_FILE = ".\alloy-installer-windows-amd64.exe.zip"
@@ -94,6 +115,10 @@ try {
     $content = $content.Replace("{DUPLO_CLUSTER_NAME}", $DUPLO_CLUSTER_NAME)
     $content = $content.Replace("{DUPLO_TENANT_NAME}", $DUPLO_TENANT_NAME)
     $content = $content.Replace("{HOSTNAME}", $HOSTNAME)
+    # --- NEW: inject AWS account + private IP placeholders (minimal change) ---
+    $content = $content.Replace("{AWS_ACCOUNT_ID}", $AWS_ACCOUNT_ID)
+    $content = $content.Replace("{HOST_PRIVATE_IP}", $HOST_PRIVATE_IP)
+    # --- END NEW ---
     $content | Set-Content $CONFIG_FILE
 
     $DEST_DIR = "C:\Program Files\GrafanaLabs\Alloy"

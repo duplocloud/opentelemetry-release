@@ -29,6 +29,16 @@ discovery.relabel "integrations_windows_exporter" {
   rule {
     target_label = "label_tenantname"
     replacement  = "{DUPLO_TENANT_NAME}"
+
+  rule {
+  target_label = "host_private_ip"
+  replacement  = "{AWS_ACCOUNT_ID}"
+}
+
+  rule {
+  target_label = "aws_instance_id"
+  replacement  = "{HOST_PRIVATE_IP}"
+}  
   }
 }
 
@@ -146,6 +156,8 @@ loki.process "logs_service" {
       cluster = "{DUPLO_CLUSTER_NAME}",
       namespace = "{DUPLO_TENANT_NAME}",
       label_tenantname = "{DUPLO_TENANT_NAME}",
+      aws_account_id  = "{AWS_ACCOUNT_ID}",
+      host_private_ip = "{HOST_PRIVATE_IP}",
     }
   }
 
