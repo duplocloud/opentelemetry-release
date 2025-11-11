@@ -111,9 +111,9 @@ spec:
                 uid: ${datasource}
               editorMode: code
               expr: |-
-                sum(rate(loki_bloom_gateway_filtered_chunks_sum{cluster="$cluster", job="$namespace/bloom-gateway"}[$__rate_interval]))
+                sum(rate(loki_bloom_gateway_filtered_chunks_sum{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__rate_interval]))
                 /
-                sum(rate(loki_bloom_gateway_requested_chunks_sum{cluster="$cluster", job="$namespace/bloom-gateway"}[$__rate_interval]))
+                sum(rate(loki_bloom_gateway_requested_chunks_sum{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__rate_interval]))
               hide: false
               instant: false
               legendFormat: Chunks
@@ -125,9 +125,9 @@ spec:
               editorMode: code
               exemplar: false
               expr: |-
-                sum(rate(loki_bloom_gateway_filtered_series_sum{cluster="$cluster", job="$namespace/bloom-gateway"}[$__rate_interval]))
+                sum(rate(loki_index_gateway_postfilter_chunks_sum{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__rate_interval]))
                 /
-                sum(rate(loki_bloom_gateway_requested_series_sum{cluster="$cluster", job="$namespace/bloom-gateway"}[$__rate_interval]))
+                sum(rate(loki_bloom_gateway_requested_chunks_sum{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__rate_interval]))
               hide: false
               instant: false
               legendFormat: Series
@@ -186,9 +186,9 @@ spec:
               editorMode: code
               exemplar: false
               expr: |-
-                sum(increase(loki_bloom_gateway_filtered_chunks_sum{cluster="$cluster", job="$namespace/bloom-gateway"}[$__range]))
+                sum(increase(loki_bloom_gateway_filtered_chunks_sum{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__range]))
                 /
-                sum(increase(loki_bloom_gateway_requested_chunks_sum{cluster="$cluster", job="$namespace/bloom-gateway"}[$__range]))
+                sum(increase(loki_bloom_gateway_requested_chunks_sum{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__range]))
               instant: true
               legendFormat: Chunks
               range: false
@@ -199,9 +199,9 @@ spec:
               editorMode: code
               exemplar: false
               expr: |-
-                sum(increase(loki_bloom_gateway_filtered_series_sum{cluster="$cluster", job="$namespace/bloom-gateway"}[$__range]))
+                sum(increase(loki_index_gateway_postfilter_chunks_sum{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__range]))
                 /
-                sum(increase(loki_bloom_gateway_requested_series_sum{cluster="$cluster", job="$namespace/bloom-gateway"}[$__range]))
+                sum(increase(loki_bloom_gateway_requested_chunks_sum{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__range]))
               hide: false
               instant: true
               legendFormat: Series
@@ -843,9 +843,9 @@ spec:
                     uid: "000000134"
                   editorMode: code
                   expr: |-
-                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job="$namespace/bloom-gateway", type=~"(found|skipped|missed)"}[$__rate_interval])) by (type)
+                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type=~"(found|skipped|missed)"}[$__rate_interval])) by (type)
                     / on () group_left
-                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job="$namespace/bloom-gateway", type="requested"}[$__rate_interval]))
+                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type="requested"}[$__rate_interval]))
                   instant: false
                   legendFormat: __auto
                   range: true
@@ -855,9 +855,9 @@ spec:
                     uid: "000000134"
                   editorMode: code
                   expr: |-
-                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job="$namespace/bloom-gateway", type="filtered"}[$__rate_interval])) by (type)
+                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type="filtered"}[$__rate_interval])) by (type)
                     / on () group_left
-                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job="$namespace/bloom-gateway", type="requested"}[$__rate_interval]))
+                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type="requested"}[$__rate_interval]))
                   hide: true
                   instant: false
                   legendFormat: __auto
@@ -936,9 +936,9 @@ spec:
                     uid: "000000134"
                   editorMode: code
                   expr: |-
-                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job="$namespace/bloom-gateway", type="filtered"}[$__rate_interval])) by (type)
+                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type="filtered"}[$__rate_interval])) by (type)
                     / on () group_left
-                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job="$namespace/bloom-gateway", type="found"}[$__rate_interval]))
+                    sum(rate(loki_bloom_recorder_chunks_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type="found"}[$__rate_interval]))
                   hide: false
                   instant: false
                   legendFormat: __auto
@@ -1015,9 +1015,9 @@ spec:
                     uid: "000000134"
                   editorMode: code
                   expr: |-
-                    sum(rate(loki_bloom_recorder_series_total{cluster="$cluster", job="$namespace/bloom-gateway", type=~"(found|skipped|missed)"}[$__rate_interval])) by (type)
+                    sum(rate(loki_bloom_recorder_series_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type=~"(found|skipped|missed)"}[$__rate_interval])) by (type)
                     / on () group_left
-                    sum(rate(loki_bloom_recorder_series_total{cluster="$cluster", job="$namespace/bloom-gateway", type="requested"}[$__rate_interval]))
+                    sum(rate(loki_bloom_recorder_series_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type="requested"}[$__rate_interval]))
                   instant: false
                   legendFormat: __auto
                   range: true
@@ -1095,9 +1095,9 @@ spec:
                     uid: "000000134"
                   editorMode: code
                   expr: |-
-                    sum(rate(loki_bloom_recorder_series_total{cluster="$cluster", job="$namespace/bloom-gateway", type="filtered"}[$__rate_interval])) by (type)
+                    sum(rate(loki_bloom_recorder_series_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type="filtered"}[$__rate_interval])) by (type)
                     / on () group_left
-                    sum(rate(loki_bloom_recorder_series_total{cluster="$cluster", job="$namespace/bloom-gateway", type="found"}[$__rate_interval]))
+                    sum(rate(loki_bloom_recorder_series_total{cluster="$cluster", job=~"$namespace/$cluster-(backend)", type="found"}[$__rate_interval]))
                   hide: false
                   instant: false
                   legendFormat: __auto
@@ -2150,7 +2150,7 @@ spec:
                   editorMode: code
                   expr: |-
                     sum by (status_code) (
-                        rate(loki_request_duration_seconds_count{cluster="$cluster",job="$namespace/bloom-gateway", route="/logproto.BloomGateway/FilterChunkRefs"}[$__rate_interval])
+                        rate(loki_request_duration_seconds_count{cluster="$cluster",job=~"$namespace/$cluster-(backend)", route="/logproto.BloomGateway/FilterChunkRefs"}[$__rate_interval])
                     )
                   hide: false
                   instant: false
@@ -3862,7 +3862,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: sum by (status_code, operation) (rate(loki_gcs_request_duration_seconds_count{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval]))
+                  expr: sum by (status_code, operation) (rate(loki_gcs_request_duration_seconds_count{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval]))
                   instant: false
                   legendFormat: '{{operation}} {{status_code}}'
                   range: true
@@ -3936,7 +3936,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: histogram_quantile(0.99, sum by (operation, le) (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval])))
+                  expr: histogram_quantile(0.99, sum by (operation, le) (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval])))
                   instant: false
                   legendFormat: '{{operation}} p99'
                   range: true
@@ -3945,7 +3945,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: histogram_quantile(0.90, sum by (operation, le) (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval])))
+                  expr: histogram_quantile(0.90, sum by (operation, le) (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval])))
                   hide: false
                   instant: false
                   legendFormat: '{{operation}} p90'
@@ -3955,7 +3955,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: histogram_quantile(0.50, sum by (operation, le) (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval])))
+                  expr: histogram_quantile(0.50, sum by (operation, le) (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval])))
                   hide: false
                   instant: false
                   legendFormat: '{{operation}} p50'
@@ -4055,7 +4055,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: sum by (status_code, operation) (rate(loki_s3_request_duration_seconds_count{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval]))
+                  expr: sum by (status_code, operation) (rate(loki_s3_request_duration_seconds_count{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval]))
                   instant: false
                   legendFormat: '{{operation}} {{status_code}}'
                   range: true
@@ -4129,7 +4129,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: histogram_quantile(0.99, sum by (operation, le) (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval])))
+                  expr: histogram_quantile(0.99, sum by (operation, le) (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval])))
                   instant: false
                   legendFormat: '{{operation}} p99'
                   range: true
@@ -4138,7 +4138,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: histogram_quantile(0.90, sum by (operation, le) (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval])))
+                  expr: histogram_quantile(0.90, sum by (operation, le) (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval])))
                   hide: false
                   instant: false
                   legendFormat: '{{operation}} p90'
@@ -4148,7 +4148,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: histogram_quantile(0.50, sum by (operation, le) (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval])))
+                  expr: histogram_quantile(0.50, sum by (operation, le) (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval])))
                   hide: false
                   instant: false
                   legendFormat: '{{operation}} p50'
@@ -4250,7 +4250,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: sum by (status_code, operation) (rate(loki_azure_blob_request_duration_seconds_count{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval]))
+                  expr: sum by (status_code, operation) (rate(loki_azure_blob_request_duration_seconds_count{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval]))
                   instant: false
                   legendFormat: '{{operation}} {{status_code}}'
                   range: true
@@ -4324,7 +4324,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: histogram_quantile(0.99, sum by (operation, le) (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval])))
+                  expr: histogram_quantile(0.99, sum by (operation, le) (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval])))
                   instant: false
                   legendFormat: '{{operation}} p99'
                   range: true
@@ -4333,7 +4333,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: histogram_quantile(0.90, sum by (operation, le) (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval])))
+                  expr: histogram_quantile(0.90, sum by (operation, le) (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval])))
                   hide: false
                   instant: false
                   legendFormat: '{{operation}} p90'
@@ -4343,7 +4343,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: histogram_quantile(0.50, sum by (operation, le) (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"} [$__rate_interval])))
+                  expr: histogram_quantile(0.50, sum by (operation, le) (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"} [$__rate_interval])))
                   hide: false
                   instant: false
                   legendFormat: '{{operation}} p50'
@@ -4415,7 +4415,7 @@ spec:
                     uid: ${datasource}
                   editorMode: code
                   exemplar: false
-                  expr: increase(loki_bloom_gateway_dequeue_duration_seconds_bucket{cluster="$cluster", job="$namespace/bloom-gateway"}[$__rate_interval])
+                  expr: increase(loki_bloom_gateway_dequeue_duration_seconds_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__rate_interval])
                   format: heatmap
                   instant: false
                   legendFormat: __auto
@@ -4475,7 +4475,7 @@ spec:
                     type: prometheus
                     uid: ${datasource}
                   editorMode: code
-                  expr: increase(loki_bloom_gateway_tasks_dequeued_bucket{cluster="$cluster", job="$namespace/bloom-gateway"}[$__rate_interval])
+                  expr: increase(loki_bloom_gateway_tasks_dequeued_bucket{cluster="$cluster", job=~"$namespace/$cluster-(backend)"}[$__rate_interval])
                   format: heatmap
                   hide: false
                   instant: false
