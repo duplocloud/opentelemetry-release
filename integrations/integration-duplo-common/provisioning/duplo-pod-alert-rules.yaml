@@ -23,21 +23,12 @@ spec:
                 editorMode: code
                 exemplar: false
                 expr: |-
-                    (
-                      sum by (cluster, namespace, pod, container, reason) (
-                          increase(kube_pod_container_status_restarts_total[5m]) 
-                          * on(cluster, namespace, pod, container) group_left(reason)
-                          kube_pod_container_status_last_terminated_reason
-                      )
+                    max by (cluster, namespace, pod, container, reason) (
+                      increase(kube_pod_container_status_restarts_total[5m])
+                        * on(cluster, namespace, pod, container) group_left(reason)
+                          last_over_time(kube_pod_container_status_last_terminated_reason{reason!="Completed"}[5m])
                     )
-                    or
-                    (
-                      sum by (cluster, namespace, pod, container) (
-                          increase(kube_pod_container_status_restarts_total[5m])
-                          unless on(cluster, namespace, pod, container)
-                          kube_pod_container_status_last_terminated_reason
-                      )
-                    )
+                    > 1
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
