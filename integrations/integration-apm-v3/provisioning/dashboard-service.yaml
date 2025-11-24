@@ -84,9 +84,12 @@ spec:
           type: dashboards
           url: ""
     panels:
-        - gridPos:
+        - fieldConfig:
+            defaults: {}
+            overrides: []
+          gridPos:
             h: 3
-            w: 24
+            w: 12
             x: 0
             "y": 0
           id: 9
@@ -98,7 +101,107 @@ spec:
             content: "# \U0001F6A8 Investigate RED Metrics\n\nPlease drill down to a 3-hour time window.\nThen, open the \U0001F517 Rate, Errors & Duration metrics panel links to investigate further."
             mode: markdown
           pluginVersion: 11.5.2
+          title: ""
           type: text
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          description: "**Apdex Score** measures user satisfaction based on response time thresholds:\n\n\U0001F7E2 **Green (0.94+)**: Excellent performance - Most users are satisfied\n\U0001F7E1 **Yellow (0.75-0.94)**: Acceptable performance - Some users may experience delays\n\U0001F534 **Red (<0.75)**: Poor performance - Many users are experiencing issues\n\n**Calculation**: (Satisfied + Tolerated/2) / Total Requests\n- **Satisfied**: Requests ≤ 1 second\n- **Tolerated**: Requests between 1-4 seconds (counted as half)\n- **Total**: All requests"
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                    seriesBy: last
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: dark-red
+                          value: null
+                        - color: light-yellow
+                          value: 0.75
+                        - color: dark-green
+                          value: 0.94
+            overrides: []
+          gridPos:
+            h: 3
+            w: 12
+            x: 12
+            "y": 0
+          id: 11
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: |-
+                (
+                  # 1. SATISFIED COMPONENT (Cumulative)
+                  # We use sum by() here primarily to DROP the 'le' label so we can add the result
+                  # to the Tolerating component later without label mismatch errors.
+                  sum by (k8s_cluster_name, k8s_namespace_name, service, span_name) (
+                    (
+                      # Custom Threshold
+                      appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}
+                      * on(k8s_cluster_name, k8s_namespace_name, service, span_name, le) group_left()
+                      service_apdex_threshold_satisfied_bucket
+                    )
+                    or
+                    (
+                      # Fallback Default (0.512)
+                      appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__", le="0.512"}
+                      unless on(k8s_cluster_name, k8s_namespace_name, service, span_name)
+                      service_apdex_threshold_satisfied_bucket
+                    )
+                  )
+                  +
+                  # 2. TOLERATING COMPONENT (Cumulative)
+                  sum by (k8s_cluster_name, k8s_namespace_name, service, span_name) (
+                    (
+                      # Custom Threshold
+                      appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}
+                      * on(k8s_cluster_name, k8s_namespace_name, service, span_name, le) group_left()
+                      service_apdex_threshold_tolerating_bucket
+                    )
+                    or
+                    (
+                      # Fallback Default (2.05)
+                      appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__", le="2.05"}
+                      unless on(k8s_cluster_name, k8s_namespace_name, service, span_name)
+                      service_apdex_threshold_tolerating_bucket
+                    )
+                  )
+                )
+                / 2
+                /
+                # 3. TOTAL SAMPLES
+                sum by (k8s_cluster_name, k8s_namespace_name, service, span_name) (
+                  appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__", le="+Inf"}
+                )
+              hide: false
+              instant: true
+              interval: ""
+              legendFormat: Apdex Score
+              range: false
+              refId: apdexQuery
+          title: Apdex Score (T = ${appdex_threshold}s)
+          type: stat
         - datasource:
             type: prometheus
             uid: duplo-metrics
@@ -493,6 +596,135 @@ spec:
         - datasource:
             type: prometheus
             uid: duplo-metrics
+          description: "**Apdex Score** measures user satisfaction based on response time thresholds:\n\n\U0001F7E2 **Green (0.94+)**: Excellent performance - Most users are satisfied\n\U0001F7E1 **Yellow (0.75-0.94)**: Acceptable performance - Some users may experience delays\n\U0001F534 **Red (<0.75)**: Poor performance - Many users are experiencing issues\n\n**Calculation**: (Satisfied + Tolerated/2) / Total Requests\n- **Satisfied**: Requests ≤ 1 second\n- **Tolerated**: Requests between 1-4 seconds (counted as half)\n- **Total**: All requests"
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                    seriesBy: last
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisGridShow: true
+                    axisLabel: ""
+                    axisPlacement: auto
+                    axisSoftMax: 1
+                    axisSoftMin: 0
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: scheme
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: dark-red
+                          value: null
+                        - color: light-yellow
+                          value: 0.75
+                        - color: dark-green
+                          value: 0.94
+            overrides: []
+          gridPos:
+            h: 10
+            w: 12
+            x: 12
+            "y": 12
+          id: 10
+          options:
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: |-
+                (
+                  # 1. SATISFIED COMPONENT (Cumulative)
+                  # We use sum by() here primarily to DROP the 'le' label so we can add the result
+                  # to the Tolerating component later without label mismatch errors.
+                  sum by (k8s_cluster_name, k8s_namespace_name, service, span_name) (
+                    (
+                      # Custom Threshold
+                      appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}
+                      * on(k8s_cluster_name, k8s_namespace_name, service, span_name, le) group_left()
+                      service_apdex_threshold_satisfied_bucket
+                    )
+                    or
+                    (
+                      # Fallback Default (0.512)
+                      appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__", le="0.512"}
+                      unless on(k8s_cluster_name, k8s_namespace_name, service, span_name)
+                      service_apdex_threshold_satisfied_bucket
+                    )
+                  )
+                  +
+                  # 2. TOLERATING COMPONENT (Cumulative)
+                  sum by (k8s_cluster_name, k8s_namespace_name, service, span_name) (
+                    (
+                      # Custom Threshold
+                      appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}
+                      * on(k8s_cluster_name, k8s_namespace_name, service, span_name, le) group_left()
+                      service_apdex_threshold_tolerating_bucket
+                    )
+                    or
+                    (
+                      # Fallback Default (2.05)
+                      appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__", le="2.05"}
+                      unless on(k8s_cluster_name, k8s_namespace_name, service, span_name)
+                      service_apdex_threshold_tolerating_bucket
+                    )
+                  )
+                )
+                / 2
+                /
+                # 3. TOTAL SAMPLES
+                sum by (k8s_cluster_name, k8s_namespace_name, service, span_name) (
+                  appo11y:duration:distribution{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__", le="+Inf"}
+                )
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: Apdex Score
+              range: true
+              refId: apdexQuery
+          title: Apdex Score ( T= ${appdex_threshold}s)
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
           fieldConfig:
             defaults:
                 color:
@@ -702,7 +934,7 @@ spec:
             h: 10
             w: 12
             x: 12
-            "y": 23
+            "y": 22
           id: 7
           options:
             cellHeight: sm
@@ -797,6 +1029,7 @@ spec:
                     client: Name
                     server: Name
           type: table
+    preload: false
     refresh: ""
     schemaVersion: 40
     tags:
@@ -897,6 +1130,24 @@ spec:
               query: 1m,10m,30m,1h,6h,12h,1d,7d,14d,30d
               refresh: 2
               type: interval
+            - current:
+                text: "0.512"
+                value: "0.512"
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: query_result(service_apdex_threshold_satisfied_bucket{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}    OR    label_replace(    absent(service_apdex_threshold_satisfied_bucket{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}),    "le", "0.512", "service", ".*"  ))
+              hide: 2
+              label: appdex_threshold
+              name: appdex_threshold
+              options: []
+              query:
+                qryType: 3
+                query: query_result(service_apdex_threshold_satisfied_bucket{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}    OR    label_replace(    absent(service_apdex_threshold_satisfied_bucket{k8s_cluster_name=~"$cluster", k8s_namespace_name=~"$namespace", service=~"$service", span_name="__aggregated__"}),    "le", "0.512", "service", ".*"  ))
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: /le="([^"]+)"/
+              type: query
     time:
         from: now-1h
         to: now
@@ -904,3 +1155,4 @@ spec:
     timezone: ""
     title: Service Dashboard
     uid: service-dashboard-v3
+    weekStart: ""
