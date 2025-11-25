@@ -27,9 +27,9 @@ spec:
                       sum by (cluster, namespace, pod, container, reason) (
                           increase(kube_pod_container_status_restarts_total[5m]) 
                           * on(cluster, namespace, pod, container) group_left(reason)
-                          kube_pod_container_status_last_terminated_reason
+                          kube_pod_container_status_last_terminated_reason{reason!="Completed"}
                       )
-                    ) > 1
+                    ) > 0
                     or
                     (
                       sum by (cluster, namespace, pod, container) (
@@ -37,7 +37,7 @@ spec:
                           unless on(cluster, namespace, pod, container)
                           kube_pod_container_status_last_terminated_reason
                       )
-                    ) > 1
+                    ) > 0
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -71,7 +71,7 @@ spec:
                 type: threshold
           execErrState: Error
           folderUID: duplo-common
-          for: 0s
+          for: 5m
           labels:
             severity: warning
           noDataState: OK
