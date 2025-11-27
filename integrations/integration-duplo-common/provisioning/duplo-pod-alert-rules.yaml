@@ -118,7 +118,7 @@ spec:
           labels:
             owner: duplo
             severity: critical
-          noDataState: Alerting
+          noDataState: OK
           orgID: 1
           ruleGroup: pod-alerts
           title: MimirAlertmanagerDown

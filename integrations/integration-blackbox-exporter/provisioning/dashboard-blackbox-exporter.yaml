@@ -1,0 +1,598 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-blackbox-exporter
+    name: blackbox-exporter-details
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 1
+    links: []
+    panels:
+        - datasource:
+            type: prometheus
+            uid: ${DS_PROMETHEUS}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings:
+                    - options:
+                        "0":
+                            color: red
+                            index: 1
+                            text: Down
+                        "1":
+                            color: green
+                            index: 0
+                            text: Up
+                      type: value
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                          value: null
+                unit: short
+            overrides: []
+          gridPos:
+            h: 6
+            w: 8
+            x: 0
+            "y": 0
+          id: 1
+          options:
+            colorMode: background
+            graphMode: none
+            justifyMode: center
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: |-
+                max by (instance) (
+                  probe_success{
+                    job=~"$job",
+                    instance=~"$target"
+                  }
+                )
+              range: true
+              refId: A
+          title: Availability
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: ${DS_PROMETHEUS}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: orange
+                          value: 0.5
+                        - color: red
+                          value: 1
+                unit: s
+            overrides: []
+          gridPos:
+            h: 6
+            w: 8
+            x: 8
+            "y": 0
+          id: 23
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - mean
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: avg(probe_duration_seconds{job="$job", instance=~"$target"})
+              range: true
+              refId: A
+          title: Latency
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                decimals: 2
+                mappings:
+                    - options:
+                        match: "null"
+                        result:
+                            text: N/A
+                      type: special
+                    - options:
+                        "1":
+                            text: "YES"
+                      type: value
+                    - options:
+                        "0":
+                            text: "NO"
+                      type: value
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: '#d44a3a'
+                          value: null
+                        - color: rgba(237, 129, 40, 0.89)
+                          value: 0
+                        - color: '#299c46'
+                          value: 1.2096e+06
+                unit: dtdurations
+            overrides: []
+          gridPos:
+            h: 6
+            w: 8
+            x: 16
+            "y": 0
+          id: 24
+          maxDataPoints: 100
+          options:
+            colorMode: value
+            graphMode: none
+            justifyMode: auto
+            orientation: horizontal
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              expr: probe_ssl_earliest_cert_expiry{instance=~"$target",job=~"$job"} - time()
+              format: time_series
+              interval: ""
+              intervalFactor: 1
+              range: true
+              refId: A
+          title: SSL Expiry
+          transformations:
+            - id: reduce
+              options: {}
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: ${DS_PROMETHEUS}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings:
+                    - options:
+                        "0":
+                            color: red
+                            index: 1
+                            text: Down
+                        "1":
+                            color: green
+                            index: 0
+                            text: Up
+                      type: value
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                          value: null
+                unit: short
+            overrides: []
+          gridPos:
+            h: 10
+            w: 24
+            x: 0
+            "y": 6
+          id: 25
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: |-
+                max by (instance) (
+                  probe_success{
+                    job=~"$job",
+                    instance=~"$target"
+                  }
+                )
+              legendFormat: '{{instance}}'
+              range: true
+              refId: A
+          title: Availability
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: ${DS_PROMETHEUS}
+          description: Returns how long the probe took to complete in seconds
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 25
+                    gradientMode: opacity
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: smooth
+                    lineWidth: 3
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                unit: s
+            overrides: []
+          gridPos:
+            h: 9
+            w: 12
+            x: 0
+            "y": 16
+          id: 3
+          options:
+            legend:
+                calcs:
+                    - mean
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: probe_duration_seconds{job="$job", instance=~"$target"}
+              legendFormat: '{{instance}}'
+              range: true
+              refId: A
+          title: Latency Trend (Glowing)
+          type: timeseries
+        - datasource:
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 9
+            w: 12
+            x: 12
+            "y": 16
+          id: 20
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - editorMode: code
+              expr: probe_dns_lookup_time_seconds{job=~"$job", instance=~"$target"}
+              legendFormat: '{{instance}}'
+              range: true
+              refId: A
+          title: DNS Lookup Time
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: ${DS_PROMETHEUS}
+          description: Duration of http request by phase, summed over all redirects
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                links: []
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: s
+            overrides: []
+          gridPos:
+            h: 8
+            w: 24
+            x: 0
+            "y": 25
+          id: 16
+          options:
+            alertThreshold: true
+            legend:
+                calcs:
+                    - mean
+                    - lastNotNull
+                displayMode: table
+                placement: right
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: probe_icmp_duration_seconds{job=~'PING-OS-VM',instance=~'$target'}
+              hide: true
+              instant: false
+              legendFormat: '{{probe_icmp_duration_seconds}} {{phase}}'
+              range: true
+              refId: A
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: probe_http_duration_seconds{job=~'$job',instance=~'$target'}
+              hide: true
+              instant: false
+              legendFormat: '{{instance}} {{phase}}'
+              range: true
+              refId: B
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: sum by (phase) (probe_http_duration_seconds{job=~'$job',instance=~'$target'})
+              hide: false
+              instant: false
+              legendFormat: '{{phase}}'
+              range: true
+              refId: C
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: sum by (phase) (probe_icmp_duration_seconds{job=~'PING-OS-VM',instance=~'$target'})
+              hide: true
+              instant: false
+              legendFormat: '{{phase}}'
+              range: true
+              refId: D
+          title: HTTP Probe Phases Duration
+          type: timeseries
+    preload: false
+    refresh: 1m
+    schemaVersion: 40
+    tags:
+        - blackbox
+        - details
+    templating:
+        list:
+            - current:
+                text: duplo-metrics
+                value: duplo-metrics
+              includeAll: false
+              label: Datasource
+              name: DS_PROMETHEUS
+              options: []
+              query: prometheus
+              refresh: 1
+              regex: ""
+              type: datasource
+            - allowCustomValue: false
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              definition: label_values(probe_success, job)
+              hide: 2
+              includeAll: false
+              label: Job
+              name: job
+              options: []
+              query:
+                query: label_values(probe_success, job)
+                refId: StandardVariableQuery
+              refresh: 1
+              regex: ""
+              sort: 1
+              type: query
+            - allowCustomValue: false
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              definition: label_values(probe_success{job="$job"}, instance)
+              includeAll: false
+              label: Target
+              name: target
+              options: []
+              query:
+                query: label_values(probe_success{job="$job"}, instance)
+                refId: StandardVariableQuery
+              refresh: 1
+              regex: ""
+              sort: 1
+              type: query
+    time:
+        from: now-1h
+        to: now
+    title: Blackbox Exporter Details
+    uid: blackbox-exporter-details
