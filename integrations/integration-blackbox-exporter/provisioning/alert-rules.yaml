@@ -1,0 +1,292 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRuleGroup
+metadata:
+    name: Integration-Blackbox-Exporter.alerts
+spec:
+    folderUid: integration-blackbox-exporter
+    interval: 60
+    rules:
+        - annotations:
+            description: The target {{ $labels.instance }} is not reachable. Please investigate
+            summary: Blackbox target {{ $labels.instance }} is DOWN
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: probe_success == 0
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 1
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-blackbox-exporter
+          for: 5m0s
+          isPaused: true
+          labels:
+            severity: critical
+          noDataState: OK
+          orgID: 1
+          ruleGroup: blackbox-exporter
+          title: BlackboxTargetDown
+          uid: BlackboxTargetDown
+        - annotations:
+            description: 'Endpoint {{ $labels.instance }} is significantly slower than its 1-hour baseline. Current: {{ $value | humanizeDuration }}s (Normal baseline: {{ query \"job:probe_duration_seconds:avg_1h\" | humanizeDuration }}s).'
+            summary: 'Latency Anomaly: {{ $labels.instance }}'
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: probe_duration_seconds > on(instance, cluster) group_left() job:probe_latency_threshold
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 900
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-blackbox-exporter
+          for: 1m0s
+          labels:
+            severity: warning
+          noDataState: OK
+          orgID: 1
+          ruleGroup: blackbox-exporter
+          title: BlackboxHighLatency
+          uid: BlackboxHighLatency
+        - annotations:
+            description: Certificate expires in < 15 days
+            summary: SSL certificate for {{ $labels.instance }} expires soon
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: (probe_ssl_earliest_cert_expiry{job="prometheus-blackbox-exporter-1762516080"} - time()) / 86400
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 16
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-blackbox-exporter
+          for: 1m0s
+          noDataState: OK
+          orgID: 1
+          ruleGroup: blackbox-exporter
+          title: BlackboxSSLCertificateExpiringSoon
+          uid: BlackboxSSLCertificate
+        - annotations:
+            description: probe_dns_lookup_time_seconds == 0, indicating no DNS resolution or lookup failure.
+            summary: Blackbox DNS lookup time is zero for {{ $labels.instance }}
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: probe_dns_lookup_time_seconds{job="prometheus-blackbox-exporter-1762516080"} == 0
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-blackbox-exporter
+          for: 1m0s
+          noDataState: OK
+          orgID: 1
+          ruleGroup: blackbox-exporter
+          title: BlackboxDNSLookupAlert
+          uid: BlackboxDNSLookupAlert
+        - annotations:
+            description: The Blackbox Exporter is responding with up=0. Check pod health, service endpoints, or network access.
+            summary: Blackbox Exporter is unreachable in {{ $labels.cluster }}/{{ $labels.namespace }}
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                editorMode: code
+                expr: min by (cluster, namespace) (up{service="duplo-blackbox-exporter"})
+                instant: true
+                intervalMs: 1000
+                legendFormat: __auto
+                maxDataPoints: 43200
+                range: false
+                refId: A
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 1
+                        type: lt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-blackbox-exporter
+          for: 0s
+          labels:
+            owner: duplo
+            severity: critical
+          noDataState: OK
+          orgID: 1
+          ruleGroup: blackbox-exporter
+          title: BlackboxExporterDown
+          uid: BlackboxExporterDown
+    title: blackbox-exporter

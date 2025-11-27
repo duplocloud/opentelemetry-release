@@ -1,0 +1,6 @@
+namespace: integration-blackboxexporter
+groups:
+    - name: blackbox.rules.latency
+      rules:
+        - expr: vector(3)
+          record: job:probe_latency_threshold
