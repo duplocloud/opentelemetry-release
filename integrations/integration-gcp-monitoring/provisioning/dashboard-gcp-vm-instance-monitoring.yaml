@@ -1,0 +1,1110 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-gcp-monitoring
+    name: gcevminstancemonitoring
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: datasource
+                uid: grafana
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - description: ""
+          fieldConfig:
+            defaults: {}
+            overrides: []
+          gridPos:
+            h: 3
+            w: 24
+            x: 0
+            "y": 0
+          id: 11
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: This dashboard has 10 charts for the related [GCE VM metrics](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-compute), including metrics for CPU, disk read/write, and network.
+            mode: markdown
+          pluginVersion: 11.5.2
+          title: GCE VM Instance Monitoring
+          type: text
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 3
+          id: 1
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.instance_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: '{{metric.label.instance_name}}'
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gce_instance
+                groupBys: []
+                metricKind: GAUGE
+                metricType: compute.googleapis.com/instance/cpu/utilization
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+                unit: 10^2.%
+                valueType: DOUBLE
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - metric.label.instance_name
+                    - =
+                    - $instance
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/instance/cpu/utilization
+                groupBys:
+                    - resource.label.instance_id
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+          title: GCE VM Instance - CPU Utilization
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 3
+          id: 2
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.instance_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gce_instance
+                groupBys: []
+                metricKind: DELTA
+                metricType: compute.googleapis.com/instance/uptime
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: s{uptime}
+                valueType: DOUBLE
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - metric.label.instance_name
+                    - =
+                    - $instance
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/instance/uptime
+                groupBys: []
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: GCE VM Instance - Uptime
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 11
+          id: 3
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.device_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gce_instance
+                groupBys: []
+                metricKind: DELTA
+                metricType: compute.googleapis.com/instance/disk/read_ops_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: "1"
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - metric.label.instance_name
+                    - =
+                    - $instance
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/instance/disk/read_ops_count
+                groupBys:
+                    - metric.label.device_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Disk read operations
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 11
+          id: 4
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.device_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gce_instance
+                groupBys: []
+                metricKind: DELTA
+                metricType: compute.googleapis.com/instance/disk/write_ops_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: "1"
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - metric.label.instance_name
+                    - =
+                    - $instance
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/instance/disk/write_ops_count
+                groupBys:
+                    - metric.label.device_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Disk write operations
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 19
+          id: 5
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.storage_type}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gce_instance
+                groupBys: []
+                metricKind: DELTA
+                metricType: compute.googleapis.com/instance/disk/read_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - metric.label.instance_name
+                    - =
+                    - $instance
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/instance/disk/read_bytes_count
+                groupBys:
+                    - metric.label.storage_type
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Disk read bytes
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 19
+          id: 6
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.storage_type}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gce_instance
+                groupBys: []
+                metricKind: DELTA
+                metricType: compute.googleapis.com/instance/disk/write_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - metric.label.instance_name
+                    - =
+                    - $instance
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/instance/disk/write_bytes_count
+                groupBys:
+                    - metric.label.storage_type
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Disk write bytes
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 27
+          id: 7
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.instance_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gce_instance
+                groupBys: []
+                metricKind: DELTA
+                metricType: compute.googleapis.com/instance/network/received_packets_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: "1"
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - metric.label.instance_name
+                    - =
+                    - $instance
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/instance/network/received_packets_count
+                groupBys:
+                    - metric.label.instance_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: GCE VM Instance - Received packets
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 27
+          id: 10
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.instance_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gce_instance
+                groupBys: []
+                metricKind: DELTA
+                metricType: compute.googleapis.com/instance/network/sent_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - metric.label.instance_name
+                    - =
+                    - $instance
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/instance/network/sent_bytes_count
+                groupBys:
+                    - metric.label.instance_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: GCE VM Instance - Sent bytes
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 35
+          id: 9
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.instance_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gce_instance
+                groupBys: []
+                metricKind: DELTA
+                metricType: compute.googleapis.com/instance/network/received_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - metric.label.instance_name
+                    - =
+                    - $instance
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/instance/network/received_bytes_count
+                groupBys:
+                    - metric.label.instance_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: GCE VM Instance - Received bytes
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 35
+          id: 12
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - ""
+                    - =
+                    - ""
+                    - AND
+                    - metric.type
+                    - =
+                    - compute.googleapis.com/nat/sent_packets_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: GCE VM Sent Packets
+          type: timeseries
+    preload: false
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - Compute
+        - Cloud Monitoring
+        - GCP
+    templating:
+        list:
+            - current:
+                text: duplo-gcp
+                value: duplo-gcp
+              includeAll: false
+              label: Datasource
+              name: datasource
+              options: []
+              query: stackdriver
+              refresh: 1
+              regex: ""
+              type: datasource
+            - datasource: $datasource
+              definition: Google Cloud Monitoring - Projects
+              includeAll: false
+              label: Project
+              name: project
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                projects: []
+                selectedMetricType: actions.googleapis.com/smarthome_action/num_active_users
+                selectedQueryType: projects
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - current:
+                text: grafana auto
+                value: grafana-auto
+              datasource: ${datasource}
+              definition: ""
+              includeAll: false
+              label: Alignment Period
+              name: alignmentPeriod
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/num_active_users
+                selectedQueryType: alignmentPeriods
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - allowCustomValue: true
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              description: ""
+              label: instance
+              name: instance
+              options: []
+              query:
+                labelKey: metric.label.instance_name
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: compute.googleapis.com/instance/cpu/usage_time
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: compute.googleapis.com
+                sloServices: []
+              refresh: 2
+              regex: /^(?!gk3|gke).*/
+              sort: 1
+              type: query
+    time:
+        from: now-1h
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: GCE VM Instance Monitoring
+    uid: gcevminstancemonitoring
+    weekStart: ""
+

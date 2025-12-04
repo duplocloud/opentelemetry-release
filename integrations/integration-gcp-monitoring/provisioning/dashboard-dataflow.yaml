@@ -1,0 +1,626 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-gcp-monitoring
+    name: dataflow
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - collapsed: false
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 0
+          id: 12
+          panels: []
+          title: System Metrics
+          type: row
+        - datasource:
+            type: stackdriver
+            uid: duplo-gcp
+          description: Cumulative vCPU time consumed by the job since its start.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 1
+          id: 10
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.job_name}}'
+              datasource:
+                type: stackdriver
+                uid: duplo-gcp
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.job_name
+                    - =
+                    - $job
+                    - AND
+                    - metric.type
+                    - =
+                    - dataflow.googleapis.com/job/total_vcpu_time
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Total vCPU Time
+          type: stat
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Displays the number of virtual CPUs currently allocated to the Dataflow job.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 1
+          id: 4
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.job_name}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.job_name
+                    - =
+                    - $job
+                    - AND
+                    - resource.label.region
+                    - =
+                    - $region
+                    - AND
+                    - metric.type
+                    - =
+                    - dataflow.googleapis.com/job/current_num_vcpus
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: current_num_vcpus
+          type: timeseries
+        - collapsed: false
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 9
+          id: 11
+          panels: []
+          title: Job Metrics
+          type: row
+        - datasource:
+            type: stackdriver
+            uid: duplo-gcp
+          description: Indicates how far behind the pipeline is in processing input events.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 10
+          id: 9
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.job_name}}'
+              datasource:
+                type: stackdriver
+                uid: duplo-gcp
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.job_name
+                    - =
+                    - $job
+                    - AND
+                    - metric.type
+                    - =
+                    - dataflow.googleapis.com/job/data_watermark_age
+                groupBys: []
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Data Watermark Lag
+          type: stat
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Measures how busy the Dataflow workers are (CPU utilization).
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 10
+          id: 5
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.job_name}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.job_name
+                    - =
+                    - $job
+                    - AND
+                    - resource.label.region
+                    - =
+                    - $region
+                    - AND
+                    - metric.type
+                    - =
+                    - dataflow.googleapis.com/job/aggregated_worker_utilization
+                groupBys:
+                    - resource.label.job_name
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Aggregated Worker Utilisation
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Shows the average system lag for each pipeline stage — how long each stage takes to process incoming data.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 18
+          id: 2
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.job_name
+                    - =
+                    - $job
+                    - AND
+                    - resource.label.region
+                    - =
+                    - $region
+                    - AND
+                    - metric.type
+                    - =
+                    - dataflow.googleapis.com/job/per_stage_system_lag
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Per Stage system lag
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: points
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 18
+          id: 1
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: ""
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.job_name
+                    - =
+                    - $job
+                    - AND
+                    - resource.label.region
+                    - =
+                    - $region
+                    - AND
+                    - metric.type
+                    - =
+                    - dataflow.googleapis.com/job/elements_produced_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: elements_produced_count
+          type: timeseries
+    preload: false
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - Cloud Monitoring
+        - GCP
+        - Dataflow
+    templating:
+        list:
+            - current:
+                text: duplo-gcp
+                value: duplo-gcp
+              label: datasource
+              name: datasource
+              options: []
+              query: stackdriver
+              refresh: 1
+              regex: ""
+              type: datasource
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              label: project
+              name: project
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
+                selectedQueryType: projects
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              description: ""
+              label: job
+              name: job
+              options: []
+              query:
+                labelKey: resource.label.job_name
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: dataflow.googleapis.com/job/total_dcu_usage
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: dataflow.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              label: region
+              name: region
+              options: []
+              query:
+                labelKey: resource.label.region
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: dataflow.googleapis.com/job/data_watermark_age
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: dataflow.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-7d
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: Dataflow
+    uid: dataflow
+    weekStart: ""
+

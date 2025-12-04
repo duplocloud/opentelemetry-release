@@ -1,0 +1,1311 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-gcp-monitoring
+    name: httpsgcploadbalancermonitoring
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: datasource
+                uid: grafana
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: false
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - description: ""
+          fieldConfig:
+            defaults: {}
+            overrides: []
+          gridPos:
+            h: 3
+            w: 24
+            x: 0
+            "y": 0
+          id: 10
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: This dashboard has 9 charts for the related [HTTP/s load balancer metrics](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-loadbalancing), including `Request Count`, `Total Latency`, `Request Bytes`, `Response Bytes`, `Frontend RTT`, `Backend Request Count`, `Backend Request Bytes`, and `Backend Response Bytes`.
+            mode: markdown
+          pluginVersion: 11.5.2
+          title: HTTP/S Load Balancer Monitoring
+          type: text
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Displays request rate segmented by HTTP response code (2xx, 3xx, 4xx, 5xx), allowing quick identification of error trends or abnormal spikes.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: cps
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 3
+          id: 11
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.response_code_class}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              hide: false
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.label.response_code_class
+                    - '!='
+                    - "0"
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/request_count
+                groupBys:
+                    - metric.label.response_code_class
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: ' Response by Code'
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Shows overall end-to-end latency between the client and backend, reflecting total request processing time across all layers.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 3
+          id: 2
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.url_map_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/total_latencies
+                perSeriesAligner: ALIGN_PERCENTILE_99
+                projectName: $project
+                unit: ms
+                valueType: DISTRIBUTION
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/total_latencies
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_PERCENTILE_99
+                projectName: $project
+          title: Total Latency
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Indicates the number of incoming requests handled per second by the load balancer, helping track traffic volume and activity patterns.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 11
+          id: 1
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.url_map_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/request_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: "1"
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/request_count
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Request Count
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Measures total response payload size sent back to clients, useful for understanding bandwidth utilization and response size trends.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 11
+          id: 4
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.url_map_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/response_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/response_bytes_count
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Response Bytes
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Tracks the volume of incoming request data received by the load balancer, highlighting input bandwidth and request payload trends.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 19
+          id: 3
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.url_map_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/request_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/request_bytes_count
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Request Bytes
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Displays the number of requests sent from the load balancer to backend services, helping analyze backend load and request routing.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 19
+          id: 6
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.url_map_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/backend_request_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: "1"
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/backend_request_count
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Backend Request Count
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Visualizes frontend round-trip time percentiles to capture client-side latency distribution and detect response time outliers.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 27
+          id: 5
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: 95th percentile {{resource.label.url_map_name}}
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_95
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/frontend_tcp_rtt
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+                unit: ms
+                valueType: DISTRIBUTION
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_95
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                    - AND
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/frontend_tcp_rtt
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+            - aliasBy: 5th Percentile {{resource.label.url_map_name}}
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_05
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/frontend_tcp_rtt
+                perSeriesAligner: ALIGN_PERCENTILE_99
+                projectName: $project
+                unit: ms
+                valueType: DISTRIBUTION
+              queryType: timeSeriesList
+              refId: B
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_05
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                    - AND
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/frontend_tcp_rtt
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_PERCENTILE_99
+                projectName: $project
+            - aliasBy: 50th percentile {{resource.label.url_map_name}}
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_50
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/frontend_tcp_rtt
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+                unit: ms
+                valueType: DISTRIBUTION
+              queryType: timeSeriesList
+              refId: C
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_50
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                    - AND
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/frontend_tcp_rtt
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+          title: Frontend RTT [95/50/5 PERCENTILE].
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Monitors latency between the load balancer and backend services, useful for pinpointing backend performance or network bottlenecks.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 27
+          id: 9
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: 95th Percentile {{resource.label.url_map_name}}
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_95
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/backend_latencies
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+                unit: ms
+                valueType: DISTRIBUTION
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_95
+                filters:
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/backend_latencies
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+            - aliasBy: 5th Percentile  {{resource.label.url_map_name}}
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_05
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys: []
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/backend_latencies
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+                unit: ms
+                valueType: DISTRIBUTION
+              queryType: timeSeriesList
+              refId: B
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_05
+                filters:
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/backend_latencies
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+            - aliasBy: 50th Percentile {{resource.label.url_map_name}}
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_50
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys: []
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/backend_latencies
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+                unit: ms
+                valueType: DISTRIBUTION
+              queryType: timeSeriesList
+              refId: C
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_PERCENTILE_50
+                filters:
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/backend_latencies
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_DELTA
+                projectName: $project
+          title: Backend Latency
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Shows the total volume of data returned from backend services back to the load balancer.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 35
+          id: 7
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.url_map_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/backend_request_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                    - AND
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/backend_request_bytes_count
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Backend Request Bytes
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: |
+            Displays the total volume of data sent from the load balancer to backend services.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 35
+          id: 8
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.url_map_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                groupBys:
+                    - resource.label.url_map_name
+                metricKind: DELTA
+                metricType: loadbalancing.googleapis.com/https/backend_response_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - https_lb_rule
+                    - AND
+                    - resource.label.url_map_name
+                    - =
+                    - $loadbalancer
+                    - AND
+                    - metric.type
+                    - =
+                    - loadbalancing.googleapis.com/https/backend_response_bytes_count
+                groupBys:
+                    - resource.label.url_map_name
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Backend Response Bytes
+          type: timeseries
+    preload: false
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - Networking
+        - Cloud Monitoring
+        - GCP
+    templating:
+        list:
+            - includeAll: false
+              label: Datasource
+              name: datasource
+              options: []
+              query: stackdriver
+              refresh: 1
+              regex: ""
+              type: datasource
+            - datasource: $datasource
+              definition: Google Cloud Monitoring - Projects
+              includeAll: false
+              label: Project
+              name: project
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                projects: []
+                selectedMetricType: actions.googleapis.com/smarthome_action/num_active_users
+                selectedQueryType: projects
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - current:
+                text: grafana auto
+                value: grafana-auto
+              datasource: ${datasource}
+              definition: ""
+              includeAll: false
+              label: Alignment Period
+              name: alignmentPeriod
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/num_active_users
+                selectedQueryType: alignmentPeriods
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - allValue: .+
+              allowCustomValue: true
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              description: ""
+              includeAll: false
+              label: loadbalancer
+              name: loadbalancer
+              options: []
+              query:
+                labelKey: resource.label.url_map_name
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: loadbalancing.googleapis.com/https/request_count
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: loadbalancing.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-1h
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: HTTP/S GCP Load Balancer Monitoring
+    uid: httpsgcploadbalancermonitoring
+    weekStart: ""
+

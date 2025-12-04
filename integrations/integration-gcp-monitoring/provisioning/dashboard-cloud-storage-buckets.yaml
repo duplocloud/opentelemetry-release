@@ -1,0 +1,828 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-gcp-monitoring
+    name: cloudstorage-buckets
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: datasource
+                uid: grafana
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - description: ""
+          fieldConfig:
+            defaults: {}
+            overrides: []
+          gridPos:
+            h: 3
+            w: 24
+            x: 0
+            "y": 0
+          id: 7
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: This dashboard has 6 charts for the related [Cloud Storage metrics](https://cloud.google.com/monitoring/api/metrics_gcp#gcp-storage), including `Total object count`, `Total bytes`, `Bucket object count`, `Bucket total bytes`, `Bucket - Received/Sent Bytes`, and `Bucket - Request count`.
+            mode: markdown
+          pluginVersion: 11.5.2
+          title: Cloud Storage Monitoring
+          type: text
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Provides an overview of all GCS buckets available under the selected project.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: auto
+                    cellOptions:
+                        type: auto
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Bucket Name
+                  properties:
+                    - id: custom.width
+                      value: 453
+          gridPos:
+            h: 16
+            w: 12
+            x: 0
+            "y": 3
+          id: 8
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            showHeader: true
+            sortBy: []
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - ""
+                    - =
+                    - ""
+                    - AND
+                    - metric.type
+                    - =
+                    - storage.googleapis.com/storage/object_count
+                groupBys:
+                    - metric.label.storage_class
+                    - resource.label.bucket_name
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: GCS Bucket List
+          transformations:
+            - id: timeSeriesTable
+              options: {}
+            - id: organize
+              options:
+                excludeByName:
+                    'Trend #A': true
+                    metric.label.method: true
+                    metric.label.response_code: true
+                    resource.type: true
+                includeByName: {}
+                indexByName:
+                    'Trend #A': 5
+                    metric.label.storage_class: 2
+                    resource.label.bucket_name: 0
+                    resource.label.location: 3
+                    resource.label.project_id: 1
+                    resource.type: 4
+                renameByName:
+                    metric.label.method: Method
+                    metric.label.response_code: Response Code
+                    metric.label.storage_class: Storage Class
+                    pubsub.googleapis.com/subscription/num_undelivered_messages duploservices-np-apps-agent-rep-skills-analysis-sub proshort-dev: ""
+                    resource.label.bucket_name: Bucket Name
+                    resource.label.location: Location
+                    resource.label.project_id: Project ID
+                    resource.label.subscription_id: Subscription ID
+                    resource.label.topic_id: Topic ID
+                    resource.type: Resource Type
+            - id: groupBy
+              options:
+                fields:
+                    Bucket Name:
+                        aggregations: []
+                        operation: groupby
+                    Location:
+                        aggregations: []
+                        operation: groupby
+                    Project ID:
+                        aggregations: []
+                        operation: groupby
+                    Storage Class:
+                        aggregations: []
+                        operation: groupby
+          type: table
+        - datasource:
+            uid: $datasource
+          description: Shows the volume of API requests made to the selected bucket over time.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 3
+          id: 6
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.bucket_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gcs_bucket
+                groupBys: []
+                metricKind: DELTA
+                metricType: storage.googleapis.com/api/request_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: "1"
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.label.bucket_name
+                    - =
+                    - $buckets
+                    - AND
+                    - metric.type
+                    - =
+                    - storage.googleapis.com/api/request_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+          title: Bucket - Request count
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Displays network throughput — how much data is uploaded to and downloaded from the bucket.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 11
+          id: 5
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.bucket_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gcs_bucket
+                groupBys: []
+                metricKind: DELTA
+                metricType: storage.googleapis.com/network/received_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.bucket_name
+                    - =
+                    - $buckets
+                    - AND
+                    - metric.type
+                    - =
+                    - storage.googleapis.com/network/received_bytes_count
+                groupBys:
+                    - resource.label.bucket_name
+                perSeriesAligner: ALIGN_SUM
+                projectName: $project
+            - aliasBy: '{{resource.label.bucket_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gcs_bucket
+                groupBys: []
+                metricKind: DELTA
+                metricType: storage.googleapis.com/network/sent_bytes_count
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+                unit: By
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: B
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.label.bucket_name
+                    - =
+                    - $buckets
+                    - AND
+                    - metric.type
+                    - =
+                    - storage.googleapis.com/network/sent_bytes_count
+                groupBys: []
+                perSeriesAligner: ALIGN_RATE
+                projectName: $project
+          title: Bucket - Received bytes, Sent bytes
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Shows total size of the selected bucket (all objects combined).
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 19
+          id: 4
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.bucket_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gcs_bucket
+                groupBys: []
+                metricKind: GAUGE
+                metricType: storage.googleapis.com/storage/total_bytes
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+                unit: By
+                valueType: DOUBLE
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.label.bucket_name
+                    - =
+                    - $buckets
+                    - AND
+                    - metric.type
+                    - =
+                    - storage.googleapis.com/storage/total_bytes
+                groupBys:
+                    - resource.label.bucket_name
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+          title: Bucket Size
+          type: stat
+        - datasource:
+            uid: $datasource
+          description: Shows total number of objects currently stored in the bucket.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 19
+          id: 3
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.bucket_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.type
+                    - =
+                    - gcs_bucket
+                groupBys: []
+                metricKind: GAUGE
+                metricType: storage.googleapis.com/storage/object_count
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+                unit: "1"
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                filters:
+                    - resource.label.bucket_name
+                    - =
+                    - $buckets
+                    - AND
+                    - metric.type
+                    - =
+                    - storage.googleapis.com/storage/object_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+          title: Bucket object count
+          type: stat
+        - datasource:
+            uid: $datasource
+          description: Shows trend of total objects stored in all monitored buckets combined.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 20
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 2
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: always
+                    spanNulls: true
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 27
+          id: 1
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.bucket_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - gcs_bucket
+                groupBys: []
+                metricKind: GAUGE
+                metricType: storage.googleapis.com/storage/object_count
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+                unit: "1"
+                valueType: INT64
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.bucket_name
+                    - =
+                    - $buckets
+                    - AND
+                    - metric.type
+                    - =
+                    - storage.googleapis.com/storage/object_count
+                groupBys:
+                    - resource.label.bucket_name
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+          title: Total object count
+          type: timeseries
+        - datasource:
+            uid: $datasource
+          description: Shows storage growth across buckets or regions.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 20
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineStyle:
+                        fill: solid
+                    lineWidth: 2
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: always
+                    spanNulls: true
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 27
+          id: 2
+          options:
+            alertThreshold: true
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+                width: 220
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.bucket_name}}'
+              datasource:
+                uid: $datasource
+              metricQuery:
+                aliasBy: ""
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.type
+                    - =
+                    - gcs_bucket
+                groupBys: []
+                metricKind: GAUGE
+                metricType: storage.googleapis.com/storage/total_bytes
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+                unit: By
+                valueType: DOUBLE
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: $alignmentPeriod
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.bucket_name
+                    - =
+                    - $buckets
+                    - AND
+                    - metric.type
+                    - =
+                    - storage.googleapis.com/storage/total_bytes
+                groupBys:
+                    - resource.label.bucket_name
+                perSeriesAligner: ALIGN_MEAN
+                projectName: $project
+          title: Total bytes
+          type: timeseries
+    preload: false
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - Storage
+        - Cloud Monitoring
+        - GCP
+    templating:
+        list:
+            - current:
+                text: duplo-gcp
+                value: duplo-gcp
+              includeAll: false
+              label: Datasource
+              name: datasource
+              options: []
+              query: stackdriver
+              refresh: 1
+              regex: ""
+              type: datasource
+            - datasource: $datasource
+              definition: Google Cloud Monitoring - Projects
+              includeAll: false
+              label: Project
+              name: project
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                projects: []
+                selectedMetricType: actions.googleapis.com/smarthome_action/num_active_users
+                selectedQueryType: projects
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - datasource: ${datasource}
+              definition: ""
+              includeAll: false
+              label: Alignment Period
+              name: alignmentPeriod
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/num_active_users
+                selectedQueryType: alignmentPeriods
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              label: buckets
+              name: buckets
+              options: []
+              query:
+                labelKey: resource.label.bucket_name
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: storage.googleapis.com/storage/total_bytes
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: storage.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-30m
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: Cloud Storage - Buckets
+    uid: cloudstorage-buckets
+    weekStart: ""
