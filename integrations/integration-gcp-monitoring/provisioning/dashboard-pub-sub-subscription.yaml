@@ -1,0 +1,950 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-gcp-monitoring
+    name: pubsub-subscription
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: auto
+                    cellOptions:
+                        type: auto
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Subscription ID
+                  properties:
+                    - id: links
+                      value:
+                        - title: show dashboard pub sub subscription
+                          url: |
+                            /d/cf2za93xfxs74b/pub-sub-subscription?var-project=${project}&var-subscriptionID=${__data.fields["Subscription ID"]}&var-location=All
+          gridPos:
+            h: 16
+            w: 12
+            x: 0
+            "y": 0
+          id: 11
+          links:
+            - title: show dashboard
+              url: |
+                /d/cf2za93xfxs74b?var-subscriptionID=${__value.text}
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            showHeader: true
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/num_undelivered_messages
+                groupBys:
+                    - resource.label.subscription_id
+                    - resource.label.project_id
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Subscription ID Table
+          transformations:
+            - id: timeSeriesTable
+              options: {}
+            - id: organize
+              options:
+                excludeByName:
+                    'Trend #A': true
+                includeByName: {}
+                indexByName:
+                    'Trend #A': 3
+                    resource.label.project_id: 1
+                    resource.label.subscription_id: 0
+                    resource.type: 2
+                renameByName:
+                    pubsub.googleapis.com/subscription/num_undelivered_messages duploservices-np-apps-agent-rep-skills-analysis-sub proshort-dev: ""
+                    resource.label.project_id: Project ID
+                    resource.label.subscription_id: Subscription ID
+                    resource.type: Resource Type
+            - id: groupBy
+              options:
+                fields:
+                    Project ID:
+                        aggregations: []
+                        operation: groupby
+                    Resource Type:
+                        aggregations: []
+                        operation: groupby
+                    Subscription ID:
+                        aggregations: []
+                        operation: groupby
+          type: table
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Tracks the rate of push requests sent by Pub/Sub to subscribers, broken down by type (e.g., internal_push, webhook).
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 0
+          id: 6
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.subscription_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.subscription_id
+                    - =
+                    - $subscriptionID
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/push_request_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: Push Request Count
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Shows the age of the oldest unacknowledged message for each subscription.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 8
+          id: 2
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.subscription_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.subscription_id
+                    - =
+                    - $subscriptionID
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/oldest_unacked_message_age
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Oldest unacked message age
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: duplo-gcp
+          description: Shows the time taken for Pub/Sub to deliver push messages to the subscriber endpoint.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 16
+          id: 10
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: duplo-gcp
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_MEAN
+                filters:
+                    - resource.label.subscription_id
+                    - =
+                    - $subscriptionID
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/push_request_latencies
+                groupBys: []
+                perSeriesAligner: ALIGN_DELTA
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Push latency
+          type: stat
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Number of messages sent from Pub/Sub to subscribers (push or pull).
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 16
+          id: 4
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.subscription_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.subscription_id
+                    - =
+                    - $subscriptionID
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/sent_message_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: Sent message count
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 24
+          id: 9
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.subscription_id
+                    - =
+                    - $subscriptionID
+                    - AND
+                    - resource.label.project_id
+                    - =
+                    - $project
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/open_streaming_pulls
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Number of Open Streaming Pulls
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Number of pull requests made by clients to retrieve messages.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 24
+          id: 5
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/pull_request_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: Pull Request count
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Shows how many messages had their acknowledgment deadlines modified by clients.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 32
+          id: 8
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.subscription_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.subscription_id
+                    - =
+                    - $subscriptionID
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/mod_ack_deadline_message_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: Mod Ack deadline message count
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: sishort
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 32
+          id: 1
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.subscription_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.subscription_id
+                    - =
+                    - $subscriptionID
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/num_undelivered_messages
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Unacked messages
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Total number of messages acknowledged by subscribers.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 40
+          id: 3
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.subscription_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.subscription_id
+                    - =
+                    - $subscriptionID
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/ack_message_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: Ack message count
+          type: timeseries
+    preload: false
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - Cloud Monitoring
+        - Pub/Sub
+        - GCP
+    templating:
+        list:
+            - current:
+                text: duplo-gcp
+                value: duplo-gcp
+              description: ""
+              label: datasource
+              name: datasource
+              options: []
+              query: stackdriver
+              refresh: 1
+              regex: ""
+              type: datasource
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              description: ""
+              label: project
+              name: project
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
+                selectedQueryType: projects
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - allValue: .+
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              includeAll: false
+              label: subscriptionID
+              name: subscriptionID
+              options: []
+              query:
+                labelKey: resource.label.subscription_id
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: pubsub.googleapis.com/subscription/num_undelivered_messages
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: pubsub.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-3h
+        to: now
+    timepicker: {}
+    timezone: browser
+    title: Pub Sub - Subscription
+    uid: pubsub-subscription
+    weekStart: ""
+

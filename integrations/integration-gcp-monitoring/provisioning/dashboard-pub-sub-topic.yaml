@@ -1,0 +1,876 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-gcp-monitoring
+    name: pubsub-topics
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: auto
+                    cellOptions:
+                        type: auto
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Topic ID
+                  properties:
+                    - id: links
+                      value:
+                        - title: show Dashboard Pub Sub topics
+                          url: |
+                            /d/bf2xs8ko48bgge/pub-sub-topics?var-project=${project}&var-topicid=${__data.fields["Topic ID"]}&var-location=All
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 0
+          id: 10
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            showHeader: true
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/topic/oldest_retained_message_age
+                groupBys: []
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Topic ID List
+          transformations:
+            - id: timeSeriesTable
+              options: {}
+            - id: organize
+              options:
+                excludeByName:
+                    'Trend #A': true
+                    resource.label.project_id: true
+                includeByName: {}
+                indexByName:
+                    'Trend #A': 3
+                    resource.label.project_id: 1
+                    resource.label.topic_id: 0
+                    resource.type: 2
+                renameByName:
+                    pubsub.googleapis.com/subscription/num_undelivered_messages duploservices-np-apps-agent-rep-skills-analysis-sub proshort-dev: ""
+                    resource.label.project_id: Project ID
+                    resource.label.subscription_id: Subscription ID
+                    resource.label.topic_id: Topic ID
+                    resource.type: Resource Type
+            - id: groupBy
+              options:
+                fields:
+                    Project ID:
+                        aggregations: []
+                        operation: groupby
+                    Resource Type:
+                        aggregations: []
+                        operation: groupby
+                    Topic ID:
+                        aggregations: []
+                        operation: groupby
+          type: table
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: |-
+            Shows the number of unacknowledged (unacked) messages.
+            Helps identify backlogs and delayed message acknowledgments in topic subscriptions.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 0
+          id: 7
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.topic_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.topic_id
+                    - =
+                    - $topicid
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/topic/num_unacked_messages_by_region
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Unacked messages
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: duplo-gcp
+          description: |
+            Shows average time taken for subscribers to acknowledge received messages.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 8
+          id: 9
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{metric.label.checker_location}}'
+              datasource:
+                type: stackdriver
+                uid: duplo-gcp
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_MEAN
+                filters:
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/subscription/ack_latencies
+                groupBys: []
+                perSeriesAligner: ALIGN_DELTA
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Ack Latency
+          type: stat
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: How long the oldest outstanding message has been waiting for an ACK since it was first delivered.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 8
+          id: 6
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.topic_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.topic_id
+                    - =
+                    - $topicid
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/topic/oldest_retained_acked_message_age_by_region
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Oldest Unacked Message Age
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Displays the count of retained messages for topics with message retention enabled.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides:
+                - __systemRef: hideSeriesFrom
+                  matcher:
+                    id: byNames
+                    options:
+                        mode: exclude
+                        names:
+                            - pubsub.googleapis.com/topic/num_retained_messages
+                        prefix: 'All except:'
+                        readOnly: true
+                  properties:
+                    - id: custom.hideFrom
+                      value:
+                        legend: false
+                        tooltip: false
+                        viz: true
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 16
+          id: 8
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.topic_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.topic_id
+                    - =
+                    - $topicid
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/topic/num_retained_messages
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Retained messages
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Shows total bytes retained for messages kept beyond their initial delivery window.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 16
+          id: 4
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.topic_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.topic_id
+                    - =
+                    - $topicid
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/topic/retained_bytes
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Retained bytes
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Tracks configuration change operations on Pub/Sub topics.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 24
+          id: 5
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: ""
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.topic_id
+                    - =
+                    - $topicid
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/topic/config_updates_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: Topic Configuration Operations
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Displays the average size of messages published to each topic over time.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+                unit: bytes
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 24
+          id: 2
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.topic_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_MEAN
+                filters:
+                    - resource.label.topic_id
+                    - =
+                    - $topicid
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/topic/message_sizes
+                groupBys:
+                    - resource.label.topic_id
+                perSeriesAligner: ALIGN_DELTA
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Publish message size
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 32
+          id: 3
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.topic_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_MEAN
+                filters:
+                    - resource.label.topic_id
+                    - =
+                    - $topicid
+                    - AND
+                    - metric.type
+                    - =
+                    - pubsub.googleapis.com/topic/send_request_latencies
+                groupBys:
+                    - resource.label.topic_id
+                perSeriesAligner: ALIGN_DELTA
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Publish Request Latency
+          type: timeseries
+    preload: false
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - Cloud Monitoring
+        - Pub/Sub
+        - GCP
+    templating:
+        list:
+            - current:
+                text: duplo-gcp
+                value: duplo-gcp
+              label: datasource
+              name: datasource
+              options: []
+              query: stackdriver
+              refresh: 1
+              regex: ""
+              type: datasource
+            - datasource:
+                type: stackdriver
+                uid: duplo-gcp
+              definition: ""
+              label: project
+              name: project
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
+                selectedQueryType: projects
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              label: topicid
+              name: topicid
+              options: []
+              query:
+                labelKey: resource.label.topic_id
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: pubsub.googleapis.com/topic/oldest_unacked_message_age_by_region
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: pubsub.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-1h
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: Pub Sub - Topics
+    uid: pubsub-topics
+    weekStart: ""
+
