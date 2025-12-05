@@ -371,7 +371,7 @@ spec:
                 groupBys: []
                 perSeriesAligner: ALIGN_MEAN
                 preprocessor: rate
-                projectName: proshort-dev
+                projectName: $project
                 view: FULL
           title: Uploaded Rows
           type: timeseries
