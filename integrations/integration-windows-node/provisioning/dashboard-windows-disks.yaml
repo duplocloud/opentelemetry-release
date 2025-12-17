@@ -23,7 +23,7 @@ spec:
               hide: true
               iconColor: light-purple
               name: Critical system event
-              tagKeys: job,instance,level
+              tagKeys: cluster,job,instance,level
               textFormat: '{{message}}'
               titleFormat: Critical system event
             - datasource:
@@ -34,7 +34,7 @@ spec:
               hide: true
               iconColor: light-yellow
               name: Reboot
-              tagKeys: job,instance
+              tagKeys: cluster,job,instance
               titleFormat: Reboot
               useValueForTime: "on"
             - datasource:
@@ -45,7 +45,7 @@ spec:
               hide: true
               iconColor: light-orange
               name: Service failed
-              tagKeys: job,instance,level
+              tagKeys: cluster,job,instance,level
               textFormat: '{{message}}'
               titleFormat: Service failed
     editable: false

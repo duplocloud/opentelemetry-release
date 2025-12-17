@@ -1,8 +1,8 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-windows-node
-    name: windows-logs
+    folder: integration-duplo-windows-node
+    name: duplo-windows-logs
 spec:
     annotations:
         list:

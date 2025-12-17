@@ -1,8 +1,8 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-windows-node
-    name: windows-fleet
+    folder: integration-duplo-windows-node
+    name: duplo-windows-fleet
 spec:
     annotations:
         list:
