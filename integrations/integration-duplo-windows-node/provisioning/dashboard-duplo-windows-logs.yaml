@@ -19,33 +19,33 @@ spec:
                 type: loki
                 uid: ${loki_datasource}
               enable: true
-              expr: '{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance", channel="System", level="Critical"} | json'
+              expr: '{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance", channel="System", level="Critical"} | json'
               hide: true
               iconColor: light-purple
               name: Critical system event
-              tagKeys: cluster,job,instance,level
+              tagKeys: cluster,namespace,job,instance,level
               textFormat: '{{message}}'
               titleFormat: Critical system event
             - datasource:
                 type: prometheus
                 uid: ${datasource}
               enable: true
-              expr: windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
+              expr: windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
               hide: true
               iconColor: light-yellow
               name: Reboot
-              tagKeys: cluster,job,instance
+              tagKeys: cluster,namespace,job,instance
               titleFormat: Reboot
               useValueForTime: "on"
             - datasource:
                 type: loki
                 uid: ${loki_datasource}
               enable: true
-              expr: '{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance", source="Service Control Manager", level="Error"} |= "terminated" | json'
+              expr: '{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance", source="Service Control Manager", level="Error"} |= "terminated" | json'
               hide: true
               iconColor: light-orange
               name: Service failed
-              tagKeys: cluster,job,instance,level
+              tagKeys: cluster,namespace,job,instance,level
               textFormat: '{{message}}'
               titleFormat: Service failed
     editable: false
@@ -361,7 +361,7 @@ spec:
                 type: loki
                 uid: ${loki_datasource}
               expr: |
-                sum by (level) (count_over_time({job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance",channel=~"$channel",source=~"$source",level=~"$level"}
+                sum by (level) (count_over_time({job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance",channel=~"$channel",source=~"$source",level=~"$level"}
                 |~ "$regex_search"
                 | json | __error__=``
                 [$__interval]))
@@ -445,11 +445,27 @@ spec:
                 type: loki
                 uid: ${loki_datasource}
               includeAll: true
+              label: Namespace
+              multi: true
+              name: namespace
+              options: []
+              query: label_values({job=~"integrations/windows_exporter", cluster=~"$cluster"}, namespace)
+              refresh: 2
+              sort: 1
+              type: query
+            - allValue: .*
+              current:
+                text: All
+                value: $__all
+              datasource:
+                type: loki
+                uid: ${loki_datasource}
+              includeAll: true
               label: Job
               multi: true
               name: job
               options: []
-              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster"}, job)
+              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace"}, job)
               refresh: 2
               sort: 1
               type: query
@@ -465,7 +481,7 @@ spec:
               multi: true
               name: instance
               options: []
-              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job"}, instance)
+              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job"}, instance)
               refresh: 2
               sort: 1
               type: query
@@ -481,7 +497,7 @@ spec:
               multi: true
               name: channel
               options: []
-              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}, channel)
+              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}, channel)
               refresh: 2
               sort: 1
               type: query
@@ -497,7 +513,7 @@ spec:
               multi: true
               name: source
               options: []
-              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance",channel=~"$channel"}, source)
+              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance",channel=~"$channel"}, source)
               refresh: 2
               sort: 1
               type: query
@@ -513,7 +529,7 @@ spec:
               multi: true
               name: level
               options: []
-              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance",channel=~"$channel",source=~"$source"}, level)
+              query: label_values({job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance",channel=~"$channel",source=~"$source"}, level)
               refresh: 2
               sort: 1
               type: query
