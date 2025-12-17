@@ -295,7 +295,7 @@ spec:
                       value:
                         - targetBlank: false
                           title: Drill down to ${__field.name} ${__value.text}
-                          url: d/duplo-windows-overview?var-instance=${__data.fields.instance}&${__url_time_range}&${datasource:queryparam}
+                          url: d/duplo-windows-overview?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-instance=${__data.fields.instance}&${__url_time_range}&${datasource:queryparam}
                 - matcher:
                     id: byRegexp
                     options: Job
@@ -635,7 +635,7 @@ spec:
                 decimals: 1
                 links:
                     - title: Drill down to this instance
-                      url: d/duplo-windows-overview?var-instance=${__field.labels.instance}&${__url_time_range}
+                      url: d/duplo-windows-overview?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-instance=${__field.labels.instance}&${__url_time_range}
                 mappings: []
                 max: 100
                 min: 0
@@ -738,7 +738,7 @@ spec:
                 decimals: 1
                 links:
                     - title: Drill down to this instance
-                      url: d/duplo-windows-overview?var-instance=${__field.labels.instance}&${__url_time_range}
+                      url: d/duplo-windows-overview?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-instance=${__field.labels.instance}&${__url_time_range}
                 mappings: []
                 max: 100
                 min: 0
@@ -841,7 +841,7 @@ spec:
                 decimals: 1
                 links:
                     - title: Drill down to this instance
-                      url: d/duplo-windows-overview?var-instance=${__field.labels.instance}&var-volume=${__field.labels.volume}&${__url_time_range}
+                      url: d/duplo-windows-overview?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-instance=${__field.labels.instance}&var-volume=${__field.labels.volume}&${__url_time_range}
                 mappings: []
                 max: 100
                 min: 0
@@ -944,7 +944,7 @@ spec:
                 decimals: 1
                 links:
                     - title: Drill down to this instance
-                      url: d/duplo-windows-overview?var-instance=${__field.labels.instance}&var-volume=${__field.labels.volume}&${__url_time_range}
+                      url: d/duplo-windows-overview?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-instance=${__field.labels.instance}&var-volume=${__field.labels.volume}&${__url_time_range}
                 mappings: []
                 max: 100
                 min: 0
