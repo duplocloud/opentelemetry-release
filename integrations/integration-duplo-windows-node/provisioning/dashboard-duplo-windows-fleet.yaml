@@ -306,7 +306,7 @@ spec:
                       value:
                         - targetBlank: false
                           title: Filter by ${__field.name}
-                          url: d/duplo-windows-fleet?var-${__field.name}=${__value.text}&${__url_time_range}&${datasource:queryparam}
+                          url: d/duplo-windows-fleet?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-${__field.name}=${__value.text}&${__url_time_range}&${datasource:queryparam}
                 - matcher:
                     id: byName
                     options: CPU usage
@@ -541,6 +541,9 @@ spec:
                     cluster:
                         aggregations: []
                         operation: groupby
+                    namespace:
+                        aggregations: []
+                        operation: groupby
                     instance:
                         aggregations: []
                         operation: groupby
@@ -559,7 +562,7 @@ spec:
             - id: filterFieldsByName
               options:
                 include:
-                    pattern: job 1$|instance|cluster|product|^hostname$|Value.+
+                    pattern: job 1$|instance|cluster|namespace|product|^hostname$|Value.+
             - id: organize
               options:
                 excludeByName:
@@ -574,6 +577,8 @@ spec:
                 includeByName: {}
                 indexByName: {}
                 renameByName:
+                    cluster: Cluster
+                    namespace: Namespace
                     hostname: Hostname
                     instance: Instance
                     job 1: Job
