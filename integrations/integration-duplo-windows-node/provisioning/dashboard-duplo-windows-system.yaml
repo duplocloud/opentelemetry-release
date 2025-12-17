@@ -55,16 +55,16 @@ spec:
         - keepTime: true
           title: Back to Windows fleet
           type: link
-          url: /d/windows-fleet
+          url: /d/duplo-windows-fleet
         - keepTime: true
           title: Back to Windows overview
           type: link
-          url: /d/windows-overview
+          url: /d/duplo-windows-overview
         - asDropdown: true
           includeVars: true
           keepTime: true
           tags:
-            - integration-windows-node
+            - integration-duplo-windows-node
           title: All Windows dashboards
           type: dashboards
     panels:
@@ -688,7 +688,7 @@ spec:
     refresh: 1m
     schemaVersion: 40
     tags:
-        - integration-windows-node
+        - integration-duplo-windows-node
     templating:
         list:
             - current:
@@ -774,6 +774,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Windows CPU and system
-    uid: windows-system
+    title: Duplo Windows CPU and system
+    uid: duplo-windows-system
     weekStart: ""
