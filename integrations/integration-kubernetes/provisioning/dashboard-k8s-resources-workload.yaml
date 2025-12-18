@@ -48,7 +48,7 @@ spec:
     panels:
         - datasource:
             type: prometheus
-            uid: duplo-metrics
+            uid: ${datasource}
           fieldConfig:
             defaults:
                 color:
@@ -176,7 +176,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${datasource}
               editorMode: code
               expr: |
                 sum by (cluster, namespace, deployment) (
@@ -194,7 +194,7 @@ spec:
               refId: D
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${datasource}
               editorMode: code
               expr: |
                 sum by (cluster, namespace, deployment) (
@@ -212,7 +212,7 @@ spec:
               refId: E
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${datasource}
               editorMode: code
               expr: |
                 sum by (cluster, namespace, statefulset) (
@@ -230,7 +230,7 @@ spec:
               refId: F
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${datasource}
               editorMode: code
               expr: |
                 sum by (cluster, namespace, statefulset) (
@@ -247,7 +247,7 @@ spec:
               refId: G
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${datasource}
               editorMode: code
               expr: |
                 sum by (cluster, namespace, daemonset) (
@@ -264,7 +264,7 @@ spec:
               refId: H
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${datasource}
               editorMode: code
               expr: |
                 sum by (cluster, namespace, daemonset) (
