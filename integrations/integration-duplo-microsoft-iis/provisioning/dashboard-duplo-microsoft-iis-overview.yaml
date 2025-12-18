@@ -1057,7 +1057,7 @@ spec:
                 uid: ${prometheus_datasource}
               hide: 0
               includeAll: true
-              label: Namespace
+              label: Namespace/Tenant
               multi: true
               name: namespace
               options: []
