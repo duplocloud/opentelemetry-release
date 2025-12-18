@@ -14,6 +14,16 @@ spec:
     graphTooltip: 0
     hideControls: false
     links:
+        - keepTime: true
+          includeVars: true
+          title: Windows Node Metrics
+          type: link
+          url: /d/duplo-windows-overview
+        - keepTime: true
+          includeVars: true
+          title: Windows Node Logs
+          type: link
+          url: /d/duplo-windows-logs
         - asDropdown: false
           icon: external link
           includeVars: true
