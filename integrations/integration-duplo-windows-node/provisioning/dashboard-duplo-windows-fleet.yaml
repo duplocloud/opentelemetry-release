@@ -1154,7 +1154,7 @@ spec:
                 uid: ${datasource}
               definition: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},namespace)
               includeAll: true
-              label: Namespace
+              label: Namespace/Tenant
               multi: true
               name: namespace
               options: []

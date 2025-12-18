@@ -445,7 +445,7 @@ spec:
                 type: loki
                 uid: ${loki_datasource}
               includeAll: true
-              label: Namespace
+              label: Namespace/Tenant
               multi: true
               name: namespace
               options: []
