@@ -1,0 +1,488 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-gcp-monitoring
+    name: cloudtasks
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links: []
+    panels:
+        - datasource:
+            type: stackdriver
+            uid: duplo-gcp
+          description: Shows average and 5th percentile delay between task creation and first execution, indicating scheduling latency or backlog buildup.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: s
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 0
+          id: 5
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: REDUCE_MEAN task_attempt_delays
+              datasource:
+                type: stackdriver
+                uid: duplo-gcp
+              hide: false
+              queryType: timeSeriesList
+              range: true
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_MEAN
+                filters:
+                    - resource.label.queue_id
+                    - =
+                    - $queueid
+                    - AND
+                    - metric.type
+                    - =
+                    - cloudtasks.googleapis.com/queue/task_attempt_delays
+                groupBys: []
+                perSeriesAligner: ALIGN_SUM
+                preprocessor: none
+                projectName: $project
+                view: FULL
+            - aliasBy: ' REDUCE_PERCENTILE_05 task_attempt_delays'
+              datasource:
+                type: stackdriver
+                uid: duplo-gcp
+              hide: false
+              queryType: timeSeriesList
+              refId: B
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_SUM
+                filters:
+                    - resource.label.queue_id
+                    - =
+                    - $queueid
+                    - AND
+                    - metric.type
+                    - =
+                    - cloudtasks.googleapis.com/queue/task_attempt_delays
+                groupBys:
+                    - resource.label.queue_id
+                perSeriesAligner: ALIGN_PERCENTILE_05
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Task Attempt Delays
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: racks the number of pending tasks per queue over time — a growing value signals slower consumption or blocked workers.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 11
+            w: 12
+            x: 12
+            "y": 0
+          id: 3
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.queue_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.queue_id
+                    - =
+                    - $queueid
+                    - AND
+                    - metric.type
+                    - =
+                    - cloudtasks.googleapis.com/queue/depth
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Queue Depth
+          type: timeseries
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: auto
+                    cellOptions:
+                        type: auto
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Queue ID
+                  properties:
+                    - id: custom.width
+                      value: 475
+          gridPos:
+            h: 11
+            w: 12
+            x: 0
+            "y": 8
+          id: 6
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            showHeader: true
+            sortBy: []
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - metric.type
+                    - =
+                    - cloudtasks.googleapis.com/queue/depth
+                groupBys:
+                    - resource.label.queue_id
+                perSeriesAligner: ALIGN_NONE
+                preprocessor: none
+                projectName: $project
+                view: FULL
+          title: Queue ID List
+          transformations:
+            - id: timeSeriesTable
+              options: {}
+            - id: organize
+              options:
+                excludeByName:
+                    'Trend #A': true
+                    metric.label.method: false
+                    metric.label.response_code: true
+                    resource.label.target_type: true
+                    resource.type: true
+                includeByName: {}
+                indexByName:
+                    'Trend #A': 4
+                    metric.label.response_code: 5
+                    resource.label.location: 2
+                    resource.label.project_id: 1
+                    resource.label.queue_id: 0
+                    resource.label.target_type: 6
+                    resource.type: 3
+                renameByName:
+                    metric.label.method: Method
+                    metric.label.response_code: Response Code
+                    pubsub.googleapis.com/subscription/num_undelivered_messages duploservices-np-apps-agent-rep-skills-analysis-sub proshort-dev: ""
+                    resource.label.bucket_name: Bucket Name
+                    resource.label.location: Location
+                    resource.label.project_id: Project ID
+                    resource.label.queue_id: Queue ID
+                    resource.label.subscription_id: Subscription ID
+                    resource.label.topic_id: Topic ID
+                    resource.type: Resource Type
+            - id: groupBy
+              options:
+                fields:
+                    Location:
+                        aggregations: []
+                        operation: groupby
+                    Project ID:
+                        aggregations: []
+                        operation: groupby
+                    Queue ID:
+                        aggregations: []
+                        operation: groupby
+          type: table
+        - datasource:
+            type: stackdriver
+            uid: ${datasource}
+          description: Monitors how many task attempts are being processed in each queue, helping identify activity spikes or retry storms.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 11
+          id: 1
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - aliasBy: '{{resource.label.queue_id}}'
+              datasource:
+                type: stackdriver
+                uid: ${datasource}
+              queryType: timeSeriesList
+              refId: A
+              timeSeriesList:
+                alignmentPeriod: cloud-monitoring-auto
+                crossSeriesReducer: REDUCE_NONE
+                filters:
+                    - resource.label.queue_id
+                    - =
+                    - $queueid
+                    - AND
+                    - metric.type
+                    - =
+                    - cloudtasks.googleapis.com/queue/task_attempt_count
+                groupBys: []
+                perSeriesAligner: ALIGN_MEAN
+                preprocessor: rate
+                projectName: $project
+                view: FULL
+          title: Task attempt count
+          type: timeseries
+    preload: false
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - Cloud Monitoring
+        - GCP
+        - CloudTasks
+    templating:
+        list:
+            - current:
+                text: duplo-gcp
+                value: duplo-gcp
+              label: datasource
+              name: datasource
+              options: []
+              query: stackdriver
+              refresh: 1
+              regex: ""
+              type: datasource
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              description: ""
+              label: project
+              name: project
+              options: []
+              query:
+                labelKey: ""
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: actions.googleapis.com/smarthome_action/camerastream/first_frame_latencies
+                selectedQueryType: projects
+                selectedSLOService: ""
+                selectedService: actions.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+            - datasource:
+                type: stackdriver
+                uid: ${datasource}
+              definition: ""
+              label: queueid
+              name: queueid
+              options: []
+              query:
+                labelKey: resource.label.queue_id
+                loading: false
+                projectName: $project
+                refId: CloudMonitoringVariableQueryEditor-VariableQuery
+                selectedMetricType: cloudtasks.googleapis.com/queue/depth
+                selectedQueryType: labelValues
+                selectedSLOService: ""
+                selectedService: cloudtasks.googleapis.com
+                sloServices: []
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-7d
+        to: now
+    timepicker: {}
+    timezone: browser
+    title: Cloud Tasks
+    uid: cloudtasks
+    weekStart: ""
+
+
