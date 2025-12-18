@@ -1,8 +1,8 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-windows-node
-    name: windows-system
+    folder: integration-duplo-windows-node
+    name: duplo-windows-system
 spec:
     annotations:
         list:
@@ -19,33 +19,33 @@ spec:
                 type: loki
                 uid: ${loki_datasource}
               enable: true
-              expr: '{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance", channel="System", level="Critical"} | json'
+              expr: '{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance", channel="System", level="Critical"} | json'
               hide: true
               iconColor: light-purple
               name: Critical system event
-              tagKeys: cluster,job,instance,level
+              tagKeys: cluster,namespace,job,instance,level
               textFormat: '{{message}}'
               titleFormat: Critical system event
             - datasource:
                 type: prometheus
                 uid: ${datasource}
               enable: true
-              expr: windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
+              expr: windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
               hide: true
               iconColor: light-yellow
               name: Reboot
-              tagKeys: cluster,job,instance
+              tagKeys: cluster,namespace,job,instance
               titleFormat: Reboot
               useValueForTime: "on"
             - datasource:
                 type: loki
                 uid: ${loki_datasource}
               enable: true
-              expr: '{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance", source="Service Control Manager", level="Error"} |= "terminated" | json'
+              expr: '{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance", source="Service Control Manager", level="Error"} |= "terminated" | json'
               hide: true
               iconColor: light-orange
               name: Service failed
-              tagKeys: cluster,job,instance,level
+              tagKeys: cluster,namespace,job,instance,level
               textFormat: '{{message}}'
               titleFormat: Service failed
     editable: false
@@ -55,16 +55,16 @@ spec:
         - keepTime: true
           title: Back to Windows fleet
           type: link
-          url: /d/windows-fleet
+          url: /d/duplo-windows-fleet
         - keepTime: true
           title: Back to Windows overview
           type: link
-          url: /d/windows-overview
+          url: /d/duplo-windows-overview
         - asDropdown: true
           includeVars: true
           keepTime: true
           tags:
-            - integration-windows-node
+            - integration-duplo-windows-node
           title: All Windows dashboards
           type: dashboards
     panels:
@@ -130,7 +130,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: 100 - (avg without (mode,core) (rate(windows_cpu_time_total{mode="idle", job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}[$__rate_interval])*100))
+              expr: 100 - (avg without (mode,core) (rate(windows_cpu_time_total{mode="idle", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}[$__rate_interval])*100))
               legendFormat: CPU usage
               refId: A
           title: CPU usage
@@ -210,7 +210,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: 100 - (avg without (mode,core) (rate(windows_cpu_time_total{mode="idle", job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}[$__rate_interval])*100))
+              expr: 100 - (avg without (mode,core) (rate(windows_cpu_time_total{mode="idle", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}[$__rate_interval])*100))
               legendFormat: CPU usage
               refId: A
           title: CPU usage
@@ -394,7 +394,7 @@ spec:
                 type: prometheus
                 uid: ${datasource}
               expr: |
-                windows_system_processor_queue_length{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
+                windows_system_processor_queue_length{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               legendFormat: CPU average queue
               refId: A
           title: CPU average queue size
@@ -468,13 +468,13 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: irate(windows_system_context_switches_total{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}[$__rate_interval])
+              expr: irate(windows_system_context_switches_total{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}[$__rate_interval])
               legendFormat: Context switches
               refId: A
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum without (core) (irate(windows_cpu_interrupts_total{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}[$__rate_interval]))
+              expr: sum without (core) (irate(windows_cpu_interrupts_total{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}[$__rate_interval]))
               legendFormat: Interrupts
               refId: B
           title: Context switches/Interrupts
@@ -532,7 +532,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_os_timezone{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
+              expr: windows_os_timezone{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
               refId: A
           title: Timezone
@@ -596,7 +596,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: clamp_max(windows_time_ntp_client_time_sources{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}, 1)
+              expr: clamp_max(windows_time_ntp_client_time_sources{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}, 1)
               legendFormat: NTP status
               refId: A
           title: NTP status
@@ -673,13 +673,13 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_time_ntp_round_trip_delay_seconds{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
+              expr: windows_time_ntp_round_trip_delay_seconds{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               legendFormat: NTP trip delay
               refId: A
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_time_computed_time_offset_seconds{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job",instance=~"$instance"}
+              expr: windows_time_computed_time_offset_seconds{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               legendFormat: Time offset
               refId: B
           title: NTP delay
@@ -688,7 +688,7 @@ spec:
     refresh: 1m
     schemaVersion: 40
     tags:
-        - integration-windows-node
+        - integration-duplo-windows-node
     templating:
         list:
             - current:
@@ -710,14 +710,33 @@ spec:
                 uid: ${datasource}
               definition: label_values(windows_os_info{job=~"integrations/windows_exporter"},cluster)
               description: ""
-              includeAll: true
+              includeAll: false
               label: Cluster
-              multi: true
               name: cluster
               options: []
               query:
                 qryType: 1
                 query: label_values(windows_os_info{job=~"integrations/windows_exporter"},cluster)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 2
+              regex: ""
+              sort: 1
+              type: query
+            - allValue: .*
+              current:
+                text: ""
+                value: ""
+              datasource:
+                type: prometheus
+                uid: ${datasource}
+              definition: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},namespace)
+              includeAll: false
+              label: Namespace/Tenant
+              name: namespace
+              options: []
+              query:
+                qryType: 1
+                query: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},namespace)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               regex: ""
@@ -730,7 +749,7 @@ spec:
               datasource:
                 type: prometheus
                 uid: ${datasource}
-              definition: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},job)
+              definition: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster", namespace=~"$namespace"},job)
               includeAll: true
               label: Job
               multi: true
@@ -738,7 +757,7 @@ spec:
               options: []
               query:
                 qryType: 1
-                query: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},job)
+                query: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster", namespace=~"$namespace"},job)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               sort: 1
@@ -754,7 +773,7 @@ spec:
               label: Instance
               name: instance
               options: []
-              query: label_values(windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster",job=~"$job"}, instance)
+              query: label_values(windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job"}, instance)
               refresh: 2
               sort: 1
               type: query
@@ -774,6 +793,6 @@ spec:
         to: now
     timepicker: {}
     timezone: default
-    title: Windows CPU and system
-    uid: windows-system
+    title: Duplo Windows CPU and system
+    uid: duplo-windows-system
     weekStart: ""

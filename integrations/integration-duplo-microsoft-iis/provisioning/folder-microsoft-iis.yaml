@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-duplo-microsoft-iis
+spec:
+    title: Integration-Duplo-Microsoft-IIS
+    uid: integration-duplo-microsoft-iis
