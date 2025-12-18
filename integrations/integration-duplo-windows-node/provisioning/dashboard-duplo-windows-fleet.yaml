@@ -1124,16 +1124,14 @@ spec:
               type: datasource
             - allValue: .*
               current:
-                text: All
-                value:
-                    - $__all
+                text: ""
+                value: ""
               datasource:
                 type: prometheus
                 uid: ${datasource}
               definition: label_values(windows_os_info{job=~"integrations/windows_exporter"},cluster)
-              includeAll: true
+              includeAll: false
               label: Cluster
-              multi: true
               name: cluster
               options: []
               query:

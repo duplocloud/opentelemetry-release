@@ -423,14 +423,13 @@ spec:
               type: datasource
             - allValue: .*
               current:
-                text: All
-                value: $__all
+                text: ""
+                value: ""
               datasource:
                 type: loki
                 uid: ${loki_datasource}
-              includeAll: true
+              includeAll: false
               label: Cluster
-              multi: true
               name: cluster
               options: []
               query: label_values({job=~"integrations/windows_exporter"}, cluster)
@@ -439,14 +438,13 @@ spec:
               type: query
             - allValue: .*
               current:
-                text: All
-                value: $__all
+                text: ""
+                value: ""
               datasource:
                 type: loki
                 uid: ${loki_datasource}
-              includeAll: true
+              includeAll: false
               label: Namespace/Tenant
-              multi: true
               name: namespace
               options: []
               query: label_values({job=~"integrations/windows_exporter", cluster=~"$cluster"}, namespace)

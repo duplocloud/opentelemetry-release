@@ -1080,9 +1080,8 @@ spec:
               datasource:
                 uid: ${prometheus_datasource}
               hide: 0
-              includeAll: true
+              includeAll: false
               label: Cluster
-              multi: true
               name: cluster
               options: []
               query: label_values(windows_iis_requests_total{},cluster)
@@ -1099,9 +1098,8 @@ spec:
               datasource:
                 uid: ${prometheus_datasource}
               hide: 0
-              includeAll: true
+              includeAll: false
               label: Namespace/Tenant
-              multi: true
               name: namespace
               options: []
               query: label_values(windows_iis_requests_total{cluster=~"$cluster"},namespace)
@@ -1137,9 +1135,8 @@ spec:
               datasource:
                 uid: ${prometheus_datasource}
               hide: 0
-              includeAll: true
+              includeAll: false
               label: Instance
-              multi: true
               name: instance
               options: []
               query: label_values(windows_iis_requests_total{job=~"$job", cluster=~"$cluster", namespace=~"$namespace"},instance)

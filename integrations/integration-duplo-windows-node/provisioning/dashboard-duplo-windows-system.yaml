@@ -710,9 +710,8 @@ spec:
                 uid: ${datasource}
               definition: label_values(windows_os_info{job=~"integrations/windows_exporter"},cluster)
               description: ""
-              includeAll: true
+              includeAll: false
               label: Cluster
-              multi: true
               name: cluster
               options: []
               query:
@@ -725,16 +724,14 @@ spec:
               type: query
             - allValue: .*
               current:
-                text: All
-                value:
-                    - $__all
+                text: ""
+                value: ""
               datasource:
                 type: prometheus
                 uid: ${datasource}
               definition: label_values(windows_os_info{job=~"integrations/windows_exporter", cluster=~"$cluster"},namespace)
-              includeAll: true
+              includeAll: false
               label: Namespace/Tenant
-              multi: true
               name: namespace
               options: []
               query:
