@@ -18,9 +18,13 @@ spec:
           includeVars: true
           title: Windows Node Metrics
           type: link
+          icon: external link
+          targetBlank: true
           url: /d/duplo-windows-overview
         - keepTime: true
           includeVars: true
+          icon: external link
+          targetBlank: true
           title: Windows Node Logs
           type: link
           url: /d/duplo-windows-logs
