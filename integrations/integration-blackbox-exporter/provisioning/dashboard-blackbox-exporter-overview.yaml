@@ -15,7 +15,7 @@ spec:
               iconColor: rgba(0, 211, 255, 1)
               name: Annotations & Alerts
               type: dashboard
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 1
     links: []
@@ -65,7 +65,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: avg(probe_success{service="duplo-blackbox-exporter"}) * 100
+              expr: avg(probe_success{job="aos-blackbox-exporter"}) * 100
               range: true
               refId: A
           title: Global Uptime
@@ -107,7 +107,7 @@ spec:
           pluginVersion: 11.5.2
           targets:
             - editorMode: code
-              expr: count(probe_success{service="duplo-blackbox-exporter"})
+              expr: count(probe_success{job="aos-blackbox-exporter"})
               range: true
               refId: A
           title: Total Targets
@@ -148,7 +148,7 @@ spec:
           pluginVersion: 11.5.2
           targets:
             - editorMode: code
-              expr: count(probe_success{service="duplo-blackbox-exporter"} == 1)
+              expr: count(probe_success{job="aos-blackbox-exporter"} == 1)
               range: true
               refId: A
           title: Healthy Targets
@@ -195,7 +195,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: count(probe_success{service="duplo-blackbox-exporter"} == 0)
+              expr: count(probe_success{job="aos-blackbox-exporter"} == 0)
               legendFormat: Targets Down
               range: true
               refId: A
@@ -246,7 +246,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: avg(probe_duration_seconds{service="duplo-blackbox-exporter"})
+              expr: avg(probe_duration_seconds{job="aos-blackbox-exporter"})
               range: true
               refId: A
           title: Average Latency
@@ -710,28 +710,28 @@ spec:
               regex: ""
               type: datasource
             - current:
-                text: prometheus-blackbox-exporter-1762516080
-                value: prometheus-blackbox-exporter-1762516080
+                text: aos-blackbox-exporter
+                value: aos-blackbox-exporter
               datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
-              definition: label_values(probe_success, job)
+              definition: label_values(probe_success{job="aos-blackbox-exporter"},job)
               hide: 2
               includeAll: false
               label: Job
               name: job
               options: []
               query:
-                query: label_values(probe_success, job)
-                refId: StandardVariableQuery
+                qryType: 1
+                query: label_values(probe_success{job="aos-blackbox-exporter"},job)
+                refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               regex: ""
               sort: 1
               type: query
             - current:
                 text: All
-                value:
-                    - $__all
+                value: $__all
               datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
@@ -749,7 +749,7 @@ spec:
               sort: 1
               type: query
     time:
-        from: now-5m
+        from: now-15m
         to: now
     title: Blackbox Exporter Overview
     uid: blackbox-exporter-overview
