@@ -38,10 +38,8 @@ spec:
     description: Kubernetes Events
     editable: false
     fiscalYearStartMonth: 0
-    gnetId: 17882
     graphTooltip: 0
     links: []
-    liveNow: false
     panels:
         - collapsed: false
           gridPos:
@@ -139,6 +137,18 @@ spec:
                     options: lastTimestamp
                   properties:
                     - id: custom.filterable
+                - matcher:
+                    id: byName
+                    options: Message
+                  properties:
+                    - id: custom.width
+                      value: 555
+                - matcher:
+                    id: byName
+                    options: Cluster
+                  properties:
+                    - id: custom.width
+                      value: 135
           gridPos:
             h: 13
             w: 24
@@ -156,13 +166,14 @@ spec:
                 show: false
             showHeader: true
             sortBy: []
-          pluginVersion: 11.3.0-197632
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: loki
                 uid: ${datasource}
+              direction: backward
               editorMode: code
-              expr: '{job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter"} |~ `(?i)$contains` | logfmt | json | drop __error__,__error_details__ | namespace=~`$namespace`'
+              expr: '{job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter"} |~ `(?i)$contains` | logfmt | json | drop __error__,__error_details__ | namespace=~`$namespace` | cluster=~`$cluster`'
               queryType: range
               refId: A
           title: Events Details
@@ -174,26 +185,39 @@ spec:
             - id: filterFieldsByName
               options:
                 include:
+                    names:
+                        - labels
+                        - Time
+                        - count
+                        - kind
+                        - msg
+                        - name
+                        - namespace
+                        - reason
+                        - sourcecomponent
+                        - type
+                        - cluster
                     pattern: /^(labels|type|reason|namespace|msg|kind|name|sourcecomponent|count|Time|firstTimestamp|lastTimestamp)$/
             - id: organize
               options:
                 excludeByName:
                     firstTimestamp: true
+                includeByName: {}
                 indexByName:
-                    Time: 9
-                    count: 8
-                    firstTimestamp: 10
-                    kind: 4
+                    Time: 10
+                    cluster: 3
+                    count: 9
+                    kind: 5
                     labels: 0
-                    lastTimestamp: 11
                     msg: 2
-                    name: 6
-                    namespace: 3
-                    reason: 5
-                    sourcecomponent: 7
+                    name: 7
+                    namespace: 4
+                    reason: 6
+                    sourcecomponent: 8
                     type: 1
                 renameByName:
                     Time: Created
+                    cluster: Cluster
                     count: Count
                     firstTimestamp: Age
                     kind: Kind
@@ -287,8 +311,10 @@ spec:
                 placement: bottom
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: single
                 sort: none
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: loki
@@ -368,8 +394,10 @@ spec:
                 placement: bottom
                 showLegend: true
             tooltip:
+                hideZeros: false
                 mode: single
                 sort: none
+          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: loki
@@ -395,7 +423,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: yellow
-                          value: null
                         - color: yellow
                           value: 0
             overrides: []
@@ -447,7 +474,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: yellow
-                          value: null
                         - color: yellow
                           value: 0
             overrides: []
@@ -498,7 +524,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: yellow
-                          value: null
                         - color: yellow
                           value: 0
             overrides: []
@@ -549,7 +574,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: yellow
-                          value: null
                         - color: yellow
                           value: 0
             overrides: []
@@ -601,7 +625,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: yellow
-                          value: null
                         - color: yellow
                           value: 0
             overrides: []
@@ -650,7 +673,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: yellow
-                          value: null
                         - color: yellow
                           value: 0
                 unit: short
@@ -701,7 +723,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: yellow
-                          value: null
                         - color: yellow
                           value: 0
             overrides: []
@@ -750,7 +771,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: yellow
-                          value: null
                         - color: yellow
                           value: 0
                 unit: short
@@ -1060,6 +1080,9 @@ spec:
         - datasource:
             type: loki
             uid: ${datasource}
+          fieldConfig:
+            defaults: {}
+            overrides: []
           gridPos:
             h: 13
             w: 24
@@ -1084,33 +1107,50 @@ spec:
               queryType: range
               range: true
               refId: A
+          title: ""
           type: logs
-    refresh: 1m
-    schemaVersion: 39
+    preload: false
+    refresh: 2h
+    schemaVersion: 40
     tags:
         - kubernetes-integration
         - k8s-events
     templating:
         list:
             - current:
-                selected: false
                 text: duplo-logging
                 value: duplo-logging
-              hide: 0
               includeAll: false
               label: datasource
-              multi: false
               name: datasource
               options: []
               query: loki
-              queryValue: ""
               refresh: 1
               regex: ""
-              skipUrlSync: false
               type: datasource
             - allValue: .*
               current:
-                selected: true
+                text: ""
+                value: ""
+              datasource:
+                type: loki
+                uid: ${datasource}
+              definition: ""
+              includeAll: true
+              multi: true
+              name: cluster
+              options: []
+              query:
+                label: cluster
+                refId: LokiVariableQueryEditor-VariableQuery
+                stream: ""
+                type: 1
+              refresh: 2
+              regex: ""
+              sort: 5
+              type: query
+            - allValue: .*
+              current:
                 text:
                     - All
                 value:
@@ -1119,7 +1159,6 @@ spec:
                 type: loki
                 uid: ${datasource}
               definition: ""
-              hide: 0
               includeAll: true
               multi: true
               name: namespace
@@ -1131,15 +1170,12 @@ spec:
                 type: 1
               refresh: 2
               regex: ""
-              skipUrlSync: false
               sort: 5
               type: query
             - current:
-                selected: false
                 text: ""
                 value: ""
               description: Line contains case insensitive. Return log lines that match regex (?i)
-              hide: 0
               label: Search events
               name: contains
               options:
@@ -1147,15 +1183,11 @@ spec:
                   text: ""
                   value: ""
               query: ""
-              skipUrlSync: false
               type: textbox
             - current:
-                selected: true
-                text:
-                    - All
+                text: All
                 value:
                     - $__all
-              hide: 0
               includeAll: true
               label: Events Data Source
               multi: true
@@ -1164,7 +1196,6 @@ spec:
               query: loki
               refresh: 1
               regex: ""
-              skipUrlSync: false
               type: datasource
     time:
         from: now-1h
