@@ -1,0 +1,12 @@
+namespace: integration-apm
+groups:
+    - name: app-o11y
+      rules:
+        - alert: HighErrorAlert
+          expr: (sum by (job,cluster) (rate(http_server_duration_milliseconds_count{http_status_code=~"5.."}[5m])))/clamp_min(sum by (job,cluster) (rate(http_server_duration_milliseconds_count[5m])), 1e-9) > 0.1
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            description: '{{ $labels.cluster }} - {{ $labels.job }} service is experiencing a high rate of 5XX errors (>10%) for the last 10 minutes. This indicates server-side errors that require immediate attention.'
+            summary: 5XX errors more than 10% in last 10 minutes.
