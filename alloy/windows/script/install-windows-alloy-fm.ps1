@@ -125,7 +125,9 @@ try {
     $OUTPUT_ZIP_FILE = ".\alloy-installer-windows-amd64.exe.zip"
     $OUTPUT_FILE = ".\alloy-installer-windows-amd64.exe"
     $WORKING_DIR = Get-Location
-    Invoke-WebRequest -Uri $DOWNLOAD_URL -OutFile $OUTPUT_ZIP_FILE -ErrorAction Stop
+    # Robust Download using .NET WebClient
+    $webClient = New-Object System.Net.WebClient
+    $webClient.DownloadFile($DOWNLOAD_URL, $OUTPUT_ZIP_FILE)
     Expand-Archive -LiteralPath $OUTPUT_ZIP_FILE -DestinationPath $WORKING_DIR.path -force -ErrorAction Stop
 }
 catch {
