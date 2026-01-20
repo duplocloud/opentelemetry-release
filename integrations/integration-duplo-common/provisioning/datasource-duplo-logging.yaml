@@ -14,13 +14,23 @@ spec:
     maxLines: 1000
     derivedFields:
     - datasourceUid: duplo-tracing
-      matcherRegex: '[tT]race_?[iI][dD]"?[:=]"?(\w+)'
+      matcherRegex: '(?:[tT]race_?[iI][dD]|otelTraceID)"?\s*[:=]\s*"?(\w+)'
+      matcherType: regex
       name: traceID
-      url: '$${__value.raw}'
+      url: '${__value.raw}'
       urlDisplayLabel: 'View Trace'
+      targetBlank: true
     - datasourceUid: duplo-tracing
       matcherRegex: 'service_name'
       matcherType: 'label'
       name: serviceName
-      url: '{resource.service.name="$${__value.raw}"}'
-      urlDisplayLabel: 'View Trace'
+      url: '{resource.service.name="${__value.raw}"}'
+      urlDisplayLabel: 'View Service Trace'
+      targetBlank: true
+    - datasourceUid: duplo-tracing
+      matcherRegex: 'otelSpanID'
+      matcherType: 'label'
+      name: spanID
+      url: '{span:id="${__value.raw}"}'
+      urlDisplayLabel: 'View Span'
+      targetBlank: true
