@@ -6,7 +6,7 @@ remotecfg {
 
 	basic_auth {
 		username = "{GCLOUD_FM_HOSTED_ID}"
-		password = "{GCLOUD_RW_API_KEY}"
+		password = sys.env("GCLOUD_RW_API_KEY")
 	}
 }
 
@@ -16,7 +16,7 @@ prometheus.remote_write "metrics_service" {
 
 		basic_auth {
 			username = "{GCLOUD_HOSTED_METRICS_ID}"
-			password = "{GCLOUD_RW_API_KEY}"
+			password = sys.env("GCLOUD_RW_API_KEY")
 		}
 	}
 }
@@ -27,7 +27,7 @@ loki.write "grafana_cloud_loki" {
 
 		basic_auth {
 			username = "{GCLOUD_HOSTED_LOGS_ID}"
-			password = "{GCLOUD_RW_API_KEY}"
+			password = sys.env("GCLOUD_RW_API_KEY")
 		}
 	}
 }

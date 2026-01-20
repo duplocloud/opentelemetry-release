@@ -170,12 +170,15 @@ try {
     $content = $content.Replace("{GCLOUD_FM_URL}", $GCLOUD_FM_URL)
     $content = $content.Replace("{GCLOUD_FM_POLL_FREQUENCY}", $GCLOUD_FM_POLL_FREQUENCY)
     $content = $content.Replace("{GCLOUD_FM_HOSTED_ID}", $GCLOUD_FM_HOSTED_ID)
-    $content = $content.Replace("{GCLOUD_RW_API_KEY}", $GCLOUD_RW_API_KEY)
+
     # --- NEW: inject AWS account + private IP placeholders (minimal change) ---
     $content = $content.Replace("{AWS_ACCOUNT_ID}", $AWS_ACCOUNT_ID)
     $content = $content.Replace("{HOST_PRIVATE_IP}", $HOST_PRIVATE_IP)
     # --- END NEW ---
     $content | Set-Content $CONFIG_FILE
+
+    Write-Host "Creating Alloy system environment variable"
+    [Environment]::SetEnvironmentVariable("GCLOUD_RW_API_KEY", $GCLOUD_RW_API_KEY, "Machine")
 
     $DEST_DIR = "C:\Program Files\GrafanaLabs\Alloy"
     Write-Host "--- Moving finalized Alloy config to $DEST_DIR\config.alloy"
