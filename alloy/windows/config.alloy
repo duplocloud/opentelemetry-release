@@ -29,17 +29,17 @@ discovery.relabel "integrations_windows_exporter" {
   rule {
     target_label = "label_tenantname"
     replacement  = "{DUPLO_TENANT_NAME}"
-
-  rule {
-  target_label = "host_private_ip"
-  replacement  = "{AWS_ACCOUNT_ID}"
-}
-
-  rule {
-  target_label = "aws_instance_id"
-  replacement  = "{HOST_PRIVATE_IP}"
-}  
   }
+  
+  rule {
+    target_label = "host_private_ip"
+    replacement  = "{AWS_ACCOUNT_ID}"
+  }
+
+  rule {
+    target_label = "aws_instance_id"
+    replacement  = "{HOST_PRIVATE_IP}"
+  }  
 }
 
 prometheus.scrape "integrations_windows_exporter" {
