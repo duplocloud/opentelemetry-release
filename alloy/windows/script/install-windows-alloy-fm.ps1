@@ -121,9 +121,10 @@ try {
     # --- END NEW ---
 
     Write-Host "Downloading Alloy Windows Installer"
+    $TEMP_DIR = "C:\temp"
     $DOWNLOAD_URL = "https://github.com/grafana/alloy/releases/download/v1.12.2/alloy-installer-windows-amd64.exe.zip"
-    $OUTPUT_ZIP_FILE = ".\alloy-installer-windows-amd64.exe.zip"
-    $OUTPUT_FILE = ".\alloy-installer-windows-amd64.exe"
+    $OUTPUT_ZIP_FILE = "$TEMP_DIR\alloy-installer-windows-amd64.exe.zip"
+    $OUTPUT_FILE = "$TEMP_DIR\alloy-installer-windows-amd64.exe"
     $WORKING_DIR = Get-Location
     # Robust Download using .NET WebClient
     $webClient = New-Object System.Net.WebClient
@@ -138,9 +139,9 @@ catch {
 
 # Install Alloy in silent mode
 Write-Host "Installing Alloy for Windows"
-$INSTALL_STDOUT_PATH = ".\install-stdout.txt"
-$INSTALL_STDERR_PATH = ".\install-stderr.txt"
-$INSTALL_PROC = Start-Process ".\alloy-installer-windows-amd64.exe" -ArgumentList "/S","/DISABLEREPORTING=yes" -Wait -PassThru -RedirectStandardOutput $INSTALL_STDOUT_PATH -RedirectStandardError $INSTALL_STDERR_PATH
+$INSTALL_STDOUT_PATH = "$TEMP_DIR\install-stdout.txt"
+$INSTALL_STDERR_PATH = "$TEMP_DIR\install-stderr.txt"
+$INSTALL_PROC = Start-Process "$OUTPUT_FILE" -ArgumentList "/S","/DISABLEREPORTING=yes" -Wait -PassThru -RedirectStandardOutput $INSTALL_STDOUT_PATH -RedirectStandardError $INSTALL_STDERR_PATH
 if ($INSTALL_PROC.ExitCode -ne 0) {
     Write-Host "ERROR: Failed to install Alloy"
     Write-Host "Alloy Install STDOUT: $(Get-Content $INSTALL_STDOUT_PATH)"
@@ -149,7 +150,7 @@ if ($INSTALL_PROC.ExitCode -ne 0) {
 }
 
 try {
-    $CONFIG_FILE = ".\config.alloy"
+    $CONFIG_FILE = "$TEMP_DIR\config.alloy"
 
     Write-Host "--- Retrieving Alloy config"
     $CONFIG_URI = "https://raw.githubusercontent.com/duplocloud/opentelemetry-release/refs/heads/main/alloy/windows/config-fm.alloy"
