@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-k6
+spec:
+    title: Integration-K6
+    uid: integration-k6
