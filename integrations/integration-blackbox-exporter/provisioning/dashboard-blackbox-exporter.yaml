@@ -15,7 +15,7 @@ spec:
               iconColor: rgba(0, 211, 255, 1)
               name: Annotations & Alerts
               type: dashboard
-    editable: true
+    editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 1
     links: []
@@ -592,7 +592,7 @@ spec:
               sort: 1
               type: query
     time:
-        from: now-1h
+        from: now-15m
         to: now
     title: Blackbox Exporter Details
     uid: blackbox-exporter-details
