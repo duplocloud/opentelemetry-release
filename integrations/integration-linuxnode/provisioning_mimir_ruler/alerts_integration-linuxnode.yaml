@@ -58,8 +58,8 @@ groups:
           labels:
             asserts_alert_category: failure
             asserts_entity_type: Node
-            asserts_severity: warning
-            severity: warning
+            asserts_severity: critical
+            severity: critical
           annotations:
             description: |
                 CPU usage at {{ $labels.instance }} has been above 90% for the last 15 minutes, is currently at {{ printf "%.2f" $value }}%.
