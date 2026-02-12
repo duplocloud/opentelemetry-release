@@ -1,33 +1,11 @@
 remotecfg {
 	url            = "{GCLOUD_FM_URL}"
-	id             = "{HOST_PRIVATE_IP}"
+	id             = "{INSTANCE_ID}"
 	poll_frequency = "{GCLOUD_FM_POLL_FREQUENCY}"
-	attributes     = {"cluster" = "{DUPLO_CLUSTER_NAME}", "tenant_name" = "{DUPLO_TENANT_NAME}", "hostname" = "{HOSTNAME}", "aws_account_id" = "{AWS_ACCOUNT_ID}", "env" = "{ENVIRONMENT}"}
+	attributes     = {"cluster" = "{DUPLO_CLUSTER_NAME}", "tenant_name" = "{DUPLO_TENANT_NAME}", "instance" = "{HOSTNAME}", "aws_account_id" = "{AWS_ACCOUNT}", "private_ip" = "{PRIVATE_IP_ADDRESS}", "instance_id" = "{INSTANCE_ID}", "env" = "{ENVIRONMENT}"}
 
 	basic_auth {
 		username = "{GCLOUD_FM_HOSTED_ID}"
 		password = sys.env("GCLOUD_RW_API_KEY")
-	}
-}
-
-prometheus.remote_write "metrics_service" {
-	endpoint {
-		url = "{GCLOUD_HOSTED_METRICS_URL}"
-
-		basic_auth {
-			username = "{GCLOUD_HOSTED_METRICS_ID}"
-			password = sys.env("GCLOUD_RW_API_KEY")
-		}
-	}
-}
-
-loki.write "grafana_cloud_loki" {
-	endpoint {
-		url = "{GCLOUD_HOSTED_LOGS_URL}"
-
-		basic_auth {
-			username = "{GCLOUD_HOSTED_LOGS_ID}"
-			password = sys.env("GCLOUD_RW_API_KEY")
-		}
 	}
 }
