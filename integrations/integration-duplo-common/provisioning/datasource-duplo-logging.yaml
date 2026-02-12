@@ -12,9 +12,10 @@ spec:
   basicAuth: false
   jsonData:
     maxLines: 1000
+    timeout: 300
     derivedFields:
     - datasourceUid: duplo-tracing
-      matcherRegex: '(?:[tT]race_?[iI][dD]|otelTraceID)"?\s*[:=]\s*"?(\w+)'
+      matcherRegex: '(?:\S*[tT]race_?[iI][dD])"?\s*[:=]\s*"?(\w+)'
       matcherType: regex
       name: traceID
       url: '${__value.raw}'
@@ -28,8 +29,8 @@ spec:
       urlDisplayLabel: 'View Service Trace'
       targetBlank: true
     - datasourceUid: duplo-tracing
-      matcherRegex: 'otelSpanID'
-      matcherType: 'label'
+      matcherRegex: '(?:\S*[sS]pan_?[iI][dD])"?\s*[:=]\s*"?(\w+)'
+      matcherType: 'regex'
       name: spanID
       url: '{span:id="${__value.raw}"}'
       urlDisplayLabel: 'View Span'
