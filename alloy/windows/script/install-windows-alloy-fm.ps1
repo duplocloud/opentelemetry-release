@@ -4,10 +4,6 @@ param (
     $DUPLO_TENANT_NAME,
     $HOSTNAME,
     $ENVIRONMENT,
-    $GCLOUD_HOSTED_METRICS_URL,
-    $GCLOUD_HOSTED_METRICS_ID,
-    $GCLOUD_HOSTED_LOGS_URL,
-    $GCLOUD_HOSTED_LOGS_ID,
     $GCLOUD_FM_URL,
     $GCLOUD_FM_POLL_FREQUENCY,
     $GCLOUD_FM_HOSTED_ID,
@@ -25,111 +21,100 @@ if (-Not [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).grou
 }
 
 # Validate required parameters
-if ($GCLOUD_FM_URL -eq $null -or $GCLOUD_FM_URL -eq "") {
+if ($null -eq $GCLOUD_FM_URL -or $GCLOUD_FM_URL -eq "") {
     Write-Host "ERROR: Required argument GCLOUD_FM_URL missing"
     exit 1
 }
 
-if ($ENVIRONMENT -eq $null -or $ENVIRONMENT -eq "") {
+if ($null -eq $ENVIRONMENT -or $ENVIRONMENT -eq "") {
     Write-Host "ERROR: Required argument ENVIRONMENT missing"
     exit 1
 }
 
-if ($GCLOUD_FM_HOSTED_ID -eq $null -or $GCLOUD_FM_HOSTED_ID -eq "") {
+if ($null -eq $GCLOUD_FM_HOSTED_ID -or $GCLOUD_FM_HOSTED_ID -eq "") {
     Write-Host "ERROR: Required argument GCLOUD_FM_HOSTED_ID missing"
     exit 1
 }
 
-if ($GCLOUD_FM_POLL_FREQUENCY -eq $null -or $GCLOUD_FM_POLL_FREQUENCY -eq "") {
+if ($null -eq $GCLOUD_FM_POLL_FREQUENCY -or $GCLOUD_FM_POLL_FREQUENCY -eq "") {
     Write-Host "ERROR: Required argument GCLOUD_FM_POLL_FREQUENCY missing"
     exit 1
 }
 
-if ($DUPLO_CLUSTER_NAME -eq $null -or $DUPLO_CLUSTER_NAME -eq "") {
+if ($null -eq $DUPLO_CLUSTER_NAME -or $DUPLO_CLUSTER_NAME -eq "") {
     Write-Host "ERROR: Required argument DUPLO_CLUSTER_NAME missing"
     exit 1
 }
 
-if ($DUPLO_TENANT_NAME -eq $null -or $DUPLO_TENANT_NAME -eq "") {
+if ($null -eq $DUPLO_TENANT_NAME -or $DUPLO_TENANT_NAME -eq "") {
     Write-Host "ERROR: Required argument DUPLO_TENANT_NAME missing"
     exit 1
 }
 
-if ($HOSTNAME -eq $null -or $HOSTNAME -eq "") {
+if ($null -eq $HOSTNAME -or $HOSTNAME -eq "") {
     Write-Host "ERROR: Required argument HOSTNAME missing"
     exit 1
 }
 
-if ($GCLOUD_RW_API_KEY -eq $null -or $GCLOUD_RW_API_KEY -eq "") {
+if ($null -eq $GCLOUD_RW_API_KEY -or $GCLOUD_RW_API_KEY -eq "") {
     Write-Host "ERROR: Required argument GCLOUD_RW_API_KEY missing"
     exit 1
 }
 
-if ($GCLOUD_HOSTED_METRICS_URL -eq $null -or $GCLOUD_HOSTED_METRICS_URL -eq "") {
-    Write-Host "ERROR: Required argument GCLOUD_HOSTED_METRICS_URL missing"
-    exit 1
-}
-
-if ($GCLOUD_HOSTED_METRICS_ID -eq $null -or $GCLOUD_HOSTED_METRICS_ID -eq "") {
-    Write-Host "ERROR: Required argument GCLOUD_HOSTED_METRICS_ID missing"
-    exit 1
-}
-
-if ($GCLOUD_HOSTED_LOGS_URL -eq $null -or $GCLOUD_HOSTED_LOGS_URL -eq "") {
-    Write-Host "ERROR: Required argument GCLOUD_HOSTED_LOGS_URL missing"
-    exit 1
-}
-
-if ($GCLOUD_HOSTED_LOGS_ID -eq $null -or $GCLOUD_HOSTED_LOGS_ID -eq "") {
-    Write-Host "ERROR: Required argument GCLOUD_HOSTED_LOGS_ID missing"
-    exit 1
-}
+$WORKING_DIR = Get-Location
 
 try {
+    $INSTANCE_ID = (Invoke-WebRequest -usebasicparsing http://169.254.169.254/latest/meta-data/instance-id).Content
+
+    $callerInfo = (aws sts get-caller-identity) | ConvertFrom-Json
+    $AWS_ACCOUNT = $callerInfo.Account
+
+    $adapterName = (get-netadapter).Name
+    $interfaceInfo = (Get-NetIPAddress -InterfaceAlias $adapterName -AddressFamily IPv4)
+    $PRIVATE_IP_ADDRESS = $interfaceInfo.IPAddress
+
     Write-Host "GCLOUD_FM_URL:" $GCLOUD_FM_URL
     Write-Host "GCLOUD_RW_API_KEY:" $GCLOUD_RW_API_KEY
-    Write-Host "GCLOUD_HOSTED_LOGS_URL:" $GCLOUD_HOSTED_LOGS_URL
     Write-Host "DUPLO_CLUSTER_NAME:" $DUPLO_CLUSTER_NAME
     Write-Host "DUPLO_TENANT_NAME:" $DUPLO_TENANT_NAME
-    Write-Host "GCLOUD_HOSTED_METRICS_URL:" $GCLOUD_HOSTED_METRICS_URL
-    Write-Host "GCLOUD_HOSTED_METRICS_ID:" $GCLOUD_HOSTED_METRICS_ID
-    Write-Host "GCLOUD_HOSTED_LOGS_ID:" $GCLOUD_HOSTED_LOGS_ID
     Write-Host "GCLOUD_FM_POLL_FREQUENCY:" $GCLOUD_FM_POLL_FREQUENCY
     Write-Host "GCLOUD_FM_HOSTED_ID:" $GCLOUD_FM_HOSTED_ID
     Write-Host "HOSTNAME:" $HOSTNAME
     Write-Host "ENVIRONMENT:" $ENVIRONMENT
-
-    # --- NEW: Fetch AWS account ID + private IP from IMDSv2 (minimal change) ---
-    try {
-        $imdsToken = Invoke-RestMethod -Method PUT -Uri "http://169.254.169.254/latest/api/token" -Headers @{"X-aws-ec2-metadata-token-ttl-seconds"="21600"} -TimeoutSec 2
-        if ($imdsToken) {
-            $imdsHeaders = @{"X-aws-ec2-metadata-token"=$imdsToken}
-            $iid = Invoke-RestMethod -Method GET -Uri "http://169.254.169.254/latest/dynamic/instance-identity/document" -Headers $imdsHeaders -TimeoutSec 2
-            $AWS_ACCOUNT_ID = $iid.accountId
-            $HOST_PRIVATE_IP = $iid.privateIp
-            if (-not $HOST_PRIVATE_IP -or $HOST_PRIVATE_IP -eq "") {
-                $HOST_PRIVATE_IP = (Invoke-RestMethod -Method GET -Uri "http://169.254.169.254/latest/meta-data/local-ipv4" -Headers $imdsHeaders -TimeoutSec 2)
-            }
-            Write-Host "AWS_ACCOUNT_ID:" $AWS_ACCOUNT_ID
-            Write-Host "HOST_PRIVATE_IP:" $HOST_PRIVATE_IP
-        } else {
-            Write-Host "WARNING: Could not get IMDS token; account_id/host_ip may be empty."
-        }
-    } catch {
-        Write-Host "WARNING: IMDS query failed; account_id/host_ip may be empty."
-    }
-    # --- END NEW ---
+    Write-Host "PRIVATE_IP_ADDRESS:" $PRIVATE_IP_ADDRESS
+    Write-Host "INSTANCE_ID:" $INSTANCE_ID
+    Write-Host "AWS_ACCOUNT:" $AWS_ACCOUNT
 
     Write-Host "Downloading Alloy Windows Installer"
     $TEMP_DIR = "C:\temp"
     $DOWNLOAD_URL = "https://github.com/grafana/alloy/releases/download/v1.12.2/alloy-installer-windows-amd64.exe.zip"
     $OUTPUT_ZIP_FILE = "$TEMP_DIR\alloy-installer-windows-amd64.exe.zip"
     $OUTPUT_FILE = "$TEMP_DIR\alloy-installer-windows-amd64.exe"
-    $WORKING_DIR = Get-Location
-    # Robust Download using .NET WebClient
-    $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile($DOWNLOAD_URL, $OUTPUT_ZIP_FILE)
-    Expand-Archive -LiteralPath $OUTPUT_ZIP_FILE -DestinationPath $WORKING_DIR.path -force -ErrorAction Stop
+
+    Write-Host "Checking for local installer zip file"
+    $ZIP_FILE_EXISTS = Test-Path -Path $OUTPUT_ZIP_FILE
+    Write-Host "Checking for local installer file"
+    $INSTALLER_FILE_EXISTS = Test-Path -Path $OUTPUT_FILE
+
+    # if output file exists or output zip file exists, do not download
+    if ($ZIP_FILE_EXISTS -or $INSTALLER_FILE_EXISTS) {
+        $DOWNLOAD_NOT_NEEDED = $true
+    }
+    else {
+        $DOWNLOAD_NOT_NEEDED = $false
+    }
+
+    if ($DOWNLOAD_NOT_NEEDED -eq $false) {
+        Write-Host "Downloading Alloy Windows Installer"
+        # Robust Download using .NET WebClient
+        $webClient = New-Object System.Net.WebClient
+        $webClient.DownloadFile($DOWNLOAD_URL, $OUTPUT_ZIP_FILE)
+    }
+
+    # if output file exists, do not expand
+    if ($INSTALLER_FILE_EXISTS -eq $false) {
+        Expand-Archive -LiteralPath $OUTPUT_ZIP_FILE -DestinationPath $WORKING_DIR.path -force -ErrorAction Stop
+    }
 }
 catch {
     Write-Host "ERROR: Failed to extract Alloy installer for Windows"
@@ -141,7 +126,7 @@ catch {
 Write-Host "Installing Alloy for Windows"
 $INSTALL_STDOUT_PATH = "$TEMP_DIR\install-stdout.txt"
 $INSTALL_STDERR_PATH = "$TEMP_DIR\install-stderr.txt"
-$INSTALL_PROC = Start-Process "$OUTPUT_FILE" -ArgumentList "/S","/DISABLEREPORTING=yes" -Wait -PassThru -RedirectStandardOutput $INSTALL_STDOUT_PATH -RedirectStandardError $INSTALL_STDERR_PATH
+$INSTALL_PROC = Start-Process "$OUTPUT_FILE" -ArgumentList "/S", "/DISABLEREPORTING=yes" -Wait -PassThru -RedirectStandardOutput $INSTALL_STDOUT_PATH -RedirectStandardError $INSTALL_STDERR_PATH
 if ($INSTALL_PROC.ExitCode -ne 0) {
     Write-Host "ERROR: Failed to install Alloy"
     Write-Host "Alloy Install STDOUT: $(Get-Content $INSTALL_STDOUT_PATH)"
@@ -152,10 +137,16 @@ if ($INSTALL_PROC.ExitCode -ne 0) {
 try {
     $CONFIG_FILE = "$TEMP_DIR\config.alloy"
 
-    Write-Host "--- Retrieving Alloy config"
-    $CONFIG_URI = "https://raw.githubusercontent.com/duplocloud/opentelemetry-release/refs/heads/main/alloy/windows/config-fm.alloy"
-    
-    Invoke-WebRequest -Uri $CONFIG_URI -Outfile $CONFIG_FILE -ErrorAction Stop
+    Write-Host "Checking for alloy config file on disk"
+    $CONFIG_FILE_EXISTS = Test-Path -Path $CONFIG_FILE
+
+    if ($CONFIG_FILE_EXISTS -eq $false) {
+        Write-Host "--- Retrieving Alloy config"
+        $CONFIG_URI = "https://raw.githubusercontent.com/duplocloud/opentelemetry-release/refs/heads/main/alloy/windows/config-fm.alloy"
+        
+        Invoke-WebRequest -Uri $CONFIG_URI -Outfile $CONFIG_FILE -ErrorAction Stop
+    }
+
     $content = Get-Content $CONFIG_FILE
 
     Write-Host "--- Replacing Alloy config params with arg values"
@@ -163,18 +154,12 @@ try {
     $content = $content.Replace("{DUPLO_TENANT_NAME}", $DUPLO_TENANT_NAME)
     $content = $content.Replace("{HOSTNAME}", $HOSTNAME)
     $content = $content.Replace("{ENVIRONMENT}", $ENVIRONMENT)
-    $content = $content.Replace("{GCLOUD_HOSTED_METRICS_URL}", $GCLOUD_HOSTED_METRICS_URL)
-    $content = $content.Replace("{GCLOUD_HOSTED_METRICS_ID}", $GCLOUD_HOSTED_METRICS_ID)
-    $content = $content.Replace("{GCLOUD_HOSTED_LOGS_URL}", $GCLOUD_HOSTED_LOGS_URL)
-    $content = $content.Replace("{GCLOUD_HOSTED_LOGS_ID}", $GCLOUD_HOSTED_LOGS_ID)
     $content = $content.Replace("{GCLOUD_FM_URL}", $GCLOUD_FM_URL)
     $content = $content.Replace("{GCLOUD_FM_POLL_FREQUENCY}", $GCLOUD_FM_POLL_FREQUENCY)
     $content = $content.Replace("{GCLOUD_FM_HOSTED_ID}", $GCLOUD_FM_HOSTED_ID)
-
-    # --- NEW: inject AWS account + private IP placeholders (minimal change) ---
-    $content = $content.Replace("{AWS_ACCOUNT_ID}", $AWS_ACCOUNT_ID)
-    $content = $content.Replace("{HOST_PRIVATE_IP}", $HOST_PRIVATE_IP)
-    # --- END NEW ---
+    $content = $content.Replace("{PRIVATE_IP_ADDRESS}", $PRIVATE_IP_ADDRESS)
+    $content = $content.Replace("{INSTANCE_ID}", $INSTANCE_ID)
+    $content = $content.Replace("{AWS_ACCOUNT}", $AWS_ACCOUNT)
     $content | Set-Content $CONFIG_FILE
 
     Write-Host "Creating Alloy system environment variable"
@@ -183,7 +168,8 @@ try {
     $DEST_DIR = "C:\Program Files\GrafanaLabs\Alloy"
     Write-Host "--- Moving finalized Alloy config to $DEST_DIR\config.alloy"
     Move-Item $CONFIG_FILE "$DEST_DIR\config.alloy" -force -ErrorAction Stop
-} catch {
+}
+catch {
     Write-Host "ERROR: Failed to retrieve Alloy config file"
     Write-Error $_.Exception
     exit 1
