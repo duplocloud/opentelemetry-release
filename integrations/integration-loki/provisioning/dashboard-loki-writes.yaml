@@ -141,7 +141,7 @@ spec:
               targets:
                 - expr: |
                     sum by (status) (
-                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}[$__rate_interval]),
+                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}[$__rate_interval]),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
                   format: time_series
@@ -178,15 +178,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})) * 1e3
+                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})) * 1e3
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})) * 1e3
+                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})) * 1e3
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B
-                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})
+                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"})
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -234,7 +234,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/distributor", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}[$__rate_interval])) by (le,pod)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs|/httpgrpc.HTTP/Handle"}[$__rate_interval])) by (le,pod)) * 1e3
                   format: time_series
                   interval: 1m
                   intervalFactor: 2
@@ -280,7 +280,7 @@ spec:
                     sort: none
               span: 6
               targets:
-                - expr: sum (rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/distributor",}[$__rate_interval])) / sum(rate(loki_distributor_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/distributor",}[$__rate_interval]))
+                - expr: sum (rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)",}[$__rate_interval])) / sum(rate(loki_distributor_bytes_received_total{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)",}[$__rate_interval]))
                   format: time_series
                   legendFormat: bytes
                   legendLink: null
@@ -315,7 +315,7 @@ spec:
               span: 6
               stack: true
               targets:
-                - expr: sum by (tenant) (rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/distributor",}[$__rate_interval])) / ignoring(tenant) group_left sum(rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"($namespace)/distributor",}[$__rate_interval]))
+                - expr: sum by (tenant) (rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)",}[$__rate_interval])) / ignoring(tenant) group_left sum(rate(loki_distributor_structured_metadata_bytes_received_total{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)",}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{tenant}}'
                   legendLink: null
@@ -459,7 +459,7 @@ spec:
               targets:
                 - expr: |
                     sum by (status) (
-                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"}[$__rate_interval]),
+                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"}[$__rate_interval]),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
                   format: time_series
@@ -496,15 +496,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"})) * 1e3
+                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"})) * 1e3
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"})) * 1e3
+                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"})) * 1e3
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B
-                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"})
+                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"})
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -552,7 +552,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/(ingester-zone.*|partition-ingester-.*)", route="/logproto.Pusher/Push"}[$__rate_interval])) by (le,pod)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"}[$__rate_interval])) by (le,pod)) * 1e3
                   format: time_series
                   interval: 1m
                   intervalFactor: 2
@@ -686,7 +686,7 @@ spec:
               targets:
                 - expr: |
                     sum by (status) (
-                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"}[$__rate_interval]),
+                      label_replace(label_replace(rate(loki_request_duration_seconds_count{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"}[$__rate_interval]),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
                   format: time_series
@@ -723,15 +723,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"})) * 1e3
+                - expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"})) * 1e3
                   format: time_series
                   legendFormat: 99th percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"})) * 1e3
+                - expr: histogram_quantile(0.50, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"})) * 1e3
                   format: time_series
                   legendFormat: 50th percentile
                   refId: B
-                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"})
+                - expr: 1e3 * sum(cluster_job_route:loki_request_duration_seconds_sum:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"}) / sum(cluster_job_route:loki_request_duration_seconds_count:sum_rate{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"})
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -779,7 +779,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"($namespace)/(ingester.*|partition-ingester.*)", route="/logproto.Pusher/Push"}[$__rate_interval])) by (le,pod)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(loki_request_duration_seconds_bucket{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)", route="/logproto.Pusher/Push"}[$__rate_interval])) by (le,pod)) * 1e3
                   format: time_series
                   interval: 1m
                   intervalFactor: 2
@@ -913,7 +913,7 @@ spec:
               targets:
                 - expr: |
                     sum by (status) (
-                      label_replace(label_replace(rate(loki_index_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval]),
+                      label_replace(label_replace(rate(loki_index_request_duration_seconds_count{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="index_chunk"}[$__rate_interval]),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
                   format: time_series
@@ -950,15 +950,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(loki_index_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(loki_index_request_duration_seconds_bucket{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="index_chunk"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 99th Percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum(rate(loki_index_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.50, sum(rate(loki_index_request_duration_seconds_bucket{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="index_chunk"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 50th Percentile
                   refId: B
-                - expr: sum(rate(loki_index_request_duration_seconds_sum{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval])) * 1e3 / sum(rate(loki_index_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval]))
+                - expr: sum(rate(loki_index_request_duration_seconds_sum{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="index_chunk"}[$__rate_interval])) * 1e3 / sum(rate(loki_index_request_duration_seconds_count{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="index_chunk"}[$__rate_interval]))
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -1006,7 +1006,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(loki_index_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="index_chunk"}[$__rate_interval])) by (le,pod)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(loki_index_request_duration_seconds_bucket{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="index_chunk"}[$__rate_interval])) by (le,pod)) * 1e3
                   format: time_series
                   interval: 1m
                   intervalFactor: 2
@@ -1140,7 +1140,7 @@ spec:
               targets:
                 - expr: |
                     sum by (status) (
-                      label_replace(label_replace(rate(loki_boltdb_shipper_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval]),
+                      label_replace(label_replace(rate(loki_boltdb_shipper_request_duration_seconds_count{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="WRITE"}[$__rate_interval]),
                       "status", "${1}xx", "status_code", "([0-9]).."),
                       "status", "${1}", "status_code", "([a-zA-Z]+)"))
                   format: time_series
@@ -1177,15 +1177,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(loki_boltdb_shipper_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(loki_boltdb_shipper_request_duration_seconds_bucket{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="WRITE"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 99th Percentile
                   refId: A
-                - expr: histogram_quantile(0.50, sum(rate(loki_boltdb_shipper_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval])) by (le)) * 1e3
+                - expr: histogram_quantile(0.50, sum(rate(loki_boltdb_shipper_request_duration_seconds_bucket{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="WRITE"}[$__rate_interval])) by (le)) * 1e3
                   format: time_series
                   legendFormat: 50th Percentile
                   refId: B
-                - expr: sum(rate(loki_boltdb_shipper_request_duration_seconds_sum{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval])) * 1e3 / sum(rate(loki_boltdb_shipper_request_duration_seconds_count{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval]))
+                - expr: sum(rate(loki_boltdb_shipper_request_duration_seconds_sum{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="WRITE"}[$__rate_interval])) * 1e3 / sum(rate(loki_boltdb_shipper_request_duration_seconds_count{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="WRITE"}[$__rate_interval]))
                   format: time_series
                   legendFormat: Average
                   refId: C
@@ -1233,7 +1233,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: histogram_quantile(0.99, sum(rate(loki_boltdb_shipper_request_duration_seconds_bucket{cluster=~"$cluster",job=~"($namespace)/(ingester.*|partition-ingester.*)", operation="WRITE"}[$__rate_interval])) by (le,pod)) * 1e3
+                - expr: histogram_quantile(0.99, sum(rate(loki_boltdb_shipper_request_duration_seconds_bucket{cluster=~"$cluster",job=~"$namespace/$cluster-(write|backend)", operation="WRITE"}[$__rate_interval])) by (le,pod)) * 1e3
                   format: time_series
                   interval: 1m
                   intervalFactor: 2
