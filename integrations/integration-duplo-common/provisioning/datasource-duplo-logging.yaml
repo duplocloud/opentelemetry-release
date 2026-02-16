@@ -12,15 +12,26 @@ spec:
   basicAuth: false
   jsonData:
     maxLines: 1000
+    timeout: 300
     derivedFields:
     - datasourceUid: duplo-tracing
-      matcherRegex: '[tT]race_?[iI][dD]"?[:=]"?(\w+)'
+      matcherRegex: '(?:\S*[tT]race_?[iI][dD])"?\s*[:=]\s*"?(\w+)'
+      matcherType: regex
       name: traceID
-      url: '$${__value.raw}'
+      url: '${__value.raw}'
       urlDisplayLabel: 'View Trace'
+      targetBlank: true
     - datasourceUid: duplo-tracing
       matcherRegex: 'service_name'
       matcherType: 'label'
       name: serviceName
-      url: '{resource.service.name="$${__value.raw}"}'
-      urlDisplayLabel: 'View Trace'
+      url: '{resource.service.name="${__value.raw}"}'
+      urlDisplayLabel: 'View Service Trace'
+      targetBlank: true
+    - datasourceUid: duplo-tracing
+      matcherRegex: '(?:\S*[sS]pan_?[iI][dD])"?\s*[:=]\s*"?(\w+)'
+      matcherType: 'regex'
+      name: spanID
+      url: '{span:id="${__value.raw}"}'
+      urlDisplayLabel: 'View Span'
+      targetBlank: true
