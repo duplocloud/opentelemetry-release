@@ -30,7 +30,12 @@ spec:
                 type: prometheus
                 uid: ${datasource}
               enable: true
-              expr: windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
+              expr: |-
+                windows_system_boot_time_timestamp_seconds{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_system_boot_time_timestamp{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
               hide: true
               iconColor: light-yellow
               name: Reboot
@@ -141,7 +146,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -204,7 +209,7 @@ spec:
                     - sum
                 show: false
             showHeader: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -353,7 +358,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -444,7 +449,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -532,7 +537,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -621,7 +626,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
