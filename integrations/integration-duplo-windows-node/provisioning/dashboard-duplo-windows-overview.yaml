@@ -177,9 +177,9 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: windows_cs_hostname{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
-              legendFormat: '{{instance}}: OS info'
+              legendFormat: '{{instance}}: Hostname'
               refId: A
           title: Hostname
           type: stat
