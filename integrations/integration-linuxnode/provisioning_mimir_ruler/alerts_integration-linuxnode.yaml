@@ -58,8 +58,8 @@ groups:
           labels:
             asserts_alert_category: failure
             asserts_entity_type: Node
-            asserts_severity: info
-            severity: info
+            asserts_severity: critical
+            severity: critical
           annotations:
             description: |
                 CPU usage at {{ $labels.instance }} has been above 90% for the last 15 minutes, is currently at {{ printf "%.2f" $value }}%.
@@ -114,7 +114,7 @@ groups:
         - alert: NodeHasRebooted
           expr: (time() - node_boot_time_seconds{job=~"integrations/(node_exporter|unix)"}) < 600 and (time() - (node_boot_time_seconds{job=~"integrations/(node_exporter|unix)"} offset 10m)) > 600
           labels:
-            severity: info
+            severity: warning
           annotations:
             description: Node {{ $labels.instance }} has rebooted {{ $value | humanize }} seconds ago.
             summary: Node has rebooted.
