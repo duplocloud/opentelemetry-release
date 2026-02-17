@@ -45,40 +45,20 @@ spec:
           fieldConfig:
             defaults:
                 color:
-                    mode: palette-classic
+                    fixedColor: '#ca95e5'
+                    mode: shades
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
+                    drawStyle: bars
+                    fillOpacity: 100
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                     stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                        mode: normal
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
                 unit: reqps
             overrides: []
           gridPos:
@@ -111,40 +91,21 @@ spec:
           fieldConfig:
             defaults:
                 color:
-                    mode: palette-classic
+                    fixedColor: '#ff7383'
+                    mode: shades
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
+                    drawStyle: bars
+                    fillOpacity: 100
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                     stacking:
-                        group: A
                         mode: normal
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                noValue: No errors
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
                 unit: reqps
             overrides: []
           gridPos:
@@ -177,40 +138,20 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
+                decimals: 1
+                noValue: No packets
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
+                unit: pps
             overrides: []
           gridPos:
             h: 8
@@ -243,40 +184,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
                 unit: percent
             overrides: []
           gridPos:
@@ -310,40 +228,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
             overrides: []
           gridPos:
             h: 8
@@ -375,40 +270,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
                 unit: percent
             overrides: []
           gridPos:
@@ -453,40 +325,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
             overrides: []
           gridPos:
             h: 8
@@ -518,40 +367,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
             overrides: []
           gridPos:
             h: 8
@@ -584,41 +410,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
-                min: 0
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
             overrides: []
           gridPos:
             h: 8
@@ -651,40 +453,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
             overrides: []
           gridPos:
             h: 8
@@ -717,40 +496,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
             overrides: []
           gridPos:
             h: 8
@@ -795,41 +551,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
-                min: 0
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
                 unit: percent
             overrides: []
           gridPos:
@@ -863,40 +595,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
                 unit: percent
             overrides: []
           gridPos:
@@ -930,40 +639,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
                 unit: percent
             overrides: []
           gridPos:
@@ -997,40 +683,17 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: '#5794f2'
                     mode: palette-classic
                 custom:
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                    lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: false
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
-                mappings: []
+                    fillOpacity: 30
+                    gradientMode: opacity
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    showPoints: never
                 thresholds:
                     mode: absolute
-                    steps:
-                        - color: green
-                          value: null
-                        - color: red
-                          value: 80
+                    steps: []
                 unit: percent
             overrides: []
           gridPos:

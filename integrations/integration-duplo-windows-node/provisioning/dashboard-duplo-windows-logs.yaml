@@ -30,7 +30,12 @@ spec:
                 type: prometheus
                 uid: ${datasource}
               enable: true
-              expr: windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
+              expr: |-
+                windows_system_boot_time_timestamp_seconds{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_system_boot_time_timestamp{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
               hide: true
               iconColor: light-yellow
               name: Reboot
@@ -131,7 +136,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: loki
@@ -181,7 +186,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: loki
@@ -232,7 +237,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 12.4.0-21935752455
           targets:
             - refId: A
           title: Integration version
@@ -355,7 +360,7 @@ spec:
             tooltip:
                 mode: multi
                 sort: desc
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: loki
@@ -395,7 +400,7 @@ spec:
             showTime: false
             sortOrder: Descending
             wrapLogMessage: false
-          pluginVersion: 11.4.0-78571
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: loki

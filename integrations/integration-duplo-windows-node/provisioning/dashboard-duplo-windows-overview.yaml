@@ -30,7 +30,12 @@ spec:
                 type: prometheus
                 uid: ${datasource}
               enable: true
-              expr: windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
+              expr: |-
+                windows_system_boot_time_timestamp_seconds{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_system_boot_time_timestamp{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
               hide: true
               iconColor: light-yellow
               name: Reboot
@@ -114,12 +119,18 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: time() - windows_system_system_up_time{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: |-
+                time() - windows_system_boot_time_timestamp_seconds{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                time() - windows_system_boot_time_timestamp{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                time() - windows_system_system_up_time{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              legendFormat: '{{instance}}: Uptime'
               refId: A
           title: Uptime
           type: stat
@@ -161,13 +172,14 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: windows_cs_hostname{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
+              legendFormat: '{{instance}}: Hostname'
               refId: A
           title: Hostname
           type: stat
@@ -209,13 +221,14 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
               expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
+              legendFormat: '{{instance}}: OS info'
               refId: A
           title: OS version
           type: stat
@@ -257,13 +270,14 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
               expr: windows_os_info{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
+              legendFormat: '{{instance}}: OS info'
               refId: A
           title: OS family
           type: stat
@@ -307,12 +321,16 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_cs_logical_processors{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: |-
+                windows_cpu_logical_processor{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_cs_logical_processors{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              legendFormat: '{{instance}}: CPU count'
               refId: A
           title: CPU count
           type: stat
@@ -358,12 +376,15 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: |-
+                windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_memory_physical_total_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               legendFormat: Memory total
               refId: A
           title: Memory total
@@ -411,12 +432,16 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_os_paging_limit_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: |-
+                windows_os_paging_limit_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_pagefile_limit_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              legendFormat: '{{instance}}: Page total'
               refId: A
           title: Pagefile size
           type: stat
@@ -460,12 +485,13 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
               expr: windows_logical_disk_size_bytes{asserts_env=~"$env", asserts_site=~"$site", volume="C:", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              legendFormat: '{{volume}}: C:'
               refId: A
           title: 'Disk C: size'
           type: stat
@@ -526,7 +552,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -605,7 +631,7 @@ spec:
             tooltip:
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -667,12 +693,16 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: 100 - windows_os_physical_memory_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100
+              expr: |-
+                100 - windows_memory_physical_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_memory_physical_total_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100
+                or
+                100 - windows_os_physical_memory_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100
+              legendFormat: '{{instance}}: Usage'
               refId: A
           title: Memory usage
           type: stat
@@ -756,18 +786,24 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} - windows_os_physical_memory_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: |-
+                windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} - windows_os_physical_memory_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_memory_physical_total_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} - windows_memory_physical_free_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               legendFormat: Memory used
               refId: A
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: |-
+                windows_cs_physical_memory_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_memory_physical_total_bytes{asserts_env=~"$env", asserts_site=~"$site", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               legendFormat: Memory total
               refId: B
           title: Memory usage
@@ -854,7 +890,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -929,7 +965,7 @@ spec:
                     - sum
                 show: false
             showHeader: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -1085,7 +1121,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -1171,7 +1207,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
