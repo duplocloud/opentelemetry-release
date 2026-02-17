@@ -35,7 +35,7 @@ spec:
           summary: Disk is almost full on Windows host.
       - alert: WindowsDiskDriveNotHealthy
         expr: >
-          windows_disk_drive_status{job=~"integrations/windows_exporter", status="OK"} != 1
+          windows_diskdrive_status{job=~"integrations/windows_exporter", status="OK"} != 1
         for: 5m
         labels:
           asserts_alert_category: failure
