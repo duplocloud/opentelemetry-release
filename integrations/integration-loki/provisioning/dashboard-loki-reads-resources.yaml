@@ -354,7 +354,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/query-scheduler"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"$namespace/$cluster-(backend)"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -1358,7 +1358,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/(.*ingester|partition-ingester).*"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"$namespace/$cluster-(write|backend)"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
