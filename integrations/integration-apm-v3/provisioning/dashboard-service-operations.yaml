@@ -149,7 +149,7 @@ spec:
                       value:
                         - targetBlank: false
                           title: ""
-                          url: /d/service-span-dashboard-v3/service-span-dashboard-v3??var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-span=${__data.fields.Operation}&var-rate_interval=$__auto
+                          url: /d/service-span-dashboard-v3/service-span-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-span=${__data.fields.Operation}&var-rate_interval=$__auto
           gridPos:
             h: 23
             w: 24
