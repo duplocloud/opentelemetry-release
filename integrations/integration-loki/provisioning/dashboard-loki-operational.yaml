@@ -1546,7 +1546,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container=~".*distributor.*"}[$__rate_interval]))
+                                namespace=~"$namespace", container="loki"}[$__rate_interval]))
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
                             refId: A
@@ -1625,7 +1625,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: go_memstats_heap_inuse_bytes{cluster="$cluster",
-                                namespace="$namespace", container=~".*distributor.*"}
+                                namespace="$namespace", container="loki"}
                             instant: false
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
@@ -2562,7 +2562,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container=~".*querier.*"}[$__rate_interval]))
+                                namespace=~"$namespace", container="loki"}[$__rate_interval]))
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
                             refId: A
@@ -2641,7 +2641,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: go_memstats_heap_inuse_bytes{cluster="$cluster",
-                                namespace="$namespace", container=~".*querier.*"}
+                                namespace="$namespace", container="loki"}
                             instant: false
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
@@ -2905,7 +2905,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container=~".*querier.*"}[$__rate_interval]))
+                                namespace=~"$namespace", container="loki"}[$__rate_interval]))
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
                             refId: A
@@ -2984,7 +2984,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: go_memstats_heap_inuse_bytes{cluster="$cluster",
-                                namespace="$namespace", container=~".*backend.*"}
+                                namespace="$namespace", container="loki"}
                             instant: false
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
