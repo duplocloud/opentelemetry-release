@@ -193,7 +193,7 @@ spec:
                     span: 4
                     targets:
                         -   expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster",
-                                job=~"($namespace)/(loki.*|enterprise-logs)-read"})
+                                job=~"$namespace/$cluster-read"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
@@ -239,7 +239,7 @@ spec:
                     span: 3
                     targets:
                         -   expr: sum by(pod) (loki_write_memory_streams{cluster=~"$cluster",
-                                job=~"($namespace)/(loki.*|enterprise-logs)-write"})
+                                job=~"$namespace/$cluster-write"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
@@ -415,7 +415,7 @@ spec:
                     span: 3
                     targets:
                         -   expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster",
-                                job=~"($namespace)/(loki.*|enterprise-logs)-write"})
+                                job=~"$namespace/$cluster-write"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
@@ -728,7 +728,7 @@ spec:
                     span: 4
                     targets:
                         -   expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster",
-                                job=~"($namespace)/(loki.*|enterprise-logs)-backend"})
+                                job=~"$namespace/$cluster-backend"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null

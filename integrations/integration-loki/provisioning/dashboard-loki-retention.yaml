@@ -193,7 +193,7 @@ spec:
                     span: 4
                     targets:
                         -   expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster",
-                                job=~"($namespace)/(loki.*|enterprise-logs)-backend"})
+                                job=~"$namespace/$cluster-backend"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
@@ -1034,7 +1034,7 @@ spec:
                     id: 21
                     span: 12
                     targets:
-                        -   expr: '{cluster=~"$cluster", job=~"($namespace)/(loki.*|enterprise-logs)-backend"}'
+                        -   expr: '{cluster=~"$cluster", job=~"$namespace/$cluster-backend"}'
                             refId: A
                     title: Compactor Logs
                     type: logs

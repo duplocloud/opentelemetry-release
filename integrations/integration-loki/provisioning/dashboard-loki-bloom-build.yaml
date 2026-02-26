@@ -114,12 +114,12 @@ spec:
                         uid: ${datasource}
                     editorMode: code
                     expr: 'sum(loki_bloomplanner_tenant_tasks_completed{cluster=~"$cluster",
-                        job=~"$namespace/bloom-planner"})
+                        job=~"$namespace/$cluster-bloom-planner"})
 
                         /
 
                         sum(loki_bloomplanner_tenant_tasks_planned{cluster=~"$cluster",
-                        job=~"$namespace/bloom-planner"})'
+                        job=~"$namespace/$cluster-bloom-planner"})'
                     hide: false
                     instant: false
                     legendFormat: Progress
@@ -208,12 +208,12 @@ spec:
                         uid: ${datasource}
                     editorMode: code
                     expr: 'sum by (tenant) (loki_bloomplanner_tenant_tasks_completed{cluster=~"$cluster",
-                        job=~"$namespace/bloom-planner"})
+                        job=~"$namespace/$cluster-bloom-planner"})
 
                         /
 
                         sum by (tenant) (loki_bloomplanner_tenant_tasks_planned{cluster=~"$cluster",
-                        job=~"$namespace/bloom-planner"})'
+                        job=~"$namespace/$cluster-bloom-planner"})'
                     hide: false
                     instant: false
                     legendFormat: '{{tenant}}'
@@ -250,8 +250,8 @@ spec:
                         type: loki
                         uid: ${loki_datasource}
                     editorMode: code
-                    expr: '{cluster="$cluster", job="$namespace/bloom-planner"} |=
-                        "level=error" |= "component=bloom-planner"'
+                    expr: '{cluster="$cluster", job="$namespace/$cluster-bloom-planner"}
+                        |= "level=error" |= "component=bloom-planner"'
                     queryType: range
                     refId: B
             title: Errors Planner
@@ -324,7 +324,7 @@ spec:
                         type: loki
                         uid: ${loki_datasource}
                     editorMode: code
-                    expr: sum(count_over_time({cluster="$cluster", job="$namespace/bloom-planner"}
+                    expr: sum(count_over_time({cluster="$cluster", job="$namespace/$cluster-bloom-planner"}
                         |= "level=error" |= "component=bloom-planner" [$__auto]))
                     legendFormat: Error rate
                     queryType: range
@@ -360,8 +360,8 @@ spec:
                         type: loki
                         uid: ${loki_datasource}
                     editorMode: code
-                    expr: '{cluster="$cluster", job="$namespace/bloom-builder"} |=
-                        "level=error" |= "component=bloom-builder"'
+                    expr: '{cluster="$cluster", job="$namespace/$cluster-bloom-builder"}
+                        |= "level=error" |= "component=bloom-builder"'
                     queryType: range
                     refId: B
             title: Errors Builder
@@ -434,7 +434,7 @@ spec:
                         type: loki
                         uid: ${loki_datasource}
                     editorMode: code
-                    expr: sum(count_over_time({cluster="$cluster", job="$namespace/bloom-builder"}
+                    expr: sum(count_over_time({cluster="$cluster", job="$namespace/$cluster-bloom-builder"}
                         |= "level=error" |= "component=bloom-builder" [$__auto]))
                     legendFormat: Error rate
                     queryType: range
@@ -568,7 +568,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum(loki_bloomplanner_tenant_tasks_planned{cluster="$cluster",
-                                job="$namespace/bloom-planner"}) > 0
+                                job="$namespace/$cluster-bloom-planner"}) > 0
                             hide: false
                             instant: false
                             legendFormat: Planned
@@ -579,7 +579,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (status) (loki_bloomplanner_tenant_tasks_completed{cluster="$cluster",
-                                job="$namespace/bloom-planner"}) > 0
+                                job="$namespace/$cluster-bloom-planner"}) > 0
                             hide: false
                             instant: false
                             legendFormat: Completed - {{status}}
@@ -590,7 +590,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: loki_bloomplanner_inflight_tasks{cluster="$cluster",
-                                job="$namespace/bloom-planner", quantile="0.95"}
+                                job="$namespace/$cluster-bloom-planner", quantile="0.95"}
                             hide: false
                             instant: false
                             legendFormat: inflight p95
@@ -601,7 +601,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum(loki_bloomplanner_queue_length{cluster="$cluster",
-                                job="$namespace/bloom-planner"}) > 0
+                                job="$namespace/$cluster-bloom-planner"}) > 0
                             hide: false
                             instant: false
                             legendFormat: Queued
@@ -735,7 +735,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum(loki_bloomplanner_connected_builders{cluster="$cluster",
-                                job="$namespace/bloom-planner"})
+                                job="$namespace/$cluster-bloom-planner"})
                             hide: false
                             instant: false
                             legendFormat: Connected builders
@@ -746,7 +746,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: count(loki_bloombuilder_processing_task{cluster="$cluster",
-                                job="$namespace/bloom-builder"} > 0)
+                                job="$namespace/$cluster-bloom-builder"} > 0)
                             hide: false
                             instant: false
                             legendFormat: Builders processing task
@@ -757,7 +757,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: count(loki_bloombuilder_processing_task{cluster="$cluster",
-                                job="$namespace/bloom-builder"} == 0)
+                                job="$namespace/$cluster-bloom-builder"} == 0)
                             hide: false
                             instant: false
                             legendFormat: IDLE Builders
@@ -834,8 +834,8 @@ spec:
                             editorMode: code
                             expr: "# series checked per compaction\nhistogram_quantile(\n\
                                 \    0.99, \n    sum by (le) (\n        rate(loki_bloombuilder_series_per_task_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: p99
@@ -847,8 +847,8 @@ spec:
                             editorMode: code
                             expr: "# series checked per compaction\nhistogram_quantile(\n\
                                 \    0.9, \n    sum by (le) (\n        rate(loki_bloombuilder_series_per_task_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: p90
@@ -860,8 +860,8 @@ spec:
                             editorMode: code
                             expr: "# series checked per compaction\nhistogram_quantile(\n\
                                 \    0.75, \n    sum by (le) (\n        rate(loki_bloombuilder_series_per_task_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: p75
@@ -873,8 +873,8 @@ spec:
                             editorMode: code
                             expr: "# series checked per compaction\nhistogram_quantile(\n\
                                 \    0.5, \n    sum by (le) (\n        rate(loki_bloombuilder_series_per_task_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: p50
@@ -950,8 +950,8 @@ spec:
                             editorMode: code
                             expr: "# series checked per compaction\nhistogram_quantile(\n\
                                 \    0.99, \n    sum by (le) (\n        rate(loki_bloombuilder_bytes_per_task_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: p99
@@ -963,8 +963,8 @@ spec:
                             editorMode: code
                             expr: "# series checked per compaction\nhistogram_quantile(\n\
                                 \    0.9, \n    sum by (le) (\n        rate(loki_bloombuilder_bytes_per_task_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: p90
@@ -976,8 +976,8 @@ spec:
                             editorMode: code
                             expr: "# series checked per compaction\nhistogram_quantile(\n\
                                 \    0.5, \n    sum by (le) (\n        rate(loki_bloombuilder_bytes_per_task_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: p50
@@ -1128,7 +1128,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum(loki_bloomplanner_tenant_tasks_planned{cluster="$cluster",
-                                job="$namespace/bloom-planner", tenant="$tenant"})
+                                job="$namespace/$cluster-bloom-planner", tenant="$tenant"})
                                 > 0
                             hide: false
                             instant: false
@@ -1140,7 +1140,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (status) (loki_bloomplanner_tenant_tasks_completed{cluster="$cluster",
-                                job="$namespace/bloom-planner", tenant="$tenant"})
+                                job="$namespace/$cluster-bloom-planner", tenant="$tenant"})
                                 > 0
                             hide: false
                             instant: false
@@ -1152,8 +1152,8 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum(loki_bloomplanner_queue_length{cluster="$cluster",
-                                job="$namespace/bloom-planner", user="$tenant"}) >
-                                0
+                                job="$namespace/$cluster-bloom-planner", user="$tenant"})
+                                > 0
                             hide: false
                             instant: false
                             legendFormat: Queued
@@ -1189,7 +1189,7 @@ spec:
                                 type: loki
                                 uid: ${loki_datasource}
                             editorMode: code
-                            expr: '{cluster=~"$cluster", job=~"$namespace/bloom-planner"}
+                            expr: '{cluster=~"$cluster", job=~"$namespace/$cluster-bloom-planner"}
 
                                 |= "level=error"
 
@@ -1285,12 +1285,12 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: 'sum(rate(loki_bloom_tokens_total{cluster="$cluster",
-                                job="$namespace/bloom-builder"}[$__rate_interval]))
+                                job="$namespace/$cluster-bloom-builder"}[$__rate_interval]))
 
                                 /
 
                                 sum(count(loki_bloom_tokens_total{cluster="$cluster",
-                                job="$namespace/bloom-builder"}))'
+                                job="$namespace/$cluster-bloom-builder"}))'
                             hide: false
                             instant: false
                             legendFormat: Per core
@@ -1301,7 +1301,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum(rate(loki_bloom_inserts_total{cluster="$cluster",
-                                job="$namespace/bloom-builder"}[$__rate_interval]))
+                                job="$namespace/$cluster-bloom-builder"}[$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: Total
@@ -1385,10 +1385,11 @@ spec:
                             editorMode: code
                             expr: "# tokens/s by type+collision\nsum by (collision)\
                                 \ (\n    rate(loki_bloom_inserts_total{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                ) \n/ on () group_left\nsum (\n    rate(loki_bloom_inserts_total{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                )"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n) \n/ on () group_left\nsum\
+                                \ (\n    rate(loki_bloom_inserts_total{cluster=\"\
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n)"
                             hide: false
                             instant: false
                             legendFormat: __auto
@@ -1470,8 +1471,8 @@ spec:
                             editorMode: code
                             expr: "histogram_quantile(\n    1.0,\n    sum by (le)\
                                 \ (\n        rate(loki_bloom_size_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: max
@@ -1483,8 +1484,8 @@ spec:
                             editorMode: code
                             expr: "histogram_quantile(\n    0.99, \n    sum by (le)\
                                 \ (\n        rate(loki_bloom_size_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: p99
@@ -1496,8 +1497,8 @@ spec:
                             editorMode: code
                             expr: "histogram_quantile(\n    0.50, \n    sum by (le)\
                                 \ (\n        rate(loki_bloom_size_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-builder\"}[$__rate_interval])\n\
-                                \    )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-builder\"\
+                                }[$__rate_interval])\n    )\n)"
                             hide: false
                             instant: false
                             legendFormat: p50
@@ -1580,7 +1581,7 @@ spec:
                                 pre-existing bloom
 
                                 sum(rate(loki_bloom_chunks_indexed_total{cluster="$cluster",
-                                job="$namespace/bloom-builder"}[$__rate_interval]))
+                                job="$namespace/$cluster-bloom-builder"}[$__rate_interval]))
                                 by (type)'
                             hide: false
                             instant: false
@@ -1799,7 +1800,7 @@ spec:
                             expr: '# MB/s/core chunk data processed
 
                                 sum(rate(loki_bloombuilder_chunk_series_size_sum{cluster=~"$cluster",
-                                job=~"$namespace/bloom-builder"}[$__rate_interval]))
+                                job=~"$namespace/$cluster-bloom-builder"}[$__rate_interval]))
 
                                 /
 
@@ -3146,7 +3147,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum(increase(loki_bloombuilder_metas_created_total{cluster="$cluster",
-                                job="$namespace/bloom-builder"}[$__rate_interval]))
+                                job="$namespace/$cluster-bloom-builder"}[$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: Metas
@@ -3197,7 +3198,7 @@ spec:
                             editorMode: code
                             exemplar: false
                             expr: sum(increase(loki_bloombuilder_metas_created_total{cluster="$cluster",
-                                job="$namespace/bloom-builder"}[$__range]))
+                                job="$namespace/$cluster-bloom-builder"}[$__range]))
                             format: table
                             hide: false
                             instant: true
@@ -3274,7 +3275,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (phase) (increase(loki_bloomplanner_metas_deleted_total{cluster="$cluster",
-                                job="$namespace/bloom-planner"}[$__rate_interval]))
+                                job="$namespace/$cluster-bloom-planner"}[$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: Deleted during {{phase}}
@@ -3359,7 +3360,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum(increase(loki_bloombuilder_blocks_created_total{cluster="$cluster",
-                                job="$namespace/bloom-builder"}[$__rate_interval]))
+                                job="$namespace/$cluster-bloom-builder"}[$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: Blocks
@@ -3410,7 +3411,7 @@ spec:
                             editorMode: code
                             exemplar: false
                             expr: sum(increase(loki_bloombuilder_blocks_created_total{cluster="$cluster",
-                                job="$namespace/bloom-builder"}[$__range]))
+                                job="$namespace/$cluster-bloom-builder"}[$__range]))
                             format: time_series
                             hide: false
                             instant: true
@@ -3487,7 +3488,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (phase) (increase(loki_bloomplanner_blocks_deleted_total{cluster="$cluster",
-                                job="$namespace/bloom-planner"}[$__rate_interval]))
+                                job="$namespace/$cluster-bloom-planner"}[$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: Deleted during {{phase}}
@@ -3565,7 +3566,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum(increase(loki_bloombuilder_blocks_reused_total{cluster="$cluster",
-                                job="$namespace/bloom-builder"}[$__rate_interval]))
+                                job="$namespace/$cluster-bloom-builder"}[$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: Blocks
@@ -3641,7 +3642,7 @@ spec:
                             editorMode: code
                             exemplar: false
                             expr: sum by (cluster, namespace) (loki_bloomplanner_retention_running{cluster="$cluster",
-                                job="$namespace/bloom-planner"})
+                                job="$namespace/$cluster-bloom-planner"})
                             instant: true
                             legendFormat: __auto
                             range: false
@@ -3719,7 +3720,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (cluster, namespace) (loki_bloomplanner_retention_running{cluster="$cluster",
-                                job="$namespace/bloom-planner"})
+                                job="$namespace/$cluster-bloom-planner"})
                             legendFormat: __auto
                             range: true
                             refId: A
@@ -3794,8 +3795,8 @@ spec:
                             editorMode: code
                             expr: "histogram_quantile(0.9, \n  sum by (status, le)\
                                 \ (\n    rate(loki_bloomplanner_retention_time_seconds_bucket{cluster=\"\
-                                $cluster\", job=\"$namespace/bloom-planner\"}[$__rate_interval])\n\
-                                \  )\n)"
+                                $cluster\", job=\"$namespace/$cluster-bloom-planner\"\
+                                }[$__rate_interval])\n  )\n)"
                             legendFormat: __auto
                             range: true
                             refId: A
@@ -3939,7 +3940,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (container, status_code, operation) (rate(loki_gcs_request_duration_seconds_count{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval]))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} {{status_code}}'
@@ -4016,7 +4017,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.99, sum by (operation, le)
                                 (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p99'
@@ -4028,7 +4029,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.90, sum by (operation, le)
                                 (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p90'
@@ -4040,7 +4041,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.50, sum by (operation, le)
                                 (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p50'
@@ -4116,7 +4117,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (container, status_code, operation) (rate(loki_gcs_request_duration_seconds_count{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval]))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} {{status_code}}'
@@ -4193,7 +4194,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.99, sum by (operation, le)
                                 (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p99'
@@ -4205,7 +4206,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.90, sum by (operation, le)
                                 (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p90'
@@ -4217,7 +4218,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.50, sum by (operation, le)
                                 (rate(loki_gcs_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p50'
@@ -4320,7 +4321,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (status_code, operation) (rate(loki_s3_request_duration_seconds_count{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval]))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} {{status_code}}'
@@ -4397,7 +4398,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.99, sum by (operation, le)
                                 (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p99'
@@ -4409,7 +4410,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.90, sum by (operation, le)
                                 (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p90'
@@ -4421,7 +4422,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.50, sum by (operation, le)
                                 (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-planner", job=""} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-planner", job=""} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p50'
@@ -4497,7 +4498,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (status_code, operation) (rate(loki_s3_request_duration_seconds_count{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval]))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} {{status_code}}'
@@ -4574,7 +4575,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.99, sum by (operation, le)
                                 (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p99'
@@ -4586,7 +4587,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.90, sum by (operation, le)
                                 (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p90'
@@ -4598,7 +4599,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.50, sum by (operation, le)
                                 (rate(loki_s3_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p50'
@@ -4701,7 +4702,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (status_code, operation) (rate(loki_azure_blob_request_duration_seconds_count{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval]))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} {{status_code}}'
@@ -4778,7 +4779,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.99, sum by (operation, le)
                                 (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p99'
@@ -4790,7 +4791,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.90, sum by (operation, le)
                                 (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p90'
@@ -4802,7 +4803,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.50, sum by (operation, le)
                                 (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-planner"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-planner"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p50'
@@ -4878,7 +4879,7 @@ spec:
                                 uid: ${datasource}
                             editorMode: code
                             expr: sum by (status_code, operation) (rate(loki_azure_blob_request_duration_seconds_count{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval]))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval]))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} {{status_code}}'
@@ -4955,7 +4956,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.99, sum by (operation, le)
                                 (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p99'
@@ -4967,7 +4968,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.90, sum by (operation, le)
                                 (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p90'
@@ -4979,7 +4980,7 @@ spec:
                             editorMode: code
                             expr: histogram_quantile(0.50, sum by (operation, le)
                                 (rate(loki_azure_blob_request_duration_seconds_bucket{cluster="$cluster",
-                                job="$namespace/bloom-builder"} [$__rate_interval])))
+                                job="$namespace/$cluster-bloom-builder"} [$__rate_interval])))
                             hide: false
                             instant: false
                             legendFormat: '{{operation}} p50'
