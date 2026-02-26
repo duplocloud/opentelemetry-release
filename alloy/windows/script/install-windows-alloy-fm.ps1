@@ -13,6 +13,35 @@ param (
 # Sets the default TLS version to 1.2 to avoid issues downloading the Alloy installer on some networks
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
+
+
+function Get-IISSiteAttributes {
+    $entries = @()
+
+    # Retrieve each IIS site using a foreach loop
+    Get-IISSite | ForEach-Object {
+        $id = $_.ID
+        $name = $_.Name
+        $entry = """$id""=""$name"""
+        
+        $entries += $entry
+		
+        $entry = """site_$id""=""true"""
+        
+        $entries += $entry
+    }
+
+    # If there are entries, join them with ", " else return an empty string
+    if ($entries.Count -gt 0) {
+        # Prepend ", " to the joined entries
+        return ", " + ($entries -join ', ')
+    } else {
+        return ""
+    }
+}
+
+
+
 Write-Host "Setting up Alloy"
 
 if (-Not [bool](([System.Security.Principal.WindowsIdentity]::GetCurrent()).groups -match "S-1-5-32-544")) {
@@ -148,6 +177,8 @@ try {
     }
 
     $content = Get-Content $CONFIG_FILE
+	
+	$DYNAMIC_ATTRIBUTES = Get-IISSiteAttributes
 
     Write-Host "--- Replacing Alloy config params with arg values"
     $content = $content.Replace("{DUPLO_CLUSTER_NAME}", $DUPLO_CLUSTER_NAME)
@@ -160,6 +191,7 @@ try {
     $content = $content.Replace("{PRIVATE_IP_ADDRESS}", $PRIVATE_IP_ADDRESS)
     $content = $content.Replace("{INSTANCE_ID}", $INSTANCE_ID)
     $content = $content.Replace("{AWS_ACCOUNT}", $AWS_ACCOUNT)
+	$content = $content.Replace("{DYNAMIC_ATTRIBUTES}", $DYNAMIC_ATTRIBUTES)
     $content | Set-Content $CONFIG_FILE
 
     Write-Host "Creating Alloy system environment variable"

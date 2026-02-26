@@ -2,7 +2,7 @@ remotecfg {
 	url            = "{GCLOUD_FM_URL}"
 	id             = "{INSTANCE_ID}"
 	poll_frequency = "{GCLOUD_FM_POLL_FREQUENCY}"
-	attributes     = {"cluster" = "{DUPLO_CLUSTER_NAME}", "tenant_name" = "{DUPLO_TENANT_NAME}", "instance" = "{HOSTNAME}", "aws_account_id" = "{AWS_ACCOUNT}", "private_ip" = "{PRIVATE_IP_ADDRESS}", "instance_id" = "{INSTANCE_ID}", "env" = "{ENVIRONMENT}"}
+	attributes     = {"cluster" = "{DUPLO_CLUSTER_NAME}", "tenant_name" = "{DUPLO_TENANT_NAME}", "instance" = "{HOSTNAME}", "aws_account_id" = "{AWS_ACCOUNT}", "private_ip" = "{PRIVATE_IP_ADDRESS}", "instance_id" = "{INSTANCE_ID}", "env" = "{ENVIRONMENT}"{DYNAMIC_ATTRIBUTES}}
 
 	basic_auth {
 		username = "{GCLOUD_FM_HOSTED_ID}"
