@@ -161,9 +161,9 @@ spec:
                 -   expr: "sum by (status) (\nlabel_replace(\n  label_replace(\n \
                         \         rate(loki_request_duration_seconds_count{cluster=\"\
                         $cluster\", job=~\"$namespace/$cluster-write\", route=~\"\
-                        api_prom_push|loki_api_v1_push|otlp_v1_logs\"}[$__rate_interval]),\n\
-                        \   \"status\", \"${1}xx\", \"status_code\", \"([0-9])..\"\
-                        ),\n\"status\", \"${1}\", \"status_code\", \"([a-z]+)\"))"
+                        api_prom_push|loki_api_v1_push\"}[$__rate_interval]),\n  \
+                        \ \"status\", \"${1}xx\", \"status_code\", \"([0-9])..\"),\n\
+                        \"status\", \"${1}\", \"status_code\", \"([a-z]+)\"))"
                     legendFormat: '{{status}}'
                     refId: A
             thresholds: []
@@ -481,17 +481,17 @@ spec:
             steppedLine: false
             targets:
                 -   expr: histogram_quantile(0.99, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"$namespace/$cluster-write",
-                        route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs", cluster=~"$cluster"}))
+                        route=~"api_prom_push|loki_api_v1_push", cluster=~"$cluster"}))
                         * 1e3
                     legendFormat: '.99'
                     refId: A
                 -   expr: histogram_quantile(0.75, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"$namespace/$cluster-write",
-                        route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs", cluster=~"$cluster"}))
+                        route=~"api_prom_push|loki_api_v1_push", cluster=~"$cluster"}))
                         * 1e3
                     legendFormat: '.9'
                     refId: B
                 -   expr: histogram_quantile(0.5, sum by (le) (cluster_job_route:loki_request_duration_seconds_bucket:sum_rate{job=~"$namespace/$cluster-write",
-                        route=~"api_prom_push|loki_api_v1_push|otlp_v1_logs", cluster=~"$cluster"}))
+                        route=~"api_prom_push|loki_api_v1_push", cluster=~"$cluster"}))
                         * 1e3
                     legendFormat: '.5'
                     refId: C
@@ -1546,7 +1546,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki"}[$__rate_interval]))
+                                namespace=~"$namespace", pod=~"$cluster-write.*"}[$__rate_interval]))
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
                             refId: A
@@ -1625,7 +1625,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: go_memstats_heap_inuse_bytes{cluster="$cluster",
-                                namespace="$namespace", container="loki"}
+                                namespace="$namespace", pod=~"$cluster-write.*"}
                             instant: false
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
@@ -2562,7 +2562,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki"}[$__rate_interval]))
+                                namespace=~"$namespace", pod=~"$cluster-read.*"}[$__rate_interval]))
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
                             refId: A
@@ -2641,7 +2641,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: go_memstats_heap_inuse_bytes{cluster="$cluster",
-                                namespace="$namespace", container="loki"}
+                                namespace="$namespace", pod=~"$cluster-read.*"}
                             instant: false
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
@@ -2905,7 +2905,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki"}[$__rate_interval]))
+                                namespace=~"$namespace", pod=~"$cluster-read.*"}[$__rate_interval]))
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
                             refId: A
@@ -2984,7 +2984,7 @@ spec:
                     steppedLine: false
                     targets:
                         -   expr: go_memstats_heap_inuse_bytes{cluster="$cluster",
-                                namespace="$namespace", container="loki"}
+                                namespace="$namespace", pod=~"$cluster-backend.*"}
                             instant: false
                             intervalFactor: 3
                             legendFormat: '{{pod}}'
