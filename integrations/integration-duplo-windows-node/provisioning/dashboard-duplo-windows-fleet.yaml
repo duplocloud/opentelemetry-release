@@ -30,7 +30,12 @@ spec:
                 type: prometheus
                 uid: ${datasource}
               enable: true
-              expr: windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
+              expr: |-
+                windows_system_boot_time_timestamp_seconds{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_system_boot_time_timestamp{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*1000 > $__from < $__to
               hide: true
               iconColor: light-yellow
               name: Reboot
@@ -131,13 +136,13 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: $datasource
               expr: |
-                vector(1) and on() ((count(up{job=~"integrations/windows.*"} == 1) > 0) and (absent(absent(windows_cs_hostname{job=~"integrations/windows.*"})))) or vector(0) and on() ((count(up{job=~"integrations/windows.*"}) > 0) and (absent(windows_cs_hostname{job=~"integrations/windows.*"})))
+                vector(1) and on() ((count(up{job=~"$job"} == 1) > 0) and (absent(absent(windows_os_info{job=~"$job"})))) or vector(0) and on() ((count(up{job=~"$job"}) > 0) and (absent(windows_os_info{job=~"$job"})))
               refId: A
           title: Metrics
           type: stat
@@ -181,13 +186,13 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: $datasource
               expr: |
-                vector(1) and on() ((count(up{job=~"integrations/windows.*"} == 1) > 0) and (absent(absent(windows_cs_hostname{job=~"integrations/windows.*"})))) or vector(0) and on() ((count(up{job=~"integrations/windows.*"}) > 0) and (absent(windows_cs_hostname{job=~"integrations/windows.*"})))
+                vector(1) and on() ((count(up{job=~"$job"} == 1) > 0) and (absent(absent(windows_os_info{job=~"$job"})))) or vector(0) and on() ((count(up{job=~"$job"}) > 0) and (absent(windows_os_info{job=~"$job"})))
               refId: A
           timeFrom: now-24h
           title: Latest metrics received
@@ -232,7 +237,7 @@ spec:
             showPercentChange: false
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - refId: A
           title: Integration version
@@ -398,8 +403,7 @@ spec:
                 show: true
             frameIndex: 7
             showHeader: true
-            sortBy: []
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -408,25 +412,32 @@ spec:
               expr: windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
+              legendFormat: '{{instance}}: OS info'
               refId: OS Info
             - datasource:
                 type: prometheus
                 uid: ${datasource}
               editorMode: code
               expr: |-
-                max by (instance, cluster) (
-                  time() - windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
-                )
+                time() - windows_system_boot_time_timestamp_seconds{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                time() - windows_system_boot_time_timestamp{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                time() - windows_system_system_up_time{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
+              legendFormat: '{{instance}}: Uptime'
               refId: Uptime
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              editorMode: code
-              expr: windows_cs_logical_processors{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: |-
+                windows_cpu_logical_processor{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_cs_logical_processors{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
+              legendFormat: '{{instance}}: Cores'
               refId: Cores
             - datasource:
                 type: prometheus
@@ -445,8 +456,10 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              editorMode: code
-              expr: windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+              expr: |-
+                windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
+                or
+                windows_memory_physical_total_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
               legendFormat: Memory total
@@ -454,10 +467,13 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              editorMode: code
-              expr: 100 - (windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}) /(windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}) * 100
+              expr: |-
+                100 - windows_memory_physical_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_memory_physical_total_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100
+                or
+                100 - windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100
               format: table
               instant: true
+              legendFormat: '{{instance}}: Usage'
               refId: Memory usage
             - datasource:
                 type: prometheus
@@ -466,6 +482,7 @@ spec:
               expr: windows_logical_disk_size_bytes{volume="C:", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}
               format: table
               instant: true
+              legendFormat: '{{volume}}: C:'
               refId: 'Disk C: total'
             - datasource:
                 type: prometheus
@@ -474,22 +491,24 @@ spec:
               expr: 100 - windows_logical_disk_free_bytes{volume="C:", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}/ windows_logical_disk_size_bytes{volume="C:", job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"}*100
               format: table
               instant: true
+              legendFormat: '{{volume}}: C: Used'
               refId: 'Disk C: used'
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              editorMode: code
-              expr: count by (instance) (max_over_time(ALERTS{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance", alertstate="firing", severity="critical"}[1m])) * group by (instance) (windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"})
+              expr: count by (job,instance) (max_over_time(ALERTS{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance", alertstate="firing", severity="critical"}[1m])) * group by (job,instance) (windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"})
               format: table
               instant: true
+              legendFormat: '{{instance}}: Critical'
               refId: CRITICAL
             - datasource:
                 type: prometheus
                 uid: ${datasource}
               editorMode: code
-              expr: count by (instance) (max_over_time(ALERTS{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance", alertstate="firing", severity="warning"}[1m])) * group by (instance) (windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"})
+              expr: count by (job,instance) (max_over_time(ALERTS{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance", alertstate="firing", severity="warning"}[1m])) * group by (job,instance) (windows_os_info{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"})
               format: table
               instant: true
+              legendFormat: '{{instance}}: Warning'
               refId: WARNING
           title: Fleet overview
           transformations:
@@ -683,7 +702,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -786,18 +805,24 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: topk(25,100 - windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100)
+              expr: |-
+                topk(25,100 - windows_memory_physical_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_memory_physical_total_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100
+                or
+                100 - windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100)
               legendFormat: '{{instance}}'
               refId: A
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: avg(100 - windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100)
+              expr: |-
+                avg(100 - windows_memory_physical_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_memory_physical_total_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100
+                or
+                100 - windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter",cluster=~"$cluster", namespace=~"$namespace",job=~"$job",instance=~"$instance"} * 100)
               legendFormat: Mean
               refId: B
           title: Memory usage
@@ -889,7 +914,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -992,7 +1017,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
@@ -1071,7 +1096,7 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
+          pluginVersion: 12.4.0-21935752455
           targets:
             - datasource:
                 type: prometheus
