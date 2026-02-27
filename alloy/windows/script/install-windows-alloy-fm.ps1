@@ -116,7 +116,7 @@ try {
 
     Write-Host "Downloading Alloy Windows Installer"
     $TEMP_DIR = "C:\temp"
-    $DOWNLOAD_URL = "https://github.com/grafana/alloy/releases/download/v1.12.2/alloy-installer-windows-amd64.exe.zip"
+    $DOWNLOAD_URL = "https://github.com/grafana/alloy/releases/download/v1.13.2/alloy-installer-windows-amd64.exe.zip"
     $OUTPUT_ZIP_FILE = "$TEMP_DIR\alloy-installer-windows-amd64.exe.zip"
     $OUTPUT_FILE = "$TEMP_DIR\alloy-installer-windows-amd64.exe"
 
