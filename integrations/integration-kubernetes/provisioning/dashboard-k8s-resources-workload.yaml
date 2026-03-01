@@ -47,6 +47,241 @@ spec:
           type: dashboards
     panels:
         - datasource:
+            type: prometheus
+            uid: ${datasource}
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 5
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 2
+                    pointSize: 10
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+            overrides:
+                - matcher:
+                    id: byFrameRefID
+                    options: D
+                  properties:
+                    - id: custom.drawStyle
+                      value: line
+                    - id: custom.lineWidth
+                      value: 3
+                - matcher:
+                    id: byFrameRefID
+                    options: E
+                  properties:
+                    - id: custom.drawStyle
+                      value: line
+                    - id: custom.lineWidth
+                      value: 1
+                    - id: custom.lineStyle
+                      value:
+                        dash:
+                            - 10
+                            - 30
+                        fill: dash
+                - matcher:
+                    id: byFrameRefID
+                    options: G
+                  properties:
+                    - id: custom.drawStyle
+                      value: line
+                    - id: custom.lineWidth
+                      value: 1
+                    - id: custom.lineStyle
+                      value:
+                        dash:
+                            - 10
+                            - 30
+                        fill: dash
+                - matcher:
+                    id: byFrameRefID
+                    options: F
+                  properties:
+                    - id: custom.drawStyle
+                      value: line
+                    - id: custom.lineWidth
+                      value: 3
+                - matcher:
+                    id: byFrameRefID
+                    options: H
+                  properties:
+                    - id: custom.drawStyle
+                      value: line
+                    - id: custom.lineWidth
+                      value: 3
+                - matcher:
+                    id: byFrameRefID
+                    options: I
+                  properties:
+                    - id: custom.drawStyle
+                      value: line
+                    - id: custom.lineWidth
+                      value: 1
+                    - id: custom.lineStyle
+                      value:
+                        dash:
+                            - 10
+                            - 30
+                        fill: dash
+          gridPos:
+            h: 8
+            w: 24
+            x: 0
+            "y": 0
+          id: 14
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              editorMode: code
+              expr: |
+                sum by (cluster, namespace, deployment) (
+                  kube_deployment_spec_replicas{
+                    cluster="$cluster",
+                    namespace="$namespace",
+                    deployment="$workload",
+                    job="integrations/kubernetes/kube-state-metrics"
+                  }
+                )
+              hide: false
+              instant: false
+              legendFormat: '{{deployment}} desired'
+              range: true
+              refId: D
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              editorMode: code
+              expr: |
+                sum by (cluster, namespace, deployment) (
+                  kube_deployment_status_replicas_available{
+                    cluster="$cluster",
+                    namespace="$namespace",
+                    deployment="$workload",
+                    job="integrations/kubernetes/kube-state-metrics"
+                  }
+                )
+              hide: false
+              instant: false
+              legendFormat: '{{deployment}} available'
+              range: true
+              refId: E
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              editorMode: code
+              expr: |
+                sum by (cluster, namespace, statefulset) (
+                  kube_statefulset_replicas{
+                    cluster="$cluster",
+                    namespace="$namespace",
+                    statefulset="$workload",
+                    job="integrations/kubernetes/kube-state-metrics"
+                  }
+                )
+              hide: false
+              instant: false
+              legendFormat: '{{statefulset}} desired'
+              range: true
+              refId: F
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              editorMode: code
+              expr: |
+                sum by (cluster, namespace, statefulset) (
+                  kube_statefulset_status_replicas_ready{
+                    cluster="$cluster",
+                    namespace="$namespace",
+                    statefulset="$workload"
+                  }
+                )
+              hide: false
+              instant: false
+              legendFormat: '{{statefulset}} available'
+              range: true
+              refId: G
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              editorMode: code
+              expr: |
+                sum by (cluster, namespace, daemonset) (
+                  kube_daemonset_status_desired_number_scheduled{
+                    cluster="$cluster",
+                    namespace="$namespace",
+                    daemonset="$workload"
+                  }
+                )
+              hide: false
+              instant: false
+              legendFormat: '{{daemonset}} desired'
+              range: true
+              refId: H
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              editorMode: code
+              expr: |
+                sum by (cluster, namespace, daemonset) (
+                  kube_daemonset_status_number_available{
+                    cluster="$cluster",
+                    namespace="$namespace",
+                    daemonset="$workload"
+                  }
+                )
+              hide: false
+              instant: false
+              legendFormat: '{{daemonset}} available'
+              range: true
+              refId: I
+          title: Pod Count per Workload
+          type: timeseries
+        - datasource:
             type: datasource
             uid: -- Mixed --
           fieldConfig:
