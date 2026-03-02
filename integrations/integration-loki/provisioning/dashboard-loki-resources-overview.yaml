@@ -74,20 +74,20 @@ spec:
                     span: 4
                     targets:
                         -   expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-read.*"}[$__rate_interval]))
+                                namespace=~"$namespace", container="loki", pod=~".*-read.*"}[$__rate_interval]))
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
                         -   expr: min(kube_pod_container_resource_requests{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-read.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-read.*",
                                 resource="cpu"} > 0)
                             format: time_series
                             legendFormat: request
                             legendLink: null
                         -   expr: min(container_spec_cpu_quota{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-read.*"}
+                                namespace=~"$namespace", container="loki", pod=~".*-read.*"}
                                 / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace",
-                                container="loki", pod=~"$cluster-read.*"})
+                                container="loki", pod=~".*-read.*"})
                             format: time_series
                             legendFormat: limit
                             legendLink: null
@@ -144,18 +144,18 @@ spec:
                     span: 4
                     targets:
                         -   expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-read.*"})
+                                namespace=~"$namespace", container="loki", pod=~".*-read.*"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
                         -   expr: min(kube_pod_container_resource_requests{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-read.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-read.*",
                                 resource="memory"} > 0)
                             format: time_series
                             legendFormat: request
                             legendLink: null
                         -   expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-read.*"}
+                                namespace=~"$namespace", container="loki", pod=~".*-read.*"}
                                 > 0)
                             format: time_series
                             legendFormat: limit
@@ -193,7 +193,7 @@ spec:
                     span: 4
                     targets:
                         -   expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster",
-                                job=~"$namespace/$cluster-read"})
+                                job=~"$namespace/.*-read"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
@@ -239,7 +239,7 @@ spec:
                     span: 3
                     targets:
                         -   expr: sum by(pod) (loki_write_memory_streams{cluster=~"$cluster",
-                                job=~"$namespace/$cluster-write"})
+                                job=~"$namespace/.*-write"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
@@ -296,20 +296,20 @@ spec:
                     span: 3
                     targets:
                         -   expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-write.*"}[$__rate_interval]))
+                                namespace=~"$namespace", container="loki", pod=~".*-write.*"}[$__rate_interval]))
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
                         -   expr: min(kube_pod_container_resource_requests{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-write.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-write.*",
                                 resource="cpu"} > 0)
                             format: time_series
                             legendFormat: request
                             legendLink: null
                         -   expr: min(container_spec_cpu_quota{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-write.*"}
+                                namespace=~"$namespace", container="loki", pod=~".*-write.*"}
                                 / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace",
-                                container="loki", pod=~"$cluster-write.*"})
+                                container="loki", pod=~".*-write.*"})
                             format: time_series
                             legendFormat: limit
                             legendLink: null
@@ -366,18 +366,18 @@ spec:
                     span: 3
                     targets:
                         -   expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-write.*"})
+                                namespace=~"$namespace", container="loki", pod=~".*-write.*"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
                         -   expr: min(kube_pod_container_resource_requests{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-write.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-write.*",
                                 resource="memory"} > 0)
                             format: time_series
                             legendFormat: request
                             legendLink: null
                         -   expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-write.*"}
+                                namespace=~"$namespace", container="loki", pod=~".*-write.*"}
                                 > 0)
                             format: time_series
                             legendFormat: limit
@@ -415,7 +415,7 @@ spec:
                     span: 3
                     targets:
                         -   expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster",
-                                job=~"$namespace/$cluster-write"})
+                                job=~"$namespace/.*-write"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
@@ -463,7 +463,7 @@ spec:
                         -   expr: 'sum by(instance, device) (rate(node_disk_written_bytes_total[$__rate_interval]))
                                 + ignoring(pod) group_right() (label_replace(count
                                 by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-write.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-write.*",
                                 device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)")
                                 * 0)
 
@@ -504,7 +504,7 @@ spec:
                         -   expr: 'sum by(instance, device) (rate(node_disk_read_bytes_total[$__rate_interval]))
                                 + ignoring(pod) group_right() (label_replace(count
                                 by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-write.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-write.*",
                                 device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)")
                                 * 0)
 
@@ -543,9 +543,9 @@ spec:
                     span: 4
                     targets:
                         -   expr: max by(persistentvolumeclaim) (kubelet_volume_stats_used_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", persistentvolumeclaim=~".*$cluster-write.*"}
+                                namespace=~"$namespace", persistentvolumeclaim=~".*.*-write.*"}
                                 / kubelet_volume_stats_capacity_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", persistentvolumeclaim=~".*$cluster-write.*"})
+                                namespace=~"$namespace", persistentvolumeclaim=~".*.*-write.*"})
                             format: time_series
                             legendFormat: '{{persistentvolumeclaim}}'
                             legendLink: null
@@ -609,20 +609,20 @@ spec:
                     span: 4
                     targets:
                         -   expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-backend.*"}[$__rate_interval]))
+                                namespace=~"$namespace", container="loki", pod=~".*-backend.*"}[$__rate_interval]))
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
                         -   expr: min(kube_pod_container_resource_requests{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-backend.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-backend.*",
                                 resource="cpu"} > 0)
                             format: time_series
                             legendFormat: request
                             legendLink: null
                         -   expr: min(container_spec_cpu_quota{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-backend.*"}
+                                namespace=~"$namespace", container="loki", pod=~".*-backend.*"}
                                 / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace",
-                                container="loki", pod=~"$cluster-backend.*"})
+                                container="loki", pod=~".*-backend.*"})
                             format: time_series
                             legendFormat: limit
                             legendLink: null
@@ -679,18 +679,18 @@ spec:
                     span: 4
                     targets:
                         -   expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-backend.*"})
+                                namespace=~"$namespace", container="loki", pod=~".*-backend.*"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
                         -   expr: min(kube_pod_container_resource_requests{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-backend.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-backend.*",
                                 resource="memory"} > 0)
                             format: time_series
                             legendFormat: request
                             legendLink: null
                         -   expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-backend.*"}
+                                namespace=~"$namespace", container="loki", pod=~".*-backend.*"}
                                 > 0)
                             format: time_series
                             legendFormat: limit
@@ -728,7 +728,7 @@ spec:
                     span: 4
                     targets:
                         -   expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster",
-                                job=~"$namespace/$cluster-backend"})
+                                job=~"$namespace/.*-backend"})
                             format: time_series
                             legendFormat: '{{pod}}'
                             legendLink: null
@@ -776,7 +776,7 @@ spec:
                         -   expr: 'sum by(instance, device) (rate(node_disk_written_bytes_total[$__rate_interval]))
                                 + ignoring(pod) group_right() (label_replace(count
                                 by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-backend.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-backend.*",
                                 device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)")
                                 * 0)
 
@@ -817,7 +817,7 @@ spec:
                         -   expr: 'sum by(instance, device) (rate(node_disk_read_bytes_total[$__rate_interval]))
                                 + ignoring(pod) group_right() (label_replace(count
                                 by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster",
-                                namespace=~"$namespace", container="loki", pod=~"$cluster-backend.*",
+                                namespace=~"$namespace", container="loki", pod=~".*-backend.*",
                                 device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)")
                                 * 0)
 
@@ -856,9 +856,9 @@ spec:
                     span: 4
                     targets:
                         -   expr: max by(persistentvolumeclaim) (kubelet_volume_stats_used_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", persistentvolumeclaim=~".*$cluster-backend.*"}
+                                namespace=~"$namespace", persistentvolumeclaim=~".*.*-backend.*"}
                                 / kubelet_volume_stats_capacity_bytes{cluster=~"$cluster",
-                                namespace=~"$namespace", persistentvolumeclaim=~".*$cluster-backend.*"})
+                                namespace=~"$namespace", persistentvolumeclaim=~".*.*-backend.*"})
                             format: time_series
                             legendFormat: '{{persistentvolumeclaim}}'
                             legendLink: null
