@@ -874,7 +874,7 @@ spec:
               sort: 1
               type: query
     time:
-        from: now-1h
+        from: now-15m
         to: now
     timepicker: {}
     timezone: ""

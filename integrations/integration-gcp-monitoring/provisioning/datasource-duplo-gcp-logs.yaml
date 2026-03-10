@@ -1,0 +1,13 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Datasource
+metadata:
+    name: duplo-gcp-logs
+spec:
+    access: proxy
+    jsonData:
+        authenticationType: gce
+    name: duplo-gcp-logs
+    orgId: 1
+    type: googlecloud-logging-datasource
+    typeLogoUrl: public/plugins/googlecloud-logging-datasource/img/logo.svg
+    uid: duplo-gcp-logs
