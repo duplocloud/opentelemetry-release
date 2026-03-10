@@ -210,11 +210,11 @@ spec:
                 thresholds:
                     mode: absolute
                     steps:
-                        - color: red
-                        - color: orange
-                          value: 1.296e+06
                         - color: green
-                          value: 2.592e+06
+                        - color: orange
+                          value: 0.5
+                        - color: dark-red
+                          value: 1
                 unit: dtdurations
             overrides: []
           gridPos:
