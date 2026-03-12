@@ -57,7 +57,6 @@ spec:
           folderUID: integration-blackbox-exporter
           for: 5m0s
           labels:
-            owner: duplo
             severity: critical
           noDataState: NoData
           ruleGroup: alerts
@@ -114,7 +113,6 @@ spec:
           folderUID: integration-blackbox-exporter
           for: 1m0s
           labels:
-            owner: duplo
             severity: warning
           noDataState: OK
           orgID: 1
@@ -172,7 +170,6 @@ spec:
           folderUID: integration-blackbox-exporter
           for: 1m0s
           labels:
-            owner: duplo
             severity: warning
           noDataState: OK
           ruleGroup: alerts
@@ -229,7 +226,6 @@ spec:
           folderUID: integration-blackbox-exporter
           for: 1m0s
           labels:
-            owner: duplo
             severity: warning
           noDataState: OK
           ruleGroup: alerts

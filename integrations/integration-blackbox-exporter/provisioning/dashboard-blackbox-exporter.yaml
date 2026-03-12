@@ -188,7 +188,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: duplo-metrics
+            uid: ${DS_PROMETHEUS}
           description: Time remaining until the SSL certificate expires. Red < 15 days, Orange < 30 days.
           fieldConfig:
             defaults:
@@ -240,7 +240,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_ssl_earliest_cert_expiry{instance=~"$target",job=~"$job"} - time()
               format: time_series
@@ -412,7 +412,7 @@ spec:
           title: Latency Trend
           type: timeseries
         - datasource:
-            uid: duplo-metrics
+            uid: ${DS_PROMETHEUS}
           description: Time taken to resolve DNS for the target endpoint. High values may indicate DNS issues.
           fieldConfig:
             defaults:
@@ -588,7 +588,7 @@ spec:
           type: timeseries
         - datasource:
             type: prometheus
-            uid: duplo-metrics
+            uid: ${DS_PROMETHEUS}
           description: Rate of failed probes over time. 0% = fully healthy. Spikes indicate outages or intermittent failures. Falls back to probe_success when probe_all_success metrics are unavailable.
           fieldConfig:
             defaults:
@@ -663,7 +663,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: |-
                 1 - avg by (instance) (

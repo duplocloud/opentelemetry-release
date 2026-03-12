@@ -38,7 +38,7 @@ spec:
                     steps:
                         - color: red
                         - color: green
-                          value: 99.9
+                          value: 99
                 unit: percent
             overrides: []
           gridPos:
@@ -80,7 +80,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: duplo-metrics
+            uid: ${DS_PROMETHEUS}
           description: Total number of endpoints currently being monitored
           fieldConfig:
             defaults:
@@ -112,7 +112,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: count(probe_success{job="aos-blackbox-exporter", namespace=~"$namespace"})
               range: true
@@ -121,7 +121,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: duplo-metrics
+            uid: ${DS_PROMETHEUS}
           description: Endpoints actively responding with a successful probe
           fieldConfig:
             defaults:
@@ -153,7 +153,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: count(probe_success{job="aos-blackbox-exporter", namespace=~"$namespace"} == 1)
               range: true
@@ -199,7 +199,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: count(probe_success{job="aos-blackbox-exporter", namespace=~"$namespace"} == 0)
               legendFormat: Targets Down
@@ -248,7 +248,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: avg(probe_duration_seconds{job="aos-blackbox-exporter", namespace=~"$namespace"})
               range: true
@@ -257,7 +257,7 @@ spec:
           type: stat
         - datasource:
             type: prometheus
-            uid: duplo-metrics
+            uid: ${DS_PROMETHEUS}
           description: Per-endpoint breakdown of HTTP status, SSL validity, certificate expiry, probe duration, and DNS lookup time. Click an instance to view details.
           fieldConfig:
             defaults:
@@ -445,7 +445,7 @@ spec:
                       value:
                         - targetBlank: true
                           title: ${__data.fields.Instance}
-                          url: /d/blackbox-exporter-details/blackbox-exporter-details?var-DS_PROMETHEUS=duplo-metrics&var-job=${job}&var-target=${__data.fields.Instance}
+                          url: /d/blackbox-exporter-details/blackbox-exporter-details?var-DS_PROMETHEUS=${DS_PROMETHEUS}&var-job=${job}&var-target=${__data.fields.Instance}
                     - id: custom.width
                       value: 521
                 - matcher:
@@ -474,7 +474,7 @@ spec:
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_success{job=~"$job", instance=~"$target"}
               format: table
@@ -484,7 +484,7 @@ spec:
               refId: A
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_http_ssl{job=~"$job", instance=~"$target"} > 0
               format: table
@@ -494,7 +494,7 @@ spec:
               refId: B
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: (probe_ssl_earliest_cert_expiry{job=~"$job", instance=~"$target"} - time()) / 3600 / 24
               format: table
@@ -504,7 +504,7 @@ spec:
               refId: C
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_http_status_code{job=~"$job", instance=~"$target"} > 0
               format: table
@@ -514,7 +514,7 @@ spec:
               refId: D
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: avg_over_time(probe_duration_seconds{job=~"$job", instance=~"$target"}[1m])
               format: table
@@ -526,7 +526,7 @@ spec:
               refId: E
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_tls_version_info{job=~"$job", instance=~"$target"}
               format: table
@@ -536,7 +536,7 @@ spec:
               refId: F
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: avg_over_time(probe_dns_lookup_time_seconds{job=~"$job", instance=~"$target"}[1m])
               format: table
@@ -720,7 +720,7 @@ spec:
                     - $__all
               datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               definition: label_values(probe_success,namespace)
               includeAll: true
               label: Namespace
@@ -760,7 +760,7 @@ spec:
                 value: $__all
               datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               definition: label_values(probe_success{job="$job", namespace=~"$namespace"},instance)
               includeAll: true
               label: Target
