@@ -17,7 +17,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: probe_success{job="aos-blackbox-exporter"} == 0
+                expr: probe_success{job=~".*blackbox.*"} == 0
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -73,7 +73,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: probe_duration_seconds{job="aos-blackbox-exporter"} > on(instance, cluster) group_left() job:probe_latency_threshold
+                expr: probe_duration_seconds{job=~".*blackbox.*"} > on(instance, cluster) group_left() job:probe_latency_threshold
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -130,7 +130,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: (probe_ssl_earliest_cert_expiry{job="aos-blackbox-exporter"} - time()) / 86400
+                expr: (probe_ssl_earliest_cert_expiry{job=~".*blackbox.*"} - time()) / 86400
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -186,7 +186,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: probe_dns_lookup_time_seconds{job="aos-blackbox-exporter"} == 0
+                expr: probe_dns_lookup_time_seconds{job=~".*blackbox.*"} == 0
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -242,7 +242,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: min by (cluster, namespace) (up{job="aos-blackbox-exporter"})
+                expr: min by (cluster, namespace) (up{job=~".*blackbox.*"})
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto

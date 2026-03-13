@@ -181,7 +181,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: avg(probe_duration_seconds{job="$job", instance=~"$target"})
+              expr: avg(probe_duration_seconds{job=~"$job", instance=~"$target"})
               range: true
               refId: A
           title: Latency
@@ -210,11 +210,11 @@ spec:
                 thresholds:
                     mode: absolute
                     steps:
-                        - color: green
-                        - color: orange
-                          value: 0.5
                         - color: dark-red
-                          value: 1
+                        - color: orange
+                          value: 1296000
+                        - color: green
+                          value: 2592000
                 unit: dtdurations
             overrides: []
           gridPos:
@@ -405,13 +405,14 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: probe_duration_seconds{job="$job", instance=~"$target"}
+              expr: probe_duration_seconds{job=~"$job", instance=~"$target"}
               legendFormat: '{{instance}}'
               range: true
               refId: A
           title: Latency Trend
           type: timeseries
         - datasource:
+            type: prometheus
             uid: ${DS_PROMETHEUS}
           description: Time taken to resolve DNS for the target endpoint. High values may indicate DNS issues.
           fieldConfig:
@@ -548,42 +549,11 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: probe_icmp_duration_seconds{job=~'PING-OS-VM',instance=~'$target'}
-              hide: true
+              expr: sum by (phase) (probe_http_duration_seconds{job=~'$job',instance=~'$target'})
               instant: false
-              legendFormat: '{{probe_icmp_duration_seconds}} {{phase}}'
+              legendFormat: '{{phase}}'
               range: true
               refId: A
-            - datasource:
-                type: prometheus
-                uid: ${DS_PROMETHEUS}
-              editorMode: code
-              expr: probe_http_duration_seconds{job=~'$job',instance=~'$target'}
-              hide: true
-              instant: false
-              legendFormat: '{{instance}} {{phase}}'
-              range: true
-              refId: B
-            - datasource:
-                type: prometheus
-                uid: ${DS_PROMETHEUS}
-              editorMode: code
-              expr: sum by (phase) (probe_http_duration_seconds{job=~'$job',instance=~'$target'})
-              hide: false
-              instant: false
-              legendFormat: '{{phase}}'
-              range: true
-              refId: C
-            - datasource:
-                type: prometheus
-                uid: ${DS_PROMETHEUS}
-              editorMode: code
-              expr: sum by (phase) (probe_icmp_duration_seconds{job=~'PING-OS-VM',instance=~'$target'})
-              hide: true
-              instant: false
-              legendFormat: '{{phase}}'
-              range: true
-              refId: D
           title: HTTP Probe Phases Duration
           type: timeseries
         - datasource:
@@ -669,7 +639,7 @@ spec:
                 1 - avg by (instance) (
                   avg_over_time(probe_success{job=~"$job", instance=~"$target"}[$__rate_interval])
                 )
-              legendFormat: '{{target}}'
+              legendFormat: '{{instance}}'
               range: true
               refId: A
           title: Error Rate
