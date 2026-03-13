@@ -15,6 +15,7 @@ spec:
               iconColor: rgba(0, 211, 255, 1)
               name: Annotations & Alerts
               type: dashboard
+    description: Monitor HTTP endpoint availability, SSL certificates, probe latency, and overall health across all targets.
     editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 1
@@ -23,56 +24,64 @@ spec:
         - datasource:
             type: prometheus
             uid: ${DS_PROMETHEUS}
+          description: Percentage of successful probes over the last hour for the selected namespace.
           fieldConfig:
             defaults:
                 color:
                     mode: thresholds
+                decimals: 2
+                fieldMinMax: false
                 mappings: []
+                noValue: 0%
                 thresholds:
                     mode: absolute
                     steps:
                         - color: red
-                          value: null
-                        - color: orange
-                          value: 95
                         - color: green
                           value: 99
                 unit: percent
             overrides: []
           gridPos:
-            h: 4
+            h: 6
             w: 5
             x: 0
             "y": 0
-          id: 1
           options:
             colorMode: background
-            graphMode: none
-            justifyMode: auto
+            graphMode: area
+            justifyMode: center
             orientation: auto
-            percentChangeColorMode: standard
+            percentChangeColorMode: same_as_value
             reduceOptions:
                 calcs:
-                    - lastNotNull
+                    - mean
                 fields: ""
                 values: false
             showPercentChange: false
-            textMode: auto
+            textMode: value
             wideLayout: true
-          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: avg(probe_success{job="aos-blackbox-exporter"}) * 100
+              expr: probe_success{job=~"$job", namespace=~"$namespace"}*100
               range: true
               refId: A
           title: Global Uptime
+          transformations:
+            - id: reduce
+              options:
+                includeTimeField: false
+                labelsToFields: false
+                mode: seriesToRows
+                reducers:
+                    - mean
           type: stat
         - datasource:
             type: prometheus
-            uid: duplo-metrics
+            uid: ${DS_PROMETHEUS}
+          description: Total number of endpoints currently being monitored
           fieldConfig:
             defaults:
                 mappings: []
@@ -80,16 +89,12 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
-                        - color: red
-                          value: 80
             overrides: []
           gridPos:
-            h: 4
-            w: 5
+            h: 6
+            w: 4
             x: 5
             "y": 0
-          id: 25
           options:
             colorMode: background
             graphMode: none
@@ -104,16 +109,20 @@ spec:
             showPercentChange: false
             textMode: value
             wideLayout: true
-          pluginVersion: 11.5.2
           targets:
-            - editorMode: code
-              expr: count(probe_success{job="aos-blackbox-exporter"})
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: count(probe_success{job=~"$job", namespace=~"$namespace"})
               range: true
               refId: A
           title: Total Targets
           type: stat
         - datasource:
-            uid: duplo-metrics
+            type: prometheus
+            uid: ${DS_PROMETHEUS}
+          description: Endpoints actively responding with a successful probe
           fieldConfig:
             defaults:
                 mappings: []
@@ -121,16 +130,12 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
-                        - color: red
-                          value: 80
             overrides: []
           gridPos:
-            h: 4
+            h: 6
             w: 5
-            x: 10
+            x: 9
             "y": 0
-          id: 26
           options:
             colorMode: background
             graphMode: none
@@ -145,10 +150,12 @@ spec:
             showPercentChange: false
             textMode: value
             wideLayout: true
-          pluginVersion: 11.5.2
           targets:
-            - editorMode: code
-              expr: count(probe_success{job="aos-blackbox-exporter"} == 1)
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: count(probe_success{job=~"$job", namespace=~"$namespace"} == 1)
               range: true
               refId: A
           title: Healthy Targets
@@ -156,28 +163,28 @@ spec:
         - datasource:
             type: prometheus
             uid: ${DS_PROMETHEUS}
+          description: Endpoints that are currently down or unreachable
           fieldConfig:
             defaults:
                 color:
                     mode: thresholds
                 mappings: []
+                noValue: "0"
                 thresholds:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
                         - color: red
                           value: 1
             overrides: []
           gridPos:
-            h: 4
+            h: 6
             w: 5
-            x: 15
+            x: 14
             "y": 0
-          id: 2
           options:
             colorMode: background
-            graphMode: none
+            graphMode: area
             justifyMode: auto
             orientation: auto
             percentChangeColorMode: standard
@@ -189,13 +196,12 @@ spec:
             showPercentChange: false
             textMode: value
             wideLayout: true
-          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: count(probe_success{job="aos-blackbox-exporter"} == 0)
+              expr: count(probe_success{job=~"$job", namespace=~"$namespace"} == 0)
               legendFormat: Targets Down
               range: true
               refId: A
@@ -204,6 +210,7 @@ spec:
         - datasource:
             type: prometheus
             uid: ${DS_PROMETHEUS}
+          description: Mean probe response time across all monitored targets
           fieldConfig:
             defaults:
                 color:
@@ -213,7 +220,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
                         - color: orange
                           value: 0.5
                         - color: red
@@ -221,11 +227,10 @@ spec:
                 unit: s
             overrides: []
           gridPos:
-            h: 4
-            w: 4
-            x: 20
+            h: 6
+            w: 5
+            x: 19
             "y": 0
-          id: 3
           options:
             colorMode: value
             graphMode: area
@@ -237,24 +242,23 @@ spec:
                     - mean
                 fields: ""
                 values: false
-            showPercentChange: false
+            showPercentChange: true
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: avg(probe_duration_seconds{job="aos-blackbox-exporter"})
+              expr: avg(probe_duration_seconds{job=~"$job", namespace=~"$namespace"})
               range: true
               refId: A
           title: Average Latency
           type: stat
         - datasource:
             type: prometheus
-            uid: duplo-metrics
-          description: ""
+            uid: ${DS_PROMETHEUS}
+          description: Per-endpoint breakdown of HTTP status, SSL validity, certificate expiry, probe duration, and DNS lookup time. Click an instance to view details.
           fieldConfig:
             defaults:
                 color:
@@ -271,7 +275,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
             overrides:
                 - matcher:
                     id: byName
@@ -283,16 +286,15 @@ spec:
                       value:
                         mode: absolute
                         steps:
-                            - color: rgba(0, 0, 0, 0)
-                              value: null
+                            - color: rgba(0,0,0,0)
                             - color: red
                               value: 0
-                            - color: orange
+                            - color: red
                               value: 1
-                            - color: yellow
-                              value: 7
+                            - color: orange
+                              value: 15
                             - color: green
-                              value: 24
+                              value: 30
                     - id: custom.cellOptions
                       value:
                         mode: basic
@@ -322,7 +324,6 @@ spec:
                         mode: absolute
                         steps:
                             - color: red
-                              value: null
                             - color: green
                               value: 1
                     - id: custom.cellOptions
@@ -340,7 +341,6 @@ spec:
                         mode: absolute
                         steps:
                             - color: rgba(0, 0, 0, 0)
-                              value: null
                             - color: green
                               value: 200
                             - color: yellow
@@ -379,7 +379,6 @@ spec:
                         mode: absolute
                         steps:
                             - color: rgba(3, 3, 3, 0)
-                              value: null
                             - color: red
                               value: 0
                             - color: green
@@ -399,7 +398,6 @@ spec:
                         mode: absolute
                         steps:
                             - color: green
-                              value: null
                             - color: yellow
                               value: 0.8
                             - color: red
@@ -425,7 +423,6 @@ spec:
                         mode: absolute
                         steps:
                             - color: green
-                              value: null
                             - color: yellow
                               value: 0.1
                             - color: red
@@ -448,7 +445,7 @@ spec:
                       value:
                         - targetBlank: true
                           title: ${__data.fields.Instance}
-                          url: /d/blackbox-exporter-details/blackbox-exporter-details?var-DS_PROMETHEUS=duplo-metrics&var-job=${job}&var-target=${__data.fields.Instance}
+                          url: /d/blackbox-exporter-details/blackbox-exporter-details?var-DS_PROMETHEUS=${DS_PROMETHEUS}&var-job=${job}&var-target=${__data.fields.Instance}
                     - id: custom.width
                       value: 521
                 - matcher:
@@ -458,28 +455,26 @@ spec:
                     - id: custom.width
                       value: 121
           gridPos:
-            h: 18
+            h: 20
             w: 24
             x: 0
-            "y": 4
-          id: 27
+            "y": 6
           options:
-            cellHeight: sm
+            cellHeight: md
             footer:
-                countRows: false
+                countRows: true
                 fields: ""
                 reducer:
-                    - sum
-                show: false
+                    - count
+                show: true
             showHeader: true
             sortBy:
                 - desc: false
                   displayName: SSL Cert Expiry (days)
-          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_success{job=~"$job", instance=~"$target"}
               format: table
@@ -489,7 +484,7 @@ spec:
               refId: A
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_http_ssl{job=~"$job", instance=~"$target"} > 0
               format: table
@@ -499,7 +494,7 @@ spec:
               refId: B
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: (probe_ssl_earliest_cert_expiry{job=~"$job", instance=~"$target"} - time()) / 3600 / 24
               format: table
@@ -509,7 +504,7 @@ spec:
               refId: C
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_http_status_code{job=~"$job", instance=~"$target"} > 0
               format: table
@@ -519,7 +514,7 @@ spec:
               refId: D
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: avg_over_time(probe_duration_seconds{job=~"$job", instance=~"$target"}[1m])
               format: table
@@ -531,7 +526,7 @@ spec:
               refId: E
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_tls_version_info{job=~"$job", instance=~"$target"}
               format: table
@@ -541,7 +536,7 @@ spec:
               refId: F
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: avg_over_time(probe_dns_lookup_time_seconds{job=~"$job", instance=~"$target"}[1m])
               format: table
@@ -554,6 +549,15 @@ spec:
             - id: seriesToColumns
               options:
                 byField: instance
+            - id: filterFieldsByName
+              options:
+                byVariable: false
+                include:
+                    pattern: ^(?!.*\s[2-9]$)(?!.*\s\d{2,}$).+
+            - id: renameByRegex
+              options:
+                regex: ^(.*) 1$
+                renamePattern: $1
             - id: organize
               options:
                 excludeByName:
@@ -578,6 +582,7 @@ spec:
                     'Value #A': false
                     'Value #B': false
                     'Value #F': true
+                    cluster: true
                     cluster 1: true
                     cluster 2: true
                     cluster 3: true
@@ -608,6 +613,7 @@ spec:
                     job 6: true
                     job 7: true
                     job 8: true
+                    namespace: true
                     namespace 1: true
                     namespace 2: true
                     namespace 3: true
@@ -688,11 +694,9 @@ spec:
                     instance: Instance
                     type 6: ""
                     version: TLS Version
-          transparent: true
           type: table
     preload: false
-    refresh: ""
-    schemaVersion: 40
+    refresh: 5m
     tags:
         - blackbox
         - overview
@@ -709,41 +713,61 @@ spec:
               refresh: 1
               regex: ""
               type: datasource
-            - current:
-                text: aos-blackbox-exporter
-                value: aos-blackbox-exporter
+            - allowCustomValue: true
+              current:
+                text: All
+                value:
+                    - $__all
               datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
-              definition: label_values(probe_success{job="aos-blackbox-exporter"},job)
-              hide: 2
+              definition: label_values(probe_success,namespace)
+              includeAll: true
+              label: Namespace
+              multi: true
+              name: namespace
+              options: []
+              query:
+                qryType: 1
+                query: label_values(probe_success,namespace)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - current: {}
+              datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              definition: label_values(probe_success,job)
+              hide: 0
               includeAll: false
               label: Job
               name: job
               options: []
               query:
                 qryType: 1
-                query: label_values(probe_success{job="aos-blackbox-exporter"},job)
+                query: label_values(probe_success,job)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               regex: ""
               sort: 1
               type: query
-            - current:
+            - allowCustomValue: false
+              current:
                 text: All
                 value: $__all
               datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
-              definition: label_values(probe_success{job="$job"}, instance)
+              definition: label_values(probe_success{job="$job", namespace=~"$namespace"},instance)
               includeAll: true
               label: Target
-              multi: true
               name: target
               options: []
               query:
-                query: label_values(probe_success{job="$job"}, instance)
-                refId: StandardVariableQuery
+                qryType: 1
+                query: label_values(probe_success{job="$job", namespace=~"$namespace"},instance)
+                refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               regex: ""
               sort: 1
@@ -751,5 +775,7 @@ spec:
     time:
         from: now-15m
         to: now
+    timepicker: {}
+    timezone: ""
     title: Blackbox Exporter Overview
     uid: blackbox-exporter-overview

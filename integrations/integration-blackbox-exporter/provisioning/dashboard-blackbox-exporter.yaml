@@ -15,6 +15,7 @@ spec:
               iconColor: rgba(0, 211, 255, 1)
               name: Annotations & Alerts
               type: dashboard
+    description: Detailed per-target probe metrics including availability, latency, SSL expiry, DNS lookup, and HTTP phase breakdown.
     editable: false
     fiscalYearStartMonth: 0
     graphTooltip: 1
@@ -23,6 +24,7 @@ spec:
         - datasource:
             type: prometheus
             uid: ${DS_PROMETHEUS}
+          description: Current probe success status for the selected target. Green = Up, Red = Down.
           fieldConfig:
             defaults:
                 color:
@@ -42,18 +44,16 @@ spec:
                     mode: absolute
                     steps:
                         - color: red
-                          value: null
                 unit: short
             overrides: []
           gridPos:
             h: 6
-            w: 8
+            w: 6
             x: 0
             "y": 0
-          id: 1
           options:
             colorMode: background
-            graphMode: none
+            graphMode: area
             justifyMode: center
             orientation: auto
             percentChangeColorMode: standard
@@ -63,9 +63,8 @@ spec:
                 fields: ""
                 values: false
             showPercentChange: false
-            textMode: auto
+            textMode: value
             wideLayout: true
-          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -85,6 +84,64 @@ spec:
         - datasource:
             type: prometheus
             uid: ${DS_PROMETHEUS}
+          description: Percentage of successful probes over the last hour for the selected target.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                decimals: 2
+                fieldMinMax: false
+                mappings: []
+                noValue: 0%
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                        - color: green
+                          value: 99
+                unit: percent
+            overrides: []
+          gridPos:
+            h: 6
+            w: 6
+            x: 6
+            "y": 0
+          options:
+            colorMode: background
+            graphMode: area
+            justifyMode: center
+            orientation: auto
+            percentChangeColorMode: same_as_value
+            reduceOptions:
+                calcs:
+                    - mean
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: value
+            wideLayout: true
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: probe_success{job=~"$job", instance=~"$target"}*100
+              range: true
+              refId: A
+          title: Uptime
+          transformations:
+            - id: reduce
+              options:
+                includeTimeField: false
+                labelsToFields: false
+                mode: seriesToRows
+                reducers:
+                    - mean
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: ${DS_PROMETHEUS}
+          description: Mean probe response time for the selected target. Orange > 3s, Red > 5s.
           fieldConfig:
             defaults:
                 color:
@@ -94,23 +151,21 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
                         - color: orange
-                          value: 0.5
+                          value: 3
                         - color: red
-                          value: 1
+                          value: 5
                 unit: s
             overrides: []
           gridPos:
             h: 6
-            w: 8
-            x: 8
+            w: 6
+            x: 12
             "y": 0
-          id: 23
           options:
             colorMode: value
             graphMode: area
-            justifyMode: auto
+            justifyMode: center
             orientation: auto
             percentChangeColorMode: standard
             reduceOptions:
@@ -118,23 +173,23 @@ spec:
                     - mean
                 fields: ""
                 values: false
-            showPercentChange: false
+            showPercentChange: true
             textMode: auto
             wideLayout: true
-          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: avg(probe_duration_seconds{job="$job", instance=~"$target"})
+              expr: avg(probe_duration_seconds{job=~"$job", instance=~"$target"})
               range: true
               refId: A
           title: Latency
           type: stat
         - datasource:
             type: prometheus
-            uid: duplo-metrics
+            uid: ${DS_PROMETHEUS}
+          description: Time remaining until the SSL certificate expires. Red < 15 days, Orange < 30 days.
           fieldConfig:
             defaults:
                 decimals: 2
@@ -155,25 +210,23 @@ spec:
                 thresholds:
                     mode: absolute
                     steps:
-                        - color: '#d44a3a'
-                          value: null
-                        - color: rgba(237, 129, 40, 0.89)
-                          value: 0
-                        - color: '#299c46'
-                          value: 1.2096e+06
+                        - color: dark-red
+                        - color: orange
+                          value: 1296000
+                        - color: green
+                          value: 2592000
                 unit: dtdurations
             overrides: []
           gridPos:
             h: 6
-            w: 8
-            x: 16
+            w: 6
+            x: 18
             "y": 0
-          id: 24
           maxDataPoints: 100
           options:
             colorMode: value
             graphMode: none
-            justifyMode: auto
+            justifyMode: center
             orientation: horizontal
             percentChangeColorMode: standard
             reduceOptions:
@@ -182,13 +235,12 @@ spec:
                 fields: ""
                 values: false
             showPercentChange: false
-            textMode: auto
+            textMode: value
             wideLayout: true
-          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
-                uid: duplo-metrics
+                uid: ${DS_PROMETHEUS}
               editorMode: code
               expr: probe_ssl_earliest_cert_expiry{instance=~"$target",job=~"$job"} - time()
               format: time_series
@@ -204,6 +256,7 @@ spec:
         - datasource:
             type: prometheus
             uid: ${DS_PROMETHEUS}
+          description: 1 = endpoint is UP, 0 = endpoint is DOWN. Shows probe success over time.
           fieldConfig:
             defaults:
                 color:
@@ -217,15 +270,15 @@ spec:
                     barAlignment: 0
                     barWidthFactor: 0.6
                     drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
+                    fillOpacity: 15
+                    gradientMode: opacity
                     hideFrom:
                         legend: false
                         tooltip: false
                         viz: false
                     insertNulls: false
-                    lineInterpolation: linear
-                    lineWidth: 1
+                    lineInterpolation: stepAfter
+                    lineWidth: 2
                     pointSize: 5
                     scaleDistribution:
                         type: linear
@@ -251,7 +304,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: red
-                          value: null
                 unit: short
             overrides: []
           gridPos:
@@ -259,18 +311,17 @@ spec:
             w: 24
             x: 0
             "y": 6
-          id: 25
           options:
             legend:
-                calcs: []
-                displayMode: list
+                calcs:
+                    - lastNotNull
+                displayMode: table
                 placement: bottom
                 showLegend: true
             tooltip:
                 hideZeros: false
-                mode: single
+                mode: multi
                 sort: none
-          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
@@ -305,7 +356,7 @@ spec:
                     barAlignment: 0
                     barWidthFactor: 0.6
                     drawStyle: line
-                    fillOpacity: 25
+                    fillOpacity: 20
                     gradientMode: opacity
                     hideFrom:
                         legend: false
@@ -313,7 +364,7 @@ spec:
                         viz: false
                     insertNulls: false
                     lineInterpolation: smooth
-                    lineWidth: 3
+                    lineWidth: 2
                     pointSize: 5
                     scaleDistribution:
                         type: linear
@@ -329,19 +380,19 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
                 unit: s
             overrides: []
           gridPos:
-            h: 9
+            h: 10
             w: 12
             x: 0
             "y": 16
-          id: 3
           options:
             legend:
                 calcs:
                     - mean
+                    - max
+                    - lastNotNull
                 displayMode: table
                 placement: bottom
                 showLegend: true
@@ -349,20 +400,21 @@ spec:
                 hideZeros: false
                 mode: multi
                 sort: desc
-          pluginVersion: 11.5.2
           targets:
             - datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: probe_duration_seconds{job="$job", instance=~"$target"}
+              expr: probe_duration_seconds{job=~"$job", instance=~"$target"}
               legendFormat: '{{instance}}'
               range: true
               refId: A
-          title: Latency Trend (Glowing)
+          title: Latency Trend
           type: timeseries
         - datasource:
-            uid: duplo-metrics
+            type: prometheus
+            uid: ${DS_PROMETHEUS}
+          description: Time taken to resolve DNS for the target endpoint. High values may indicate DNS issues.
           fieldConfig:
             defaults:
                 color:
@@ -376,15 +428,15 @@ spec:
                     barAlignment: 0
                     barWidthFactor: 0.6
                     drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
+                    fillOpacity: 15
+                    gradientMode: opacity
                     hideFrom:
                         legend: false
                         tooltip: false
                         viz: false
                     insertNulls: false
-                    lineInterpolation: linear
-                    lineWidth: 1
+                    lineInterpolation: smooth
+                    lineWidth: 2
                     pointSize: 5
                     scaleDistribution:
                         type: linear
@@ -400,27 +452,26 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
                         - color: red
                           value: 80
             overrides: []
           gridPos:
-            h: 9
+            h: 10
             w: 12
             x: 12
             "y": 16
-          id: 20
           options:
             legend:
-                calcs: []
-                displayMode: list
+                calcs:
+                    - mean
+                    - max
+                displayMode: table
                 placement: bottom
                 showLegend: true
             tooltip:
                 hideZeros: false
                 mode: single
                 sort: none
-          pluginVersion: 11.5.2
           targets:
             - editorMode: code
               expr: probe_dns_lookup_time_seconds{job=~"$job", instance=~"$target"}
@@ -432,7 +483,7 @@ spec:
         - datasource:
             type: prometheus
             uid: ${DS_PROMETHEUS}
-          description: Duration of http request by phase, summed over all redirects
+          description: 'Breakdown of HTTP probe duration by phase: DNS, connect, TLS, processing, and transfer. Helps identify where latency is introduced.'
           fieldConfig:
             defaults:
                 color:
@@ -446,15 +497,15 @@ spec:
                     barAlignment: 0
                     barWidthFactor: 0.6
                     drawStyle: line
-                    fillOpacity: 0
-                    gradientMode: none
+                    fillOpacity: 10
+                    gradientMode: opacity
                     hideFrom:
                         legend: false
                         tooltip: false
                         viz: false
                     insertNulls: false
-                    lineInterpolation: linear
-                    lineWidth: 1
+                    lineInterpolation: smooth
+                    lineWidth: 2
                     pointSize: 5
                     scaleDistribution:
                         type: linear
@@ -471,17 +522,15 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
                         - color: red
                           value: 80
                 unit: s
             overrides: []
           gridPos:
-            h: 8
-            w: 24
+            h: 10
+            w: 12
             x: 0
-            "y": 25
-          id: 16
+            "y": 26
           options:
             alertThreshold: true
             legend:
@@ -494,54 +543,251 @@ spec:
             tooltip:
                 hideZeros: false
                 mode: multi
-                sort: none
-          pluginVersion: 11.5.2
+                sort: desc
           targets:
             - datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: probe_icmp_duration_seconds{job=~'PING-OS-VM',instance=~'$target'}
-              hide: true
+              expr: sum by (phase) (probe_http_duration_seconds{job=~'$job',instance=~'$target'})
               instant: false
-              legendFormat: '{{probe_icmp_duration_seconds}} {{phase}}'
+              legendFormat: '{{phase}}'
               range: true
               refId: A
-            - datasource:
-                type: prometheus
-                uid: ${DS_PROMETHEUS}
-              editorMode: code
-              expr: probe_http_duration_seconds{job=~'$job',instance=~'$target'}
-              hide: true
-              instant: false
-              legendFormat: '{{instance}} {{phase}}'
-              range: true
-              refId: B
-            - datasource:
-                type: prometheus
-                uid: ${DS_PROMETHEUS}
-              editorMode: code
-              expr: sum by (phase) (probe_http_duration_seconds{job=~'$job',instance=~'$target'})
-              hide: false
-              instant: false
-              legendFormat: '{{phase}}'
-              range: true
-              refId: C
-            - datasource:
-                type: prometheus
-                uid: ${DS_PROMETHEUS}
-              editorMode: code
-              expr: sum by (phase) (probe_icmp_duration_seconds{job=~'PING-OS-VM',instance=~'$target'})
-              hide: true
-              instant: false
-              legendFormat: '{{phase}}'
-              range: true
-              refId: D
           title: HTTP Probe Phases Duration
           type: timeseries
+        - datasource:
+            type: prometheus
+            uid: ${DS_PROMETHEUS}
+          description: Rate of failed probes over time. 0% = fully healthy. Spikes indicate outages or intermittent failures. Falls back to probe_success when probe_all_success metrics are unavailable.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 20
+                    gradientMode: opacity
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: smooth
+                    lineWidth: 2
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: dashed+area
+                mappings:
+                    - options:
+                        "0":
+                            color: green
+                            index: 0
+                            text: No Errors
+                      type: value
+                max: 1
+                min: 0
+                noValue: "0"
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: orange
+                          value: 0.05
+                        - color: red
+                          value: 0.2
+                unit: percentunit
+            overrides: []
+          gridPos:
+            h: 10
+            w: 12
+            x: 12
+            "y": 26
+          options:
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - lastNotNull
+                displayMode: table
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${DS_PROMETHEUS}
+              editorMode: code
+              expr: |-
+                1 - avg by (instance) (
+                  avg_over_time(probe_success{job=~"$job", instance=~"$target"}[$__rate_interval])
+                )
+              legendFormat: '{{instance}}'
+              range: true
+              refId: A
+          title: Error Rate
+          type: timeseries
+        - datasource:
+            type: loki
+            uid: duplo-logging
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: auto
+                    cellOptions:
+                        type: auto
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                        - color: red
+                          value: 80
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Time
+                  properties:
+                    - id: custom.width
+                      value: 172
+                - matcher:
+                    id: byName
+                    options: Target
+                  properties:
+                    - id: custom.width
+                      value: 511
+                - matcher:
+                    id: byName
+                    options: Level
+                  properties:
+                    - id: custom.width
+                      value: 74
+                - matcher:
+                    id: byName
+                    options: Location
+                  properties:
+                    - id: custom.width
+                      value: 470
+                - matcher:
+                    id: byName
+                    options: Error
+                  properties:
+                    - id: custom.width
+                      value: 210
+                - matcher:
+                    id: byName
+                    options: Message
+                  properties:
+                    - id: custom.width
+                      value: 189
+          gridPos:
+            h: 8
+            w: 24
+            x: 0
+            "y": 36
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            showHeader: true
+            sortBy:
+                - desc: true
+                  displayName: Time
+          targets:
+            - datasource:
+                type: loki
+                uid: duplo-logging
+              direction: backward
+              editorMode: code
+              expr: '{container="blackbox-exporter"} | logfmt | target=~"$target"'
+              queryType: range
+              refId: A
+          title: Probe Logs
+          transformations:
+            - id: extractFields
+              options:
+                delimiter: ','
+                format: auto
+                keepTime: true
+                replace: true
+                source: labels
+            - id: formatTime
+              options:
+                outputFormat: DD/MMM/YYYY HH:SS:MM
+                timeField: Time
+                timezone: utc
+                useTimezone: true
+            - id: organize
+              options:
+                excludeByName:
+                    app_kubernetes_io_name: true
+                    cluster: true
+                    container: true
+                    detected_level: true
+                    flags: true
+                    job: true
+                    module: true
+                    namespace: true
+                    pod: true
+                    service_name: true
+                    source: true
+                    stream: true
+                    time: true
+                includeByName: {}
+                indexByName:
+                    Time: 0
+                    app_kubernetes_io_name: 3
+                    cluster: 4
+                    container: 5
+                    detected_level: 6
+                    flags: 7
+                    job: 8
+                    level: 9
+                    location: 10
+                    module: 11
+                    msg: 12
+                    namespace: 13
+                    pod: 14
+                    service_name: 15
+                    source: 16
+                    stream: 17
+                    target: 2
+                    time: 1
+                renameByName:
+                    duration_seconds: Duration(s)
+                    err: Error
+                    level: Level
+                    location: Location
+                    msg: Message
+                    target: Target
+                    time: Time
+          type: table
     preload: false
     refresh: 1m
-    schemaVersion: 40
     tags:
         - blackbox
         - details
@@ -559,6 +805,9 @@ spec:
               regex: ""
               type: datasource
             - allowCustomValue: false
+              current:
+                text: aos-blackbox-exporter
+                value: aos-blackbox-exporter
               datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
@@ -576,6 +825,9 @@ spec:
               sort: 1
               type: query
             - allowCustomValue: false
+              current:
+                text: ""
+                value: ""
               datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
@@ -594,5 +846,7 @@ spec:
     time:
         from: now-15m
         to: now
+    timepicker: {}
+    timezone: ""
     title: Blackbox Exporter Details
     uid: blackbox-exporter-details

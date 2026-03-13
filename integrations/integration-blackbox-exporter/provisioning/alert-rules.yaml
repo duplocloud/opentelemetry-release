@@ -1,7 +1,7 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: AlertRuleGroup
 metadata:
-    name: integration-blackbox-exporter.alerts
+    name: integration-blackbox-exporter.blackbox-exporter
 spec:
     folderUid: integration-blackbox-exporter
     interval: 60
@@ -17,7 +17,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: probe_success{job="aos-blackbox-exporter"} == 0
+                expr: probe_success{job=~".*blackbox.*"} == 0
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -73,7 +73,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: probe_duration_seconds{job="aos-blackbox-exporter"} > on(instance, cluster) group_left() job:probe_latency_threshold
+                expr: probe_duration_seconds{job=~".*blackbox.*"} > on(instance, cluster) group_left() job:probe_latency_threshold
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -120,7 +120,7 @@ spec:
           title: BlackboxHighLatency
           uid: BlackboxHighLatency
         - annotations:
-            description: Certificate expires in < 15 days
+            description: Certificate expires in {{ printf "%.0f" $values.A.Value }} days
             summary: SSL certificate for {{ $labels.instance }} expires soon
           condition: C
           data:
@@ -130,7 +130,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: (probe_ssl_earliest_cert_expiry{job="aos-blackbox-exporter"} - time()) / 86400
+                expr: (probe_ssl_earliest_cert_expiry{job=~".*blackbox.*"} - time()) / 86400
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -145,7 +145,7 @@ spec:
                 conditions:
                     - evaluator:
                         params:
-                            - 16
+                            - 28
                         type: lt
                       operator:
                         type: and
@@ -169,6 +169,8 @@ spec:
           execErrState: Error
           folderUID: integration-blackbox-exporter
           for: 1m0s
+          labels:
+            severity: warning
           noDataState: OK
           ruleGroup: alerts
           title: BlackboxSSLCertificateExpiringSoon
@@ -184,7 +186,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: probe_dns_lookup_time_seconds{job="aos-blackbox-exporter"} == 0
+                expr: probe_dns_lookup_time_seconds{job=~".*blackbox.*"} == 0
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -223,6 +225,8 @@ spec:
           execErrState: Error
           folderUID: integration-blackbox-exporter
           for: 1m0s
+          labels:
+            severity: warning
           noDataState: OK
           ruleGroup: alerts
           title: BlackboxDNSLookupAlert
@@ -238,7 +242,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: min by (cluster, namespace) (up{job="aos-blackbox-exporter"})
+                expr: min by (cluster, namespace) (up{job=~".*blackbox.*"})
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
