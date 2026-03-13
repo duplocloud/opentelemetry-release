@@ -237,7 +237,8 @@ spec:
                   kube_statefulset_status_replicas_ready{
                     cluster="$cluster",
                     namespace="$namespace",
-                    statefulset="$workload"
+                    statefulset="$workload",
+                    job="integrations/kubernetes/kube-state-metrics"
                   }
                 )
               hide: false
@@ -254,7 +255,8 @@ spec:
                   kube_daemonset_status_desired_number_scheduled{
                     cluster="$cluster",
                     namespace="$namespace",
-                    daemonset="$workload"
+                    daemonset="$workload",
+                    job="integrations/kubernetes/kube-state-metrics"
                   }
                 )
               hide: false
@@ -271,7 +273,8 @@ spec:
                   kube_daemonset_status_number_available{
                     cluster="$cluster",
                     namespace="$namespace",
-                    daemonset="$workload"
+                    daemonset="$workload",
+                    job="integrations/kubernetes/kube-state-metrics"
                   }
                 )
               hide: false
