@@ -153,7 +153,7 @@ spec:
                 type: prometheus
                 uid: ${datasource}
               editorMode: code
-              expr: sum(kube_pod_container_resource_requests{resource="memory", node=~"$node"}) by (node)
+              expr: sum(kube_pod_container_resource_requests{job="integrations/kubernetes/kube-state-metrics", cluster="$cluster", resource="memory", node=~"$node"}) by (node)
               instant: false
               legendFormat: '{{node}} - Allocated'
               range: true
@@ -280,7 +280,7 @@ spec:
                 type: prometheus
                 uid: ${datasource}
               editorMode: code
-              expr: sum(kube_pod_container_resource_requests{resource="cpu", node=~"$node"}) by (node)
+              expr: sum(kube_pod_container_resource_requests{job="integrations/kubernetes/kube-state-metrics", cluster="$cluster", resource="cpu", node=~"$node"}) by (node)
               instant: false
               legendFormat: '{{node}} - Allocated'
               range: true
@@ -884,6 +884,7 @@ spec:
               datasource:
                 type: prometheus
                 uid: ${datasource}
+              definition: label_values(up{job="integrations/kubernetes/kube-state-metrics"}, cluster)
               label: cluster
               name: cluster
               options: []
@@ -933,6 +934,28 @@ spec:
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               regex: ""
+              type: query
+            - allowCustomValue: false
+              current:
+                text: All
+                value:
+                    - $__all
+              datasource:
+                type: prometheus
+                uid: ${datasource}
+              definition: label_values(kube_pod_info{cluster="$cluster"}, namespace)
+              includeAll: true
+              label: namespace
+              multi: false
+              name: namespace
+              options: []
+              query:
+                qryType: 1
+                query: label_values(kube_pod_info{cluster="$cluster"}, namespace)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 2
+              regex: ""
+              sort: 1
               type: query
             - current:
                 text: All
