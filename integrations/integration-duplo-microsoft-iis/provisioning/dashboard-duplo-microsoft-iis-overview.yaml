@@ -105,14 +105,14 @@ spec:
               editorMode: code
               expr: |
                 (
-  sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
-  + (
-      sum by (site) (iis:requests_tolerating:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
-      or
-      sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"} * 0)
-    ) / 2
-)
-/ sum by (site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                  sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                  + (
+                      sum by (site) (iis:requests_tolerating:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                      or
+                      sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"} * 0)
+                    ) / 2
+                )
+                / sum by (site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
               instant: true
               legendFormat: '{{site}}'
               range: false
@@ -294,14 +294,14 @@ spec:
               exemplar: true
               expr: |
                 (
-  sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
-  + (
-      sum by (site) (iis:requests_tolerating:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
-      or
-      sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"} * 0)
-    ) / 2
-)
-/ sum by (site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                  sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                  + (
+                      sum by (site) (iis:requests_tolerating:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                      or
+                      sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"} * 0)
+                    ) / 2
+                )
+                / sum by (site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
               hide: false
               instant: false
               interval: ""
