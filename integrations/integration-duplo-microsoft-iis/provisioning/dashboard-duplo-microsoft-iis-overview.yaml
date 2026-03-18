@@ -67,7 +67,7 @@ spec:
                 color:
                     mode: thresholds
                     seriesBy: last
-                decimals: 3
+
                 mappings: []
                 max: 1
                 min: 0
