@@ -224,8 +224,8 @@ spec:
           fieldConfig:
             defaults:
                 color:
+                    fixedColor: red
                     mode: thresholds
-                    seriesBy: last
                 custom:
                     axisBorderShow: false
                     axisCenteredZero: false
@@ -233,8 +233,6 @@ spec:
                     axisGridShow: true
                     axisLabel: ""
                     axisPlacement: auto
-                    axisSoftMax: 1
-                    axisSoftMin: 0
                     barAlignment: 0
                     barWidthFactor: 0.6
                     drawStyle: line
@@ -256,14 +254,16 @@ spec:
                         group: A
                         mode: none
                     thresholdsStyle:
-                        mode: "off"
+                        mode: area
+                max: 1
+                min: 0.5
                 mappings: []
                 thresholds:
                     mode: absolute
                     steps:
-                        - color: dark-red
+                        - color: red
                           value: null
-                        - color: light-yellow
+                        - color: "#EAB839"
                           value: 0.75
                         - color: dark-green
                           value: 0.94
