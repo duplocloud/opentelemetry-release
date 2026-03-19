@@ -13,20 +13,21 @@ spec:
           data:
             - datasourceUid: duplo-metrics
               model:
-                datasource:
-                    type: prometheus
-                    uid: duplo-metrics
-                editorMode: code
-                expr: probe_success{job=~".*blackbox.*"} == 0
-                instant: true
+                expr: probe_success{job="aos-blackbox-exporter"}
                 intervalMs: 1000
-                legendFormat: __auto
                 maxDataPoints: 43200
-                range: false
-                refId: A
               refId: A
               relativeTimeRange:
                 from: 600
+            - datasourceUid: __expr__
+              model:
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                type: reduce
+              refId: B
+              relativeTimeRange: {}
             - datasourceUid: __expr__
               model:
                 conditions:
@@ -34,22 +35,9 @@ spec:
                         params:
                             - 1
                         type: lt
-                      operator:
-                        type: and
-                      query:
-                        params:
-                            - C
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                datasource:
-                    type: __expr__
-                    uid: __expr__
-                expression: A
+                expression: B
                 intervalMs: 1000
                 maxDataPoints: 43200
-                refId: C
                 type: threshold
               refId: C
               relativeTimeRange: {}
@@ -59,7 +47,8 @@ spec:
           labels:
             severity: critical
           noDataState: NoData
-          ruleGroup: alerts
+          orgID: 1
+          ruleGroup: blackbox-exporter
           title: BlackboxTargetDown
           uid: BlackboxTargetDown
         - annotations:
@@ -73,7 +62,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: probe_duration_seconds{job=~".*blackbox.*"} > on(instance, cluster) group_left() job:probe_latency_threshold
+                expr: probe_duration_seconds{job="aos-blackbox-exporter"} > on(instance, cluster) group_left() job:probe_latency_threshold
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -116,65 +105,9 @@ spec:
             severity: warning
           noDataState: OK
           orgID: 1
-          ruleGroup: alerts
+          ruleGroup: blackbox-exporter
           title: BlackboxHighLatency
           uid: BlackboxHighLatency
-        - annotations:
-            description: Certificate expires in {{ printf "%.0f" $values.A.Value }} days
-            summary: SSL certificate for {{ $labels.instance }} expires soon
-          condition: C
-          data:
-            - datasourceUid: duplo-metrics
-              model:
-                datasource:
-                    type: prometheus
-                    uid: duplo-metrics
-                editorMode: code
-                expr: (probe_ssl_earliest_cert_expiry{job=~".*blackbox.*"} - time()) / 86400
-                instant: true
-                intervalMs: 1000
-                legendFormat: __auto
-                maxDataPoints: 43200
-                range: false
-                refId: A
-              refId: A
-              relativeTimeRange:
-                from: 600
-            - datasourceUid: __expr__
-              model:
-                conditions:
-                    - evaluator:
-                        params:
-                            - 28
-                        type: lt
-                      operator:
-                        type: and
-                      query:
-                        params:
-                            - C
-                      reducer:
-                        params: []
-                        type: last
-                      type: query
-                datasource:
-                    type: __expr__
-                    uid: __expr__
-                expression: A
-                intervalMs: 1000
-                maxDataPoints: 43200
-                refId: C
-                type: threshold
-              refId: C
-              relativeTimeRange: {}
-          execErrState: Error
-          folderUID: integration-blackbox-exporter
-          for: 1m0s
-          labels:
-            severity: warning
-          noDataState: OK
-          ruleGroup: alerts
-          title: BlackboxSSLCertificateExpiringSoon
-          uid: BlackboxSSLCertificate
         - annotations:
             description: probe_dns_lookup_time_seconds == 0, indicating no DNS resolution or lookup failure.
             summary: Blackbox DNS lookup time is zero for {{ $labels.instance }}
@@ -186,7 +119,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: probe_dns_lookup_time_seconds{job=~".*blackbox.*"} == 0
+                expr: probe_dns_lookup_time_seconds{job="aos-blackbox-exporter"} == 0
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -225,10 +158,9 @@ spec:
           execErrState: Error
           folderUID: integration-blackbox-exporter
           for: 1m0s
-          labels:
-            severity: warning
           noDataState: OK
-          ruleGroup: alerts
+          orgID: 1
+          ruleGroup: blackbox-exporter
           title: BlackboxDNSLookupAlert
           uid: BlackboxDNSLookupAlert
         - annotations:
@@ -242,7 +174,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: min by (cluster, namespace) (up{job=~".*blackbox.*"})
+                expr: min by (cluster, namespace) (up{job="aos-blackbox-exporter"})
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto
@@ -285,7 +217,8 @@ spec:
             owner: duplo
             severity: critical
           noDataState: OK
-          ruleGroup: alerts
+          orgID: 1
+          ruleGroup: blackbox-exporter
           title: BlackboxExporterDown
           uid: BlackboxExporterDown
     title: blackbox-exporter

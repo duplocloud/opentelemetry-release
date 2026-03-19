@@ -1,0 +1,54 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: AlertRuleGroup
+metadata:
+    name: integration-blackbox-exporter.evaluation-group-12h
+spec:
+    folderUid: integration-blackbox-exporter
+    interval: 43200
+    rules:
+        - annotations:
+            description: Certificate expires in {{ printf "%.0f" $values.B.Value }} days
+            summary: SSL certificate for {{ $labels.instance }} expires soon
+          condition: C
+          data:
+            - datasourceUid: duplo-metrics
+              model:
+                expr: (probe_ssl_earliest_cert_expiry{job="aos-blackbox-exporter"} - time()) / 86400
+                intervalMs: 1000
+                maxDataPoints: 43200
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                type: reduce
+              refId: B
+              relativeTimeRange: {}
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 28
+                        type: lt
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: integration-blackbox-exporter
+          for: 0s
+          labels:
+            severity: warning
+          noDataState: NoData
+          orgID: 1
+          ruleGroup: evaluation-group-12h
+          title: BlackboxSSLCertificateExpiringSoon
+          uid: BlackboxSSLCertificate
+    title: evaluation-group-12h
