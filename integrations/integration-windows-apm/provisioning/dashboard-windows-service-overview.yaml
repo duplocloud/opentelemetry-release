@@ -22,30 +22,30 @@ spec:
     links:
         - asDropdown: false
           icon: external link
-          includeVars: true
+          includeVars: false
           keepTime: true
           tags: []
           targetBlank: true
           title: Windows Node Metrics
           tooltip: ""
           type: link
-          url: /d/duplo-windows-overview
+          url: /d/duplo-windows-overview?var-cluster=${cluster}&var-namespace=${namespace}&var-instance=${instance}
         - asDropdown: false
           icon: external link
-          includeVars: true
+          includeVars: false
           keepTime: true
           tags: []
           targetBlank: true
           title: Windows Node Logs
           tooltip: ""
           type: link
-          url: /d/duplo-windows-logs
+          url: /d/duplo-windows-logs?var-cluster=${cluster}&var-namespace=${namespace}&var-instance=${instance}
         - asDropdown: true
           icon: external link
           includeVars: false
           keepTime: true
           tags:
-            - apm-v3
+            - windows-apm
             - service
             - windows-iis
           targetBlank: false
@@ -273,7 +273,7 @@ spec:
     refresh: ""
     schemaVersion: 40
     tags:
-        - apm-v3
+        - windows-apm
         - service
         - windows-iis
         - overview

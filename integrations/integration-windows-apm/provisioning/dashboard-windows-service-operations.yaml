@@ -45,7 +45,7 @@ spec:
           includeVars: false
           keepTime: true
           tags:
-            - apm-v3
+            - windows-apm
             - service
             - windows-iis
           targetBlank: false
@@ -65,7 +65,7 @@ spec:
                 language: plaintext
                 showLineNumbers: false
                 showMiniMap: false
-            content: "# \U0001F6A8 Investigate RED Metrics\n\nPlease click on the URI operation links to drill down into the Windows Service Span Dashboard and analyze Rate, Errors, and Duration (RED metrics) for potential issues.\nFocus on URIs with higher latency, increased error percentages, or unusual request rates."
+            content: "# \U0001F4CA Operations by URI\n\nClick on a URI to drill down into detailed Rate, Errors, and Duration (RED) metrics for that endpoint.\nFocus on URIs with higher latency, increased error percentages, or unusual request rates."
             mode: markdown
           pluginVersion: 11.5.2
           type: text
@@ -235,7 +235,7 @@ spec:
     refresh: ""
     schemaVersion: 40
     tags:
-        - apm-v3
+        - windows-apm
         - service
         - windows-iis
         - operations

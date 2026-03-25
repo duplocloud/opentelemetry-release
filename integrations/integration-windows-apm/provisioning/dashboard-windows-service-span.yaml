@@ -45,7 +45,7 @@ spec:
           includeVars: false
           keepTime: true
           tags:
-            - apm-v3
+            - windows-apm
             - service
             - windows-iis
           targetBlank: false
@@ -65,7 +65,7 @@ spec:
                 language: plaintext
                 showLineNumbers: false
                 showMiniMap: false
-            content: "# \U0001F6A8 Investigate RED Metrics\n\nPlease drill down to a 3-hour time window.\nThen, analyze the Rate, Errors & Duration metrics for this specific URI endpoint."
+            content: "# \U0001F4CA URI Endpoint Details\n\nReview the Rate, Errors, and Duration (RED) metrics for this specific URI endpoint.\nUse the IIS access logs below to investigate individual requests and response times."
             mode: markdown
           pluginVersion: 11.5.2
           type: text
@@ -437,7 +437,7 @@ spec:
     refresh: ""
     schemaVersion: 40
     tags:
-        - apm-v3
+        - windows-apm
         - service
         - windows-iis
         - operation
