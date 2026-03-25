@@ -287,6 +287,8 @@ spec:
                     steps:
                         - color: semi-dark-green
                           value: null
+                max: 1
+                min: 0
                 unit: percentunit
             overrides:
                 - matcher:
@@ -841,6 +843,8 @@ spec:
                     steps:
                         - color: green
                           value: null
+                max: 1
+                min: 0
                 unit: percentunit
             overrides: []
           gridPos:
