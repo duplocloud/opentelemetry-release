@@ -109,6 +109,9 @@ spec:
                     id: byName
                     options: Apdex
                   properties:
+                    - id: custom.cellOptions
+                      value:
+                        type: color-text
                     - id: color
                       value:
                         mode: thresholds
@@ -122,14 +125,8 @@ spec:
                               value: 0.75
                             - color: dark-green
                               value: 0.94
-                    - id: custom.cellOptions
-                      value:
-                        mode: gradient
-                        type: gauge
-                    - id: max
-                      value: 1
-                    - id: min
-                      value: 0
+                    - id: decimals
+                      value: 2
                 - matcher:
                     id: byName
                     options: Site
@@ -231,6 +228,7 @@ spec:
             - id: timeSeriesTable
               options:
                 apdexQuery:
+                    stat: lastNotNull
                     timeField: Time
                 durationP95Query:
                     timeField: Time
