@@ -170,12 +170,14 @@ spec:
               editorMode: code
               exemplar: false
               expr: |
-                (
-                  sum by (cluster, namespace, site, uri) (iis:uri_error_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
-                  or
-                  sum by (cluster, namespace, site, uri) (iis:uri_request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}) * 0
-                )
-                / sum by (cluster, namespace, site, uri) (iis:uri_request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                clamp_max(
+                  (
+                    sum by (cluster, namespace, site, uri) (iis:uri_error_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                    or
+                    sum by (cluster, namespace, site, uri) (iis:uri_request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}) * 0
+                  )
+                  / clamp_min(sum by (cluster, namespace, site, uri) (iis:uri_request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}), 0.001)
+                , 1)
               hide: false
               instant: false
               interval: ""

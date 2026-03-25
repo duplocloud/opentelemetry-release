@@ -211,12 +211,14 @@ spec:
               editorMode: code
               exemplar: false
               expr: |
-                (
-                  sum by (cluster, namespace, site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", status_code=~"5.."}[5m]))
-                  or
-                  sum by (cluster, namespace, site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"}[5m])) * 0
-                )
-                / sum by (cluster, namespace, site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"}[5m]))
+                clamp_max(
+                  (
+                    sum by (cluster, namespace, site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", status_code=~"5.."}[5m]))
+                    or
+                    sum by (cluster, namespace, site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"}[5m])) * 0
+                  )
+                  / clamp_min(sum by (cluster, namespace, site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"}[5m])), 0.001)
+                , 1)
               hide: false
               instant: false
               interval: ""

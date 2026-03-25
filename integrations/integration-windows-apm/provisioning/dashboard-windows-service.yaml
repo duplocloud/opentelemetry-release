@@ -321,12 +321,14 @@ spec:
               editorMode: code
               exemplar: true
               expr: |
-                (
-                  sum by (site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance", status_code=~"5.."}[5m]))
-                  or
-                  sum by (site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}[5m])) * 0
-                )
-                / sum by (site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}[5m]))
+                clamp_max(
+                  (
+                    sum by (site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance", status_code=~"5.."}[5m]))
+                    or
+                    sum by (site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}[5m])) * 0
+                  )
+                  / clamp_min(sum by (site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}[5m])), 0.001)
+                , 1)
               hide: false
               instant: false
               interval: ""
