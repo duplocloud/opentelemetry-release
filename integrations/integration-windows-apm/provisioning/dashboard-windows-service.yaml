@@ -863,7 +863,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               editorMode: code
-              expr: irate(windows_iis_server_file_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[5m]) / (irate(windows_iis_server_file_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[5m]) + irate(windows_iis_server_file_cache_misses_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[5m]))
+              expr: increase(windows_iis_server_file_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]) / clamp_min(increase(windows_iis_server_file_cache_queries_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]),1)
               legendFormat: File cache
               range: true
               refId: A
@@ -871,7 +871,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               editorMode: code
-              expr: irate(windows_iis_server_uri_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[5m]) / (irate(windows_iis_server_uri_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[5m]) + irate(windows_iis_server_uri_cache_misses_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[5m]))
+              expr: increase(windows_iis_server_uri_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]) / clamp_min(increase(windows_iis_server_uri_cache_queries_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]),1)
               legendFormat: URI cache
               range: true
               refId: B
@@ -879,7 +879,7 @@ spec:
                 type: prometheus
                 uid: duplo-metrics
               editorMode: code
-              expr: irate(windows_iis_server_metadata_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[5m]) / (irate(windows_iis_server_metadata_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[5m]) + irate(windows_iis_server_metadata_cache_misses_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[5m]))
+              expr: increase(windows_iis_server_metadata_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]) / clamp_min(increase(windows_iis_server_metadata_cache_queries_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]),1)
               legendFormat: Metadata cache
               range: true
               refId: C
