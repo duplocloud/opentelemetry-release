@@ -111,7 +111,7 @@ spec:
                   properties:
                     - id: custom.cellOptions
                       value:
-                        type: color-text
+                        type: auto
                     - id: color
                       value:
                         mode: thresholds
@@ -176,10 +176,10 @@ spec:
                 )
                 / sum by (cluster, namespace, site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"})
               hide: false
-              instant: true
+              instant: false
               interval: ""
               legendFormat: ""
-              range: false
+              range: true
               refId: apdexQuery
             - datasource:
                 type: prometheus
@@ -227,6 +227,8 @@ spec:
           transformations:
             - id: timeSeriesTable
               options:
+                apdexQuery:
+                    timeField: Time
                 durationP95Query:
                     timeField: Time
                 errorsQuery:
@@ -240,26 +242,27 @@ spec:
             - id: organize
               options:
                 excludeByName:
+                    'Trend #apdexQuery': false
                     'Trend #durationP95Query': false
                     'Trend #errorsQuery': false
                     'Trend #rateQuery': false
-                    'Value #apdexQuery': false
-                    Time: true
                     cluster 2: true
                     cluster 3: true
+                    cluster 4: true
                     namespace 2: true
                     namespace 3: true
+                    namespace 4: true
                 includeByName: {}
                 indexByName:
                     site: 0
                     cluster 1: 1
                     namespace 1: 2
-                    'Value #apdexQuery': 3
+                    'Trend #apdexQuery': 3
                     'Trend #rateQuery': 4
                     'Trend #durationP95Query': 5
                     'Trend #errorsQuery': 6
                 renameByName:
-                    'Value #apdexQuery': Apdex
+                    'Trend #apdexQuery': Apdex
                     'Trend #durationP95Query': Duration P95
                     'Trend #errorsQuery': Errors
                     'Trend #rateQuery': Rate
