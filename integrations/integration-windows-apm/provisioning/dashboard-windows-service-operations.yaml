@@ -1,0 +1,318 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-windows-apm
+    name: windows-service-operations-dashboard-v3
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    description: Windows Service Level Dashboard - IIS Site Operations
+    editable: false
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links:
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: Back to Windows Services Overview
+          tooltip: ""
+          type: link
+          url: /d/windows-service-overview-dashboard-v3/windows-service-overview-dashboard-v3
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: Back to Site Dashboard
+          tooltip: ""
+          type: link
+          url: /d/windows-service-dashboard-v3/windows-service-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-site=${site}&var-instance=${instance}
+        - asDropdown: true
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags:
+            - apm-v3
+            - service
+            - windows-iis
+          targetBlank: false
+          title: All Windows Services | Dashboards
+          tooltip: ""
+          type: dashboards
+          url: ""
+    panels:
+        - gridPos:
+            h: 3
+            w: 24
+            x: 0
+            "y": 0
+          id: 1
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: "# \U0001F6A8 Investigate RED Metrics\n\nPlease click on the URI operation links to drill down into the Windows Service Span Dashboard and analyze Rate, Errors, and Duration (RED metrics) for potential issues.\nFocus on URIs with higher latency, increased error percentages, or unusual request rates."
+            mode: markdown
+          pluginVersion: 11.5.2
+          type: text
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: center
+                    cellOptions:
+                        type: auto
+                    filterable: false
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Duration P95
+                  properties:
+                    - id: unit
+                      value: ms
+                    - id: color
+                      value:
+                        fixedColor: orange
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Errors
+                  properties:
+                    - id: unit
+                      value: percentunit
+                    - id: color
+                      value:
+                        fixedColor: dark-red
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Rate
+                  properties:
+                    - id: unit
+                      value: reqps
+                    - id: color
+                      value:
+                        fixedColor: '#15a425'
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: URI
+                  properties:
+                    - id: custom.filterable
+                      value: true
+                    - id: links
+                      value:
+                        - targetBlank: false
+                          title: ""
+                          url: /d/windows-service-span-dashboard-v3/windows-service-span-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-site=${site}&var-instance=${instance}&var-uri=${__data.fields.URI}
+          gridPos:
+            h: 23
+            w: 24
+            x: 0
+            "y": 3
+          id: 2
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                enablePagination: true
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            frameIndex: 2
+            showHeader: true
+            sortBy:
+                - desc: true
+                  displayName: Rate
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: max by (cluster, namespace, site, uri) (iis:uri_response_time_ms_p95:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: operationsDuration
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: |
+                (
+                  sum by (cluster, namespace, site, uri) (iis:uri_error_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                  or
+                  sum by (cluster, namespace, site, uri) (iis:uri_request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}) * 0
+                )
+                / sum by (cluster, namespace, site, uri) (iis:uri_request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: operationsErrors
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: sum by (cluster, namespace, site, uri) (iis:uri_request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: operationsRate
+          title: Operations by URI
+          transformations:
+            - id: timeSeriesTable
+              options:
+                operationsDuration:
+                    timeField: Time
+                operationsErrors:
+                    stat: lastNotNull
+                    timeField: Time
+                operationsRate:
+                    timeField: Time
+            - id: joinByField
+              options:
+                byField: uri
+                mode: outer
+            - id: organize
+              options:
+                excludeByName:
+                    'Trend #operationsDuration': false
+                    'Trend #operationsErrors': false
+                    'Trend #operationsRate': false
+                    cluster 1: true
+                    cluster 2: true
+                    cluster 3: true
+                    namespace 1: true
+                    namespace 2: true
+                    namespace 3: true
+                    site 1: true
+                    site 2: true
+                    site 3: true
+                includeByName: {}
+                indexByName: {}
+                renameByName:
+                    'Trend #operationsDuration': Duration P95
+                    'Trend #operationsErrors': Errors
+                    'Trend #operationsRate': Rate
+                    uri: URI
+          type: table
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - apm-v3
+        - service
+        - windows-iis
+        - operations
+    templating:
+        list:
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m,cluster)
+              label: Cluster
+              name: cluster
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m,cluster)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m{cluster=~"$cluster"},namespace)
+              label: Namespace
+              name: namespace
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m{cluster=~"$cluster"},namespace)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace"},site)
+              description: ""
+              label: Site
+              name: site
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace"},site)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allValue: .*
+              allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"},instance)
+              description: ""
+              includeAll: true
+              label: Instance
+              name: instance
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"},instance)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-1h
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: Windows Service Operations Dashboard
+    uid: windows-service-operations-dashboard-v3

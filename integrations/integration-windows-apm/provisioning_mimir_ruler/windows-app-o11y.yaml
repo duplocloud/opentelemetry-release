@@ -1,0 +1,107 @@
+namespace: windows-app-o11y
+groups:
+    - name: windows-iis-apdex
+      interval: 1m
+      rules:
+        - record: winappo11y:apdex:score
+          expr: |
+            (
+              sum by (cluster, namespace, site, instance) (iis:requests_satisfied:rate1m)
+              + (
+                  sum by (cluster, namespace, site, instance) (iis:requests_tolerating:rate1m)
+                  or
+                  sum by (cluster, namespace, site, instance) (iis:requests_satisfied:rate1m) * 0
+                ) / 2
+            )
+            / sum by (cluster, namespace, site, instance) (iis:request_rate:rate1m)
+        - record: winappo11y:apdex:score
+          expr: |
+            (
+              sum by (cluster, namespace, site) (iis:requests_satisfied:rate1m)
+              + (
+                  sum by (cluster, namespace, site) (iis:requests_tolerating:rate1m)
+                  or
+                  sum by (cluster, namespace, site) (iis:requests_satisfied:rate1m) * 0
+                ) / 2
+            )
+            / sum by (cluster, namespace, site) (iis:request_rate:rate1m)
+          labels:
+            instance: __aggregated__
+    - name: windows-iis-duration
+      interval: 1m
+      rules:
+        - record: winappo11y:duration:p95
+          expr: max by (cluster, namespace, site, instance) (iis:response_time_ms_p95:rate1m) / 1000
+        - record: winappo11y:duration:p95
+          expr: max by (cluster, namespace, site) (iis:response_time_ms_p95:rate1m) / 1000
+          labels:
+            instance: __aggregated__
+        - record: winappo11y:duration:p99
+          expr: max by (cluster, namespace, site, instance) (iis:response_time_ms_p99:rate1m) / 1000
+        - record: winappo11y:duration:p99
+          expr: max by (cluster, namespace, site) (iis:response_time_ms_p99:rate1m) / 1000
+          labels:
+            instance: __aggregated__
+        - record: winappo11y:duration:avg
+          expr: max by (cluster, namespace, site, instance) (iis:response_time_ms_avg:rate1m) / 1000
+        - record: winappo11y:duration:avg
+          expr: max by (cluster, namespace, site) (iis:response_time_ms_avg:rate1m) / 1000
+          labels:
+            instance: __aggregated__
+    - name: windows-iis-request-rate
+      interval: 1m
+      rules:
+        - record: winappo11y:request:rate1m
+          expr: sum by (cluster, namespace, site, instance) (iis:request_rate:rate1m)
+        - record: winappo11y:request:rate1m
+          expr: sum by (cluster, namespace, site) (iis:request_rate:rate1m)
+          labels:
+            instance: __aggregated__
+    - name: windows-iis-error-ratio
+      interval: 1m
+      rules:
+        - record: winappo11y:error:ratio
+          expr: |
+            (
+              sum by (cluster, namespace, site, instance) (rate(windows_iis_requests_total{status_code=~"5.."}[5m]))
+              or
+              sum by (cluster, namespace, site, instance) (rate(windows_iis_requests_total[5m])) * 0
+            )
+            / sum by (cluster, namespace, site, instance) (rate(windows_iis_requests_total[5m]))
+        - record: winappo11y:error:ratio
+          expr: |
+            (
+              sum by (cluster, namespace, site) (rate(windows_iis_requests_total{status_code=~"5.."}[5m]))
+              or
+              sum by (cluster, namespace, site) (rate(windows_iis_requests_total[5m])) * 0
+            )
+            / sum by (cluster, namespace, site) (rate(windows_iis_requests_total[5m]))
+          labels:
+            instance: __aggregated__
+    - name: windows-iis-anomaly-duration
+      interval: 1m
+      rules:
+        - record: winappo11y:duration:p95:prediction
+          expr: quantile_over_time(0.5, winappo11y:duration:p95[1h])
+        - record: winappo11y:duration:p95:stddev_1h
+          expr: stddev_over_time(winappo11y:duration:p95[1h])
+        - record: winappo11y:duration:p95:stddev
+          expr: avg_over_time(winappo11y:duration:p95:stddev_1h[1d2h])
+    - name: windows-iis-anomaly-request-rate
+      interval: 1m
+      rules:
+        - record: winappo11y:request:rate1m:prediction
+          expr: avg_over_time(winappo11y:request:rate1m[1h])
+        - record: winappo11y:request:rate1m:stddev_1h
+          expr: stddev_over_time(winappo11y:request:rate1m[1h])
+        - record: winappo11y:request:rate1m:stddev
+          expr: avg_over_time(winappo11y:request:rate1m:stddev_1h[1d2h])
+    - name: windows-iis-anomaly-error-ratio
+      interval: 1m
+      rules:
+        - record: winappo11y:error:ratio:prediction
+          expr: avg_over_time(winappo11y:error:ratio[1h])
+        - record: winappo11y:error:ratio:stddev_1h
+          expr: stddev_over_time(winappo11y:error:ratio[1h])
+        - record: winappo11y:error:ratio:stddev
+          expr: avg_over_time(winappo11y:error:ratio:stddev_1h[1d2h])
