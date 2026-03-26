@@ -36,6 +36,16 @@ spec:
           tooltip: ""
           type: link
           url: /d/integration-jvm-runtime/jvm-runtime?${__url_time_range}&${__all_variables}
+        - asDropdown: false
+          icon: external link
+          includeVars: true
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: JVM Profiles
+          tooltip: ""
+          type: link
+          url: /d/integration-jvm-profiles/jvm-profiles?${__url_time_range}&${__all_variables}
     panels:
         - collapsed: false
           gridPos:

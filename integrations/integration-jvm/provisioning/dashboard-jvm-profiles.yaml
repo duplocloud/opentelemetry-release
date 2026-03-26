@@ -1,0 +1,312 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-jvm
+    name: integration-jvm-profiles
+spec:
+    graphTooltip: 1
+    links:
+        - asDropdown: false
+          icon: external link
+          includeVars: true
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: Back to JVM Overview
+          tooltip: ""
+          type: link
+          url: /d/integration-jvm-dashboard/jvm-overview?${__url_time_range}&${__all_variables}
+        - asDropdown: false
+          icon: external link
+          includeVars: true
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: JVM Memory
+          tooltip: ""
+          type: link
+          url: /d/integration-jvm-memory/jvm-memory?${__url_time_range}&${__all_variables}
+        - asDropdown: false
+          icon: external link
+          includeVars: true
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: JVM Runtime
+          tooltip: ""
+          type: link
+          url: /d/integration-jvm-runtime/jvm-runtime?${__url_time_range}&${__all_variables}
+        - asDropdown: false
+          icon: external link
+          includeVars: true
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: JVM GC
+          tooltip: ""
+          type: link
+          url: /d/integration-jvm-gc/jvm-gc?${__url_time_range}&${__all_variables}
+    panels:
+        - gridPos:
+              h: 2
+              w: 24
+              x: 0
+              y: 0
+          id: 1
+          options:
+              content: "# Java Application Profiles\nExplore CPU, memory allocation, lock contention, and wall clock profiles for your Java applications. Select a profile type from the dropdown above to switch between different profiling views. Profiles are collected via Pyroscope continuous profiling."
+              mode: markdown
+          title: ""
+          type: text
+        - collapsed: false
+          gridPos:
+              h: 1
+              w: 24
+              x: 0
+              y: 2
+          id: 2
+          title: Profile Overview
+          type: row
+        - datasource:
+              type: grafana-pyroscope-datasource
+              uid: duplo-profiling
+          gridPos:
+              h: 18
+              w: 24
+              x: 0
+              y: 3
+          id: 3
+          targets:
+              - datasource:
+                    type: grafana-pyroscope-datasource
+                    uid: duplo-profiling
+                labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                profileTypeId: "$profile_type"
+                queryType: profile
+                refId: A
+          title: "$profile_type Profile"
+          type: flamegraph
+        - collapsed: false
+          gridPos:
+              h: 1
+              w: 24
+              x: 0
+              y: 21
+          id: 4
+          title: Profile Trends
+          type: row
+        - datasource:
+              type: grafana-pyroscope-datasource
+              uid: duplo-profiling
+          gridPos:
+              h: 10
+              w: 24
+              x: 0
+              y: 22
+          id: 5
+          options:
+              legend:
+                  calcs: []
+                  displayMode: list
+                  placement: bottom
+                  showLegend: true
+              tooltip:
+                  hideZeros: false
+                  mode: multi
+                  sort: desc
+          targets:
+              - datasource:
+                    type: grafana-pyroscope-datasource
+                    uid: duplo-profiling
+                groupBy:
+                    - service_name
+                labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                profileTypeId: "$profile_type"
+                queryType: metrics
+                refId: A
+          title: "$profile_type Trend"
+          type: timeseries
+        - collapsed: true
+          gridPos:
+              h: 1
+              w: 24
+              x: 0
+              y: 32
+          id: 6
+          panels:
+              - datasource:
+                    type: grafana-pyroscope-datasource
+                    uid: duplo-profiling
+                gridPos:
+                    h: 16
+                    w: 12
+                    x: 0
+                    y: 33
+                id: 7
+                targets:
+                    - datasource:
+                          type: grafana-pyroscope-datasource
+                          uid: duplo-profiling
+                      labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                      profileTypeId: "process_cpu:cpu"
+                      queryType: profile
+                      refId: A
+                title: CPU Profile
+                type: flamegraph
+              - datasource:
+                    type: grafana-pyroscope-datasource
+                    uid: duplo-profiling
+                gridPos:
+                    h: 16
+                    w: 12
+                    x: 12
+                    y: 33
+                id: 8
+                targets:
+                    - datasource:
+                          type: grafana-pyroscope-datasource
+                          uid: duplo-profiling
+                      labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                      profileTypeId: "memory:alloc_in_new_tlab_bytes"
+                      queryType: profile
+                      refId: A
+                title: Memory Allocation Profile
+                type: flamegraph
+              - datasource:
+                    type: grafana-pyroscope-datasource
+                    uid: duplo-profiling
+                gridPos:
+                    h: 16
+                    w: 12
+                    x: 0
+                    y: 49
+                id: 9
+                targets:
+                    - datasource:
+                          type: grafana-pyroscope-datasource
+                          uid: duplo-profiling
+                      labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                      profileTypeId: "lock:contentions"
+                      queryType: profile
+                      refId: A
+                title: Lock Contention Profile
+                type: flamegraph
+              - datasource:
+                    type: grafana-pyroscope-datasource
+                    uid: duplo-profiling
+                gridPos:
+                    h: 16
+                    w: 12
+                    x: 12
+                    y: 49
+                id: 10
+                targets:
+                    - datasource:
+                          type: grafana-pyroscope-datasource
+                          uid: duplo-profiling
+                      labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                      profileTypeId: "wall:wall"
+                      queryType: profile
+                      refId: A
+                title: Wall Clock Profile
+                type: flamegraph
+          title: Comparison Profiles
+          type: row
+    schemaVersion: 39
+    tags:
+        - jvm
+        - java
+        - profiling
+    templating:
+        list:
+            - datasource:
+                  type: prometheus
+                  uid: duplo-metrics
+              includeAll: false
+              multi: false
+              name: cluster
+              query:
+                  qryType: 1
+                  query: label_values(jvm_memory_used_bytes, cluster)
+                  refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              type: query
+            - allValue: ".*"
+              datasource:
+                  type: prometheus
+                  uid: duplo-metrics
+              includeAll: true
+              multi: true
+              name: namespace
+              query:
+                  qryType: 1
+                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster"}, namespace)'
+                  refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              type: query
+            - datasource:
+                  type: prometheus
+                  uid: duplo-metrics
+              includeAll: false
+              label: Job
+              multi: false
+              name: application
+              query:
+                  qryType: 1
+                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace"}, job)'
+                  refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              type: query
+            - allValue: ".*"
+              datasource:
+                  type: prometheus
+                  uid: duplo-metrics
+              includeAll: true
+              multi: true
+              name: pod
+              query:
+                  qryType: 1
+                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"}, instance)'
+                  refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              type: query
+            - current:
+                  selected: true
+                  text: CPU
+                  value: "process_cpu:cpu"
+              includeAll: false
+              label: Profile Type
+              multi: false
+              name: profile_type
+              options:
+                  - selected: true
+                    text: CPU
+                    value: "process_cpu:cpu"
+                  - selected: false
+                    text: Allocations - Bytes
+                    value: "memory:alloc_in_new_tlab_bytes"
+                  - selected: false
+                    text: Allocations - Objects
+                    value: "memory:alloc_in_new_tlab_objects"
+                  - selected: false
+                    text: Live Heap
+                    value: "memory:live"
+                  - selected: false
+                    text: Wall Clock
+                    value: "wall:wall"
+                  - selected: false
+                    text: Lock Contentions
+                    value: "lock:contentions"
+                  - selected: false
+                    text: Lock Delay
+                    value: "lock:delay"
+                  - selected: false
+                    text: "CPU - itimer"
+                    value: "itimer:cpu"
+              query: "process_cpu:cpu : CPU,memory:alloc_in_new_tlab_bytes : Allocations - Bytes,memory:alloc_in_new_tlab_objects : Allocations - Objects,memory:live : Live Heap,wall:wall : Wall Clock,lock:contentions : Lock Contentions,lock:delay : Lock Delay,itimer:cpu : CPU - itimer"
+              type: custom
+    time:
+        from: now-1h
+        to: now
+    title: JVM Profiles
+    uid: integration-jvm-profiles
