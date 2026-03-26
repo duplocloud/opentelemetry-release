@@ -133,19 +133,19 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"process_cpu_usage|jvm_cpu_recent_utilization_ratio|process_runtime_jvm_cpu_utilization_ratio", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"process_cpu_usage|jvm_cpu_recent_utilization_ratio|process_runtime_jvm_cpu_utilization_ratio", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}} process'
         refId: A
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"system_cpu_usage|system_cpu_utilization_ratio|process_runtime_jvm_system_cpu_utilization_ratio", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"system_cpu_usage|system_cpu_utilization_ratio|process_runtime_jvm_system_cpu_utilization_ratio", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}} system'
         refId: B
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg_over_time(({__name__=~"process_cpu_usage|jvm_cpu_recent_utilization_ratio|process_runtime_jvm_cpu_utilization_ratio", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})[15m:])
+        expr: avg_over_time(({__name__=~"process_cpu_usage|jvm_cpu_recent_utilization_ratio|process_runtime_jvm_cpu_utilization_ratio", cluster="$cluster", job="$application", instance=~"$pod"})[15m:])
         legendFormat: '{{instance}} avg 15m'
         refId: C
       title: CPU Usage
@@ -210,13 +210,13 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"system_load_average_1m|process_runtime_jvm_system_cpu_load_1m", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"system_load_average_1m|process_runtime_jvm_system_cpu_load_1m", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}} load 1m'
         refId: A
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}} processors'
         refId: B
       title: Load
@@ -291,19 +291,19 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"jvm_threads_live|jvm_thread_count|process_runtime_jvm_threads_count", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"jvm_threads_live|jvm_thread_count|process_runtime_jvm_threads_count", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}} live'
         refId: A
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"jvm_threads_daemon", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"jvm_threads_daemon", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}} daemon'
         refId: B
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"jvm_threads_peak", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"jvm_threads_peak", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}} peak'
         refId: C
       title: Threads
@@ -368,7 +368,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: sum by(state)({__name__=~"jvm_threads_states", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: sum by(state)({__name__=~"jvm_threads_states", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{state}}'
         refId: A
       title: Thread States
@@ -443,13 +443,13 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: '{__name__=~"process_files_open|process_open_fds|process_open_file_descriptor_count", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
+        expr: '{__name__=~"process_files_open|process_open_fds|process_open_file_descriptor_count", cluster="$cluster", job="$application", instance=~"$pod"}'
         legendFormat: '{{instance}} open'
         refId: A
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: '{__name__=~"process_files_max|process_max_fds", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
+        expr: '{__name__=~"process_files_max|process_max_fds", cluster="$cluster", job="$application", instance=~"$pod"}'
         legendFormat: '{{instance}} max'
         refId: B
       title: File Descriptors
@@ -514,7 +514,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: increase(logback_events_total{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m])
+        expr: increase(logback_events_total{cluster="$cluster", job="$application", instance=~"$pod"}[1m])
         legendFormat: '{{instance}} {{level}}'
         refId: A
       title: Log Events
@@ -589,7 +589,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"jvm_classes_loaded|jvm_class_count|process_runtime_jvm_classes_current_loaded", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"jvm_classes_loaded|jvm_class_count|process_runtime_jvm_classes_current_loaded", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}}'
         refId: A
       title: Classes Loaded
@@ -654,7 +654,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: delta(({__name__=~"jvm_classes_loaded|jvm_class_count|process_runtime_jvm_classes_current_loaded", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})[1m:])
+        expr: delta(({__name__=~"jvm_classes_loaded|jvm_class_count|process_runtime_jvm_classes_current_loaded", cluster="$cluster", job="$application", instance=~"$pod"})[1m:])
         legendFormat: '{{instance}}'
         refId: A
       title: Class Delta
@@ -692,15 +692,16 @@ spec:
           datasource:
             type: prometheus
             uid: duplo-metrics
-          definition: label_values(jvm_memory_used_bytes{cluster="$cluster"}, namespace)
+          definition: label_values(jvm_memory_used_bytes{cluster="$cluster"}, instance)
           includeAll: true
           multi: true
           name: namespace
           query:
             qryType: 1
-            query: label_values(jvm_memory_used_bytes{cluster="$cluster"}, namespace)
+            query: label_values(jvm_memory_used_bytes{cluster="$cluster"}, instance)
             refId: PrometheusVariableQueryEditor-VariableQuery
           refresh: 2
+          regex: /^([^.]+)\..+/
           sort: 1
           type: query
         - current:
@@ -710,14 +711,14 @@ spec:
           datasource:
             type: prometheus
             uid: duplo-metrics
-          definition: label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace"}, job)
+          definition: label_values(jvm_memory_used_bytes{cluster="$cluster"}, job)
           includeAll: false
           label: Job
           multi: false
           name: application
           query:
             qryType: 1
-            query: label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace"}, job)
+            query: label_values(jvm_memory_used_bytes{cluster="$cluster"}, job)
             refId: PrometheusVariableQueryEditor-VariableQuery
           refresh: 2
           sort: 1
@@ -730,13 +731,13 @@ spec:
           datasource:
             type: prometheus
             uid: duplo-metrics
-          definition: label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"}, instance)
+          definition: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"($namespace)\\..+"}, instance)
           includeAll: true
           multi: true
           name: pod
           query:
             qryType: 1
-            query: label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"}, instance)
+            query: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"($namespace)\\..+"}, instance)
             refId: PrometheusVariableQueryEditor-VariableQuery
           refresh: 2
           sort: 1

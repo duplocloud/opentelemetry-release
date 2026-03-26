@@ -80,7 +80,7 @@ spec:
               - datasource:
                     type: grafana-pyroscope-datasource
                     uid: duplo-profiling
-                labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                labelSelector: '{service_name="$application", cluster=~"$cluster"}'
                 profileTypeId: "$profile_type"
                 queryType: profile
                 refId: A
@@ -120,7 +120,7 @@ spec:
                     uid: duplo-profiling
                 groupBy:
                     - service_name
-                labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                labelSelector: '{service_name="$application", cluster=~"$cluster"}'
                 profileTypeId: "$profile_type"
                 queryType: metrics
                 refId: A
@@ -147,7 +147,7 @@ spec:
                     - datasource:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
-                      labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                      labelSelector: '{service_name="$application", cluster=~"$cluster"}'
                       profileTypeId: "process_cpu:cpu"
                       queryType: profile
                       refId: A
@@ -166,7 +166,7 @@ spec:
                     - datasource:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
-                      labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                      labelSelector: '{service_name="$application", cluster=~"$cluster"}'
                       profileTypeId: "memory:alloc_in_new_tlab_bytes"
                       queryType: profile
                       refId: A
@@ -185,7 +185,7 @@ spec:
                     - datasource:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
-                      labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                      labelSelector: '{service_name="$application", cluster=~"$cluster"}'
                       profileTypeId: "lock:contentions"
                       queryType: profile
                       refId: A
@@ -204,7 +204,7 @@ spec:
                     - datasource:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
-                      labelSelector: '{service_name="$application", namespace=~"$namespace", cluster=~"$cluster"}'
+                      labelSelector: '{service_name="$application", cluster=~"$cluster"}'
                       profileTypeId: "wall:wall"
                       queryType: profile
                       refId: A
@@ -240,9 +240,10 @@ spec:
               name: namespace
               query:
                   qryType: 1
-                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster"}, namespace)'
+                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster"}, instance)'
                   refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
+              regex: /^([^.]+)\..+/
               type: query
             - datasource:
                   type: prometheus
@@ -253,7 +254,7 @@ spec:
               name: application
               query:
                   qryType: 1
-                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace"}, job)'
+                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster"}, job)'
                   refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               type: query
@@ -266,7 +267,7 @@ spec:
               name: pod
               query:
                   qryType: 1
-                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"}, instance)'
+                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"($namespace)\\..+"}, instance)'
                   refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               type: query
