@@ -1,0 +1,1149 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-jvm
+    name: integration-jvm-memory
+spec:
+    annotations:
+        list:
+        - builtIn: 1
+          datasource:
+            type: datasource
+            uid: grafana
+          enable: true
+          hide: true
+          iconColor: rgba(0, 211, 255, 1)
+          limit: 100
+          name: Annotations & Alerts
+          showIn: 0
+          type: dashboard
+    description: JVM Memory details dashboard for Micrometer instrumented applications
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 1
+    links:
+    - asDropdown: false
+      icon: external link
+      includeVars: true
+      keepTime: true
+      tags: []
+      targetBlank: false
+      title: Back to JVM Overview
+      tooltip: ""
+      type: link
+      url: /d/integration-jvm-dashboard/jvm-overview?${__url_time_range}&${__all_variables}
+    - asDropdown: false
+      icon: external link
+      includeVars: true
+      keepTime: true
+      tags: []
+      targetBlank: false
+      title: JVM Runtime
+      tooltip: ""
+      type: link
+      url: /d/integration-jvm-runtime/jvm-runtime?${__url_time_range}&${__all_variables}
+    - asDropdown: false
+      icon: external link
+      includeVars: true
+      keepTime: true
+      tags: []
+      targetBlank: false
+      title: JVM GC
+      tooltip: ""
+      type: link
+      url: /d/integration-jvm-gc/jvm-gc?${__url_time_range}&${__all_variables}
+    panels:
+    - collapsed: false
+      gridPos:
+        h: 1
+        w: 24
+        x: 0
+        y: 0
+      id: 1
+      panels: []
+      title: JVM Memory Overview
+      type: row
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      fieldConfig:
+        defaults:
+          color:
+            mode: palette-classic
+          custom:
+            axisBorderShow: false
+            axisCenteredZero: false
+            axisColorMode: text
+            axisLabel: ''
+            axisPlacement: auto
+            barAlignment: 0
+            barWidthFactor: 0.6
+            drawStyle: line
+            fillOpacity: 10
+            gradientMode: none
+            hideFrom:
+              legend: false
+              tooltip: false
+              viz: false
+            insertNulls: false
+            lineInterpolation: linear
+            lineWidth: 1
+            pointSize: 5
+            scaleDistribution:
+              type: linear
+            showPoints: never
+            spanNulls: false
+            stacking:
+              group: A
+              mode: none
+            thresholdsStyle:
+              mode: 'off'
+          mappings: []
+          thresholds:
+            mode: absolute
+            steps:
+            - color: green
+            - color: red
+              value: 80
+          unit: bytes
+        overrides: []
+      gridPos:
+        h: 10
+        w: 12
+        x: 0
+        y: 1
+      id: 2
+      options:
+        legend:
+          calcs: []
+          displayMode: list
+          placement: bottom
+          showLegend: true
+        tooltip:
+          hideZeros: false
+          mode: multi
+          sort: desc
+      targets:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: avg by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="heap"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} used'
+        refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: avg by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="heap"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} committed'
+        refId: B
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: avg by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="heap"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} max'
+        refId: C
+      title: JVM Heap
+      type: timeseries
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      fieldConfig:
+        defaults:
+          color:
+            mode: palette-classic
+          custom:
+            axisBorderShow: false
+            axisCenteredZero: false
+            axisColorMode: text
+            axisLabel: ''
+            axisPlacement: auto
+            barAlignment: 0
+            barWidthFactor: 0.6
+            drawStyle: line
+            fillOpacity: 10
+            gradientMode: none
+            hideFrom:
+              legend: false
+              tooltip: false
+              viz: false
+            insertNulls: false
+            lineInterpolation: linear
+            lineWidth: 1
+            pointSize: 5
+            scaleDistribution:
+              type: linear
+            showPoints: never
+            spanNulls: false
+            stacking:
+              group: A
+              mode: none
+            thresholdsStyle:
+              mode: 'off'
+          mappings: []
+          thresholds:
+            mode: absolute
+            steps:
+            - color: green
+            - color: red
+              value: 80
+          unit: bytes
+        overrides: []
+      gridPos:
+        h: 10
+        w: 12
+        x: 12
+        y: 1
+      id: 3
+      options:
+        legend:
+          calcs: []
+          displayMode: list
+          placement: bottom
+          showLegend: true
+        tooltip:
+          hideZeros: false
+          mode: multi
+          sort: desc
+      targets:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: avg by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="nonheap"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} used'
+        refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: avg by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="nonheap"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} committed'
+        refId: B
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: avg by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="nonheap"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} max'
+        refId: C
+      title: JVM Non-Heap
+      type: timeseries
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      fieldConfig:
+        defaults:
+          color:
+            mode: palette-classic
+          custom:
+            axisBorderShow: false
+            axisCenteredZero: false
+            axisColorMode: text
+            axisLabel: ''
+            axisPlacement: auto
+            barAlignment: 0
+            barWidthFactor: 0.6
+            drawStyle: line
+            fillOpacity: 10
+            gradientMode: none
+            hideFrom:
+              legend: false
+              tooltip: false
+              viz: false
+            insertNulls: false
+            lineInterpolation: linear
+            lineWidth: 1
+            pointSize: 5
+            scaleDistribution:
+              type: linear
+            showPoints: never
+            spanNulls: false
+            stacking:
+              group: A
+              mode: none
+            thresholdsStyle:
+              mode: 'off'
+          mappings: []
+          thresholds:
+            mode: absolute
+            steps:
+            - color: green
+            - color: red
+              value: 80
+          unit: bytes
+        overrides: []
+      gridPos:
+        h: 10
+        w: 12
+        x: 0
+        y: 11
+      id: 4
+      options:
+        legend:
+          calcs: []
+          displayMode: list
+          placement: bottom
+          showLegend: true
+        tooltip:
+          hideZeros: false
+          mode: multi
+          sort: desc
+      targets:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: Used
+        refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: Committed
+        refId: B
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: Max
+        refId: C
+      title: JVM Total
+      type: timeseries
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      fieldConfig:
+        defaults:
+          color:
+            mode: palette-classic
+          custom:
+            axisBorderShow: false
+            axisCenteredZero: false
+            axisColorMode: text
+            axisLabel: ''
+            axisPlacement: auto
+            barAlignment: 0
+            barWidthFactor: 0.6
+            drawStyle: line
+            fillOpacity: 10
+            gradientMode: none
+            hideFrom:
+              legend: false
+              tooltip: false
+              viz: false
+            insertNulls: false
+            lineInterpolation: linear
+            lineWidth: 1
+            pointSize: 5
+            scaleDistribution:
+              type: linear
+            showPoints: never
+            spanNulls: false
+            stacking:
+              group: A
+              mode: none
+            thresholdsStyle:
+              mode: 'off'
+          mappings: []
+          thresholds:
+            mode: absolute
+            steps:
+            - color: green
+            - color: red
+              value: 80
+          unit: bytes
+        overrides: []
+      gridPos:
+        h: 10
+        w: 12
+        x: 12
+        y: 11
+      id: 5
+      options:
+        legend:
+          calcs: []
+          displayMode: list
+          placement: bottom
+          showLegend: true
+        tooltip:
+          hideZeros: false
+          mode: multi
+          sort: desc
+      targets:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} used'
+        refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} committed'
+        refId: B
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} max'
+        refId: C
+      title: JVM Total Memory (per pod)
+      type: timeseries
+    - collapsed: true
+      gridPos:
+        h: 1
+        w: 24
+        x: 0
+        y: 21
+      id: 6
+      panels:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        fieldConfig:
+          defaults:
+            color:
+              mode: palette-classic
+            custom:
+              axisBorderShow: false
+              axisCenteredZero: false
+              axisColorMode: text
+              axisLabel: ''
+              axisPlacement: auto
+              barAlignment: 0
+              barWidthFactor: 0.6
+              drawStyle: line
+              fillOpacity: 10
+              gradientMode: none
+              hideFrom:
+                legend: false
+                tooltip: false
+                viz: false
+              insertNulls: false
+              lineInterpolation: linear
+              lineWidth: 1
+              pointSize: 5
+              scaleDistribution:
+                type: linear
+              showPoints: never
+              spanNulls: false
+              stacking:
+                group: A
+                mode: none
+              thresholdsStyle:
+                mode: 'off'
+            mappings: []
+            thresholds:
+              mode: absolute
+              steps:
+              - color: green
+              - color: red
+                value: 80
+            unit: bytes
+          overrides: []
+        gridPos:
+          h: 10
+          w: 24
+          x: 0
+          y: 22
+        id: 7
+        options:
+          legend:
+            calcs: []
+            displayMode: list
+            placement: bottom
+            showLegend: true
+          tooltip:
+            hideZeros: false
+            mode: multi
+            sort: desc
+        repeat: jvm_memory_pool_heap
+        repeatDirection: h
+        targets:
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_heap"}
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} used'
+          refId: A
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_heap"}
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} committed'
+          refId: B
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_heap"}
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} max'
+          refId: C
+        title: $jvm_memory_pool_heap
+        type: timeseries
+      title: JVM Memory Pools (Heap)
+      type: row
+    - collapsed: true
+      gridPos:
+        h: 1
+        w: 24
+        x: 0
+        y: 32
+      id: 8
+      panels:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        fieldConfig:
+          defaults:
+            color:
+              mode: palette-classic
+            custom:
+              axisBorderShow: false
+              axisCenteredZero: false
+              axisColorMode: text
+              axisLabel: ''
+              axisPlacement: auto
+              barAlignment: 0
+              barWidthFactor: 0.6
+              drawStyle: line
+              fillOpacity: 10
+              gradientMode: none
+              hideFrom:
+                legend: false
+                tooltip: false
+                viz: false
+              insertNulls: false
+              lineInterpolation: linear
+              lineWidth: 1
+              pointSize: 5
+              scaleDistribution:
+                type: linear
+              showPoints: never
+              spanNulls: false
+              stacking:
+                group: A
+                mode: none
+              thresholdsStyle:
+                mode: 'off'
+            mappings: []
+            thresholds:
+              mode: absolute
+              steps:
+              - color: green
+              - color: red
+                value: 80
+            unit: bytes
+          overrides: []
+        gridPos:
+          h: 10
+          w: 24
+          x: 0
+          y: 33
+        id: 9
+        options:
+          legend:
+            calcs: []
+            displayMode: list
+            placement: bottom
+            showLegend: true
+          tooltip:
+            hideZeros: false
+            mode: multi
+            sort: desc
+        repeat: jvm_memory_pool_nonheap
+        repeatDirection: h
+        targets:
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_nonheap"}
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} used'
+          refId: A
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_nonheap"}
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} committed'
+          refId: B
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_nonheap"}
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} max'
+          refId: C
+        title: $jvm_memory_pool_nonheap
+        type: timeseries
+      title: JVM Memory Pools (Non-Heap)
+      type: row
+    - collapsed: true
+      gridPos:
+        h: 1
+        w: 24
+        x: 0
+        y: 43
+      id: 10
+      panels:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        fieldConfig:
+          defaults:
+            color:
+              mode: palette-classic
+            custom:
+              axisBorderShow: false
+              axisCenteredZero: false
+              axisColorMode: text
+              axisLabel: ''
+              axisPlacement: auto
+              barAlignment: 0
+              barWidthFactor: 0.6
+              drawStyle: line
+              fillOpacity: 10
+              gradientMode: none
+              hideFrom:
+                legend: false
+                tooltip: false
+                viz: false
+              insertNulls: false
+              lineInterpolation: linear
+              lineWidth: 1
+              pointSize: 5
+              scaleDistribution:
+                type: linear
+              showPoints: never
+              spanNulls: false
+              stacking:
+                group: A
+                mode: none
+              thresholdsStyle:
+                mode: 'off'
+            mappings: []
+            thresholds:
+              mode: absolute
+              steps:
+              - color: green
+              - color: red
+                value: 80
+            unit: bytes
+          overrides:
+          - matcher:
+              id: byFrameRefID
+              options: C
+            properties:
+            - id: custom.axisPlacement
+              value: right
+            - id: unit
+              value: short
+        gridPos:
+          h: 10
+          w: 24
+          x: 0
+          y: 44
+        id: 11
+        options:
+          legend:
+            calcs: []
+            displayMode: list
+            placement: bottom
+            showLegend: true
+          tooltip:
+            hideZeros: false
+            mode: multi
+            sort: desc
+        repeat: jvm_buffer_pool
+        repeatDirection: h
+        targets:
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: jvm_buffer_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"}
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} used'
+          refId: A
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: jvm_buffer_total_capacity_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"}
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} capacity'
+          refId: B
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: jvm_buffer_count_buffers{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"}
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} count'
+          refId: C
+        title: $jvm_buffer_pool
+        type: timeseries
+      title: Buffer Pools
+      type: row
+    - collapsed: true
+      gridPos:
+        h: 1
+        w: 24
+        x: 0
+        y: 54
+      id: 12
+      panels:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        fieldConfig:
+          defaults:
+            color:
+              mode: palette-classic
+            custom:
+              axisBorderShow: false
+              axisCenteredZero: false
+              axisColorMode: text
+              axisLabel: ''
+              axisPlacement: auto
+              barAlignment: 0
+              barWidthFactor: 0.6
+              drawStyle: line
+              fillOpacity: 10
+              gradientMode: none
+              hideFrom:
+                legend: false
+                tooltip: false
+                viz: false
+              insertNulls: false
+              lineInterpolation: linear
+              lineWidth: 1
+              pointSize: 5
+              scaleDistribution:
+                type: linear
+              showPoints: never
+              spanNulls: false
+              stacking:
+                group: A
+                mode: none
+              thresholdsStyle:
+                mode: 'off'
+            mappings: []
+            thresholds:
+              mode: absolute
+              steps:
+              - color: green
+              - color: red
+                value: 80
+            unit: bytes
+          overrides: []
+        gridPos:
+          h: 10
+          w: 12
+          x: 0
+          y: 55
+        id: 13
+        options:
+          legend:
+            calcs: []
+            displayMode: list
+            placement: bottom
+            showLegend: true
+          tooltip:
+            hideZeros: false
+            mode: multi
+            sort: desc
+        targets:
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: avg by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"(G1|PS|Par )?Eden Space", area="heap"})
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} used'
+          refId: A
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: avg by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"(G1|PS|Par )?Eden Space", area="heap"})
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} committed'
+          refId: B
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: avg by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"(G1|PS|Par )?Eden Space", area="heap"})
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} max'
+          refId: C
+        title: Eden Space (Young Gen)
+        type: timeseries
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        fieldConfig:
+          defaults:
+            color:
+              mode: palette-classic
+            custom:
+              axisBorderShow: false
+              axisCenteredZero: false
+              axisColorMode: text
+              axisLabel: ''
+              axisPlacement: auto
+              barAlignment: 0
+              barWidthFactor: 0.6
+              drawStyle: line
+              fillOpacity: 10
+              gradientMode: none
+              hideFrom:
+                legend: false
+                tooltip: false
+                viz: false
+              insertNulls: false
+              lineInterpolation: linear
+              lineWidth: 1
+              pointSize: 5
+              scaleDistribution:
+                type: linear
+              showPoints: never
+              spanNulls: false
+              stacking:
+                group: A
+                mode: none
+              thresholdsStyle:
+                mode: 'off'
+            mappings: []
+            thresholds:
+              mode: absolute
+              steps:
+              - color: green
+              - color: red
+                value: 80
+            unit: bytes
+          overrides: []
+        gridPos:
+          h: 10
+          w: 12
+          x: 12
+          y: 55
+        id: 14
+        options:
+          legend:
+            calcs: []
+            displayMode: list
+            placement: bottom
+            showLegend: true
+          tooltip:
+            hideZeros: false
+            mode: multi
+            sort: desc
+        targets:
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: avg by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"(G1|PS|Par )?Survivor Space", area="heap"})
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} used'
+          refId: A
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: avg by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"(G1|PS|Par )?Survivor Space", area="heap"})
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} committed'
+          refId: B
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: avg by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"(G1|PS|Par )?Survivor Space", area="heap"})
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} max'
+          refId: C
+        title: Survivor Space
+        type: timeseries
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        fieldConfig:
+          defaults:
+            color:
+              mode: palette-classic
+            custom:
+              axisBorderShow: false
+              axisCenteredZero: false
+              axisColorMode: text
+              axisLabel: ''
+              axisPlacement: auto
+              barAlignment: 0
+              barWidthFactor: 0.6
+              drawStyle: line
+              fillOpacity: 10
+              gradientMode: none
+              hideFrom:
+                legend: false
+                tooltip: false
+                viz: false
+              insertNulls: false
+              lineInterpolation: linear
+              lineWidth: 1
+              pointSize: 5
+              scaleDistribution:
+                type: linear
+              showPoints: never
+              spanNulls: false
+              stacking:
+                group: A
+                mode: none
+              thresholdsStyle:
+                mode: 'off'
+            mappings: []
+            thresholds:
+              mode: absolute
+              steps:
+              - color: green
+              - color: red
+                value: 80
+            unit: bytes
+          overrides: []
+        gridPos:
+          h: 10
+          w: 12
+          x: 0
+          y: 65
+        id: 15
+        options:
+          legend:
+            calcs: []
+            displayMode: list
+            placement: bottom
+            showLegend: true
+          tooltip:
+            hideZeros: false
+            mode: multi
+            sort: desc
+        targets:
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: avg by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"(G1 Old Gen|PS Old Gen|Tenured Gen|CMS Old Gen)", area="heap"})
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} used'
+          refId: A
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: avg by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"(G1 Old Gen|PS Old Gen|Tenured Gen|CMS Old Gen)", area="heap"})
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} committed'
+          refId: B
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          expr: avg by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"(G1 Old Gen|PS Old Gen|Tenured Gen|CMS Old Gen)", area="heap"})
+          format: time_series
+          hide: false
+          intervalFactor: 2
+          legendFormat: '{{instance}} max'
+          refId: C
+        title: Old Gen / Tenured Space
+        type: timeseries
+      title: GC Generation Pools
+      type: row
+    schemaVersion: 41
+    tags:
+    - jvm
+    - java
+    - memory
+    templating:
+      list:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        definition: label_values(jvm_memory_used_bytes, cluster)
+        includeAll: false
+        label: Cluster
+        name: cluster
+        options: []
+        query:
+          qryType: 1
+          query: label_values(jvm_memory_used_bytes, cluster)
+          refId: PrometheusVariableQueryEditor-VariableQuery
+        refresh: 2
+        regex: ''
+        sort: 1
+        type: query
+      - allValue: .*
+        current:
+          text: All
+          value: $__all
+        datasource:
+          type: prometheus
+          uid: duplo-metrics
+        definition: label_values(jvm_memory_used_bytes{cluster="$cluster"}, namespace)
+        includeAll: true
+        label: Namespace
+        multi: true
+        name: namespace
+        options: []
+        query:
+          qryType: 1
+          query: label_values(jvm_memory_used_bytes{cluster="$cluster"}, namespace)
+          refId: PrometheusVariableQueryEditor-VariableQuery
+        refresh: 2
+        regex: ''
+        sort: 1
+        type: query
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        definition: label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace"}, job)
+        includeAll: false
+        label: Job
+        name: application
+        options: []
+        query:
+          qryType: 1
+          query: label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace"}, job)
+          refId: PrometheusVariableQueryEditor-VariableQuery
+        refresh: 2
+        regex: ''
+        sort: 1
+        type: query
+      - allValue: .*
+        current:
+          text: All
+          value: $__all
+        datasource:
+          type: prometheus
+          uid: duplo-metrics
+        definition: label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"}, instance)
+        includeAll: true
+        label: Pod
+        multi: true
+        name: pod
+        options: []
+        query:
+          qryType: 1
+          query: label_values(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"}, instance)
+          refId: PrometheusVariableQueryEditor-VariableQuery
+        refresh: 2
+        regex: ''
+        sort: 1
+        type: query
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        definition: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"}, id)
+        hide: 2
+        includeAll: true
+        label: JVM Memory Pools Heap
+        name: jvm_memory_pool_heap
+        options: []
+        query: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"}, id)
+        refresh: 1
+        regex: ''
+        sort: 1
+        type: query
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        definition: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"}, id)
+        hide: 2
+        includeAll: true
+        label: JVM Memory Pools Non-Heap
+        name: jvm_memory_pool_nonheap
+        options: []
+        query: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"}, id)
+        refresh: 1
+        regex: ''
+        sort: 2
+        type: query
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        definition: label_values(jvm_buffer_memory_used_bytes{cluster="$cluster", job="$application"}, id)
+        hide: 2
+        includeAll: true
+        label: JVM Buffer Pools
+        name: jvm_buffer_pool
+        options: []
+        query: label_values(jvm_buffer_memory_used_bytes{cluster="$cluster", job="$application"}, id)
+        refresh: 1
+        regex: ''
+        sort: 1
+        type: query
+    time:
+      from: now-3h
+      to: now
+    timepicker: {}
+    timezone: browser
+    title: JVM Memory
+    uid: integration-jvm-memory
