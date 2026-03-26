@@ -315,7 +315,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status=~"5.."}[2m]))
+              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status=~"5.."}[2m])) or sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application", http_response_status_code=~"5.."}[2m]))
               format: time_series
               legendFormat: ""
               refId: A
@@ -363,7 +363,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: max(http_server_requests_max_seconds{cluster="$cluster", job="$application"})*1000
+              expr: (max(http_server_requests_max_seconds{cluster="$cluster", job="$application"}) or histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{cluster="$cluster", job="$application"}[2m]))))*1000
               format: time_series
               legendFormat: ""
               refId: A
@@ -723,7 +723,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application"}[1m]))
+              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application"}[1m])) or sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application"}[1m]))
               format: time_series
               legendFormat: Rate
               refId: A
@@ -792,7 +792,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status=~"5.."}[1m]))
+              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status=~"5.."}[1m])) or sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application", http_response_status_code=~"5.."}[1m]))
               format: time_series
               legendFormat: Errors
               refId: A
@@ -860,14 +860,14 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(rate(http_server_requests_seconds_sum{cluster="$cluster", job="$application", status!~"5.."}[1m]))/sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status!~"5.."}[1m]))
+              expr: sum(rate(http_server_requests_seconds_sum{cluster="$cluster", job="$application", status!~"5.."}[1m]))/sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status!~"5.."}[1m])) or sum(rate(http_server_request_duration_seconds_sum{cluster="$cluster", job="$application", http_response_status_code!~"5.."}[1m]))/sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application", http_response_status_code!~"5.."}[1m]))
               format: time_series
               legendFormat: Average
               refId: A
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: max(http_server_requests_max_seconds{cluster="$cluster", job="$application", status!~"5.."})
+              expr: max(http_server_requests_max_seconds{cluster="$cluster", job="$application", status!~"5.."}) or histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{cluster="$cluster", job="$application", http_response_status_code!~"5.."}[1m])))
               format: time_series
               legendFormat: Max
               refId: B
@@ -953,6 +953,187 @@ spec:
               legendFormat: '{{instance}} max'
               refId: C
           title: Thread Pool / Utilisation
+          type: timeseries
+        - collapsed: false
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 30
+          id: 19
+          panels: []
+          title: Database
+          type: row
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: short
+            overrides: []
+          gridPos:
+            h: 10
+            w: 12
+            x: 0
+            "y": 31
+          id: 20
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              expr: sum by(job,instance)(db_client_connection_count{cluster="$cluster", job="$application", instance=~"$pod"})
+              format: time_series
+              legendFormat: '{{instance}} active'
+              refId: A
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              expr: sum by(job,instance)(db_client_connection_max{cluster="$cluster", job="$application", instance=~"$pod"})
+              format: time_series
+              legendFormat: '{{instance}} max'
+              refId: B
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              expr: sum by(job,instance)(db_client_connection_idle_min{cluster="$cluster", job="$application", instance=~"$pod"})
+              format: time_series
+              legendFormat: '{{instance}} idle min'
+              refId: C
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              expr: sum by(job,instance)(db_client_connection_pending_requests{cluster="$cluster", job="$application", instance=~"$pod"})
+              format: time_series
+              legendFormat: '{{instance}} pending'
+              refId: D
+          title: DB Connection Pool
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: red
+                          value: 80
+                unit: s
+            overrides: []
+          gridPos:
+            h: 10
+            w: 12
+            x: 12
+            "y": 31
+          id: 21
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              expr: sum(rate(db_client_operation_duration_seconds_sum{cluster="$cluster", job="$application", instance=~"$pod"}[1m])) / sum(rate(db_client_operation_duration_seconds_count{cluster="$cluster", job="$application", instance=~"$pod"}[1m]))
+              format: time_series
+              legendFormat: avg
+              refId: A
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              expr: histogram_quantile(0.95, sum by(le)(rate(db_client_operation_duration_seconds_bucket{cluster="$cluster", job="$application", instance=~"$pod"}[1m])))
+              format: time_series
+              legendFormat: p95
+              refId: B
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              expr: histogram_quantile(0.99, sum by(le)(rate(db_client_operation_duration_seconds_bucket{cluster="$cluster", job="$application", instance=~"$pod"}[1m])))
+              format: time_series
+              legendFormat: p99
+              refId: C
+          title: DB Operation Duration
           type: timeseries
     tags:
         - jvm
