@@ -221,7 +221,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", area="heap"})*100/sum(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", area="heap"})
+              expr: sum(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", area="heap"})*100/sum(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", area="heap"}) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", type="heap"})*100/sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", type="heap"})
               format: time_series
               legendFormat: ""
               refId: A
@@ -269,7 +269,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", area="nonheap"})*100/sum(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", area="nonheap"})
+              expr: sum(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", area="nonheap"})*100/sum(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", area="nonheap"}) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", type="nonheap"})*100/sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", type="nonheap"})
               format: time_series
               legendFormat: ""
               refId: A
@@ -411,7 +411,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: max({__name__=~"process_cpu_usage|jvm_cpu_recent_utilization_ratio", cluster="$cluster", namespace=~"$namespace", job="$application"})*100
+              expr: max({__name__=~"process_cpu_usage|jvm_cpu_recent_utilization_ratio|process_runtime_jvm_cpu_utilization_ratio", cluster="$cluster", namespace=~"$namespace", job="$application"})*100
               format: time_series
               legendFormat: ""
               refId: A
@@ -459,7 +459,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: max(sum by(job,instance)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum", cluster="$cluster", namespace=~"$namespace", job="$application"}[2m])) / on(job,instance) {__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", namespace=~"$namespace", job="$application"})*100
+              expr: max(sum by(job,instance)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum|process_runtime_jvm_gc_duration_seconds_sum", cluster="$cluster", namespace=~"$namespace", job="$application"}[2m])) / on(job,instance) {__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", namespace=~"$namespace", job="$application"})*100
               format: time_series
               legendFormat: ""
               refId: A
@@ -504,7 +504,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: max({__name__=~"jvm_threads_live_threads|jvm_threads_live|jvm_thread_count", cluster="$cluster", namespace=~"$namespace", job="$application"})
+              expr: max({__name__=~"jvm_threads_live|jvm_thread_count|process_runtime_jvm_threads_count", cluster="$cluster", namespace=~"$namespace", job="$application"})
               format: time_series
               legendFormat: ""
               refId: A
@@ -552,7 +552,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum({__name__=~"jvm_threads_states_threads|jvm_threads_states", cluster="$cluster", namespace=~"$namespace", job="$application", state="blocked"})
+              expr: sum({__name__=~"jvm_threads_states", cluster="$cluster", namespace=~"$namespace", job="$application", state="blocked"})
               format: time_series
               legendFormat: ""
               refId: A
@@ -597,7 +597,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: max({__name__=~"process_files_open_files|process_files_open|process_open_fds", cluster="$cluster", namespace=~"$namespace", job="$application"})
+              expr: max({__name__=~"process_files_open|process_open_fds|process_open_file_descriptor_count", cluster="$cluster", namespace=~"$namespace", job="$application"})
               format: time_series
               legendFormat: ""
               refId: A
@@ -867,7 +867,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: max(http_server_requests_seconds_max{cluster="$cluster", namespace=~"$namespace", job="$application", status!~"5.."})
+              expr: max(http_server_requests_max_seconds{cluster="$cluster", namespace=~"$namespace", job="$application", status!~"5.."})
               format: time_series
               legendFormat: Max
               refId: B
@@ -934,21 +934,21 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: '{__name__=~"tomcat_threads_busy_threads|executor_active_threads", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
+              expr: '{__name__=~"executor_active_threads", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
               format: time_series
               legendFormat: '{{instance}} busy'
               refId: A
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: '{__name__=~"tomcat_threads_current_threads|executor_pool_size_threads", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
+              expr: '{__name__=~"executor_pool_size_threads", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
               format: time_series
               legendFormat: '{{instance}} current'
               refId: B
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: '{__name__=~"tomcat_threads_config_max_threads|executor_pool_max_threads", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
+              expr: '{__name__=~"executor_pool_max_threads", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
               format: time_series
               legendFormat: '{{instance}} max'
               refId: C

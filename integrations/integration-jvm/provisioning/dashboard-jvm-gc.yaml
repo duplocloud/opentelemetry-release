@@ -84,7 +84,7 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: sum by(job, instance)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m])) / on(job, instance) {__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}
+                expr: sum by(job, instance)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum|process_runtime_jvm_gc_duration_seconds_sum", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m])) / on(job, instance) {__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}
                 legendFormat: '{{instance}}'
                 refId: A
           title: GC Pressure
@@ -125,7 +125,7 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: label_replace(avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_count|jvm_gc_duration_seconds_count", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m])),"action","$1","action","end of (.+)")
+                expr: label_replace(avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_count|jvm_gc_duration_seconds_count|process_runtime_jvm_gc_duration_seconds_count", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m])),"action","$1","action","end of (.+)")
                 legendFormat: '{{instance}} {{action}} ({{cause}})'
                 refId: A
           title: Collections
@@ -157,13 +157,13 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: label_replace(avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m])) / avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_count|jvm_gc_duration_seconds_count", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m])),"action","$1","action","end of (.+)")
+                expr: label_replace(avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum|process_runtime_jvm_gc_duration_seconds_sum", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m])) / avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_count|jvm_gc_duration_seconds_count|process_runtime_jvm_gc_duration_seconds_count", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m])),"action","$1","action","end of (.+)")
                 legendFormat: '{{instance}} {{action}} avg'
                 refId: A
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: '{__name__=~"jvm_gc_pause_seconds_max|jvm_gc_pause_max_seconds", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
+                expr: '{__name__=~"jvm_gc_pause_max_seconds", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}'
                 legendFormat: '{{instance}} {{action}} max'
                 refId: B
           title: Pause Durations
@@ -283,13 +283,13 @@ spec:
                     - datasource:
                           type: prometheus
                           uid: duplo-metrics
-                      expr: label_replace(histogram_quantile(0.95, sum by(le,job,instance,gc,action)(rate(process_runtime_jvm_gc_duration_seconds_bucket{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
+                      expr: label_replace(histogram_quantile(0.95, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
                       legendFormat: '{{instance}} {{action}} p95'
                       refId: A
                     - datasource:
                           type: prometheus
                           uid: duplo-metrics
-                      expr: label_replace(histogram_quantile(0.50, sum by(le,job,instance,gc,action)(rate(process_runtime_jvm_gc_duration_seconds_bucket{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
+                      expr: label_replace(histogram_quantile(0.50, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
                       legendFormat: '{{instance}} {{action}} p50'
                       refId: B
                 title: GC Pause Duration - p50 / p95 (Histogram)

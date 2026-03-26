@@ -137,7 +137,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="heap"})
+        expr: avg by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="heap"}) or avg by(job,instance)(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", type="heap"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -146,7 +146,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="heap"})
+        expr: avg by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="heap"}) or avg by(job,instance)(process_runtime_jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", type="heap"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -155,7 +155,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="heap"})
+        expr: avg by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="heap"}) or avg by(job,instance)(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", type="heap"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -227,7 +227,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="nonheap"})
+        expr: avg by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="nonheap"}) or avg by(job,instance)(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", type="nonheap"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -236,7 +236,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="nonheap"})
+        expr: avg by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="nonheap"}) or avg by(job,instance)(process_runtime_jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", type="nonheap"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -245,7 +245,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="nonheap"})
+        expr: avg by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", area="nonheap"}) or avg by(job,instance)(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", type="nonheap"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -317,7 +317,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: sum(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"})
+        expr: sum({__name__=~"jvm_memory_used_bytes|process_runtime_jvm_memory_usage_bytes", cluster="$cluster", namespace=~"$namespace", job="$application"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -326,7 +326,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: sum(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"})
+        expr: sum({__name__=~"jvm_memory_committed_bytes|process_runtime_jvm_memory_committed_bytes", cluster="$cluster", namespace=~"$namespace", job="$application"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -335,7 +335,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: sum(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application"})
+        expr: sum({__name__=~"jvm_memory_max_bytes|jvm_memory_limit_bytes|process_runtime_jvm_memory_limit_bytes", cluster="$cluster", namespace=~"$namespace", job="$application"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -407,7 +407,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: sum by(job,instance)(jvm_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: sum by(job,instance)({__name__=~"jvm_memory_used_bytes|process_runtime_jvm_memory_usage_bytes", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -416,7 +416,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: sum by(job,instance)(jvm_memory_committed_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: sum by(job,instance)({__name__=~"jvm_memory_committed_bytes|process_runtime_jvm_memory_committed_bytes", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -425,7 +425,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: sum by(job,instance)(jvm_memory_max_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
+        expr: sum by(job,instance)({__name__=~"jvm_memory_max_bytes|jvm_memory_limit_bytes|process_runtime_jvm_memory_limit_bytes", cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod"})
         format: time_series
         hide: false
         intervalFactor: 2
@@ -719,7 +719,7 @@ spec:
         - datasource:
             type: prometheus
             uid: duplo-metrics
-          expr: jvm_buffer_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"}
+          expr: jvm_buffer_memory_used_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"} or process_runtime_jvm_buffer_usage_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", pool=~"$jvm_buffer_pool"}
           format: time_series
           hide: false
           intervalFactor: 2
@@ -728,7 +728,7 @@ spec:
         - datasource:
             type: prometheus
             uid: duplo-metrics
-          expr: jvm_buffer_total_capacity_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"}
+          expr: jvm_buffer_total_capacity_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"} or process_runtime_jvm_buffer_limit_bytes{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", pool=~"$jvm_buffer_pool"}
           format: time_series
           hide: false
           intervalFactor: 2
@@ -737,7 +737,7 @@ spec:
         - datasource:
             type: prometheus
             uid: duplo-metrics
-          expr: jvm_buffer_count_buffers{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"}
+          expr: jvm_buffer_count_buffers{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"} or process_runtime_jvm_buffer_count{cluster="$cluster", namespace=~"$namespace", job="$application", instance=~"$pod", pool=~"$jvm_buffer_pool"}
           format: time_series
           hide: false
           intervalFactor: 2
