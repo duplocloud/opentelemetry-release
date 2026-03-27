@@ -105,6 +105,7 @@ spec:
       expr: rate({__name__=~"jvm_gc_memory_promoted_bytes_total|jvm_gc_memory_promoted_bytes|process_runtime_jvm_memory_promoted_bytes", cluster="$cluster", job="$application", instance=~"$pod"}[5m])
       legendFormat: '{{instance}} promoted'
       refId: B
+    description: 'Memory allocation and promotion rates. Only available for Micrometer (Spring Boot) and older OTel Java agent instrumented apps.'
     title: Allocated/Promoted
     type: timeseries
   - datasource:
@@ -660,6 +661,7 @@ spec:
       expr: '{__name__=~"process_files_max|process_max_fds|process_max_file_descriptor_count", cluster="$cluster", job="$application", instance=~"$pod"}'
       legendFormat: '{{instance}} max'
       refId: B
+    description: 'Open and max file descriptors. May show no data if the JVM does not expose process-level file descriptor metrics.'
     title: File Descriptors
     type: timeseries
   - datasource:
@@ -725,6 +727,7 @@ spec:
       expr: increase(logback_events_total{cluster="$cluster", job="$application", instance=~"$pod"}[1m])
       legendFormat: '{{instance}} {{level}}'
       refId: A
+    description: 'Log events by level. Only available for Micrometer apps using Logback (logback_events_total). OTel instrumented apps do not expose this metric.'
     title: Log Events
     type: timeseries
   - collapsed: false
@@ -1005,43 +1008,43 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      definition: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"}, id)
+      definition: 'query_result(group by(id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"}) or group by(jvm_memory_pool_name)(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap"}))'
       hide: 2
       includeAll: true
       label: JVM Memory Pools Heap
       name: jvm_memory_pool_heap
       options: []
-      query: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"}, id)
+      query: 'query_result(group by(id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"}) or group by(jvm_memory_pool_name)(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap"}))'
       refresh: 1
-      regex: ''
+      regex: '/(?:id|jvm_memory_pool_name)="([^"]+)"/'
       sort: 1
       type: query
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      definition: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"}, id)
+      definition: 'query_result(group by(id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"}) or group by(jvm_memory_pool_name)(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap"}))'
       hide: 2
       includeAll: true
       label: JVM Memory Pools Non-Heap
       name: jvm_memory_pool_nonheap
       options: []
-      query: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"}, id)
+      query: 'query_result(group by(id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"}) or group by(jvm_memory_pool_name)(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap"}))'
       refresh: 1
-      regex: ''
+      regex: '/(?:id|jvm_memory_pool_name)="([^"]+)"/'
       sort: 2
       type: query
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      definition: label_values(jvm_buffer_memory_used_bytes{cluster="$cluster", job="$application"}, id)
+      definition: 'query_result(group by(id)(jvm_buffer_memory_used_bytes{cluster="$cluster", job="$application"}) or group by(jvm_buffer_pool_name)(jvm_buffer_memory_usage_bytes{cluster="$cluster", job="$application"}))'
       hide: 2
       includeAll: true
       label: JVM Buffer Pools
       name: jvm_buffer_pool
       options: []
-      query: label_values(jvm_buffer_memory_used_bytes{cluster="$cluster", job="$application"}, id)
+      query: 'query_result(group by(id)(jvm_buffer_memory_used_bytes{cluster="$cluster", job="$application"}) or group by(jvm_buffer_pool_name)(jvm_buffer_memory_usage_bytes{cluster="$cluster", job="$application"}))'
       refresh: 1
-      regex: ''
+      regex: '/(?:id|jvm_buffer_pool_name)="([^"]+)"/'
       sort: 1
       type: query
   time:
