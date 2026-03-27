@@ -57,7 +57,7 @@ spec:
     title: Pyroscope Profiles Explorer
     tooltip: Explore Java application profiles in Pyroscope
     type: link
-    url: /a/grafana-pyroscope-app/explore
+    url: /a/grafana-pyroscope-app/explore?searchText=&panelType=time-series&layout=grid&hideNoData=off&explorationType=flame-graph&var-serviceName=ebpf%2F${namespace}%2F${application}&var-profileMetricId=process_cpu%3Acpu%3Ananoseconds%3Acpu%3Ananoseconds&var-groupBy=all&var-dataSource=duplo-profiling&var-filters=&var-filtersBaseline=&var-filtersComparison=&maxNodes=16384
   panels:
   - collapsed: false
     gridPos:
@@ -108,7 +108,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: max(process_uptime_seconds{cluster="$cluster", job="$application"})
+      expr: max(process_uptime_seconds{cluster="$cluster", job="$application", instance=~"$pod"})
       format: time_series
       legendFormat: ''
       refId: A
@@ -153,7 +153,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: min(process_start_time_seconds{cluster="$cluster", job="$application"})*1000
+      expr: min(process_start_time_seconds{cluster="$cluster", job="$application", instance=~"$pod"})*1000
       format: time_series
       legendFormat: ''
       refId: A
@@ -201,7 +201,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"})*100/sum(jvm_memory_max_bytes{cluster="$cluster", job="$application", area="heap"}) or sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap"})*100/clamp_min(sum(jvm_memory_limit_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap"}),1) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", type="heap"})*100/sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", job="$application", type="heap"})
+      expr: sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap", instance=~"$pod"})*100/sum(jvm_memory_max_bytes{cluster="$cluster", job="$application", area="heap", instance=~"$pod"}) or sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap", instance=~"$pod"})*100/clamp_min(sum(jvm_memory_limit_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap", instance=~"$pod"}),1) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", type="heap", instance=~"$pod"})*100/sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", job="$application", type="heap", instance=~"$pod"})
       format: time_series
       legendFormat: ''
       refId: A
@@ -249,7 +249,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"})*100/clamp_min(sum(jvm_memory_max_bytes{cluster="$cluster", job="$application", area="nonheap"}),1) or sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap"})*100/clamp_min(sum(jvm_memory_limit_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap"}),1) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", type="nonheap"})*100/clamp_min(sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", job="$application", type="nonheap"}),1)
+      expr: sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap", instance=~"$pod"})*100/clamp_min(sum(jvm_memory_max_bytes{cluster="$cluster", job="$application", area="nonheap", instance=~"$pod"}),1) or sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap", instance=~"$pod"})*100/clamp_min(sum(jvm_memory_limit_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap", instance=~"$pod"}),1) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", type="nonheap", instance=~"$pod"})*100/clamp_min(sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", job="$application", type="nonheap", instance=~"$pod"}),1)
       format: time_series
       legendFormat: ''
       refId: A
@@ -297,7 +297,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: max({__name__=~"process_cpu_usage|jvm_cpu_recent_utilization_ratio|process_runtime_jvm_cpu_utilization_ratio", cluster="$cluster", job="$application"})*100
+      expr: max({__name__=~"process_cpu_usage|jvm_cpu_recent_utilization_ratio|process_runtime_jvm_cpu_utilization_ratio", cluster="$cluster", job="$application", instance=~"$pod"})*100
       format: time_series
       legendFormat: ''
       refId: A
@@ -345,7 +345,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: max(sum by(job,instance)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum|process_runtime_jvm_gc_duration_seconds_sum", cluster="$cluster", job="$application"}[2m])) / on(job,instance) {__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", job="$application"})*100
+      expr: max(sum by(job,instance)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum|process_runtime_jvm_gc_duration_seconds_sum", cluster="$cluster", job="$application", instance=~"$pod"}[2m])) / on(job,instance) {__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", job="$application", instance=~"$pod"})*100
       format: time_series
       legendFormat: ''
       refId: A
@@ -390,7 +390,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: max({__name__=~"jvm_threads_live|jvm_thread_count|process_runtime_jvm_threads_count", cluster="$cluster", job="$application"})
+      expr: max({__name__=~"jvm_threads_live|jvm_thread_count|process_runtime_jvm_threads_count", cluster="$cluster", job="$application", instance=~"$pod"})
       format: time_series
       legendFormat: ''
       refId: A
@@ -438,7 +438,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: sum({__name__=~"jvm_threads_states", cluster="$cluster", job="$application", state="blocked"}) or sum(jvm_thread_count{cluster="$cluster", job="$application", jvm_thread_state="BLOCKED"})
+      expr: sum({__name__=~"jvm_threads_states", cluster="$cluster", job="$application", state="blocked", instance=~"$pod"}) or sum(jvm_thread_count{cluster="$cluster", job="$application", jvm_thread_state="BLOCKED", instance=~"$pod"})
       format: time_series
       legendFormat: ''
       refId: A
@@ -483,7 +483,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: max({__name__=~"process_files_open|process_open_fds|process_open_file_descriptor_count", cluster="$cluster", job="$application"})
+      expr: max({__name__=~"process_files_open|process_open_fds|process_open_file_descriptor_count", cluster="$cluster", job="$application", instance=~"$pod"})
       format: time_series
       legendFormat: ''
       refId: A
@@ -531,7 +531,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: sum(rate(logback_events_total{cluster="$cluster", job="$application", level="error"}[2m]))*60
+      expr: sum(rate(logback_events_total{cluster="$cluster", job="$application", level="error", instance=~"$pod"}[2m]))*60
       format: time_series
       legendFormat: ''
       refId: A
@@ -791,7 +791,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: sum({__name__=~"jvm_memory_used_bytes|process_runtime_jvm_memory_usage_bytes", cluster="$cluster", job="$application"})
+      expr: sum({__name__=~"jvm_memory_used_bytes|process_runtime_jvm_memory_usage_bytes", cluster="$cluster", job="$application", instance=~"$pod"})
       format: time_series
       hide: false
       intervalFactor: 2
@@ -800,7 +800,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: sum({__name__=~"jvm_memory_committed_bytes|process_runtime_jvm_memory_committed_bytes", cluster="$cluster", job="$application"})
+      expr: sum({__name__=~"jvm_memory_committed_bytes|process_runtime_jvm_memory_committed_bytes", cluster="$cluster", job="$application", instance=~"$pod"})
       format: time_series
       hide: false
       intervalFactor: 2
@@ -809,7 +809,7 @@ spec:
     - datasource:
         type: prometheus
         uid: duplo-metrics
-      expr: sum({__name__=~"jvm_memory_max_bytes|jvm_memory_limit_bytes|process_runtime_jvm_memory_limit_bytes", cluster="$cluster", job="$application"})
+      expr: sum({__name__=~"jvm_memory_max_bytes|jvm_memory_limit_bytes|process_runtime_jvm_memory_limit_bytes", cluster="$cluster", job="$application", instance=~"$pod"})
       format: time_series
       hide: false
       intervalFactor: 2

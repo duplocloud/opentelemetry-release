@@ -57,7 +57,7 @@ spec:
     title: Pyroscope Profiles Explorer
     tooltip: Explore Java application profiles in Pyroscope
     type: link
-    url: /a/grafana-pyroscope-app/explore
+    url: /a/grafana-pyroscope-app/explore?searchText=&panelType=time-series&layout=grid&hideNoData=off&explorationType=flame-graph&var-serviceName=ebpf%2F${namespace}%2F${application}&var-profileMetricId=process_cpu%3Acpu%3Ananoseconds%3Acpu%3Ananoseconds&var-groupBy=all&var-dataSource=duplo-profiling&var-filters=&var-filtersBaseline=&var-filtersComparison=&maxNodes=16384
   panels:
   - collapsed: false
     gridPos:
