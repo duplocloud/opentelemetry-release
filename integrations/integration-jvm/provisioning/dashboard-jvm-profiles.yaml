@@ -15,8 +15,7 @@ spec:
           title: Back to JVM Overview
           tooltip: ""
           type: link
-          url: /d/integration-jvm-dashboard/jvm-overview?${__url_time_range}&${__all_variables}
-        - asDropdown: false
+          url: /d/integration-jvm-dashboard/jvm-overview        - asDropdown: false
           icon: external link
           includeVars: true
           keepTime: true
@@ -25,8 +24,7 @@ spec:
           title: JVM Memory
           tooltip: ""
           type: link
-          url: /d/integration-jvm-memory/jvm-memory?${__url_time_range}&${__all_variables}
-        - asDropdown: false
+          url: /d/integration-jvm-memory/jvm-memory        - asDropdown: false
           icon: external link
           includeVars: true
           keepTime: true
@@ -35,8 +33,7 @@ spec:
           title: JVM Runtime
           tooltip: ""
           type: link
-          url: /d/integration-jvm-runtime/jvm-runtime?${__url_time_range}&${__all_variables}
-        - asDropdown: false
+          url: /d/integration-jvm-runtime/jvm-runtime        - asDropdown: false
           icon: external link
           includeVars: true
           keepTime: true
@@ -45,8 +42,7 @@ spec:
           title: JVM GC
           tooltip: ""
           type: link
-          url: /d/integration-jvm-gc/jvm-gc?${__url_time_range}&${__all_variables}
-    panels:
+          url: /d/integration-jvm-gc/jvm-gc    panels:
         - gridPos:
               h: 2
               w: 24
@@ -148,7 +144,7 @@ spec:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
                       labelSelector: '{service_name=~"java/$namespace/$application"}'
-                      profileTypeId: "process_cpu:cpu"
+                      profileTypeId: "process_cpu:cpu:nanoseconds:cpu:nanoseconds"
                       queryType: profile
                       refId: A
                 title: CPU Profile
@@ -167,7 +163,7 @@ spec:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
                       labelSelector: '{service_name=~"java/$namespace/$application"}'
-                      profileTypeId: "memory:alloc_in_new_tlab_bytes"
+                      profileTypeId: "memory:alloc_in_new_tlab_bytes:bytes:space:bytes"
                       queryType: profile
                       refId: A
                 title: Memory Allocation Profile
@@ -186,7 +182,7 @@ spec:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
                       labelSelector: '{service_name=~"java/$namespace/$application"}'
-                      profileTypeId: "lock:contentions"
+                      profileTypeId: "lock:contentions:count:lock:nanoseconds"
                       queryType: profile
                       refId: A
                 title: Lock Contention Profile
@@ -205,7 +201,7 @@ spec:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
                       labelSelector: '{service_name=~"java/$namespace/$application"}'
-                      profileTypeId: "wall:wall"
+                      profileTypeId: "wall:wall:nanoseconds:wall:nanoseconds"
                       queryType: profile
                       refId: A
                 title: Wall Clock Profile
@@ -284,29 +280,29 @@ spec:
               options:
                   - selected: true
                     text: CPU
-                    value: "process_cpu:cpu"
+                    value: "process_cpu:cpu:nanoseconds:cpu:nanoseconds"
                   - selected: false
                     text: Allocations - Bytes
-                    value: "memory:alloc_in_new_tlab_bytes"
+                    value: "memory:alloc_in_new_tlab_bytes:bytes:space:bytes"
                   - selected: false
                     text: Allocations - Objects
-                    value: "memory:alloc_in_new_tlab_objects"
+                    value: "memory:alloc_in_new_tlab_objects:count:space:bytes"
                   - selected: false
                     text: Live Heap
-                    value: "memory:live"
+                    value: "memory:live:bytes:space:bytes"
                   - selected: false
                     text: Wall Clock
-                    value: "wall:wall"
+                    value: "wall:wall:nanoseconds:wall:nanoseconds"
                   - selected: false
                     text: Lock Contentions
-                    value: "lock:contentions"
+                    value: "lock:contentions:count:lock:nanoseconds"
                   - selected: false
                     text: Lock Delay
-                    value: "lock:delay"
+                    value: "lock:delay:nanoseconds:lock:nanoseconds"
                   - selected: false
                     text: "CPU - itimer"
-                    value: "itimer:cpu"
-              query: "process_cpu:cpu : CPU,memory:alloc_in_new_tlab_bytes : Allocations - Bytes,memory:alloc_in_new_tlab_objects : Allocations - Objects,memory:live : Live Heap,wall:wall : Wall Clock,lock:contentions : Lock Contentions,lock:delay : Lock Delay,itimer:cpu : CPU - itimer"
+                    value: "itimer:cpu:nanoseconds:cpu:nanoseconds"
+              query: "process_cpu:cpu:nanoseconds:cpu:nanoseconds : CPU,memory:alloc_in_new_tlab_bytes:bytes:space:bytes : Allocations - Bytes,memory:alloc_in_new_tlab_objects:count:space:bytes : Allocations - Objects,memory:live:bytes:space:bytes : Live Heap,wall:wall:nanoseconds:wall:nanoseconds : Wall Clock,lock:contentions:count:lock:nanoseconds : Lock Contentions,lock:delay:nanoseconds:lock:nanoseconds : Lock Delay,itimer:cpu:nanoseconds:cpu:nanoseconds : CPU - itimer"
               type: custom
     time:
         from: now-1h

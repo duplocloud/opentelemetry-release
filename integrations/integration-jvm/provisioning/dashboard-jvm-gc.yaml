@@ -15,8 +15,7 @@ spec:
           title: Back to JVM Overview
           tooltip: ""
           type: link
-          url: /d/integration-jvm-dashboard/jvm-overview?${__url_time_range}&${__all_variables}
-        - asDropdown: false
+          url: /d/integration-jvm-dashboard/jvm-overview        - asDropdown: false
           icon: external link
           includeVars: true
           keepTime: true
@@ -25,8 +24,7 @@ spec:
           title: JVM Memory
           tooltip: ""
           type: link
-          url: /d/integration-jvm-memory/jvm-memory?${__url_time_range}&${__all_variables}
-        - asDropdown: false
+          url: /d/integration-jvm-memory/jvm-memory        - asDropdown: false
           icon: external link
           includeVars: true
           keepTime: true
@@ -35,8 +33,7 @@ spec:
           title: JVM Runtime
           tooltip: ""
           type: link
-          url: /d/integration-jvm-runtime/jvm-runtime?${__url_time_range}&${__all_variables}
-        - asDropdown: false
+          url: /d/integration-jvm-runtime/jvm-runtime        - asDropdown: false
           icon: external link
           includeVars: true
           keepTime: true
@@ -45,8 +42,7 @@ spec:
           title: JVM Profiles
           tooltip: ""
           type: link
-          url: /d/integration-jvm-profiles/jvm-profiles?${__url_time_range}&${__all_variables}
-    panels:
+          url: /d/integration-jvm-profiles/jvm-profiles    panels:
         - collapsed: false
           gridPos:
               h: 1
@@ -84,7 +80,7 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: sum by(job, instance)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum|process_runtime_jvm_gc_duration_seconds_sum", cluster="$cluster", job="$application", instance=~"$pod"}[1m])) / on(job, instance) {__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", job="$application", instance=~"$pod"}
+                expr: sum by(job, instance)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum|process_runtime_jvm_gc_duration_seconds_sum", cluster="$cluster", job="$application", instance=~"$pod"}[5m])) / on(job, instance) {__name__=~"system_cpu_count|jvm_cpu_count", cluster="$cluster", job="$application", instance=~"$pod"}
                 legendFormat: '{{instance}}'
                 refId: A
           title: GC Pressure
@@ -125,7 +121,7 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: label_replace(avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_count|jvm_gc_duration_seconds_count|process_runtime_jvm_gc_duration_seconds_count", cluster="$cluster", job="$application", instance=~"$pod"}[1m])),"action","$1","action","end of (.+)")
+                expr: label_replace(avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_count|jvm_gc_duration_seconds_count|process_runtime_jvm_gc_duration_seconds_count", cluster="$cluster", job="$application", instance=~"$pod"}[5m])),"action","$1","action","end of (.+)")
                 legendFormat: '{{instance}} {{action}} ({{cause}})'
                 refId: A
           title: Collections
@@ -157,7 +153,7 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: label_replace(avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum|process_runtime_jvm_gc_duration_seconds_sum", cluster="$cluster", job="$application", instance=~"$pod"}[1m])) / avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_count|jvm_gc_duration_seconds_count|process_runtime_jvm_gc_duration_seconds_count", cluster="$cluster", job="$application", instance=~"$pod"}[1m])),"action","$1","action","end of (.+)")
+                expr: label_replace(avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_sum|jvm_gc_duration_seconds_sum|process_runtime_jvm_gc_duration_seconds_sum", cluster="$cluster", job="$application", instance=~"$pod"}[5m])) / avg by(job,instance,action,cause)(rate({__name__=~"jvm_gc_pause_seconds_count|jvm_gc_duration_seconds_count|process_runtime_jvm_gc_duration_seconds_count", cluster="$cluster", job="$application", instance=~"$pod"}[5m])),"action","$1","action","end of (.+)")
                 legendFormat: '{{instance}} {{action}} avg'
                 refId: A
               - datasource:
@@ -204,13 +200,13 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: rate({__name__=~"jvm_gc_memory_allocated_bytes_total|jvm_gc_memory_allocated_bytes|process_runtime_jvm_memory_allocated_bytes", cluster="$cluster", job="$application", instance=~"$pod"}[1m])
+                expr: rate({__name__=~"jvm_gc_memory_allocated_bytes_total|jvm_gc_memory_allocated_bytes|process_runtime_jvm_memory_allocated_bytes", cluster="$cluster", job="$application", instance=~"$pod"}[5m])
                 legendFormat: '{{instance}} allocated'
                 refId: A
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: rate({__name__=~"jvm_gc_memory_promoted_bytes_total|jvm_gc_memory_promoted_bytes|process_runtime_jvm_memory_promoted_bytes", cluster="$cluster", job="$application", instance=~"$pod"}[1m])
+                expr: rate({__name__=~"jvm_gc_memory_promoted_bytes_total|jvm_gc_memory_promoted_bytes|process_runtime_jvm_memory_promoted_bytes", cluster="$cluster", job="$application", instance=~"$pod"}[5m])
                 legendFormat: '{{instance}} promoted'
                 refId: B
           title: Allocated/Promoted
@@ -409,13 +405,13 @@ spec:
                     - datasource:
                           type: prometheus
                           uid: duplo-metrics
-                      expr: label_replace(histogram_quantile(0.95, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_pause_seconds_bucket|jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
+                      expr: label_replace(histogram_quantile(0.95, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_pause_seconds_bucket|jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[5m]))),"action","$1","action","end of (.+)")
                       legendFormat: '{{instance}} {{action}} p95'
                       refId: A
                     - datasource:
                           type: prometheus
                           uid: duplo-metrics
-                      expr: label_replace(histogram_quantile(0.50, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_pause_seconds_bucket|jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
+                      expr: label_replace(histogram_quantile(0.50, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_pause_seconds_bucket|jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[5m]))),"action","$1","action","end of (.+)")
                       legendFormat: '{{instance}} {{action}} p50'
                       refId: B
                 title: GC Pause Duration - p50 / p95 (Histogram)
