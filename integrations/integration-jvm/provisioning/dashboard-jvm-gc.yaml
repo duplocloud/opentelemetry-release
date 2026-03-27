@@ -163,7 +163,7 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: '{__name__=~"jvm_gc_pause_max_seconds", cluster="$cluster", job="$application", instance=~"$pod"}'
+                expr: '{__name__=~"jvm_gc_pause_max_seconds|jvm_gc_duration_seconds_max|process_runtime_jvm_gc_duration_seconds_max", cluster="$cluster", job="$application", instance=~"$pod"}'
                 legendFormat: '{{instance}} {{action}} max'
                 refId: B
           title: Pause Durations
@@ -204,13 +204,13 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: rate(jvm_gc_memory_allocated_bytes_total{cluster="$cluster", job="$application", instance=~"$pod"}[1m])
+                expr: rate({__name__=~"jvm_gc_memory_allocated_bytes_total|jvm_gc_memory_allocated_bytes|process_runtime_jvm_memory_allocated_bytes", cluster="$cluster", job="$application", instance=~"$pod"}[1m])
                 legendFormat: '{{instance}} allocated'
                 refId: A
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: rate(jvm_gc_memory_promoted_bytes_total{cluster="$cluster", job="$application", instance=~"$pod"}[1m])
+                expr: rate({__name__=~"jvm_gc_memory_promoted_bytes_total|jvm_gc_memory_promoted_bytes|process_runtime_jvm_memory_promoted_bytes", cluster="$cluster", job="$application", instance=~"$pod"}[1m])
                 legendFormat: '{{instance}} promoted'
                 refId: B
           title: Allocated/Promoted
@@ -243,17 +243,143 @@ spec:
               - datasource:
                     type: prometheus
                     uid: duplo-metrics
-                expr: avg by(job,instance,pool)(process_runtime_jvm_memory_usage_after_last_gc_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap"})
+                expr: avg by(job,instance,pool)(process_runtime_jvm_memory_usage_after_last_gc_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap"}) or avg by(job,instance,pool)(jvm_memory_used_after_last_gc_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap"}) or label_replace(avg by(job,instance,id)(jvm_memory_used_after_last_gc_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap"}),"pool","$1","id","(.+)")
                 legendFormat: '{{instance}} {{pool}}'
                 refId: A
           title: Memory After Last GC (Leak Detector)
+          type: timeseries
+        - collapsed: false
+          gridPos:
+              h: 1
+              w: 24
+              x: 0
+              "y": 33
+          id: 11
+          title: GC Generation Pools
+          type: row
+        - datasource:
+              type: prometheus
+              uid: duplo-metrics
+          description: "Eden Space memory usage - where new objects are allocated."
+          fieldConfig:
+              defaults:
+                  unit: bytes
+              overrides: []
+          gridPos:
+              h: 10
+              w: 8
+              x: 0
+              "y": 34
+          id: 12
+          options:
+              legend:
+                  calcs: []
+                  displayMode: list
+                  placement: bottom
+                  showLegend: true
+              tooltip:
+                  hideZeros: false
+                  mode: multi
+                  sort: desc
+          targets:
+              - datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                expr: avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Eden.*"}) or avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Eden.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Eden.*"})
+                legendFormat: '{{instance}} used'
+                refId: A
+              - datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                expr: avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Eden.*"}) or avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Eden.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Eden.*"})
+                legendFormat: '{{instance}} committed'
+                refId: B
+          title: Eden Space
+          type: timeseries
+        - datasource:
+              type: prometheus
+              uid: duplo-metrics
+          description: "Survivor Space memory usage - objects that survived minor GC."
+          fieldConfig:
+              defaults:
+                  unit: bytes
+              overrides: []
+          gridPos:
+              h: 10
+              w: 8
+              x: 8
+              "y": 34
+          id: 13
+          options:
+              legend:
+                  calcs: []
+                  displayMode: list
+                  placement: bottom
+                  showLegend: true
+              tooltip:
+                  hideZeros: false
+                  mode: multi
+                  sort: desc
+          targets:
+              - datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                expr: avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Survivor.*"}) or avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Survivor.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Survivor.*"})
+                legendFormat: '{{instance}} used'
+                refId: A
+              - datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                expr: avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Survivor.*"}) or avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Survivor.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Survivor.*"})
+                legendFormat: '{{instance}} committed'
+                refId: B
+          title: Survivor Space
+          type: timeseries
+        - datasource:
+              type: prometheus
+              uid: duplo-metrics
+          description: "Old Gen / Tenured memory usage - long-lived objects promoted from young generation."
+          fieldConfig:
+              defaults:
+                  unit: bytes
+              overrides: []
+          gridPos:
+              h: 10
+              w: 8
+              x: 16
+              "y": 34
+          id: 14
+          options:
+              legend:
+                  calcs: []
+                  displayMode: list
+                  placement: bottom
+                  showLegend: true
+              tooltip:
+                  hideZeros: false
+                  mode: multi
+                  sort: desc
+          targets:
+              - datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                expr: avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Old.*|.*Tenured.*"}) or avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Old.*|.*Tenured.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Old.*|.*Tenured.*"})
+                legendFormat: '{{instance}} used'
+                refId: A
+              - datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                expr: avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Old.*|.*Tenured.*"}) or avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Old.*|.*Tenured.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Old.*|.*Tenured.*"})
+                legendFormat: '{{instance}} committed'
+                refId: B
+          title: Old Gen / Tenured
           type: timeseries
         - collapsed: true
           gridPos:
               h: 1
               w: 24
               x: 0
-              "y": 33
+              "y": 44
           id: 9
           panels:
               - datasource:
@@ -267,7 +393,7 @@ spec:
                     h: 10
                     w: 12
                     x: 0
-                    "y": 34
+                    "y": 45
                 id: 10
                 options:
                     legend:
@@ -283,13 +409,13 @@ spec:
                     - datasource:
                           type: prometheus
                           uid: duplo-metrics
-                      expr: label_replace(histogram_quantile(0.95, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
+                      expr: label_replace(histogram_quantile(0.95, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_pause_seconds_bucket|jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
                       legendFormat: '{{instance}} {{action}} p95'
                       refId: A
                     - datasource:
                           type: prometheus
                           uid: duplo-metrics
-                      expr: label_replace(histogram_quantile(0.50, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
+                      expr: label_replace(histogram_quantile(0.50, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_pause_seconds_bucket|jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[1m]))),"action","$1","action","end of (.+)")
                       legendFormat: '{{instance}} {{action}} p50'
                       refId: B
                 title: GC Pause Duration - p50 / p95 (Histogram)
@@ -325,16 +451,18 @@ spec:
                   query: label_values(jvm_memory_used_bytes{cluster="$cluster"}, instance)
                   refId: PrometheusVariableQueryEditor-VariableQuery
               regex: /^([^.]+)\..+/
+              sort: 1
               type: query
             - datasource:
                   type: prometheus
                   uid: duplo-metrics
+              definition: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)
               includeAll: false
               label: Job
               name: application
               query:
                   qryType: 1
-                  query: label_values(jvm_memory_used_bytes{cluster="$cluster"}, job)
+                  query: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)
                   refId: PrometheusVariableQueryEditor-VariableQuery
               type: query
             - allValue: ".*"

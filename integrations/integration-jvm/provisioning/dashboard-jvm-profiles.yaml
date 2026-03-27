@@ -80,7 +80,7 @@ spec:
               - datasource:
                     type: grafana-pyroscope-datasource
                     uid: duplo-profiling
-                labelSelector: '{service_name="$application", cluster=~"$cluster"}'
+                labelSelector: '{service_name=~"java/$namespace/$application"}'
                 profileTypeId: "$profile_type"
                 queryType: profile
                 refId: A
@@ -120,7 +120,7 @@ spec:
                     uid: duplo-profiling
                 groupBy:
                     - service_name
-                labelSelector: '{service_name="$application", cluster=~"$cluster"}'
+                labelSelector: '{service_name=~"java/$namespace/$application"}'
                 profileTypeId: "$profile_type"
                 queryType: metrics
                 refId: A
@@ -147,7 +147,7 @@ spec:
                     - datasource:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
-                      labelSelector: '{service_name="$application", cluster=~"$cluster"}'
+                      labelSelector: '{service_name=~"java/$namespace/$application"}'
                       profileTypeId: "process_cpu:cpu"
                       queryType: profile
                       refId: A
@@ -166,7 +166,7 @@ spec:
                     - datasource:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
-                      labelSelector: '{service_name="$application", cluster=~"$cluster"}'
+                      labelSelector: '{service_name=~"java/$namespace/$application"}'
                       profileTypeId: "memory:alloc_in_new_tlab_bytes"
                       queryType: profile
                       refId: A
@@ -185,7 +185,7 @@ spec:
                     - datasource:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
-                      labelSelector: '{service_name="$application", cluster=~"$cluster"}'
+                      labelSelector: '{service_name=~"java/$namespace/$application"}'
                       profileTypeId: "lock:contentions"
                       queryType: profile
                       refId: A
@@ -204,7 +204,7 @@ spec:
                     - datasource:
                           type: grafana-pyroscope-datasource
                           uid: duplo-profiling
-                      labelSelector: '{service_name="$application", cluster=~"$cluster"}'
+                      labelSelector: '{service_name=~"java/$namespace/$application"}'
                       profileTypeId: "wall:wall"
                       queryType: profile
                       refId: A
@@ -244,17 +244,19 @@ spec:
                   refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               regex: /^([^.]+)\..+/
+              sort: 1
               type: query
             - datasource:
                   type: prometheus
                   uid: duplo-metrics
+              definition: 'label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)'
               includeAll: false
               label: Job
               multi: false
               name: application
               query:
                   qryType: 1
-                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster"}, job)'
+                  query: 'label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)'
                   refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               type: query

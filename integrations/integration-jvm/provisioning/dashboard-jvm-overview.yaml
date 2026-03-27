@@ -221,7 +221,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"})*100/sum(jvm_memory_max_bytes{cluster="$cluster", job="$application", area="heap"}) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", type="heap"})*100/sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", job="$application", type="heap"})
+              expr: sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"})*100/sum(jvm_memory_max_bytes{cluster="$cluster", job="$application", area="heap"}) or sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap"})*100/clamp_min(sum(jvm_memory_limit_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap"}),1) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", type="heap"})*100/sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", job="$application", type="heap"})
               format: time_series
               legendFormat: ""
               refId: A
@@ -269,7 +269,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"})*100/sum(jvm_memory_max_bytes{cluster="$cluster", job="$application", area="nonheap"}) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", type="nonheap"})*100/sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", job="$application", type="nonheap"})
+              expr: sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"})*100/clamp_min(sum(jvm_memory_max_bytes{cluster="$cluster", job="$application", area="nonheap"}),1) or sum(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap"})*100/clamp_min(sum(jvm_memory_limit_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap"}),1) or sum(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", type="nonheap"})*100/clamp_min(sum(process_runtime_jvm_memory_limit_bytes{cluster="$cluster", job="$application", type="nonheap"}),1)
               format: time_series
               legendFormat: ""
               refId: A
@@ -315,7 +315,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status=~"5.."}[2m])) or sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application", http_response_status_code=~"5.."}[2m]))
+              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status=~"5.."}[2m])) or sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application", http_response_status_code=~"5.."}[2m])) or sum(rate(http_server_duration_milliseconds_count{cluster="$cluster", job="$application", http_status_code=~"5.."}[2m]))
               format: time_series
               legendFormat: ""
               refId: A
@@ -552,7 +552,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum({__name__=~"jvm_threads_states", cluster="$cluster", job="$application", state="blocked"})
+              expr: sum({__name__=~"jvm_threads_states", cluster="$cluster", job="$application", state="blocked"}) or sum(jvm_thread_count{cluster="$cluster", job="$application", jvm_thread_state="BLOCKED"})
               format: time_series
               legendFormat: ""
               refId: A
@@ -723,7 +723,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application"}[1m])) or sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application"}[1m]))
+              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application"}[1m])) or sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application"}[1m])) or sum(rate(http_server_duration_milliseconds_count{cluster="$cluster", job="$application"}[1m]))
               format: time_series
               legendFormat: Rate
               refId: A
@@ -792,7 +792,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status=~"5.."}[1m])) or sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application", http_response_status_code=~"5.."}[1m]))
+              expr: sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status=~"5.."}[1m])) or sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application", http_response_status_code=~"5.."}[1m])) or sum(rate(http_server_duration_milliseconds_count{cluster="$cluster", job="$application", http_status_code=~"5.."}[1m]))
               format: time_series
               legendFormat: Errors
               refId: A
@@ -860,14 +860,14 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: sum(rate(http_server_requests_seconds_sum{cluster="$cluster", job="$application", status!~"5.."}[1m]))/sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status!~"5.."}[1m])) or sum(rate(http_server_request_duration_seconds_sum{cluster="$cluster", job="$application", http_response_status_code!~"5.."}[1m]))/sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application", http_response_status_code!~"5.."}[1m]))
+              expr: sum(rate(http_server_requests_seconds_sum{cluster="$cluster", job="$application", status!~"5.."}[1m]))/sum(rate(http_server_requests_seconds_count{cluster="$cluster", job="$application", status!~"5.."}[1m])) or sum(rate(http_server_request_duration_seconds_sum{cluster="$cluster", job="$application", http_response_status_code!~"5.."}[1m]))/sum(rate(http_server_request_duration_seconds_count{cluster="$cluster", job="$application", http_response_status_code!~"5.."}[1m])) or sum(rate(http_server_duration_milliseconds_sum{cluster="$cluster", job="$application", http_status_code!~"5.."}[1m]))/sum(rate(http_server_duration_milliseconds_count{cluster="$cluster", job="$application", http_status_code!~"5.."}[1m]))/1000
               format: time_series
               legendFormat: Average
               refId: A
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              expr: max(http_server_requests_max_seconds{cluster="$cluster", job="$application", status!~"5.."}) or histogram_quantile(0.99, sum(rate(http_server_request_duration_seconds_bucket{cluster="$cluster", job="$application", http_response_status_code!~"5.."}[1m])))
+              expr: max(http_server_requests_max_seconds{cluster="$cluster", job="$application", status!~"5.."}) or histogram_quantile(0.99, sum by(le)(rate(http_server_request_duration_seconds_bucket{cluster="$cluster", job="$application", http_response_status_code!~"5.."}[1m]))) or histogram_quantile(0.99, sum by(le)(rate(http_server_duration_milliseconds_bucket{cluster="$cluster", job="$application", http_status_code!~"5.."}[1m])))/1000
               format: time_series
               legendFormat: Max
               refId: B
@@ -1181,14 +1181,14 @@ spec:
             - datasource:
                 type: prometheus
                 uid: duplo-metrics
-              definition: label_values(jvm_memory_used_bytes{cluster="$cluster"}, job)
+              definition: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)
               includeAll: false
               label: Job
               name: application
               options: []
               query:
                 qryType: 1
-                query: label_values(jvm_memory_used_bytes{cluster="$cluster"}, job)
+                query: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 2
               regex: ""

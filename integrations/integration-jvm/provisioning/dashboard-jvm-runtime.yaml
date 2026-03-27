@@ -297,13 +297,13 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"jvm_threads_daemon", cluster="$cluster", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"jvm_threads_daemon|jvm_thread_daemon_count", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}} daemon'
         refId: B
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"jvm_threads_peak", cluster="$cluster", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"jvm_threads_peak|jvm_thread_peak_count", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}} peak'
         refId: C
       title: Threads
@@ -368,9 +368,39 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: sum by(state)({__name__=~"jvm_threads_states", cluster="$cluster", job="$application", instance=~"$pod"})
-        legendFormat: '{{state}}'
+        expr: sum(jvm_threads_states{state="runnable", cluster="$cluster", job="$application", instance=~"$pod"}) or sum(jvm_thread_count{jvm_thread_state="RUNNABLE", cluster="$cluster", job="$application", instance=~"$pod"})
+        legendFormat: runnable
         refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum(jvm_threads_states{state="blocked", cluster="$cluster", job="$application", instance=~"$pod"}) or sum(jvm_thread_count{jvm_thread_state="BLOCKED", cluster="$cluster", job="$application", instance=~"$pod"})
+        legendFormat: blocked
+        refId: B
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum(jvm_threads_states{state="waiting", cluster="$cluster", job="$application", instance=~"$pod"}) or sum(jvm_thread_count{jvm_thread_state="WAITING", cluster="$cluster", job="$application", instance=~"$pod"})
+        legendFormat: waiting
+        refId: C
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum(jvm_threads_states{state="timed-waiting", cluster="$cluster", job="$application", instance=~"$pod"}) or sum(jvm_thread_count{jvm_thread_state="TIMED_WAITING", cluster="$cluster", job="$application", instance=~"$pod"})
+        legendFormat: timed-waiting
+        refId: D
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum(jvm_threads_states{state="new", cluster="$cluster", job="$application", instance=~"$pod"}) or sum(jvm_thread_count{jvm_thread_state="NEW", cluster="$cluster", job="$application", instance=~"$pod"})
+        legendFormat: new
+        refId: E
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: sum(jvm_threads_states{state="terminated", cluster="$cluster", job="$application", instance=~"$pod"}) or sum(jvm_thread_count{jvm_thread_state="TERMINATED", cluster="$cluster", job="$application", instance=~"$pod"})
+        legendFormat: terminated
+        refId: F
       title: Thread States
       type: timeseries
     - collapsed: false
@@ -449,7 +479,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: '{__name__=~"process_files_max|process_max_fds", cluster="$cluster", job="$application", instance=~"$pod"}'
+        expr: '{__name__=~"process_files_max|process_max_fds|process_max_file_descriptor_count", cluster="$cluster", job="$application", instance=~"$pod"}'
         legendFormat: '{{instance}} max'
         refId: B
       title: File Descriptors
@@ -589,7 +619,7 @@ spec:
       - datasource:
           type: prometheus
           uid: duplo-metrics
-        expr: avg by(job,instance)({__name__=~"jvm_classes_loaded|jvm_class_count|process_runtime_jvm_classes_current_loaded", cluster="$cluster", job="$application", instance=~"$pod"})
+        expr: avg by(job,instance)({__name__=~"jvm_classes_loaded|jvm_class_count|jvm_class_loaded_total|process_runtime_jvm_classes_current_loaded", cluster="$cluster", job="$application", instance=~"$pod"})
         legendFormat: '{{instance}}'
         refId: A
       title: Classes Loaded
@@ -655,8 +685,14 @@ spec:
           type: prometheus
           uid: duplo-metrics
         expr: delta(({__name__=~"jvm_classes_loaded|jvm_class_count|process_runtime_jvm_classes_current_loaded", cluster="$cluster", job="$application", instance=~"$pod"})[1m:])
-        legendFormat: '{{instance}}'
+        legendFormat: '{{instance}} delta'
         refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: increase({__name__=~"jvm_classes_unloaded|jvm_class_unloaded_total|process_runtime_jvm_classes_unloaded_total", cluster="$cluster", job="$application", instance=~"$pod"}[1m])
+        legendFormat: '{{instance}} unloaded'
+        refId: B
       title: Class Delta
       type: timeseries
     schemaVersion: 39
@@ -711,14 +747,14 @@ spec:
           datasource:
             type: prometheus
             uid: duplo-metrics
-          definition: label_values(jvm_memory_used_bytes{cluster="$cluster"}, job)
+          definition: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)
           includeAll: false
           label: Job
           multi: false
           name: application
           query:
             qryType: 1
-            query: label_values(jvm_memory_used_bytes{cluster="$cluster"}, job)
+            query: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)
             refId: PrometheusVariableQueryEditor-VariableQuery
           refresh: 2
           sort: 1
