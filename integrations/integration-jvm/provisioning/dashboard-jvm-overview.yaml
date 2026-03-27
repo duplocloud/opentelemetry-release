@@ -47,7 +47,8 @@ spec:
           title: JVM Memory
           tooltip: ""
           type: link
-          url: /d/integration-jvm-memory/jvm-memory        - asDropdown: false
+          url: /d/integration-jvm-memory/jvm-memory
+        - asDropdown: false
           icon: external link
           includeVars: true
           keepTime: true
@@ -56,7 +57,8 @@ spec:
           title: JVM Runtime
           tooltip: ""
           type: link
-          url: /d/integration-jvm-runtime/jvm-runtime        - asDropdown: false
+          url: /d/integration-jvm-runtime/jvm-runtime
+        - asDropdown: false
           icon: external link
           includeVars: true
           keepTime: true
@@ -65,7 +67,8 @@ spec:
           title: JVM GC
           tooltip: ""
           type: link
-          url: /d/integration-jvm-gc/jvm-gc        - asDropdown: false
+          url: /d/integration-jvm-gc/jvm-gc
+        - asDropdown: false
           icon: external link
           includeVars: true
           keepTime: true
@@ -74,7 +77,8 @@ spec:
           title: JVM Profiles
           tooltip: ""
           type: link
-          url: /d/integration-jvm-profiles/jvm-profiles    panels:
+          url: /d/integration-jvm-profiles/jvm-profiles
+    panels:
         - collapsed: false
           gridPos:
             h: 1
