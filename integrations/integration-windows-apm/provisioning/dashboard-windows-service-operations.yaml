@@ -29,7 +29,7 @@ spec:
           title: Back to Windows Services Overview
           tooltip: ""
           type: link
-          url: /d/windows-service-overview-dashboard-v3/windows-service-overview-dashboard-v3
+          url: /d/windows-service-overview-dashboard-v3/windows-service-overview-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}
         - asDropdown: false
           icon: external link
           includeVars: false

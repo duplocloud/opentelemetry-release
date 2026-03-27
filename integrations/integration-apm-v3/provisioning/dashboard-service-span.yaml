@@ -29,7 +29,7 @@ spec:
           title: Back to Services Overview
           tooltip: ""
           type: link
-          url: /d/service-overview-dashboard-v3/service-overview-dashboard-v3?var-rate_interval=$__auto
+          url: /d/service-overview-dashboard-v3/service-overview-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-rate_interval=$__auto
         - asDropdown: false
           icon: external link
           includeVars: false
@@ -40,6 +40,26 @@ spec:
           tooltip: ""
           type: link
           url: /d/service-dashboard-v3/service-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-service=${service}&var-rate_interval=$__auto
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: Pyroscope Profiles Explorer
+          tooltip: "Explore application profiles"
+          type: link
+          url: /a/grafana-pyroscope-app/explore?searchText=&panelType=time-series&layout=grid&hideNoData=off&explorationType=flame-graph&var-serviceName=ebpf%2F${namespace}%2F${service}&var-profileMetricId=process_cpu%3Acpu%3Ananoseconds%3Acpu%3Ananoseconds&var-groupBy=all&var-dataSource=duplo-profiling&maxNodes=16384
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: JVM Overview
+          tooltip: "JVM metrics overview"
+          type: link
+          url: /d/integration-jvm-dashboard/jvm-overview?var-cluster=${cluster}&var-namespace=${namespace}&var-application=${service}
         - asDropdown: true
           icon: external link
           includeVars: false

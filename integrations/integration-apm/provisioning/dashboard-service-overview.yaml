@@ -30,6 +30,26 @@ spec:
           tooltip: ""
           type: link
           url: /explore?schemaVersion=1&panes=%7B%22tte%22:%7B%22datasource%22:%22duplo-tracing%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22datasource%22:%7B%22type%22:%22tempo%22,%22uid%22:%22duplo-tracing%22%7D,%22queryType%22:%22serviceMap%22,%22limit%22:20,%22tableType%22:%22traces%22,%22serviceMapQuery%22:%22%7Bsource%3D%5C%22tempo%5C%22,k8s_cluster_name%3D~%5C%22${cluster}%5C%22,k8s_namespace_name%3D~%5C%22${namespace}%5C%22,service_name%3D~%5C%22${service}%5C%22%7D%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D%7D
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: Pyroscope Profiles Explorer
+          tooltip: "Explore application profiles"
+          type: link
+          url: /a/grafana-pyroscope-app/explore?searchText=&panelType=time-series&layout=grid&hideNoData=off&explorationType=flame-graph&var-serviceName=ebpf%2F${namespace}%2F${service}&var-profileMetricId=process_cpu%3Acpu%3Ananoseconds%3Acpu%3Ananoseconds&var-groupBy=all&var-dataSource=duplo-profiling&maxNodes=16384
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: JVM Overview
+          tooltip: "JVM metrics overview"
+          type: link
+          url: /d/integration-jvm-dashboard/jvm-overview
         - asDropdown: true
           icon: external link
           includeVars: false
