@@ -456,13 +456,13 @@ spec:
             - datasource:
                   type: prometheus
                   uid: duplo-metrics
-              definition: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)
+              definition: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\..+"}, job)
               includeAll: false
               label: Job
               name: application
               query:
                   qryType: 1
-                  query: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\\\..+"}, job)
+                  query: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\..+"}, job)
                   refId: PrometheusVariableQueryEditor-VariableQuery
               type: query
             - allValue: ".*"
