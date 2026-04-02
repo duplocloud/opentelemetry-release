@@ -107,6 +107,13 @@ spec:
             - linuxnode-integration
           title: All Linux node /  dashboards
           type: dashboards
+        - icon: external link
+          includeVars: false
+          keepTime: true
+          targetBlank: false
+          title: K8s Node Pods → $instance
+          type: link
+          url: /d/k8s-resources-node/k8s-compute-resources-node-pods?var-datasource=${datasource}&var-cluster=${cluster}&var-node=${instance}
     panels:
         - collapsed: false
           gridPos:
