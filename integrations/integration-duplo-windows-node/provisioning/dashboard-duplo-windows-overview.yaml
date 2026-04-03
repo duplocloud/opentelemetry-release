@@ -61,6 +61,16 @@ spec:
           title: Back to Windows fleet
           type: link
           url: /d/duplo-windows-fleet
+        - asDropdown: false
+          icon: external link
+          includeVars: true
+          keepTime: true
+          tags:
+            - duplo-microsoft-iis-integration
+          targetBlank: false
+          title: Microsoft IIS Dashboards
+          type: dashboards
+          url: ""
         - asDropdown: true
           includeVars: true
           keepTime: true

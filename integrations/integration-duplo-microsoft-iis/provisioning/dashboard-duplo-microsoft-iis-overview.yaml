@@ -39,6 +39,363 @@ spec:
           type: dashboards
           url: ""
     panels:
+        - collapsed: false
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 0
+          id: 18
+          targets: []
+          title: Apdex Score
+          type: row
+        - datasource:
+            uid: ${prometheus_datasource}
+          description: |
+            **Apdex Score** measures user satisfaction based on response time thresholds.
+
+            🟢 **Green (0.94+)**: Excellent — most users satisfied
+            🟡 **Yellow (0.75–0.94)**: Acceptable — some delays
+            🔴 **Red (<0.75)**: Poor — many users experiencing issues
+
+            **Calculation**: (Satisfied + Tolerating/2) / Total
+            - Satisfied: time_taken ≤ 1000 ms
+            - Tolerating: 1000–4000 ms (counted as half)
+            - Frustrated: > 4000 ms (counted as zero)
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                    seriesBy: last
+
+                mappings: []
+                max: 1
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: dark-red
+                          value: null
+                        - color: light-yellow
+                          value: 0.75
+                        - color: dark-green
+                          value: 0.94
+            overrides: []
+          gridPos:
+            h: 4
+            w: 8
+            x: 0
+            "y": 1
+          id: 19
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                uid: ${prometheus_datasource}
+              editorMode: code
+              expr: |
+                (
+                  sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                  + (
+                      sum by (site) (iis:requests_tolerating:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                      or
+                      sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"} * 0)
+                    ) / 2
+                )
+                / sum by (site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              instant: true
+              legendFormat: '{{site}}'
+              range: false
+              refId: apdexQuery
+          title: Apdex Score (T = 1s)
+          type: stat
+        - datasource:
+            uid: ${prometheus_datasource}
+          description: Total IIS request rate (req/s) across selected sites, derived from Loki recording rules.
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: blue
+                          value: null
+                unit: reqps
+            overrides: []
+          gridPos:
+            h: 4
+            w: 8
+            x: 8
+            "y": 1
+          id: 20
+          options:
+            colorMode: background
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                uid: ${prometheus_datasource}
+              editorMode: code
+              expr: sum(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              instant: true
+              legendFormat: req/s
+              range: false
+              refId: A
+          title: Request Rate
+          type: stat
+        - datasource:
+            uid: ${prometheus_datasource}
+          description: 'P95 response time in ms from IIS access logs. Green <1 s | Yellow 1–4 s | Red >4 s'
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: dark-green
+                          value: null
+                        - color: light-yellow
+                          value: 1000
+                        - color: dark-red
+                          value: 4000
+                unit: ms
+            overrides: []
+          gridPos:
+            h: 4
+            w: 8
+            x: 16
+            "y": 1
+          id: 21
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            textMode: auto
+            wideLayout: true
+          targets:
+            - datasource:
+                uid: ${prometheus_datasource}
+              editorMode: code
+              expr: max(iis:response_time_ms_p95:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              instant: true
+              legendFormat: P95 ms
+              range: false
+              refId: A
+          title: P95 Response Time
+          type: stat
+        - datasource:
+            uid: ${prometheus_datasource}
+          description: |
+            **Apdex Score** over time per IIS site.
+
+            🟢 **Green (0.94+)**: Excellent
+            🟡 **Yellow (0.75–0.94)**: Acceptable
+            🔴 **Red (<0.75)**: Poor
+
+            **Calculation**: (Satisfied + Tolerating/2) / Total Requests
+          fieldConfig:
+            defaults:
+                color:
+                    fixedColor: red
+                    mode: thresholds
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisGridShow: true
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: scheme
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: area
+                max: 1
+                min: 0.5
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: red
+                          value: null
+                        - color: "#EAB839"
+                          value: 0.75
+                        - color: dark-green
+                          value: 0.94
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 5
+          id: 22
+          options:
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          targets:
+            - datasource:
+                uid: ${prometheus_datasource}
+              editorMode: code
+              exemplar: true
+              expr: |
+                (
+                  sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                  + (
+                      sum by (site) (iis:requests_tolerating:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                      or
+                      sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"} * 0)
+                    ) / 2
+                )
+                / sum by (site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: '{{site}}'
+              range: true
+              refId: apdexQuery
+          title: Apdex Score (T = 1s)
+          type: timeseries
+        - datasource:
+            uid: ${prometheus_datasource}
+          description: P50 (dashed), P95 (solid), P99 (long-dash) response times in ms from IIS access logs.
+          fieldConfig:
+            defaults:
+                color:
+                    fixedColor: '#5794f2'
+                    mode: palette-classic
+                custom:
+                    fillOpacity: 5
+                    lineWidth: 2
+                    showPoints: never
+                    spanNulls: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: dark-green
+                          value: null
+                        - color: light-yellow
+                          value: 1000
+                        - color: dark-red
+                          value: 4000
+                unit: ms
+            overrides:
+                - matcher:
+                    id: byFrameRefID
+                    options: p50
+                  properties:
+                    - id: custom.lineStyle
+                      value:
+                        dash:
+                            - 4
+                            - 4
+                        fill: dash
+                - matcher:
+                    id: byFrameRefID
+                    options: p99
+                  properties:
+                    - id: custom.lineStyle
+                      value:
+                        dash:
+                            - 10
+                            - 5
+                        fill: dash
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 5
+          id: 23
+          options:
+            legend:
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                mode: multi
+                sort: desc
+          targets:
+            - datasource:
+                uid: ${prometheus_datasource}
+              editorMode: code
+              expr: avg by (site) (iis:response_time_ms_p50:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              instant: false
+              legendFormat: 'P50 - {{site}}'
+              range: true
+              refId: p50
+            - datasource:
+                uid: ${prometheus_datasource}
+              editorMode: code
+              expr: avg by (site) (iis:response_time_ms_p95:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              instant: false
+              legendFormat: 'P95 - {{site}}'
+              range: true
+              refId: p95
+            - datasource:
+                uid: ${prometheus_datasource}
+              editorMode: code
+              expr: avg by (site) (iis:response_time_ms_p99:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              instant: false
+              legendFormat: 'P99 - {{site}}'
+              range: true
+              refId: p99
+          title: Response Time Percentiles (P50/P95/P99)
+          type: timeseries
         - datasource:
             uid: ${prometheus_datasource}
           description: The request rate split by HTTP Method for an IIS site
@@ -62,7 +419,7 @@ spec:
             h: 8
             w: 12
             x: 0
-            "y": 0
+            "y": 13
           id: 2
           options:
             legend:
@@ -109,7 +466,7 @@ spec:
             h: 8
             w: 12
             x: 12
-            "y": 0
+            "y": 13
           id: 3
           options:
             legend:
@@ -158,7 +515,7 @@ spec:
             h: 8
             w: 12
             x: 0
-            "y": 8
+            "y": 21
           id: 4
           options:
             legend:
@@ -202,7 +559,7 @@ spec:
             h: 8
             w: 12
             x: 12
-            "y": 8
+            "y": 21
           id: 5
           options:
             legend:
@@ -246,7 +603,7 @@ spec:
             h: 8
             w: 12
             x: 0
-            "y": 16
+            "y": 29
           id: 6
           options:
             legend:
@@ -289,7 +646,7 @@ spec:
             h: 8
             w: 12
             x: 12
-            "y": 16
+            "y": 29
           id: 7
           options:
             legend:
@@ -332,7 +689,7 @@ spec:
             h: 8
             w: 12
             x: 0
-            "y": 24
+            "y": 37
           id: 8
           options:
             legend:
@@ -375,7 +732,7 @@ spec:
             h: 8
             w: 12
             x: 12
-            "y": 24
+            "y": 37
           id: 9
           options:
             legend:
@@ -418,7 +775,7 @@ spec:
             h: 8
             w: 12
             x: 0
-            "y": 32
+            "y": 45
           id: 10
           options:
             legend:
@@ -461,7 +818,7 @@ spec:
             h: 8
             w: 12
             x: 12
-            "y": 32
+            "y": 45
           id: 11
           options:
             legend:
@@ -489,7 +846,7 @@ spec:
             h: 10
             w: 24
             x: 0
-            "y": 40
+            "y": 53
           id: 12
           options:
             dedupStrategy: none
@@ -516,7 +873,7 @@ spec:
             h: 1
             w: 24
             x: 0
-            "y": 50
+            "y": 63
           id: 13
           targets: []
           title: Cache
@@ -544,7 +901,7 @@ spec:
             h: 8
             w: 12
             x: 0
-            "y": 51
+            "y": 64
           id: 14
           options:
             legend:
@@ -589,7 +946,7 @@ spec:
             h: 8
             w: 12
             x: 12
-            "y": 51
+            "y": 64
           id: 15
           options:
             legend:
@@ -633,7 +990,7 @@ spec:
             h: 8
             w: 12
             x: 0
-            "y": 59
+            "y": 72
           id: 16
           options:
             legend:
@@ -677,7 +1034,7 @@ spec:
             h: 8
             w: 12
             x: 12
-            "y": 59
+            "y": 72
           id: 17
           options:
             legend:

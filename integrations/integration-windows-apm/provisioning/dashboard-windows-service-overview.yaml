@@ -1,0 +1,364 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-windows-apm
+    name: windows-service-overview-dashboard-v3
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    description: Windows Service Level Dashboard - IIS Sites Overview
+    editable: false
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links:
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: Windows Node Metrics
+          tooltip: ""
+          type: link
+          url: /d/duplo-windows-overview?var-cluster=${cluster}&var-namespace=${namespace}&var-instance=${instance}
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: Windows Node Logs
+          tooltip: ""
+          type: link
+          url: /d/duplo-windows-logs?var-cluster=${cluster}&var-namespace=${namespace}&var-instance=${instance}
+        - asDropdown: true
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags:
+            - windows-apm
+            - service
+            - windows-iis
+          targetBlank: false
+          title: All Windows Services | Dashboards
+          tooltip: ""
+          type: dashboards
+          url: ""
+    panels:
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: center
+                    cellOptions:
+                        type: auto
+                        wrapText: false
+                    filterable: false
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Duration P95
+                  properties:
+                    - id: unit
+                      value: ms
+                    - id: color
+                      value:
+                        fixedColor: orange
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Errors
+                  properties:
+                    - id: unit
+                      value: percentunit
+                    - id: color
+                      value:
+                        fixedColor: dark-red
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Rate
+                  properties:
+                    - id: unit
+                      value: reqps
+                    - id: color
+                      value:
+                        fixedColor: '#15a425'
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: Apdex
+                  properties:
+                    - id: custom.cellOptions
+                      value:
+                        type: auto
+                    - id: color
+                      value:
+                        mode: thresholds
+                    - id: thresholds
+                      value:
+                        mode: absolute
+                        steps:
+                            - color: dark-red
+                              value: null
+                            - color: light-yellow
+                              value: 0.75
+                            - color: dark-green
+                              value: 0.94
+                    - id: decimals
+                      value: 2
+                - matcher:
+                    id: byName
+                    options: Site
+                  properties:
+                    - id: custom.filterable
+                      value: true
+                    - id: links
+                      value:
+                        - targetBlank: false
+                          title: ""
+                          url: /d/windows-service-dashboard-v3/windows-service-dashboard-v3?var-cluster=${__data.fields.Cluster}&var-namespace=${__data.fields.Namespace}&var-site=${__data.fields.Site}&var-instance=$instance
+          gridPos:
+            h: 32
+            w: 24
+            x: 0
+            "y": 0
+          id: 1
+          options:
+            cellHeight: md
+            footer:
+                countRows: false
+                enablePagination: true
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            frameIndex: 2
+            showHeader: true
+            sortBy:
+                - desc: true
+                  displayName: Errors
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: |
+                (
+                  sum by (cluster, namespace, site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"})
+                  + (
+                      sum by (cluster, namespace, site) (iis:requests_tolerating:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"})
+                      or
+                      sum by (cluster, namespace, site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"} * 0)
+                    ) / 2
+                )
+                / sum by (cluster, namespace, site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: apdexQuery
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: max by (cluster, namespace, site) (iis:response_time_ms_p95:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: durationP95Query
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: sum by (cluster, namespace, site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: rateQuery
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: |
+                clamp_max(
+                  (
+                    sum by (cluster, namespace, site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", status_code=~"5.."}[5m]))
+                    or
+                    sum by (cluster, namespace, site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"}[5m])) * 0
+                  )
+                  / clamp_min(sum by (cluster, namespace, site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"}[5m])), 0.001)
+                , 1)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: ""
+              range: true
+              refId: errorsQuery
+          title: IIS Sites
+          transformations:
+            - id: timeSeriesTable
+              options:
+                apdexQuery:
+                    timeField: Time
+                durationP95Query:
+                    timeField: Time
+                errorsQuery:
+                    timeField: Time
+                rateQuery:
+                    timeField: Time
+            - id: joinByField
+              options:
+                byField: site
+                mode: outer
+            - id: organize
+              options:
+                excludeByName:
+                    'Trend #apdexQuery': false
+                    'Trend #durationP95Query': false
+                    'Trend #errorsQuery': false
+                    'Trend #rateQuery': false
+                    cluster 2: true
+                    cluster 3: true
+                    cluster 4: true
+                    namespace 2: true
+                    namespace 3: true
+                    namespace 4: true
+                includeByName: {}
+                indexByName:
+                    site: 0
+                    cluster 1: 1
+                    namespace 1: 2
+                    'Trend #apdexQuery': 3
+                    'Trend #rateQuery': 4
+                    'Trend #durationP95Query': 5
+                    'Trend #errorsQuery': 6
+                renameByName:
+                    'Trend #apdexQuery': Apdex
+                    'Trend #durationP95Query': Duration P95
+                    'Trend #errorsQuery': Errors
+                    'Trend #rateQuery': Rate
+                    cluster 1: Cluster
+                    namespace 1: Namespace
+                    site: Site
+          type: table
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - windows-apm
+        - service
+        - windows-iis
+        - overview
+    templating:
+        list:
+            - allValue: .*
+              allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m,cluster)
+              includeAll: false
+              label: Cluster
+              name: cluster
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m,cluster)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allValue: .*
+              allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m{cluster=~"$cluster"},namespace)
+              includeAll: false
+              label: Namespace
+              name: namespace
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m{cluster=~"$cluster"},namespace)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allValue: .*
+              allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace"},site)
+              description: ""
+              includeAll: true
+              label: Site
+              name: site
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace"},site)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allValue: .*
+              allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"},instance)
+              description: ""
+              includeAll: true
+              label: Instance
+              name: instance
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"},instance)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-1h
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: Windows Service Overview Dashboard
+    uid: windows-service-overview-dashboard-v3

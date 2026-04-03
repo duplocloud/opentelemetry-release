@@ -1,0 +1,7 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: DashboardFolder
+metadata:
+    name: integration-jvm
+spec:
+    title: Integration-JVM
+    uid: integration-jvm

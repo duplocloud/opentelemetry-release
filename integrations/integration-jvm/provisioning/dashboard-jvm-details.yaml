@@ -1,0 +1,1056 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+  folder: integration-jvm
+  name: integration-jvm-details
+spec:
+  annotations:
+    list:
+    - builtIn: 1
+      datasource:
+        type: datasource
+        uid: grafana
+      enable: true
+      hide: true
+      iconColor: rgba(0, 211, 255, 1)
+      name: Annotations & Alerts
+      target:
+        limit: 100
+        matchAny: false
+        tags: []
+        type: dashboard
+      type: dashboard
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      enable: true
+      expr: resets(process_uptime_seconds{cluster="$cluster", job="$application"}[1m]) > 0
+      hide: false
+      iconColor: rgba(255, 96, 96, 1)
+      name: Restart Detection
+      showIn: 0
+      step: 1m
+      tagKeys: restart-tag
+      textFormat: uptime reset
+      titleFormat: Restart
+  description: JVM Details dashboard - memory pools, GC analysis, classloading and system resources
+  editable: false
+  fiscalYearStartMonth: 0
+  graphTooltip: 1
+  links:
+  - asDropdown: false
+    icon: external link
+    includeVars: true
+    keepTime: true
+    tags: []
+    targetBlank: false
+    title: Back to JVM Overview
+    tooltip: ''
+    type: link
+    url: /d/integration-jvm-dashboard/jvm-overview
+  - asDropdown: false
+    icon: external link
+    includeVars: false
+    keepTime: false
+    tags: []
+    targetBlank: true
+    title: Pyroscope Profiles Explorer
+    tooltip: Explore Java application profiles in Pyroscope
+    type: link
+    url: /a/grafana-pyroscope-app/explore?searchText=&panelType=time-series&layout=grid&hideNoData=off&explorationType=flame-graph&var-serviceName=ebpf%2F${namespace}%2F${application}&var-profileMetricId=process_cpu%3Acpu%3Ananoseconds%3Acpu%3Ananoseconds&var-groupBy=all&var-dataSource=duplo-profiling&var-filters=&var-filtersBaseline=&var-filtersComparison=&maxNodes=16384
+  panels:
+  - collapsed: false
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 0
+    id: 1
+    panels: []
+    title: Memory Allocation
+    type: row
+  - datasource:
+      type: prometheus
+      uid: duplo-metrics
+    fieldConfig:
+      defaults:
+        unit: Bps
+      overrides: []
+    gridPos:
+      h: 10
+      w: 12
+      x: 0
+      y: 1
+    id: 2
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    targets:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: rate({__name__=~"jvm_gc_memory_allocated_bytes_total|jvm_gc_memory_allocated_bytes|process_runtime_jvm_memory_allocated_bytes", cluster="$cluster", job="$application", instance=~"$pod"}[5m])
+      legendFormat: '{{instance}} allocated'
+      refId: A
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: rate({__name__=~"jvm_gc_memory_promoted_bytes_total|jvm_gc_memory_promoted_bytes|process_runtime_jvm_memory_promoted_bytes", cluster="$cluster", job="$application", instance=~"$pod"}[5m])
+      legendFormat: '{{instance}} promoted'
+      refId: B
+    description: 'Memory allocation and promotion rates. Only available for Micrometer (Spring Boot) and older OTel Java agent instrumented apps.'
+    title: Allocated/Promoted
+    type: timeseries
+  - datasource:
+      type: prometheus
+      uid: duplo-metrics
+    description: Memory usage after last GC. Rising trend may indicate a memory leak.
+    fieldConfig:
+      defaults:
+        unit: bytes
+      overrides: []
+    gridPos:
+      h: 10
+      w: 12
+      x: 12
+      y: 1
+    id: 3
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    targets:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: avg by(job,instance,pool)(process_runtime_jvm_memory_usage_after_last_gc_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap"}) or avg by(job,instance,pool)(jvm_memory_used_after_last_gc_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap"}) or label_replace(avg by(job,instance,id)(jvm_memory_used_after_last_gc_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap"}),"pool","$1","id","(.+)")
+      legendFormat: '{{instance}} {{pool}}'
+      refId: A
+    title: Memory After Last GC (Leak Detector)
+    type: timeseries
+  - collapsed: false
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 11
+    id: 4
+    panels: []
+    title: GC Generation Pools
+    type: row
+  - datasource:
+      type: prometheus
+      uid: duplo-metrics
+    description: Eden Space memory usage - where new objects are allocated.
+    fieldConfig:
+      defaults:
+        unit: bytes
+      overrides: []
+    gridPos:
+      h: 10
+      w: 8
+      x: 0
+      y: 12
+    id: 5
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    targets:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Eden.*"}) or avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Eden.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Eden.*"})
+      legendFormat: '{{instance}} used'
+      refId: A
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Eden.*"}) or avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Eden.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Eden.*"})
+      legendFormat: '{{instance}} committed'
+      refId: B
+    title: Eden Space
+    type: timeseries
+  - datasource:
+      type: prometheus
+      uid: duplo-metrics
+    description: Survivor Space memory usage - objects that survived minor GC.
+    fieldConfig:
+      defaults:
+        unit: bytes
+      overrides: []
+    gridPos:
+      h: 10
+      w: 8
+      x: 8
+      y: 12
+    id: 6
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    targets:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Survivor.*"}) or avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Survivor.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Survivor.*"})
+      legendFormat: '{{instance}} used'
+      refId: A
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Survivor.*"}) or avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Survivor.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Survivor.*"})
+      legendFormat: '{{instance}} committed'
+      refId: B
+    title: Survivor Space
+    type: timeseries
+  - datasource:
+      type: prometheus
+      uid: duplo-metrics
+    description: Old Gen / Tenured memory usage - long-lived objects promoted from young generation.
+    fieldConfig:
+      defaults:
+        unit: bytes
+      overrides: []
+    gridPos:
+      h: 10
+      w: 8
+      x: 16
+      y: 12
+    id: 7
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    targets:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Old.*|.*Tenured.*"}) or avg by(job,instance,id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Old.*|.*Tenured.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_usage_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Old.*|.*Tenured.*"})
+      legendFormat: '{{instance}} used'
+      refId: A
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", area="heap", id=~".*Old.*|.*Tenured.*"}) or avg by(job,instance,id)(jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_type="heap", jvm_memory_pool_name=~".*Old.*|.*Tenured.*"}) or avg by(job,instance,id)(process_runtime_jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", type="heap", pool=~".*Old.*|.*Tenured.*"})
+      legendFormat: '{{instance}} committed'
+      refId: B
+    title: Old Gen / Tenured
+    type: timeseries
+  - collapsed: true
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 22
+    id: 8
+    panels:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      fieldConfig:
+        defaults:
+          color:
+            mode: palette-classic
+          custom:
+            axisBorderShow: false
+            axisCenteredZero: false
+            axisColorMode: text
+            axisLabel: ''
+            axisPlacement: auto
+            barAlignment: 0
+            barWidthFactor: 0.6
+            drawStyle: line
+            fillOpacity: 10
+            gradientMode: none
+            hideFrom:
+              legend: false
+              tooltip: false
+              viz: false
+            insertNulls: false
+            lineInterpolation: linear
+            lineWidth: 1
+            pointSize: 5
+            scaleDistribution:
+              type: linear
+            showPoints: never
+            spanNulls: false
+            stacking:
+              group: A
+              mode: none
+            thresholdsStyle:
+              mode: 'off'
+          mappings: []
+          thresholds:
+            mode: absolute
+            steps:
+            - color: green
+            - color: red
+              value: 80
+          unit: bytes
+        overrides: []
+      gridPos:
+        h: 10
+        w: 24
+        x: 0
+        y: 23
+      id: 9
+      options:
+        legend:
+          calcs: []
+          displayMode: list
+          placement: bottom
+          showLegend: true
+        tooltip:
+          hideZeros: false
+          mode: multi
+          sort: desc
+      repeat: jvm_memory_pool_heap
+      repeatDirection: h
+      targets:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_heap"} or jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_pool_name=~"$jvm_memory_pool_heap"}
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} used'
+        refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_heap"} or jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_pool_name=~"$jvm_memory_pool_heap"}
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} committed'
+        refId: B
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: jvm_memory_max_bytes{cluster="$cluster", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_heap"} or jvm_memory_limit_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_pool_name=~"$jvm_memory_pool_heap"}
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} max'
+        refId: C
+      title: $jvm_memory_pool_heap
+      type: timeseries
+    title: JVM Memory Pools (Heap)
+    type: row
+  - collapsed: true
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 23
+    id: 10
+    panels:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      fieldConfig:
+        defaults:
+          color:
+            mode: palette-classic
+          custom:
+            axisBorderShow: false
+            axisCenteredZero: false
+            axisColorMode: text
+            axisLabel: ''
+            axisPlacement: auto
+            barAlignment: 0
+            barWidthFactor: 0.6
+            drawStyle: line
+            fillOpacity: 10
+            gradientMode: none
+            hideFrom:
+              legend: false
+              tooltip: false
+              viz: false
+            insertNulls: false
+            lineInterpolation: linear
+            lineWidth: 1
+            pointSize: 5
+            scaleDistribution:
+              type: linear
+            showPoints: never
+            spanNulls: false
+            stacking:
+              group: A
+              mode: none
+            thresholdsStyle:
+              mode: 'off'
+          mappings: []
+          thresholds:
+            mode: absolute
+            steps:
+            - color: green
+            - color: red
+              value: 80
+          unit: bytes
+        overrides: []
+      gridPos:
+        h: 10
+        w: 24
+        x: 0
+        y: 24
+      id: 11
+      options:
+        legend:
+          calcs: []
+          displayMode: list
+          placement: bottom
+          showLegend: true
+        tooltip:
+          hideZeros: false
+          mode: multi
+          sort: desc
+      repeat: jvm_memory_pool_nonheap
+      repeatDirection: h
+      targets:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_nonheap"} or jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_pool_name=~"$jvm_memory_pool_nonheap"}
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} used'
+        refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_nonheap"} or jvm_memory_committed_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_pool_name=~"$jvm_memory_pool_nonheap"}
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} committed'
+        refId: B
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: jvm_memory_max_bytes{cluster="$cluster", job="$application", instance=~"$pod", id=~"$jvm_memory_pool_nonheap"} or jvm_memory_limit_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_memory_pool_name=~"$jvm_memory_pool_nonheap"}
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} max'
+        refId: C
+      title: $jvm_memory_pool_nonheap
+      type: timeseries
+    title: JVM Memory Pools (Non-Heap)
+    type: row
+  - collapsed: true
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 24
+    id: 12
+    panels:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      fieldConfig:
+        defaults:
+          color:
+            mode: palette-classic
+          custom:
+            axisBorderShow: false
+            axisCenteredZero: false
+            axisColorMode: text
+            axisLabel: ''
+            axisPlacement: auto
+            barAlignment: 0
+            barWidthFactor: 0.6
+            drawStyle: line
+            fillOpacity: 10
+            gradientMode: none
+            hideFrom:
+              legend: false
+              tooltip: false
+              viz: false
+            insertNulls: false
+            lineInterpolation: linear
+            lineWidth: 1
+            pointSize: 5
+            scaleDistribution:
+              type: linear
+            showPoints: never
+            spanNulls: false
+            stacking:
+              group: A
+              mode: none
+            thresholdsStyle:
+              mode: 'off'
+          mappings: []
+          thresholds:
+            mode: absolute
+            steps:
+            - color: green
+            - color: red
+              value: 80
+          unit: bytes
+        overrides:
+        - matcher:
+            id: byFrameRefID
+            options: C
+          properties:
+          - id: custom.axisPlacement
+            value: right
+          - id: unit
+            value: short
+      gridPos:
+        h: 10
+        w: 24
+        x: 0
+        y: 25
+      id: 13
+      options:
+        legend:
+          calcs: []
+          displayMode: list
+          placement: bottom
+          showLegend: true
+        tooltip:
+          hideZeros: false
+          mode: multi
+          sort: desc
+      repeat: jvm_buffer_pool
+      repeatDirection: h
+      targets:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: jvm_buffer_memory_used_bytes{cluster="$cluster", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"} or jvm_buffer_memory_usage_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_buffer_pool_name=~"$jvm_buffer_pool"} or process_runtime_jvm_buffer_usage_bytes{cluster="$cluster", job="$application", instance=~"$pod", pool=~"$jvm_buffer_pool"}
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} used'
+        refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: jvm_buffer_total_capacity_bytes{cluster="$cluster", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"} or jvm_buffer_total_capacity_bytes{cluster="$cluster", job="$application", instance=~"$pod", jvm_buffer_pool_name=~"$jvm_buffer_pool"} or process_runtime_jvm_buffer_limit_bytes{cluster="$cluster", job="$application", instance=~"$pod", pool=~"$jvm_buffer_pool"}
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} capacity'
+        refId: B
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: jvm_buffer_count_buffers{cluster="$cluster", job="$application", instance=~"$pod", id=~"$jvm_buffer_pool"} or jvm_buffer_count{cluster="$cluster", job="$application", instance=~"$pod", jvm_buffer_pool_name=~"$jvm_buffer_pool"} or process_runtime_jvm_buffer_count{cluster="$cluster", job="$application", instance=~"$pod", pool=~"$jvm_buffer_pool"}
+        format: time_series
+        hide: false
+        intervalFactor: 2
+        legendFormat: '{{instance}} count'
+        refId: C
+      title: $jvm_buffer_pool
+      type: timeseries
+    title: Buffer Pools
+    type: row
+  - collapsed: false
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 25
+    id: 14
+    panels: []
+    title: System Resources
+    type: row
+  - datasource:
+      type: prometheus
+      uid: duplo-metrics
+    fieldConfig:
+      defaults:
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          barAlignment: 0
+          drawStyle: line
+          fillOpacity: 10
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          lineInterpolation: linear
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: 'off'
+        mappings: []
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+          - color: red
+            value: 80
+        unit: short
+      overrides: []
+    gridPos:
+      h: 10
+      w: 12
+      x: 0
+      y: 26
+    id: 15
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    targets:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: '{__name__=~"process_files_open|process_open_fds|process_open_file_descriptor_count", cluster="$cluster", job="$application", instance=~"$pod"}'
+      legendFormat: '{{instance}} open'
+      refId: A
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: '{__name__=~"process_files_max|process_max_fds|process_max_file_descriptor_count", cluster="$cluster", job="$application", instance=~"$pod"}'
+      legendFormat: '{{instance}} max'
+      refId: B
+    description: 'Open and max file descriptors. May show no data if the JVM does not expose process-level file descriptor metrics.'
+    title: File Descriptors
+    type: timeseries
+  - datasource:
+      type: prometheus
+      uid: duplo-metrics
+    fieldConfig:
+      defaults:
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          barAlignment: 0
+          drawStyle: line
+          fillOpacity: 10
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          lineInterpolation: linear
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: 'off'
+        mappings: []
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+          - color: red
+            value: 80
+        unit: short
+      overrides: []
+    gridPos:
+      h: 10
+      w: 12
+      x: 12
+      y: 26
+    id: 16
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    targets:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: increase(logback_events_total{cluster="$cluster", job="$application", instance=~"$pod"}[1m])
+      legendFormat: '{{instance}} {{level}}'
+      refId: A
+    description: 'Log events by level. Only available for Micrometer apps using Logback (logback_events_total). OTel instrumented apps do not expose this metric.'
+    title: Log Events
+    type: timeseries
+  - collapsed: false
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 36
+    id: 17
+    panels: []
+    title: Classloading
+    type: row
+  - datasource:
+      type: prometheus
+      uid: duplo-metrics
+    fieldConfig:
+      defaults:
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          barAlignment: 0
+          drawStyle: line
+          fillOpacity: 10
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          lineInterpolation: linear
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: 'off'
+        mappings: []
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+          - color: red
+            value: 80
+        unit: short
+      overrides: []
+    gridPos:
+      h: 10
+      w: 12
+      x: 0
+      y: 37
+    id: 18
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    targets:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: avg by(job,instance)({__name__=~"jvm_classes_loaded|jvm_class_count|jvm_class_loaded_total|process_runtime_jvm_classes_current_loaded", cluster="$cluster", job="$application", instance=~"$pod"})
+      legendFormat: '{{instance}}'
+      refId: A
+    title: Classes Loaded
+    type: timeseries
+  - datasource:
+      type: prometheus
+      uid: duplo-metrics
+    fieldConfig:
+      defaults:
+        custom:
+          axisBorderShow: false
+          axisCenteredZero: false
+          axisColorMode: text
+          axisLabel: ''
+          axisPlacement: auto
+          barAlignment: 0
+          drawStyle: line
+          fillOpacity: 10
+          gradientMode: none
+          hideFrom:
+            legend: false
+            tooltip: false
+            viz: false
+          lineInterpolation: linear
+          lineWidth: 1
+          pointSize: 5
+          scaleDistribution:
+            type: linear
+          showPoints: never
+          spanNulls: false
+          stacking:
+            group: A
+            mode: none
+          thresholdsStyle:
+            mode: 'off'
+        mappings: []
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+          - color: red
+            value: 80
+        unit: short
+      overrides: []
+    gridPos:
+      h: 10
+      w: 12
+      x: 12
+      y: 37
+    id: 19
+    options:
+      legend:
+        calcs: []
+        displayMode: list
+        placement: bottom
+        showLegend: true
+      tooltip:
+        hideZeros: false
+        mode: multi
+        sort: desc
+    targets:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: delta(({__name__=~"jvm_classes_loaded|jvm_class_count|process_runtime_jvm_classes_current_loaded", cluster="$cluster", job="$application", instance=~"$pod"})[1m:])
+      legendFormat: '{{instance}} delta'
+      refId: A
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      expr: increase({__name__=~"jvm_classes_unloaded|jvm_class_unloaded_total|process_runtime_jvm_classes_unloaded_total", cluster="$cluster", job="$application", instance=~"$pod"}[1m])
+      legendFormat: '{{instance}} unloaded'
+      refId: B
+    title: Class Delta
+    type: timeseries
+  - collapsed: true
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 47
+    id: 20
+    panels:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      fieldConfig:
+        defaults:
+          unit: s
+        overrides: []
+      gridPos:
+        h: 10
+        w: 12
+        x: 0
+        y: 48
+      id: 21
+      options:
+        legend:
+          calcs: []
+          displayMode: list
+          placement: bottom
+          showLegend: true
+        tooltip:
+          hideZeros: false
+          mode: multi
+          sort: desc
+      targets:
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: label_replace(histogram_quantile(0.95, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_pause_seconds_bucket|jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[5m]))),"action","$1","action","end of (.+)")
+        legendFormat: '{{instance}} {{action}} p95'
+        refId: A
+      - datasource:
+          type: prometheus
+          uid: duplo-metrics
+        expr: label_replace(histogram_quantile(0.50, sum by(le,job,instance,gc,action)(rate({__name__=~"jvm_gc_pause_seconds_bucket|jvm_gc_duration_seconds_bucket|process_runtime_jvm_gc_duration_seconds_bucket", cluster="$cluster", job="$application", instance=~"$pod"}[5m]))),"action","$1","action","end of (.+)")
+        legendFormat: '{{instance}} {{action}} p50'
+        refId: B
+      title: GC Pause Duration - p50 / p95 (Histogram)
+      type: timeseries
+    title: GC Diagnostics (Advanced)
+    type: row
+  schemaVersion: 39
+  tags:
+  - jvm
+  - java
+  - details
+  templating:
+    list:
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      definition: label_values(jvm_memory_used_bytes, cluster)
+      includeAll: false
+      label: Cluster
+      name: cluster
+      options: []
+      query:
+        qryType: 1
+        query: label_values(jvm_memory_used_bytes, cluster)
+        refId: PrometheusVariableQueryEditor-VariableQuery
+      refresh: 2
+      regex: ''
+      sort: 1
+      type: query
+    - allValue: .*
+      current:
+        text: All
+        value: $__all
+      datasource:
+        type: prometheus
+        uid: duplo-metrics
+      definition: label_values(jvm_memory_used_bytes{cluster="$cluster"}, instance)
+      includeAll: true
+      label: Namespace
+      multi: true
+      name: namespace
+      options: []
+      query:
+        qryType: 1
+        query: label_values(jvm_memory_used_bytes{cluster="$cluster"}, instance)
+        refId: PrometheusVariableQueryEditor-VariableQuery
+      refresh: 2
+      regex: /^([^.]+)\..+/
+      sort: 1
+      type: query
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      definition: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\..+"}, job)
+      includeAll: false
+      label: Job
+      name: application
+      options: []
+      query:
+        qryType: 1
+        query: label_values(jvm_memory_used_bytes{cluster="$cluster", instance=~"($namespace)\\..+"}, job)
+        refId: PrometheusVariableQueryEditor-VariableQuery
+      refresh: 2
+      regex: ''
+      sort: 1
+      type: query
+    - allValue: .*
+      current:
+        text: All
+        value: $__all
+      datasource:
+        type: prometheus
+        uid: duplo-metrics
+      definition: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"($namespace)\\..+"}, instance)
+      includeAll: true
+      label: Pod
+      multi: true
+      name: pod
+      options: []
+      query:
+        qryType: 1
+        query: label_values(jvm_memory_used_bytes{cluster="$cluster", job="$application", instance=~"($namespace)\\..+"}, instance)
+        refId: PrometheusVariableQueryEditor-VariableQuery
+      refresh: 2
+      regex: ''
+      sort: 1
+      type: query
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      definition: 'query_result(group by(id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"}) or group by(jvm_memory_pool_name)(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap"}))'
+      hide: 2
+      includeAll: true
+      label: JVM Memory Pools Heap
+      name: jvm_memory_pool_heap
+      options: []
+      query: 'query_result(group by(id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="heap"}) or group by(jvm_memory_pool_name)(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="heap"}))'
+      refresh: 1
+      regex: '/(?:id|jvm_memory_pool_name)="([^"]+)"/'
+      sort: 1
+      type: query
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      definition: 'query_result(group by(id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"}) or group by(jvm_memory_pool_name)(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap"}))'
+      hide: 2
+      includeAll: true
+      label: JVM Memory Pools Non-Heap
+      name: jvm_memory_pool_nonheap
+      options: []
+      query: 'query_result(group by(id)(jvm_memory_used_bytes{cluster="$cluster", job="$application", area="nonheap"}) or group by(jvm_memory_pool_name)(jvm_memory_used_bytes{cluster="$cluster", job="$application", jvm_memory_type="non_heap"}))'
+      refresh: 1
+      regex: '/(?:id|jvm_memory_pool_name)="([^"]+)"/'
+      sort: 2
+      type: query
+    - datasource:
+        type: prometheus
+        uid: duplo-metrics
+      definition: 'query_result(group by(id)(jvm_buffer_memory_used_bytes{cluster="$cluster", job="$application"}) or group by(jvm_buffer_pool_name)(jvm_buffer_memory_usage_bytes{cluster="$cluster", job="$application"}))'
+      hide: 2
+      includeAll: true
+      label: JVM Buffer Pools
+      name: jvm_buffer_pool
+      options: []
+      query: 'query_result(group by(id)(jvm_buffer_memory_used_bytes{cluster="$cluster", job="$application"}) or group by(jvm_buffer_pool_name)(jvm_buffer_memory_usage_bytes{cluster="$cluster", job="$application"}))'
+      refresh: 1
+      regex: '/(?:id|jvm_buffer_pool_name)="([^"]+)"/'
+      sort: 1
+      type: query
+  time:
+    from: now-3h
+    to: now
+  timepicker: {}
+  timezone: browser
+  title: JVM Details
+  uid: integration-jvm-details

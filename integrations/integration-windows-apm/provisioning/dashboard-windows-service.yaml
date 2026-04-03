@@ -1,0 +1,979 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-windows-apm
+    name: windows-service-dashboard-v3
+spec:
+    annotations:
+        list:
+            - builtIn: 1
+              datasource:
+                type: grafana
+                uid: -- Grafana --
+              enable: true
+              hide: true
+              iconColor: rgba(0, 211, 255, 1)
+              name: Annotations & Alerts
+              type: dashboard
+    description: Windows Service Level Dashboard - IIS Site Detail
+    editable: false
+    fiscalYearStartMonth: 0
+    graphTooltip: 0
+    links:
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: Windows Node Metrics
+          tooltip: ""
+          type: link
+          url: /d/duplo-windows-overview?var-cluster=${cluster}&var-namespace=${namespace}&var-instance=${instance}
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: true
+          title: Windows Node Logs
+          tooltip: ""
+          type: link
+          url: /d/duplo-windows-logs?var-cluster=${cluster}&var-namespace=${namespace}&var-instance=${instance}
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: Back to Windows Services Overview
+          tooltip: ""
+          type: link
+          url: /d/windows-service-overview-dashboard-v3/windows-service-overview-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
+          targetBlank: false
+          title: Site Operations
+          tooltip: ""
+          type: link
+          url: /d/windows-service-operations-dashboard-v3/windows-service-operations-dashboard-v3?var-cluster=${cluster}&var-namespace=${namespace}&var-site=${site}&var-instance=${instance}
+        - asDropdown: true
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags:
+            - windows-apm
+            - service
+            - windows-iis
+          targetBlank: false
+          title: All Windows Services | Dashboards
+          tooltip: ""
+          type: dashboards
+          url: ""
+    panels:
+        - fieldConfig:
+            defaults: {}
+            overrides: []
+          gridPos:
+            h: 3
+            w: 12
+            x: 0
+            "y": 0
+          id: 9
+          options:
+            code:
+                language: plaintext
+                showLineNumbers: false
+                showMiniMap: false
+            content: "# \U0001F4CA IIS Site Performance\n\nReview the Rate, Errors, and Duration (RED) metrics below for this IIS site.\nUse the Operations dashboard link above to drill down into individual URI endpoints."
+            mode: markdown
+          pluginVersion: 11.5.2
+          title: ""
+          type: text
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          description: "**Apdex Score** measures user satisfaction based on response time thresholds:\n\n\U0001F7E2 **Green (0.94+)**: Excellent performance - Most users are satisfied\n\U0001F7E1 **Yellow (0.75-0.94)**: Acceptable performance - Some users may experience delays\n\U0001F534 **Red (<0.75)**: Poor performance - Many users are experiencing issues\n\n**Calculation**: (Satisfied + Tolerated/2) / Total Requests\n- **Satisfied**: Requests \u2264 1000 ms\n- **Tolerated**: Requests between 1000-4000 ms (counted as half)\n- **Total**: All requests"
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                    seriesBy: last
+                mappings: []
+                max: 1
+                min: 0
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: dark-red
+                          value: null
+                        - color: light-yellow
+                          value: 0.75
+                        - color: dark-green
+                          value: 0.94
+            overrides: []
+          gridPos:
+            h: 3
+            w: 12
+            x: 12
+            "y": 0
+          id: 11
+          options:
+            colorMode: value
+            graphMode: area
+            justifyMode: auto
+            orientation: auto
+            percentChangeColorMode: standard
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            showPercentChange: false
+            textMode: auto
+            wideLayout: true
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: false
+              expr: |
+                (
+                  sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                  + (
+                      sum by (site) (iis:requests_tolerating:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                      or
+                      sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"} * 0)
+                    ) / 2
+                )
+                / sum by (site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: true
+              interval: ""
+              legendFormat: Apdex Score
+              range: false
+              refId: apdexQuery
+          title: Apdex Score (T = 1s)
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+                unit: reqps
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Rate
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: '#1bc2c9'
+                        mode: fixed
+          gridPos:
+            h: 9
+            w: 8
+            x: 0
+            "y": 3
+          id: 2
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: sum by (site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: Rate
+              range: true
+              refId: serviceRateQuery
+          title: Rate
+          transformations:
+            - id: merge
+              options: {}
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+                max: 1
+                min: 0
+                unit: percentunit
+            overrides:
+                - matcher:
+                    id: byName
+                    options: Errors
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: dark-red
+                        mode: fixed
+          gridPos:
+            h: 9
+            w: 8
+            x: 8
+            "y": 3
+          id: 3
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: |
+                clamp_max(
+                  (
+                    sum by (site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance", status_code=~"5.."}[5m]))
+                    or
+                    sum by (site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}[5m])) * 0
+                  )
+                  / clamp_min(sum by (site) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}[5m])), 0.001)
+                , 1)
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: Errors
+              range: true
+              refId: serviceErrorsQuery
+          title: Errors
+          transformations:
+            - id: joinByField
+              options:
+                byField: Time
+                mode: outer
+            - id: merge
+              options: {}
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: semi-dark-green
+                          value: null
+                unit: ms
+            overrides:
+                - matcher:
+                    id: byName
+                    options: P99
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: dark-green
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: P95
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: semi-dark-yellow
+                        mode: fixed
+                - matcher:
+                    id: byName
+                    options: AVG
+                  properties:
+                    - id: color
+                      value:
+                        fixedColor: blue
+                        mode: fixed
+          gridPos:
+            h: 9
+            w: 8
+            x: 16
+            "y": 3
+          id: 4
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: max by (site) (iis:response_time_ms_p99:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: P99
+              range: true
+              refId: serviceP99Query
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: max by (site) (iis:response_time_ms_p95:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: P95
+              range: true
+              refId: serviceP95Query
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: max by (site) (iis:response_time_ms_avg:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: AVG
+              range: true
+              refId: serviceAvgQuery
+          title: Duration
+          transformations:
+            - id: joinByField
+              options:
+                byField: Time
+                mode: outer
+            - id: merge
+              options: {}
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          description: "**Apdex Score** measures user satisfaction based on response time thresholds:\n\n\U0001F7E2 **Green (0.94+)**: Excellent performance - Most users are satisfied\n\U0001F7E1 **Yellow (0.75-0.94)**: Acceptable performance - Some users may experience delays\n\U0001F534 **Red (<0.75)**: Poor performance - Many users are experiencing issues\n\n**Calculation**: (Satisfied + Tolerated/2) / Total Requests\n- **Satisfied**: Requests \u2264 1000 ms\n- **Tolerated**: Requests between 1000-4000 ms (counted as half)\n- **Total**: All requests"
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                    seriesBy: last
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisGridShow: true
+                    axisLabel: ""
+                    axisPlacement: auto
+                    axisSoftMax: 1
+                    axisSoftMin: 0
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: scheme
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: dark-red
+                          value: null
+                        - color: light-yellow
+                          value: 0.75
+                        - color: dark-green
+                          value: 0.94
+            overrides: []
+          gridPos:
+            h: 10
+            w: 24
+            x: 0
+            "y": 12
+          id: 10
+          options:
+            legend:
+                calcs:
+                    - mean
+                    - max
+                    - min
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: single
+                sort: none
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              exemplar: true
+              expr: |
+                (
+                  sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                  + (
+                      sum by (site) (iis:requests_tolerating:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+                      or
+                      sum by (site) (iis:requests_satisfied:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"} * 0)
+                    ) / 2
+                )
+                / sum by (site) (iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              hide: false
+              instant: false
+              interval: ""
+              legendFormat: '{{site}}'
+              range: true
+              refId: apdexQuery
+          title: Apdex Score (T = 1s) Over Time
+          type: timeseries
+        - collapsed: false
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 22
+          id: 20
+          targets: []
+          title: IIS Infrastructure Metrics
+          type: row
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 10
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: normal
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                unit: reqps
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 23
+          id: 21
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              expr: sum by (method) (rate(windows_iis_requests_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}[5m]))
+              legendFormat: '{{method}}'
+              range: true
+              refId: A
+          title: Request Rate by HTTP Method
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 23
+          id: 22
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              expr: sum by (site) (windows_iis_current_connections{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"})
+              legendFormat: '{{site}}'
+              range: true
+              refId: A
+          title: Current Connections
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                unit: Bps
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 0
+            "y": 31
+          id: 23
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              expr: sum by (site) (rate(windows_iis_sent_bytes_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}[5m]))
+              legendFormat: 'Sent - {{site}}'
+              range: true
+              refId: A
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              expr: sum by (site) (rate(windows_iis_received_bytes_total{cluster=~"$cluster", namespace=~"$namespace", site=~"$site", instance=~"$instance"}[5m]))
+              legendFormat: 'Received - {{site}}'
+              range: true
+              refId: B
+          title: Traffic
+          type: timeseries
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: line
+                    fillOpacity: 0
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: auto
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: none
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                max: 1
+                min: 0
+                unit: percentunit
+            overrides: []
+          gridPos:
+            h: 8
+            w: 12
+            x: 12
+            "y": 31
+          id: 24
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: false
+                mode: multi
+                sort: desc
+          pluginVersion: 11.5.2
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              expr: increase(windows_iis_server_file_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]) / clamp_min(increase(windows_iis_server_file_cache_queries_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]),1)
+              legendFormat: File cache
+              range: true
+              refId: A
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              expr: increase(windows_iis_server_uri_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]) / clamp_min(increase(windows_iis_server_uri_cache_queries_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]),1)
+              legendFormat: URI cache
+              range: true
+              refId: B
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              editorMode: code
+              expr: increase(windows_iis_server_metadata_cache_hits_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]) / clamp_min(increase(windows_iis_server_metadata_cache_queries_total{cluster=~"$cluster", namespace=~"$namespace", instance=~"$instance"}[$__interval:]),1)
+              legendFormat: Metadata cache
+              range: true
+              refId: C
+          title: Cache Hit Ratios
+          type: timeseries
+    preload: false
+    refresh: ""
+    schemaVersion: 40
+    tags:
+        - windows-apm
+        - service
+        - windows-iis
+        - main
+    templating:
+        list:
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m,cluster)
+              label: Cluster
+              name: cluster
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m,cluster)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m{cluster=~"$cluster"},namespace)
+              label: Namespace
+              name: namespace
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m{cluster=~"$cluster"},namespace)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace"},site)
+              description: ""
+              label: Site
+              name: site
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace"},site)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+            - allValue: .*
+              allowCustomValue: false
+              current: {}
+              datasource:
+                type: prometheus
+                uid: duplo-metrics
+              definition: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"},instance)
+              description: ""
+              includeAll: true
+              label: Instance
+              name: instance
+              options: []
+              query:
+                qryType: 1
+                query: label_values(iis:request_rate:rate1m{cluster=~"$cluster", namespace=~"$namespace", site=~"$site"},instance)
+                refId: PrometheusVariableQueryEditor-VariableQuery
+              refresh: 1
+              regex: ""
+              type: query
+    time:
+        from: now-1h
+        to: now
+    timepicker: {}
+    timezone: ""
+    title: Windows Service Dashboard
+    uid: windows-service-dashboard-v3
+    weekStart: ""

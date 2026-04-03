@@ -1,0 +1,1730 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+    folder: integration-apm-v4
+    name: service-dashboard-v4
+spec:
+    annotations:
+        list:
+            -   builtIn: 1
+                datasource:
+                    type: grafana
+                    uid: -- Grafana --
+                enable: true
+                hide: true
+                iconColor: rgba(0, 211, 255, 1)
+                name: Annotations & Alerts
+                target:
+                    limit: 100
+                    matchAny: false
+                    tags: []
+                    type: dashboard
+                type: dashboard
+    description: "APM dashboard for monitoring OpenTelemetry-based services.  \n\nInstrument your applications using OpenTelemetry SDKs and send traces, metrics, and logs to Tempo for traces, a Prometheus-compatible database like Mimir for metrics, and Loki for logs. This dashboard provides a centralized view of your application's health and performance.  \n\nFor a fully managed observability stack, consider using Grafana Cloud.  \n\nLearn more about this dashboard on https://github.com/cyrille-leclerc/opentelemetry-service-dashboard."
+    editable: true
+    fiscalYearStartMonth: 0
+    graphTooltip: 1
+    links:
+        -   asDropdown: false
+            icon: external link
+            includeVars: false
+            keepTime: true
+            tags: []
+            targetBlank: false
+            title: Open in Legacy Dashboard
+            tooltip: Switch to Legacy Service Dashboard with current service & time range
+            type: link
+            url: /d/service-dashboard-v3/service-dashboard?var-cluster=${deployment_environment_name}&var-namespace=${service_namespace}&var-service=${service_name}&${__url_time_range}
+        -   asDropdown: false
+            icon: external link
+            includeVars: false
+            keepTime: true
+            tags: []
+            targetBlank: false
+            title: Back to Services Overview
+            tooltip: ''
+            type: link
+            url: /d/service-overview-dashboard-v4/service-overview-dashboard?var-deployment_environment_name=${deployment_environment_name}&var-service_namespace=${service_namespace}&var-rate_interval=$__auto
+        -   asDropdown: false
+            icon: external link
+            includeVars: false
+            keepTime: true
+            tags: []
+            targetBlank: true
+            title: Service Infra Metrics
+            tooltip: ''
+            type: link
+            url: /d/k8s-resources-workload/k8s-compute-resources-workload?var-datasource=duplo-metrics&var-cluster=${deployment_environment_name}&var-namespace=${service_namespace}&var-type=$__all&var-workload=${service_name}&var-lokids=$__all
+        -   asDropdown: false
+            icon: external link
+            includeVars: false
+            keepTime: true
+            tags: []
+            targetBlank: true
+            title: Service Logs
+            tooltip: ''
+            type: link
+            url: /a/grafana-lokiexplore-app/explore/service/xyz/logs?var-ds=duplo-logging&var-filters=service_name%7C%3D%7C${service_name}&var-filters=cluster%7C%3D%7C${deployment_environment_name}&var-filters=namespace%7C%3D%7C${service_namespace}
+        -   asDropdown: false
+            icon: external link
+            includeVars: false
+            keepTime: true
+            tags: []
+            targetBlank: true
+            title: Service Graph
+            tooltip: ''
+            type: link
+            url: /explore?schemaVersion=1&panes=%7B%22tte%22:%7B%22datasource%22:%22duplo-tracing%22,%22queries%22:%5B%7B%22refId%22:%22A%22,%22datasource%22:%7B%22type%22:%22tempo%22,%22uid%22:%22duplo-tracing%22%7D,%22queryType%22:%22serviceMap%22,%22limit%22:20,%22tableType%22:%22traces%22,%22serviceMapQuery%22:%22%7Bsource%3D%5C%22tempo%5C%22,k8s_cluster_name%3D%5C%22${deployment_environment_name}%5C%22,k8s_namespace_name%3D%5C%22${service_namespace}%5C%22,service_name%3D%5C%22${service_name}%5C%22%7D%22%7D%5D,%22range%22:%7B%22from%22:%22${__from}%22,%22to%22:%22${__to}%22%7D%7D%7D
+        -   asDropdown: false
+            icon: external link
+            includeVars: false
+            keepTime: true
+            tags: []
+            targetBlank: false
+            title: Service Operations
+            tooltip: ''
+            type: link
+            url: /d/service-dashboard-v4-ops/apm-for-opentelemetry-operations?var-deployment_environment_name=${deployment_environment_name}&var-service_namespace=${service_namespace}&var-service_name=${service_name}&var-rate_interval=$__auto
+        -   asDropdown: false
+            icon: external link
+            includeVars: false
+            keepTime: true
+            tags: []
+            targetBlank: true
+            title: Pyroscope Profiles Explorer
+            tooltip: ''
+            type: link
+            url: /a/grafana-pyroscope-app/explore?searchText=&panelType=time-series&layout=grid&hideNoData=off&explorationType=flame-graph&var-serviceName=ebpf%2F${service_namespace}%2F${service_name}&var-profileMetricId=process_cpu%3Acpu%3Ananoseconds%3Acpu%3Ananoseconds&var-groupBy=all&var-dataSource=duplo-profiling&maxNodes=16384
+        -   asDropdown: false
+            icon: external link
+            includeVars: false
+            keepTime: true
+            tags: []
+            targetBlank: true
+            title: JVM Overview
+            tooltip: ''
+            type: link
+            url: /d/integration-jvm-dashboard/jvm-overview?var-cluster=${deployment_environment_name}&var-namespace=${service_namespace}&var-application=${service_name}
+        -   asDropdown: true
+            icon: external link
+            includeVars: false
+            keepTime: true
+            tags:
+                - apm-v4
+                - otel
+                - service
+            targetBlank: false
+            title: All Services | Dashboards
+            tooltip: ''
+            type: dashboards
+            url: ''
+    panels:
+        -   description: service.namespace=${service_namespace}, service.name=${service_name}, deployment.environment.name=${deployment_environment_name}
+            fieldConfig:
+                defaults: {}
+                overrides: []
+            gridPos:
+                h: 3
+                w: 9
+                x: 0
+                y: 0
+            id: 20
+            options:
+                code:
+                    language: plaintext
+                    showLineNumbers: false
+                    showMiniMap: false
+                content: |
+                    <h1><img src="https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png" alt="OpenTelemetry Icon" width="25" height=""> Service ${service_namespace}/${service_name} (env: ${deployment_environment_name})</h1>
+                mode: html
+            pluginVersion: 12.0.2+security-01
+            title: ''
+            type: text
+        -   datasource:
+                type: prometheus
+                uid: ${prometheus_datasource}
+            description: Shows the timestamp of the latest metrics received in the past 24h.
+            fieldConfig:
+                defaults:
+                    color:
+                        fixedColor: '#24292e'
+                        mode: fixed
+                    mappings: []
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: green
+                            -   color: red
+                                value: 80
+                overrides: []
+            gridPos:
+                h: 3
+                w: 4
+                x: 9
+                y: 0
+            hideTimeOverride: true
+            id: 39
+            options:
+                colorMode: background
+                graphMode: none
+                justifyMode: auto
+                orientation: auto
+                percentChangeColorMode: standard
+                reduceOptions:
+                    calcs:
+                        - lastNotNull
+                    fields: /^Time$/
+                    values: false
+                showPercentChange: false
+                textMode: auto
+                wideLayout: true
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: |
+                        timestamp(sum by (deployment_environment_name, service_namespace, service_name) (http_server_request_duration_seconds_count{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}) or absent{})
+                    interval: 60s
+                    legendFormat: __auto
+                    range: true
+                    refId: A
+            timeFrom: now-24h
+            title: Latest metrics received
+            type: stat
+        -   datasource:
+                type: loki
+                uid: ${loki_datasource}
+            description: Shows the timestamp of the latest logs received in the past 24h.
+            fieldConfig:
+                defaults:
+                    color:
+                        fixedColor: '#24292e'
+                        mode: fixed
+                    mappings: []
+                    noValue: No data
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: green
+                            -   color: red
+                                value: 80
+                    unit: dateTimeFromNow
+                overrides: []
+            gridPos:
+                h: 3
+                w: 3
+                x: 13
+                y: 0
+            hideTimeOverride: true
+            id: 40
+            options:
+                colorMode: background
+                graphMode: none
+                justifyMode: auto
+                orientation: auto
+                percentChangeColorMode: standard
+                reduceOptions:
+                    calcs:
+                        - lastNotNull
+                    fields: /^Time$/
+                    values: false
+                showPercentChange: false
+                textMode: auto
+                wideLayout: true
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: loki
+                        uid: duplo-logging
+                    direction: backward
+                    editorMode: code
+                    expr: sum(count_over_time({service_name="$service_name", exporter="OTLP"} [5m]))
+                    queryType: range
+                    refId: A
+            timeFrom: now-24h
+            title: Latest logs received
+            type: stat
+        -   datasource:
+                type: tempo
+                uid: ${tempo_datasource}
+            description: Shows the timestamp of the latest span received in the past 24h.
+            fieldConfig:
+                defaults:
+                    color:
+                        fixedColor: '#24292e'
+                        mode: fixed
+                    mappings: []
+                    noValue: No data
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: green
+                            -   color: red
+                                value: 80
+                    unit: dateTimeFromNow
+                overrides: []
+            gridPos:
+                h: 3
+                w: 4
+                x: 16
+                y: 0
+            id: 41
+            options:
+                colorMode: background
+                graphMode: none
+                justifyMode: auto
+                orientation: auto
+                percentChangeColorMode: standard
+                reduceOptions:
+                    calcs:
+                        - lastNotNull
+                    fields: /^time$/
+                    values: false
+                showPercentChange: false
+                textMode: auto
+                wideLayout: true
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: tempo
+                        uid: duplo-tracing
+                    filters:
+                        -   id: 0344fb49
+                            operator: '='
+                            scope: resource
+                            tag: service.namespace
+                            value:
+                                - $service_namespace
+                            valueType: string
+                        -   id: service-name
+                            operator: '='
+                            scope: resource
+                            tag: service.name
+                            value:
+                                - $service_name
+                            valueType: string
+                        -   id: 58f4667e
+                            operator: '='
+                            scope: resource
+                            tag: k8s.cluster.name
+                            value: []
+                        -   id: 3020ef4f
+                            operator: '='
+                            scope: resource
+                            tag: k8s.namespace.name
+                            value: []
+                        -   id: a103888b
+                            operator: '='
+                            scope: resource
+                            tag: service.name
+                            value: []
+                        -   id: 4b75ba3d
+                            operator: '='
+                            scope: span
+                            tag: name
+                            value: []
+                    limit: 20
+                    metricsQueryType: range
+                    query: '{resource.service.namespace="$service_namespace" && resource.service.name="$service_name"} | count_over_time()'
+                    queryType: traceql
+                    refId: A
+                    tableType: traces
+            timeFrom: now-1h
+            title: Latest traces received
+            type: stat
+        -   datasource:
+                type: prometheus
+                uid: ${prometheus_datasource}
+            description: |-
+                **Current Apdex Score** — instant snapshot of user satisfaction.
+
+                🟢 **Green (0.94+)**: Excellent
+                🟡 **Yellow (0.75-0.94)**: Acceptable
+                🔴 **Red (<0.75)**: Poor
+
+                **Calculation**: (Satisfied + Tolerated/2) / Total Requests
+            fieldConfig:
+                defaults:
+                    color:
+                        mode: thresholds
+                    mappings: []
+                    max: 1
+                    min: 0
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: red
+                            -   color: '#EAB839'
+                                value: 0.75
+                            -   color: dark-green
+                                value: 0.94
+                    unit: none
+                overrides: []
+            gridPos:
+                h: 3
+                w: 4
+                x: 20
+                y: 0
+            id: 100
+            options:
+                colorMode: background
+                graphMode: none
+                justifyMode: center
+                orientation: auto
+                percentChangeColorMode: standard
+                reduceOptions:
+                    calcs:
+                        - lastNotNull
+                    fields: ''
+                    values: false
+                showPercentChange: false
+                textMode: auto
+                wideLayout: true
+                wrapText: false
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: ${prometheus_datasource}
+                    editorMode: code
+                    expr: |-
+                        (
+                          sum by (service_namespace, service_name) (
+                            (
+                              rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}[5m])
+                              * on(service_namespace, service_name, le) group_left()
+                              service_apdex_threshold_satisfied_bucket
+                            )
+                            or
+                            (
+                              rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name",
+                                le="0.5"
+                              }[5m])
+                              unless on(service_namespace, service_name)
+                              service_apdex_threshold_satisfied_bucket
+                            )
+                          )
+                          +
+                          sum by (service_namespace, service_name) (
+                            (
+                              rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"
+                              }[5m])
+                              * on(service_namespace, service_name, le) group_left()
+                              service_apdex_threshold_tolerating_bucket
+                            )
+                            or
+                            (
+                              rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name",
+                                le="2.5"
+                              }[5m])
+                              unless on(service_namespace, service_name)
+                              service_apdex_threshold_tolerating_bucket
+                            )
+                          )
+                        )
+                        / 2
+                        /
+                        sum by (service_namespace, service_name) (
+                          rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name",
+                            le="+Inf"
+                          }[5m])
+                        )
+                    instant: true
+                    legendFormat: apdex
+                    range: false
+                    refId: A
+            title: Apdex Score (Instant)
+            type: stat
+        -   collapsed: false
+            gridPos:
+                h: 1
+                w: 24
+                x: 0
+                y: 3
+            id: 15
+            panels: []
+            title: Server HTTP RED Metrics
+            type: row
+        -   datasource:
+                type: prometheus
+                uid: ${prometheus_datasource}
+            fieldConfig:
+                defaults:
+                    color:
+                        mode: palette-classic
+                    custom:
+                        axisBorderShow: false
+                        axisCenteredZero: false
+                        axisColorMode: text
+                        axisLabel: ''
+                        axisPlacement: auto
+                        axisSoftMin: 0
+                        barAlignment: 0
+                        barWidthFactor: 0.6
+                        drawStyle: line
+                        fillOpacity: 0
+                        gradientMode: none
+                        hideFrom:
+                            legend: false
+                            tooltip: false
+                            viz: false
+                        insertNulls: false
+                        lineInterpolation: smooth
+                        lineWidth: 1
+                        pointSize: 5
+                        scaleDistribution:
+                            log: 10
+                            type: log
+                        showPoints: auto
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                        thresholdsStyle:
+                            mode: 'off'
+                    mappings: []
+                    min: 0
+                    noValue: No HTTP Operation
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: green
+                            -   color: red
+                                value: 80
+                    unit: s
+                overrides: []
+            gridPos:
+                h: 10
+                w: 8
+                x: 0
+                y: 4
+            id: 17
+            links:
+                -   targetBlank: true
+                    title: Drill down to traces
+                    url: /a/grafana-exploretraces-app/explore?var-filters=resource.deployment.environment.name%7C%3D%7C${deployment_environment_name}&var-filters=resource.service.namespace%7C%3D%7C${service_namespace}&var-filters=resource.service.name%7C%3D%7C${service_name}&var-metric=duration&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing&actionView=traceList&var-primarySignal=true
+            options:
+                legend:
+                    calcs: []
+                    displayMode: list
+                    placement: bottom
+                    showLegend: true
+                tooltip:
+                    hideZeros: false
+                    mode: single
+                    sort: none
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: histogram_quantile(0.99, sum by(le, deployment_environment_name, service_namespace, service_name) (rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}[$__rate_interval])))
+                    interval: 60s
+                    legendFormat: P99
+                    range: true
+                    refId: P99
+                -   datasource:
+                        type: prometheus
+                        uid: ${prometheus_datasource}
+                    editorMode: builder
+                    expr: histogram_quantile(0.9, sum by(le, deployment_environment_name, service_namespace, service_name) (rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}[$__rate_interval])))
+                    interval: 60s
+                    legendFormat: P90
+                    range: true
+                    refId: P90
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: builder
+                    expr: avg by(deployment_environment_name, service_namespace, service_name) (rate(http_server_request_duration_seconds_sum{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}[$__rate_interval])) / avg by(deployment_environment_name, service_namespace, service_name) (rate(http_server_request_duration_seconds_count{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}[$__rate_interval]))
+                    interval: 60s
+                    legendFormat: AVG
+                    range: true
+                    refId: AVG
+            title: Duration
+            type: timeseries
+        -   datasource:
+                type: prometheus
+                uid: ${prometheus_datasource}
+            fieldConfig:
+                defaults:
+                    color:
+                        mode: palette-classic
+                    custom:
+                        axisBorderShow: false
+                        axisCenteredZero: false
+                        axisColorMode: text
+                        axisLabel: ''
+                        axisPlacement: auto
+                        axisSoftMax: 100
+                        axisSoftMin: 0
+                        barAlignment: 0
+                        barWidthFactor: 0.6
+                        drawStyle: line
+                        fillOpacity: 0
+                        gradientMode: none
+                        hideFrom:
+                            legend: false
+                            tooltip: false
+                            viz: false
+                        insertNulls: false
+                        lineInterpolation: smooth
+                        lineWidth: 1
+                        pointSize: 5
+                        scaleDistribution:
+                            type: linear
+                        showPoints: auto
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                        thresholdsStyle:
+                            mode: 'off'
+                    mappings: []
+                    noValue: No HTTP Operation
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: red
+                    unit: percent
+                overrides:
+                    -   matcher:
+                            id: byName
+                            options: 5xx
+                        properties:
+                            -   id: custom.fillOpacity
+                                value: 64
+                            -   id: color
+                                value:
+                                    fixedColor: red
+                                    mode: fixed
+            gridPos:
+                h: 10
+                w: 8
+                x: 8
+                y: 4
+            id: 18
+            links:
+                -   targetBlank: true
+                    title: Drill down to traces
+                    url: /a/grafana-exploretraces-app/explore?var-filters=resource.deployment.environment.name%7C%3D%7C${deployment_environment_name}&var-filters=resource.service.namespace%7C%3D%7C${service_namespace}&var-filters=resource.service.name%7C%3D%7C${service_name}&var-metric=errors&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing&var-primarySignal=true&actionView=traceList
+            options:
+                legend:
+                    calcs: []
+                    displayMode: list
+                    placement: bottom
+                    showLegend: true
+                tooltip:
+                    hideZeros: false
+                    mode: single
+                    sort: none
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: |-
+                        (
+                          sum by(deployment_environment_name, service_namespace, service_name) (
+                            rate(
+                              http_server_request_duration_seconds_count{
+                                deployment_environment_name=~"$deployment_environment_name",
+                                service_namespace=~"$service_namespace",
+                                service_name="$service_name",
+                                http_response_status_code=~"5.."
+                              }[$__rate_interval]
+                            )
+                          ) * 100
+                        )
+                        /
+                        (
+                          sum by(deployment_environment_name, service_namespace, service_name) (
+                            rate(
+                              http_server_request_duration_seconds_count{
+                                deployment_environment_name=~"$deployment_environment_name",
+                                service_namespace=~"$service_namespace",
+                                service_name="$service_name"
+                              }[$__rate_interval]
+                            )
+                          )
+                        )
+                        or
+                        (
+                          0
+                          *
+                          sum by(deployment_environment_name, service_namespace, service_name) (
+                            rate(
+                              http_server_request_duration_seconds_count{
+                                deployment_environment_name=~"$deployment_environment_name",
+                                service_namespace=~"$service_namespace",
+                                service_name="$service_name"
+                              }[$__rate_interval]
+                            )
+                          )
+                        )
+                    interval: 60s
+                    legendFormat: 5xx
+                    range: true
+                    refId: 5xx
+            title: Error
+            type: timeseries
+        -   datasource:
+                type: prometheus
+                uid: ${prometheus_datasource}
+            fieldConfig:
+                defaults:
+                    color:
+                        mode: palette-classic
+                    custom:
+                        axisBorderShow: false
+                        axisCenteredZero: false
+                        axisColorMode: text
+                        axisLabel: ''
+                        axisPlacement: auto
+                        axisSoftMin: 0
+                        barAlignment: 0
+                        barWidthFactor: 0.6
+                        drawStyle: line
+                        fillOpacity: 0
+                        gradientMode: none
+                        hideFrom:
+                            legend: false
+                            tooltip: false
+                            viz: false
+                        insertNulls: false
+                        lineInterpolation: smooth
+                        lineWidth: 1
+                        pointSize: 5
+                        scaleDistribution:
+                            log: 10
+                            type: log
+                        showPoints: auto
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                        thresholdsStyle:
+                            mode: 'off'
+                    mappings: []
+                    min: 0
+                    noValue: No HTTP Operation
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: green
+                            -   color: red
+                                value: 80
+                    unit: reqps
+                overrides: []
+            gridPos:
+                h: 10
+                w: 8
+                x: 16
+                y: 4
+            id: 19
+            links:
+                -   targetBlank: true
+                    title: Drill down to traces
+                    url: /a/grafana-exploretraces-app/explore?var-filters=resource.deployment.environment.name%7C%3D%7C${deployment_environment_name}&var-filters=resource.service.namespace%7C%3D%7C${service_namespace}&var-filters=resource.service.name%7C%3D%7C${service_name}&var-metric=rate&from=${__from}&to=${__to}&timezone=browser&var-ds=duplo-tracing&var-primarySignal=true&actionView=traceList
+            options:
+                legend:
+                    calcs: []
+                    displayMode: list
+                    placement: bottom
+                    showLegend: true
+                tooltip:
+                    hideZeros: false
+                    mode: single
+                    sort: none
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: '(sum(rate(http_server_request_duration_seconds_count{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}[$__rate_interval])) by (deployment_environment_name, service_namespace, service_name)) '
+                    interval: 60s
+                    legendFormat: Requests
+                    range: true
+                    refId: RequestRate
+            title: Request Rate
+            type: timeseries
+        -   datasource:
+                type: prometheus
+                uid: duplo-metrics
+            fieldConfig:
+                defaults:
+                    color:
+                        mode: thresholds
+                    mappings: []
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: orange
+                    unit: short
+                overrides: []
+            gridPos:
+                h: 9
+                w: 16
+                x: 0
+                y: 14
+            id: 42
+            options:
+                displayMode: gradient
+                legend:
+                    calcs: []
+                    displayMode: list
+                    placement: bottom
+                    showLegend: false
+                maxVizHeight: 300
+                minVizHeight: 16
+                minVizWidth: 8
+                namePlacement: auto
+                orientation: vertical
+                reduceOptions:
+                    calcs:
+                        - sum
+                    fields: ''
+                    values: false
+                showUnfilled: false
+                sizing: auto
+                valueMode: text
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: sum by (le) (rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}[$__rate_interval]))
+                    format: heatmap
+                    interval: ''
+                    legendFormat: '{{le}}'
+                    range: true
+                    refId: serviceRateQuery
+            title: Duration distribution
+            transformations:
+                -   id: renameByRegex
+                    options:
+                        regex: (^\d+\.\d+$)
+                        renamePattern: $1 s
+            type: bargauge
+        -   datasource:
+                type: prometheus
+                uid: ${prometheus_datasource}
+            fieldConfig:
+                defaults:
+                    color:
+                        fixedColor: red
+                        mode: thresholds
+                    custom:
+                        axisBorderShow: false
+                        axisCenteredZero: false
+                        axisColorMode: text
+                        axisLabel: ''
+                        axisPlacement: auto
+                        barAlignment: 0
+                        barWidthFactor: 0.6
+                        drawStyle: line
+                        fillOpacity: 0
+                        gradientMode: scheme
+                        hideFrom:
+                            legend: false
+                            tooltip: false
+                            viz: false
+                        insertNulls: false
+                        lineInterpolation: linear
+                        lineWidth: 1
+                        pointSize: 5
+                        scaleDistribution:
+                            type: linear
+                        showPoints: auto
+                        spanNulls: false
+                        stacking:
+                            group: A
+                            mode: none
+                        thresholdsStyle:
+                            mode: area
+                    fieldMinMax: false
+                    mappings: []
+                    max: 1
+                    min: 0.5
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: red
+                            -   color: '#EAB839'
+                                value: 0.75
+                            -   color: dark-green
+                                value: 0.94
+                overrides: []
+            gridPos:
+                h: 9
+                w: 8
+                x: 16
+                y: 14
+            id: 43
+            options:
+                legend:
+                    calcs:
+                        - mean
+                        - min
+                        - max
+                    displayMode: list
+                    placement: bottom
+                    showLegend: true
+                tooltip:
+                    hideZeros: false
+                    mode: single
+                    sort: none
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: |-
+                        (
+                          sum by (service_namespace, service_name) (
+                            (
+                              rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}[5m])
+                              * on(service_namespace, service_name, le) group_left()
+                              service_apdex_threshold_satisfied_bucket
+                            )
+                            or
+                            (
+                              rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name",
+                                le="0.5"
+                              }[5m])
+                              unless on(service_namespace, service_name)
+                              service_apdex_threshold_satisfied_bucket
+                            )
+                          )
+                          +
+                          sum by (service_namespace, service_name) (
+                            (
+                              rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"
+                              }[5m])
+                              * on(service_namespace, service_name, le) group_left()
+                              service_apdex_threshold_tolerating_bucket
+                            )
+                            or
+                            (
+                              rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name",
+                                le="2.5"
+                              }[5m])
+                              unless on(service_namespace, service_name)
+                              service_apdex_threshold_tolerating_bucket
+                            )
+                          )
+                        )
+                        / 2
+                        /
+                        sum by (service_namespace, service_name) (
+                          rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name",
+                            le="+Inf"
+                          }[5m])
+                        )
+                    legendFormat: apdex
+                    range: true
+                    refId: A
+            title: Apdex Score ( T= ${appdex_threshold}s)
+            type: timeseries
+        -   collapsed: false
+            gridPos:
+                h: 1
+                w: 24
+                x: 0
+                y: 23
+            id: 22
+            panels: []
+            title: Inbound Operations
+            type: row
+        -   datasource:
+                type: prometheus
+                uid: ${prometheus_datasource}
+            fieldConfig:
+                defaults:
+                    color:
+                        mode: thresholds
+                    custom:
+                        align: auto
+                        cellOptions:
+                            type: auto
+                        filterable: false
+                        inspect: false
+                    mappings: []
+                    noValue: No HTTP operation
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: green
+                            -   color: red
+                                value: 80
+                overrides:
+                    -   matcher:
+                            id: byName
+                            options: Duration (p99)
+                        properties:
+                            -   id: unit
+                                value: s
+                    -   matcher:
+                            id: byName
+                            options: Rate
+                        properties:
+                            -   id: unit
+                                value: reqps
+                    -   matcher:
+                            id: byName
+                            options: Error
+                        properties:
+                            -   id: unit
+                                value: percentunit
+                    -   matcher:
+                            id: byName
+                            options: Operation
+                        properties:
+                            -   id: custom.width
+                                value: 730
+                            -   id: links
+                                value:
+                                    -   targetBlank: true
+                                        title: details
+                                        url: /d/service-dashboard-v4-ops/apm-for-opentelemetry-operations?orgId=1&var-prometheus_datasource=${prometheus_datasource}&var-deployment_environment_name=${deployment_environment_name}&var-service_namespace=${service_namespace}&var-service_name=${service_name}&var-http_route=${__data.fields.http_route}&var-http_request_method=${__data.fields.http_request_method}
+                            -   id: custom.filterable
+                                value: true
+                    -   matcher:
+                            id: byName
+                            options: http_request_method
+                        properties:
+                            -   id: custom.hidden
+                                value: true
+                    -   matcher:
+                            id: byName
+                            options: http_route
+                        properties:
+                            -   id: custom.hidden
+                                value: true
+            gridPos:
+                h: 10
+                w: 24
+                x: 0
+                y: 24
+            id: 21
+            options:
+                cellHeight: sm
+                footer:
+                    countRows: false
+                    enablePagination: true
+                    fields: ''
+                    reducer:
+                        - sum
+                    show: false
+                showHeader: true
+                sortBy:
+                    -   desc: true
+                        displayName: Operation
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: "\n        sum by (operation, http_request_method, http_route ) (\n            label_join(\n                rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n            )\n        )\n    "
+                    interval: 60s
+                    legendFormat: '{{operation}}'
+                    range: true
+                    refId: RPS
+                -   datasource:
+                        type: prometheus
+                        uid: ${prometheus_datasource}
+                    editorMode: code
+                    expr: "(\n        sum by (operation ) (\n            label_join(\n                rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\", http_response_status_code=~\"5..\"}[$__rate_interval]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n            )\n        )\n     / \n        sum by (operation ) (\n            label_join(\n                rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n            )\n        )\n    ) or (0 * \n        sum by (operation) (\n          \
+                        \  label_join(\n                rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n            )\n        )\n    )"
+                    interval: 60s
+                    legendFormat: '{{operation}}'
+                    range: true
+                    refId: ERR_PCT
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: "\n        histogram_quantile(\n            0.99,\n            sum by (le, operation) (\n                label_join(\n                rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[5m]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n                )\n            )\n        )\n    "
+                    interval: 60s
+                    legendFormat: '{{operation}}'
+                    range: true
+                    refId: Duration
+            title: HTTP Operations
+            transformations:
+                -   id: timeSeriesTable
+                    options:
+                        Duration:
+                            timeField: Time
+                        ERR_PCT:
+                            timeField: Time
+                        RPS:
+                            timeField: Time
+                -   id: joinByField
+                    options:
+                        byField: operation
+                        mode: outer
+                -   id: organize
+                    options:
+                        excludeByName:
+                            http_request_method 1: false
+                            http_request_method 2: true
+                            http_request_method 3: true
+                            http_route 1: false
+                            http_route 2: true
+                            http_route 3: true
+                        includeByName: {}
+                        indexByName:
+                            'Trend #Duration': 1
+                            'Trend #ERR_PCT': 2
+                            'Trend #RPS': 3
+                            operation: 0
+                        renameByName:
+                            'Trend #Duration': Duration (p99)
+                            'Trend #ERR_PCT': Error
+                            'Trend #RPS': Rate
+                            http_request_method 1: http_request_method
+                            http_route 1: http_route
+                            operation: Operation
+            type: table
+        -   collapsed: false
+            gridPos:
+                h: 1
+                w: 24
+                x: 0
+                y: 34
+            id: 28
+            panels: []
+            title: Outbound Services and Databases
+            type: row
+        -   datasource:
+                type: prometheus
+                uid: ${prometheus_datasource}
+            fieldConfig:
+                defaults:
+                    color:
+                        mode: thresholds
+                    custom:
+                        align: auto
+                        cellOptions:
+                            type: auto
+                        inspect: false
+                    mappings: []
+                    noValue: No HTTP call
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: green
+                            -   color: red
+                                value: 80
+                overrides:
+                    -   matcher:
+                            id: byName
+                            options: Duration (P99)
+                        properties:
+                            -   id: unit
+                                value: s
+                    -   matcher:
+                            id: byName
+                            options: Rate
+                        properties:
+                            -   id: unit
+                                value: reqps
+                    -   matcher:
+                            id: byName
+                            options: Error
+                        properties:
+                            -   id: unit
+                                value: percentunit
+            gridPos:
+                h: 8
+                w: 12
+                x: 0
+                y: 35
+            id: 23
+            options:
+                cellHeight: sm
+                footer:
+                    countRows: false
+                    fields: ''
+                    reducer:
+                        - sum
+                    show: false
+                showHeader: true
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: |-
+                        sum by (outbound_service) (
+                          label_join(
+                            rate(
+                              http_client_request_duration_seconds_count{
+                                deployment_environment_name=~"$deployment_environment_name",
+                                service_namespace=~"$service_namespace",
+                                service_name="$service_name"
+                              }[$__rate_interval]
+                            ),
+                            "outbound_service",
+                            " ",
+                            "server_address"
+                          )
+                        )
+                    interval: 60s
+                    legendFormat: '{{server_address}} {{http_request_method}} {{url_template}}'
+                    range: true
+                    refId: RPS
+                -   datasource:
+                        type: prometheus
+                        uid: ${prometheus_datasource}
+                    editorMode: code
+                    expr: |-
+                        (
+                          sum by (outbound_service) (
+                            label_join(
+                              rate(
+                                http_client_request_duration_seconds_count{
+                                  deployment_environment_name=~"$deployment_environment_name",
+                                  service_namespace=~"$service_namespace",
+                                  service_name="$service_name",
+                                  http_response_status_code=~"5.."
+                                }[$__rate_interval]
+                              ),
+                              "outbound_service",
+                              " ",
+                              "server_address"
+                            )
+                          )
+                          /
+                          sum by (outbound_service) (
+                            label_join(
+                              rate(
+                                http_client_request_duration_seconds_count{
+                                  deployment_environment_name=~"$deployment_environment_name",
+                                  service_namespace=~"$service_namespace",
+                                  service_name="$service_name"
+                                }[$__rate_interval]
+                              ),
+                              "outbound_service",
+                              " ",
+                              "server_address"
+                            )
+                          )
+                        )
+                        or
+                        (
+                          0
+                          *
+                          sum by (outbound_service) (
+                            label_join(
+                              rate(
+                                http_client_request_duration_seconds_count{
+                                  deployment_environment_name=~"$deployment_environment_name",
+                                  service_namespace=~"$service_namespace",
+                                  service_name="$service_name"
+                                }[$__rate_interval]
+                              ),
+                              "outbound_service",
+                              " ",
+                              "server_address"
+                            )
+                          )
+                        )
+                    interval: 60s
+                    legendFormat: '{{server_address}} {{http_request_method}} {{url_template}}'
+                    range: true
+                    refId: ERR_PCT
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: |-
+                        histogram_quantile(
+                          0.99,
+                          sum by (le, outbound_service) (
+                            label_join(
+                              rate(
+                                http_client_request_duration_seconds_bucket{
+                                  deployment_environment_name=~"$deployment_environment_name",
+                                  service_namespace=~"$service_namespace",
+                                  service_name="$service_name"
+                                }[5m]
+                              ),
+                              "outbound_service",
+                              " ",
+                              "server_address"
+                            )
+                          )
+                        )
+                    interval: 60s
+                    legendFormat: '{{server_address}} {{http_request_method}} {{url_template}}'
+                    range: true
+                    refId: DURATION
+            title: Outbound HTTP Services
+            transformations:
+                -   id: timeSeriesTable
+                    options:
+                        Duration:
+                            timeField: Time
+                        ERR_PCT:
+                            timeField: Time
+                        RPS:
+                            timeField: Time
+                -   id: joinByField
+                    options:
+                        byField: outbound_service
+                        mode: outer
+                -   id: organize
+                    options:
+                        excludeByName: {}
+                        includeByName: {}
+                        indexByName:
+                            'Trend #DURATION': 1
+                            'Trend #ERR_PCT': 2
+                            'Trend #RPS': 3
+                            outbound_service: 0
+                        renameByName:
+                            'Trend #DURATION': Duration (P99)
+                            'Trend #Duration': Duration (p99)
+                            'Trend #ERR_PCT': Error
+                            'Trend #RPS': Rate
+                            operation: Operation
+                            outbound_service: Service
+            type: table
+        -   datasource:
+                type: prometheus
+                uid: ${prometheus_datasource}
+            fieldConfig:
+                defaults:
+                    color:
+                        mode: thresholds
+                    custom:
+                        align: auto
+                        cellOptions:
+                            type: auto
+                        inspect: false
+                    mappings: []
+                    noValue: No database call
+                    thresholds:
+                        mode: absolute
+                        steps:
+                            -   color: green
+                            -   color: red
+                                value: 80
+                overrides:
+                    -   matcher:
+                            id: byName
+                            options: Duration (P99)
+                        properties:
+                            -   id: unit
+                                value: s
+                    -   matcher:
+                            id: byName
+                            options: Rate
+                        properties:
+                            -   id: unit
+                                value: reqps
+                    -   matcher:
+                            id: byName
+                            options: Error
+                        properties:
+                            -   id: unit
+                                value: percentunit
+            gridPos:
+                h: 8
+                w: 12
+                x: 12
+                y: 35
+            id: 24
+            options:
+                cellHeight: sm
+                footer:
+                    countRows: false
+                    fields: ''
+                    reducer:
+                        - sum
+                    show: false
+                showHeader: true
+                sortBy: []
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: |-
+                        sum by (database) (
+                          label_join(
+                            rate(
+                              db_client_operation_duration_seconds_count{
+                                deployment_environment_name=~"$deployment_environment_name",
+                                service_namespace=~"$service_namespace",
+                                service_name="$service_name"
+                              }[$__rate_interval]
+                            ),
+                            "database",
+                            "/",
+                            "server_address",
+                            "db_namespace"
+                          )
+                        )
+                    interval: 60s
+                    legendFormat: '{{server_address}} {{db_namespace}}'
+                    range: true
+                    refId: RPS
+                -   datasource:
+                        type: prometheus
+                        uid: ${prometheus_datasource}
+                    editorMode: code
+                    expr: "(\n        sum by (database) (\n            label_join(\n                rate(db_client_operation_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\", http_response_status_code=~\"5..\"}[$__rate_interval]),\n                \"database\",\n                \"/\",\n                \"server_address\",\n                \"db_namespace\"\n            )\n        )\n     / \n        sum by (database) (\n            label_join(\n                rate(db_client_operation_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"database\",\n                \"/\",\n                \"server_address\",\n                \"db_namespace\"\n            )\n        )\n    ) or (0 * \n        sum by (database) (\n            label_join(\n\
+                        \                rate(db_client_operation_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"database\",\n                \"/\",\n                \"server_address\",\n                \"db_namespace\"\n            )\n        )\n    )"
+                    interval: 60s
+                    legendFormat: '{{server_address}} {{db_namespace}}'
+                    range: true
+                    refId: ERR_PCT
+                -   datasource:
+                        type: prometheus
+                        uid: duplo-metrics
+                    editorMode: code
+                    expr: |-
+                        histogram_quantile(
+                          0.99,
+                          sum by (le, database) (
+                            label_join(
+                              rate(
+                                db_client_operation_duration_seconds_bucket{
+                                  deployment_environment_name=~"$deployment_environment_name",
+                                  service_namespace=~"$service_namespace",
+                                  service_name="$service_name"
+                                }[5m]
+                              ),
+                              "database",
+                              "/",
+                              "server_address",
+                              "db_namespace"
+                            )
+                          )
+                        )
+                    interval: 60s
+                    legendFormat: '{{server_address}} {{db_namespace}}'
+                    range: true
+                    refId: DURATION
+            title: Outbound Databases
+            transformations:
+                -   id: timeSeriesTable
+                    options:
+                        DURATION:
+                            timeField: Time
+                        Duration:
+                            timeField: Time
+                        ERR_PCT:
+                            timeField: Time
+                        RPS:
+                            timeField: Time
+                -   id: joinByField
+                    options:
+                        byField: database
+                        mode: outer
+                -   id: organize
+                    options:
+                        excludeByName: {}
+                        includeByName: {}
+                        indexByName:
+                            'Trend #DURATION': 1
+                            'Trend #ERR_PCT': 2
+                            'Trend #RPS': 3
+                            database: 0
+                        renameByName:
+                            'Trend #DURATION': Duration (P99)
+                            'Trend #Duration': Duration (p99)
+                            'Trend #ERR_PCT': Error
+                            'Trend #RPS': Rate
+                            database: Database
+                            database_operation: Database Operation
+                            operation: Operation
+                            outbound_service: Service
+            type: table
+        -   collapsed: true
+            gridPos:
+                h: 1
+                w: 24
+                x: 0
+                y: 43
+            id: 29
+            panels:
+                -   datasource:
+                        type: tempo
+                        uid: ${tempo_datasource}
+                    fieldConfig:
+                        defaults:
+                            color:
+                                mode: thresholds
+                            custom:
+                                align: auto
+                                cellOptions:
+                                    type: auto
+                                inspect: false
+                            mappings: []
+                            noValue: No traces
+                            thresholds:
+                                mode: absolute
+                                steps:
+                                    -   color: green
+                                    -   color: red
+                                        value: 80
+                        overrides:
+                            -   matcher:
+                                    id: byName
+                                    options: Trace Service
+                                properties:
+                                    -   id: custom.hidden
+                                        value: true
+                            -   matcher:
+                                    id: byName
+                                    options: Span ID
+                                properties:
+                                    -   id: custom.hidden
+                                        value: false
+                                    -   id: custom.width
+                                        value: 314
+                            -   matcher:
+                                    id: byName
+                                    options: deployment.environment.name
+                                properties:
+                                    -   id: custom.hidden
+                                        value: true
+                            -   matcher:
+                                    id: byName
+                                    options: service.name
+                                properties:
+                                    -   id: custom.hidden
+                                        value: true
+                            -   matcher:
+                                    id: byName
+                                    options: service.namespace
+                                properties:
+                                    -   id: custom.hidden
+                                        value: true
+                    gridPos:
+                        h: 10
+                        w: 24
+                        x: 0
+                        y: 44
+                    id: 30
+                    options:
+                        cellHeight: sm
+                        footer:
+                            countRows: false
+                            fields: ''
+                            reducer:
+                                - sum
+                            show: false
+                        frameIndex: 0
+                        showHeader: true
+                        sortBy: []
+                    pluginVersion: 12.0.2+security-01
+                    targets:
+                        -   datasource:
+                                type: tempo
+                                uid: duplo-tracing
+                            filters:
+                                -   id: service-name
+                                    operator: '='
+                                    scope: resource
+                                    tag: service.name
+                                    value:
+                                        - $service_name
+                                    valueType: string
+                                -   id: 6997e808
+                                    operator: '='
+                                    scope: resource
+                                    tag: deployment.environment.name
+                                    value:
+                                        - $deployment_environment_name
+                                    valueType: string
+                                -   id: e9f0e855
+                                    operator: '='
+                                    scope: resource
+                                    tag: service.namespace
+                                    value:
+                                        - $service_namespace
+                                    valueType: string
+                            limit: 20
+                            metricsQueryType: range
+                            query: '{resource.service.name="$service_name" && resource.service.namespace="$service_namespace" && duration > 0.5s} '
+                            queryType: traceql
+                            refId: A
+                            tableType: spans
+                    title: ''
+                    type: table
+            title: Slow Traces (> 0.5s)
+            type: row
+        -   collapsed: false
+            gridPos:
+                h: 1
+                w: 24
+                x: 0
+                y: 44
+            id: 25
+            panels: []
+            title: OTLP Logs
+            type: row
+        -   datasource:
+                type: loki
+                uid: ${loki_datasource}
+            fieldConfig:
+                defaults: {}
+                overrides: []
+            gridPos:
+                h: 15
+                w: 24
+                x: 0
+                y: 45
+            id: 26
+            options:
+                dedupStrategy: none
+                enableInfiniteScrolling: true
+                enableLogDetails: true
+                prettifyLogMessage: false
+                showCommonLabels: false
+                showLabels: false
+                showTime: true
+                sortOrder: Descending
+                wrapLogMessage: false
+            pluginVersion: 12.0.2+security-01
+            targets:
+                -   datasource:
+                        type: loki
+                        uid: duplo-logging
+                    direction: backward
+                    editorMode: code
+                    expr: "{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=~\"$service_name\"} | line_format `\e[1m{{if .detected_level }}{{alignRight 7 .detected_level}}{{else if .severity_text}}{{alignRight 5 .severity_text}}{{end}}\e[0m \e[90m[{{alignRight 10 .instance}}{{if .thread_name}}/{{alignRight 20 .thread_name}}{{else if eq \"java\" .telemetry_sdk_language }}                    {{end}}]\e[0m \e[36m{{if .scope_name }}{{alignRight 40 .scope_name}}{{end}}{{if .exception_type}} \e[1;101m \e[0m{{end}} {{if .exception_type}}\e[1;91m{{.exception_type}}\e[0m{{end}}{{if .exception_message}} \e[1;91m{{.exception_message}}\e[0m {{end}} \e[0m {{__line__}} {{if .trace_id}} \e[37m\e[3m[trace_id={{.trace_id}}]{{end}}`"
+                    queryType: range
+                    refId: A
+            title: ''
+            type: logs
+    preload: false
+    refresh: 30s
+    schemaVersion: 41
+    tags:
+        - apm-v4
+        - otel
+        - service
+        - main
+    templating:
+        list:
+            -   allowCustomValue: false
+                current:
+                    text: duplo-metrics
+                    value: duplo-metrics
+                description: OpenTelemetry metrics.
+                hide: 2
+                label: Metrics
+                name: prometheus_datasource
+                options: []
+                query: prometheus
+                refresh: 1
+                regex: duplo-metrics
+                type: datasource
+            -   allowCustomValue: false
+                current:
+                    text: duplo-tracing
+                    value: duplo-tracing
+                description: OpenTelemetry traces
+                hide: 2
+                label: Traces
+                name: tempo_datasource
+                options: []
+                query: tempo
+                refresh: 1
+                regex: duplo-tracing
+                type: datasource
+            -   allowCustomValue: false
+                current:
+                    text: duplo-logging
+                    value: duplo-logging
+                description: OpenTelemetry logs.
+                hide: 2
+                label: Logs
+                name: loki_datasource
+                options: []
+                query: loki
+                refresh: 1
+                regex: duplo-logging
+                type: datasource
+            -   allowCustomValue: false
+                current:
+                    text: duploinfra-ft
+                    value: duploinfra-ft
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                definition: label_values(http_server_request_duration_seconds_count,deployment_environment_name)
+                description: Deployment environment
+                includeAll: false
+                label: Environment
+                name: deployment_environment_name
+                options: []
+                query:
+                    qryType: 1
+                    query: label_values(http_server_request_duration_seconds_count,deployment_environment_name)
+                    refId: PrometheusVariableQueryEditor-VariableQuery
+                refresh: 1
+                regex: ''
+                type: query
+            -   allowCustomValue: false
+                current:
+                    text: duploservices-ftadmin
+                    value: duploservices-ftadmin
+                datasource:
+                    type: prometheus
+                    uid: ${prometheus_datasource}
+                definition: label_values(http_server_request_duration_seconds_count{deployment_environment_name=~"$deployment_environment_name"},service_namespace)
+                description: Service namespace.
+                includeAll: false
+                label: Namespace
+                name: service_namespace
+                options: []
+                query:
+                    qryType: 1
+                    query: label_values(http_server_request_duration_seconds_count{deployment_environment_name=~"$deployment_environment_name"},service_namespace)
+                    refId: PrometheusVariableQueryEditor-VariableQuery
+                refresh: 1
+                regex: ''
+                sort: 1
+                type: query
+            -   current:
+                    text: login
+                    value: login
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                definition: label_values(http_server_request_duration_seconds_count{service_namespace=~"$service_namespace", deployment_environment_name=~"$deployment_environment_name"},service_name)
+                description: Service name.
+                label: Name
+                name: service_name
+                options: []
+                query:
+                    qryType: 1
+                    query: label_values(http_server_request_duration_seconds_count{service_namespace=~"$service_namespace", deployment_environment_name=~"$deployment_environment_name"},service_name)
+                    refId: PrometheusVariableQueryEditor-VariableQuery
+                refresh: 2
+                regex: ''
+                sort: 1
+                type: query
+    time:
+        from: now-30m
+        to: now
+    timepicker: {}
+    timezone: ''
+    title: APM for OpenTelemetry
+    uid: service-dashboard-v4
