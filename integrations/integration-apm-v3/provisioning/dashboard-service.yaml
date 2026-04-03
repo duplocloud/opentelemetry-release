@@ -25,6 +25,16 @@ spec:
           includeVars: false
           keepTime: true
           tags: []
+          targetBlank: false
+          title: Open in New Dashboard
+          tooltip: Switch to New APM Service Dashboard with current service & time range
+          type: link
+          url: /d/service-dashboard-v4/apm-for-opentelemetry?var-deployment_environment_name=${cluster}&var-service_namespace=${namespace}&var-service_name=${service}&${__url_time_range}
+        - asDropdown: false
+          icon: external link
+          includeVars: false
+          keepTime: true
+          tags: []
           targetBlank: true
           title: Service Infra Metrics
           tooltip: ""
