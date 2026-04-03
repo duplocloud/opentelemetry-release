@@ -72,7 +72,6 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
             overrides:
                 - matcher:
                     id: byName
@@ -166,14 +165,14 @@ spec:
                 show: false
             showHeader: true
             sortBy: []
-          pluginVersion: 11.5.2
+          pluginVersion: 12.0.2+security-01
           targets:
             - datasource:
                 type: loki
                 uid: ${datasource}
               direction: backward
               editorMode: code
-              expr: '{job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |~ `(?i)$contains` | logfmt | json | drop __error__,__error_details__'
+              expr: '{job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |~ `(?i)$contains` | logfmt  | drop __error__,__error_details__'
               queryType: range
               refId: A
           title: Events Details
@@ -277,8 +276,8 @@ spec:
                         viz: false
                     insertNulls: false
                     lineInterpolation: linear
-                    lineWidth: 1
-                    pointSize: 5
+                    lineWidth: 4
+                    pointSize: 26
                     scaleDistribution:
                         type: linear
                     showPoints: auto
@@ -293,17 +292,17 @@ spec:
                     mode: absolute
                     steps:
                         - color: green
-                          value: null
                         - color: red
                           value: 80
             overrides: []
           gridPos:
-            h: 8
-            w: 12
+            h: 10
+            w: 15
             x: 0
             "y": 15
           id: 2
           interval: 1m
+          maxDataPoints: 100
           options:
             legend:
                 calcs: []
@@ -314,13 +313,14 @@ spec:
                 hideZeros: false
                 mode: single
                 sort: none
-          pluginVersion: 11.5.2
+          pluginVersion: 12.0.2+security-01
           targets:
             - datasource:
                 type: loki
                 uid: ${datasource}
+              direction: backward
               editorMode: code
-              expr: sum by (type) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ [$__interval]))
+              expr: 'sum by (type) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |~ `(?i)$contains`  | logfmt | drop __error__,__error_details__ [$__interval]))'
               legendFormat: '{{type}}'
               queryType: range
               refId: A
@@ -334,572 +334,78 @@ spec:
                 color:
                     mode: palette-classic
                 custom:
-                    axisBorderShow: false
-                    axisCenteredZero: false
-                    axisColorMode: text
-                    axisLabel: ""
-                    axisPlacement: auto
-                    barAlignment: 0
-                    barWidthFactor: 0.6
-                    drawStyle: line
-                    fillOpacity: 29
-                    gradientMode: hue
                     hideFrom:
                         legend: false
                         tooltip: false
                         viz: false
-                    insertNulls: false
-                    lineInterpolation: smooth
-                    lineWidth: 1
-                    pointSize: 5
-                    scaleDistribution:
-                        type: linear
-                    showPoints: auto
-                    spanNulls: true
-                    stacking:
-                        group: A
-                        mode: none
-                    thresholdsStyle:
-                        mode: "off"
                 mappings: []
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: red
-                          value: null
-                        - color: red
-                          value: 1
-                unit: short
+                noValue: "0"
             overrides:
                 - matcher:
                     id: byName
-                    options: Warning
+                    options: Failed
                   properties:
-                    - id: color
-                      value:
-                        fixedColor: red
-                        mode: fixed
+                    - id: displayName
+                      value: Image Pull Failed
+                - matcher:
+                    id: byName
+                    options: Killing
+                  properties:
+                    - id: displayName
+                      value: Liveness Probe Failed
+                - matcher:
+                    id: byName
+                    options: FailedMount
+                  properties:
+                    - id: displayName
+                      value: Volume Mount Failed
+                - matcher:
+                    id: byName
+                    options: FailedScheduling
+                  properties:
+                    - id: displayName
+                      value: Scheduling Failed
+                - matcher:
+                    id: byName
+                    options: OOMKilling
+                  properties:
+                    - id: displayName
+                      value: Container OOM Killed
+                - matcher:
+                    id: byName
+                    options: BackOff
+                  properties:
+                    - id: displayName
+                      value: Container Crashed
+                - matcher:
+                    id: byName
+                    options: TaintManagerEviction
+                  properties:
+                    - id: displayName
+                      value: Pod Evicted
+                - matcher:
+                    id: byName
+                    options: SystemOOM
+                  properties:
+                    - id: displayName
+                      value: System OOM
           gridPos:
-            h: 8
-            w: 12
-            x: 12
+            h: 10
+            w: 9
+            x: 15
             "y": 15
           id: 4
           interval: 1m
           options:
-            legend:
-                calcs:
-                    - sum
-                displayMode: list
-                placement: bottom
-                showLegend: true
-            tooltip:
-                hideZeros: false
-                mode: single
-                sort: none
-          pluginVersion: 11.5.2
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum(count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ | type="Warning" [$__interval]))
-              legendFormat: Warning
-              queryType: range
-              range: true
-              refId: A
-          title: Warnings
-          type: timeseries
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                color:
-                    mode: thresholds
-                mappings: []
-                noValue: "0"
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: yellow
-                        - color: yellow
-                          value: 0
-            overrides: []
-          gridPos:
-            h: 5
-            w: 3
-            x: 0
-            "y": 23
-          id: 6
-          interval: 1m
-          options:
-            colorMode: value
-            graphMode: area
-            justifyMode: auto
-            orientation: auto
-            percentChangeColorMode: standard
-            reduceOptions:
-                calcs:
-                    - last
-                fields: ""
-                values: false
-            showPercentChange: false
-            text: {}
-            textMode: auto
-            wideLayout: true
-          pluginVersion: 11.3.0-197632
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: 'sum(count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |= "Error: ImagePullBackOff" | logfmt | json | drop __error__,__error_details__ | reason="Failed"  | line_format "{{ .msg }}" [$__interval]))'
-              legendFormat: ""
-              queryType: range
-              range: true
-              refId: A
-          title: Image Pull Failed
-          type: stat
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                color:
-                    mode: thresholds
-                mappings: []
-                noValue: "0"
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: yellow
-                        - color: yellow
-                          value: 0
-            overrides: []
-          gridPos:
-            h: 5
-            w: 3
-            x: 3
-            "y": 23
-          id: 14
-          interval: 1m
-          options:
-            colorMode: value
-            graphMode: area
-            justifyMode: auto
-            orientation: auto
-            percentChangeColorMode: standard
-            reduceOptions:
-                calcs:
-                    - last
-                fields: ""
-                values: false
-            showPercentChange: false
-            text: {}
-            textMode: auto
-            wideLayout: true
-          pluginVersion: 11.3.0-197632
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum(count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |= "failed liveness probe" | logfmt | json | drop __error__,__error_details__ | reason="Killing" [$__interval]))
-              queryType: range
-              range: true
-              refId: A
-          title: Liveness Probe Failed
-          type: stat
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                color:
-                    mode: thresholds
-                mappings: []
-                noValue: "0"
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: yellow
-                        - color: yellow
-                          value: 0
-            overrides: []
-          gridPos:
-            h: 5
-            w: 3
-            x: 6
-            "y": 23
-          id: 41
-          interval: 1m
-          options:
-            colorMode: value
-            graphMode: area
-            justifyMode: auto
-            orientation: auto
-            percentChangeColorMode: standard
-            reduceOptions:
-                calcs:
-                    - last
-                fields: ""
-                values: false
-            showPercentChange: false
-            text: {}
-            textMode: auto
-            wideLayout: true
-          pluginVersion: 11.3.0-197632
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum(count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ | reason="FailedMount" [$__interval]))
-              queryType: range
-              range: true
-              refId: A
-          title: Volume Mount Failed
-          type: stat
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                color:
-                    mode: thresholds
-                mappings: []
-                noValue: "0"
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: yellow
-                        - color: yellow
-                          value: 0
-            overrides: []
-          gridPos:
-            h: 5
-            w: 3
-            x: 9
-            "y": 23
-          id: 16
-          interval: 1m
-          options:
-            colorMode: value
-            graphMode: area
-            justifyMode: auto
-            orientation: auto
-            percentChangeColorMode: standard
-            reduceOptions:
-                calcs:
-                    - last
-                fields: ""
-                values: false
-            showPercentChange: false
-            text:
-                valueSize: 0
-            textMode: auto
-            wideLayout: true
-          pluginVersion: 11.3.0-197632
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum(count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ | reason="FailedScheduling" [$__interval]))
-              queryType: range
-              range: true
-              refId: A
-          title: Scheduling Failed
-          type: stat
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                color:
-                    mode: thresholds
-                mappings: []
-                noValue: "0"
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: yellow
-                        - color: yellow
-                          value: 0
-            overrides: []
-          gridPos:
-            h: 5
-            w: 3
-            x: 12
-            "y": 23
-          id: 10
-          interval: 1m
-          options:
-            colorMode: value
-            graphMode: area
-            justifyMode: auto
-            orientation: auto
-            percentChangeColorMode: standard
-            reduceOptions:
-                calcs:
-                    - last
-                fields: ""
-                values: false
-            showPercentChange: false
-            text: {}
-            textMode: auto
-            wideLayout: true
-          pluginVersion: 11.3.0-197632
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum(count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ | reason="OOMKilling" [$__interval]))
-              queryType: range
-              range: true
-              refId: A
-          title: Container OOM Killed
-          type: stat
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                mappings: []
-                noValue: "0"
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: yellow
-                        - color: yellow
-                          value: 0
-                unit: short
-            overrides: []
-          gridPos:
-            h: 5
-            w: 3
-            x: 15
-            "y": 23
-          id: 12
-          interval: 1m
-          options:
-            colorMode: value
-            graphMode: area
-            justifyMode: auto
-            orientation: auto
-            percentChangeColorMode: standard
-            reduceOptions:
-                calcs:
-                    - last
-                fields: ""
-                values: false
-            showPercentChange: false
-            textMode: auto
-            wideLayout: true
-          pluginVersion: 11.3.0-197632
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum(count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ | reason="BackOff" [$__interval]))
-              queryType: range
-              range: true
-              refId: A
-          title: Container Crashed
-          type: stat
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                color:
-                    mode: thresholds
-                mappings: []
-                noValue: "0"
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: yellow
-                        - color: yellow
-                          value: 0
-            overrides: []
-          gridPos:
-            h: 5
-            w: 3
-            x: 18
-            "y": 23
-          id: 18
-          interval: 1m
-          options:
-            colorMode: value
-            graphMode: area
-            justifyMode: auto
-            orientation: auto
-            percentChangeColorMode: standard
-            reduceOptions:
-                calcs:
-                    - last
-                fields: ""
-                values: false
-            showPercentChange: false
-            text: {}
-            textMode: auto
-            wideLayout: true
-          pluginVersion: 11.3.0-197632
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum(count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |= "Marking for deletion Pod" | logfmt | json | drop __error__,__error_details__ | reason="TaintManagerEviction" [$__interval]))
-              queryType: range
-              range: true
-              refId: A
-          title: Pod Evicted
-          type: stat
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                mappings: []
-                noValue: "0"
-                thresholds:
-                    mode: absolute
-                    steps:
-                        - color: yellow
-                        - color: yellow
-                          value: 0
-                unit: short
-            overrides: []
-          gridPos:
-            h: 5
-            w: 3
-            x: 21
-            "y": 23
-          id: 40
-          interval: 1m
-          options:
-            colorMode: value
-            graphMode: area
-            justifyMode: auto
-            orientation: auto
-            percentChangeColorMode: standard
-            reduceOptions:
-                calcs:
-                    - last
-                fields: ""
-                values: false
-            showPercentChange: false
-            textMode: auto
-            wideLayout: true
-          pluginVersion: 11.3.0-197632
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum(count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ | reason="SystemOOM" [$__interval]))
-              queryType: range
-              range: true
-              refId: A
-          title: System OOM
-          type: stat
-        - collapsed: false
-          gridPos:
-            h: 1
-            w: 24
-            x: 0
-            "y": 28
-          id: 30
-          panels: []
-          title: Kubernetes Events - Distribution
-          type: row
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          description: ""
-          fieldConfig:
-            defaults:
-                color:
-                    mode: palette-classic
-                custom:
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                mappings: []
-            overrides:
-                - matcher:
-                    id: byName
-                    options: Field
-                  properties:
-                    - id: color
-                      value:
-                        mode: thresholds
-                    - id: displayName
-                      value: Reason
-                    - id: color
-                      value:
-                        fixedColor: '#eab839'
-                        mode: fixed
-                - matcher:
-                    id: byName
-                    options: Total
-                  properties:
-                    - id: color
-                      value:
-                        mode: continuous-BlYlRd
-                - __systemRef: hideSeriesFrom
-                  matcher:
-                    id: byNames
-                    options:
-                        mode: exclude
-                        names:
-                            - Completed
-                            - Created
-                            - FreeDiskSpaceFailed
-                            - InProgress
-                            - JobAlreadyActive
-                            - Killing
-                            - Pulled
-                            - Pulling
-                            - SawCompletedJob
-                            - Scheduled
-                            - SnapshotDelete
-                            - SnapshotError
-                            - SnapshotUpdate
-                            - Started
-                            - SuccessfulCreate
-                            - SuccessfulDelete
-                            - Unhealthy
-                            - Valid
-                            - nodeAssigned
-                            - unchanged
-                            - Value
-                        prefix: 'All except:'
-                        readOnly: true
-                  properties:
-                    - id: custom.hideFrom
-                      value:
-                        legend: false
-                        tooltip: false
-                        viz: true
-          gridPos:
-            h: 14
-            w: 6
-            x: 0
-            "y": 29
-          id: 26
-          interval: 1m
-          options:
+            displayLabels:
+                - value
+                - name
             legend:
                 displayMode: list
-                placement: bottom
+                placement: right
                 showLegend: true
+                values:
+                    - percent
             pieType: pie
             reduceOptions:
                 calcs:
@@ -907,211 +413,329 @@ spec:
                 fields: ""
                 values: false
             tooltip:
+                hideZeros: true
                 mode: multi
-                sort: none
-          pluginVersion: 9.3.1
+                sort: desc
+          pluginVersion: 12.0.2+security-01
           targets:
             - datasource:
                 type: loki
                 uid: ${datasource}
+              direction: backward
               editorMode: code
-              expr: sum by (reason) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ [$__interval]))
-              instant: false
+              expr: 'sum by (reason) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |~ `(?i)$contains` | logfmt | drop __error__,__error_details__ | reason=~"Failed|Killing|FailedMount|FailedScheduling|OOMKilling|BackOff|TaintManagerEviction|SystemOOM" [$__interval]))'
               legendFormat: '{{reason}}'
               queryType: range
               range: true
               refId: A
-          title: Events by Reason
+          title: Event Reason Counts
           type: piechart
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                color:
-                    mode: palette-classic
-                custom:
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                mappings: []
-            overrides: []
-          gridPos:
-            h: 14
-            w: 6
-            x: 6
-            "y": 29
-          id: 28
-          interval: 1m
-          options:
-            displayLabels: []
-            legend:
-                displayMode: list
-                placement: bottom
-                showLegend: true
-            pieType: pie
-            reduceOptions:
-                calcs:
-                    - sum
-                fields: ""
-                values: false
-            tooltip:
-                mode: multi
-                sort: none
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum by (namespace) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ [$__interval]))
-              legendFormat: '{{namespace}}'
-              queryType: range
-              range: true
-              refId: A
-          title: Events by Namespace
-          type: piechart
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                color:
-                    mode: palette-classic
-                custom:
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                mappings: []
-            overrides: []
-          gridPos:
-            h: 14
-            w: 6
-            x: 12
-            "y": 29
-          id: 20
-          interval: 1m
-          options:
-            legend:
-                displayMode: list
-                placement: bottom
-                showLegend: true
-            pieType: pie
-            reduceOptions:
-                calcs:
-                    - sum
-                fields: ""
-                values: false
-            tooltip:
-                mode: multi
-                sort: none
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum by (sourcecomponent) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ [$__interval]))
-              legendFormat: '{{sourcecomponent}}'
-              queryType: range
-              range: true
-              refId: A
-          title: Events by Source
-          type: piechart
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults:
-                color:
-                    mode: palette-classic
-                custom:
-                    hideFrom:
-                        legend: false
-                        tooltip: false
-                        viz: false
-                links: []
-                mappings: []
-            overrides: []
-          gridPos:
-            h: 14
-            w: 6
-            x: 18
-            "y": 29
-          id: 22
-          interval: 1m
-          options:
-            legend:
-                displayMode: list
-                placement: bottom
-                showLegend: true
-                values: []
-            pieType: pie
-            reduceOptions:
-                calcs:
-                    - sum
-                fields: ""
-                values: false
-            tooltip:
-                mode: multi
-                sort: none
-          targets:
-            - datasource:
-                type: loki
-                uid: ${datasource}
-              editorMode: code
-              expr: sum by (kind) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | json | drop __error__,__error_details__ [$__interval]))
-              legendFormat: '{{kind}}'
-              queryType: range
-              range: true
-              refId: A
-          title: Events by Kind
-          type: piechart
-        - collapsed: false
+        - collapsed: true
           gridPos:
             h: 1
             w: 24
             x: 0
-            "y": 43
+            "y": 25
           id: 38
-          panels: []
-          title: Kubernetes Events - Raw Logs
-          type: row
-        - datasource:
-            type: loki
-            uid: ${datasource}
-          fieldConfig:
-            defaults: {}
-            overrides: []
-          gridPos:
-            h: 13
-            w: 24
-            x: 0
-            "y": 44
-          id: 8
-          options:
-            dedupStrategy: none
-            enableLogDetails: true
-            prettifyLogMessage: false
-            showCommonLabels: false
-            showLabels: false
-            showTime: true
-            sortOrder: Descending
-            wrapLogMessage: false
-          targets:
+          panels:
             - datasource:
                 type: loki
                 uid: ${datasource}
-              editorMode: code
-              expr: '{job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |~ `(?i)$contains` | logfmt | json | drop __error__,__error_details__'
-              queryType: range
-              range: true
-              refId: A
-          title: ""
-          type: logs
+              fieldConfig:
+                defaults: {}
+                overrides: []
+              gridPos:
+                h: 13
+                w: 24
+                x: 0
+                "y": 26
+              id: 8
+              options:
+                dedupStrategy: none
+                enableInfiniteScrolling: false
+                enableLogDetails: true
+                prettifyLogMessage: false
+                showCommonLabels: false
+                showLabels: false
+                showTime: true
+                sortOrder: Descending
+                wrapLogMessage: false
+              pluginVersion: 12.0.2+security-01
+              targets:
+                - datasource:
+                    type: loki
+                    uid: ${datasource}
+                  direction: backward
+                  editorMode: code
+                  expr: '{job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |~ `(?i)$contains` | logfmt | json | drop __error__,__error_details__'
+                  queryType: range
+                  range: true
+                  refId: A
+              title: ""
+              type: logs
+          title: Kubernetes Events - Raw Logs
+          type: row
+        - collapsed: true
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 26
+          id: 30
+          panels:
+            - datasource:
+                type: loki
+                uid: ${datasource}
+              description: ""
+              fieldConfig:
+                defaults:
+                    color:
+                        mode: palette-classic
+                    custom:
+                        hideFrom:
+                            legend: false
+                            tooltip: false
+                            viz: false
+                    mappings: []
+                overrides:
+                    - matcher:
+                        id: byName
+                        options: Field
+                      properties:
+                        - id: color
+                          value:
+                            mode: thresholds
+                        - id: displayName
+                          value: Reason
+                        - id: color
+                          value:
+                            fixedColor: '#eab839'
+                            mode: fixed
+                    - matcher:
+                        id: byName
+                        options: Total
+                      properties:
+                        - id: color
+                          value:
+                            mode: continuous-BlYlRd
+                    - __systemRef: hideSeriesFrom
+                      matcher:
+                        id: byNames
+                        options:
+                            mode: exclude
+                            names:
+                                - Completed
+                                - Created
+                                - FreeDiskSpaceFailed
+                                - InProgress
+                                - JobAlreadyActive
+                                - Killing
+                                - Pulled
+                                - Pulling
+                                - SawCompletedJob
+                                - Scheduled
+                                - SnapshotDelete
+                                - SnapshotError
+                                - SnapshotUpdate
+                                - Started
+                                - SuccessfulCreate
+                                - SuccessfulDelete
+                                - Unhealthy
+                                - Valid
+                                - nodeAssigned
+                                - unchanged
+                                - Value
+                            prefix: 'All except:'
+                            readOnly: true
+                      properties:
+                        - id: custom.hideFrom
+                          value:
+                            legend: false
+                            tooltip: false
+                            viz: true
+              gridPos:
+                h: 14
+                w: 6
+                x: 0
+                "y": 27
+              id: 26
+              interval: 1m
+              options:
+                legend:
+                    displayMode: list
+                    placement: bottom
+                    showLegend: true
+                pieType: pie
+                reduceOptions:
+                    calcs:
+                        - sum
+                    fields: ""
+                    values: false
+                tooltip:
+                    mode: multi
+                    sort: none
+              targets:
+                - datasource:
+                    type: loki
+                    uid: ${datasource}
+                  editorMode: code
+                  expr: 'sum by (reason) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | drop __error__,__error_details__ [$__interval]))'
+                  instant: false
+                  legendFormat: '{{reason}}'
+                  queryType: range
+                  range: true
+                  refId: A
+              title: Events by Reason
+              type: piechart
+            - datasource:
+                type: loki
+                uid: ${datasource}
+              fieldConfig:
+                defaults:
+                    color:
+                        mode: palette-classic
+                    custom:
+                        hideFrom:
+                            legend: false
+                            tooltip: false
+                            viz: false
+                    mappings: []
+                overrides: []
+              gridPos:
+                h: 14
+                w: 6
+                x: 6
+                "y": 27
+              id: 28
+              interval: 1m
+              options:
+                displayLabels: []
+                legend:
+                    displayMode: list
+                    placement: bottom
+                    showLegend: true
+                pieType: pie
+                reduceOptions:
+                    calcs:
+                        - sum
+                    fields: ""
+                    values: false
+                tooltip:
+                    mode: multi
+                    sort: none
+              targets:
+                - datasource:
+                    type: loki
+                    uid: ${datasource}
+                  editorMode: code
+                  expr: 'sum by (namespace) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | drop __error__,__error_details__ [$__interval]))'
+                  legendFormat: '{{namespace}}'
+                  queryType: range
+                  range: true
+                  refId: A
+              title: Events by Namespace
+              type: piechart
+            - datasource:
+                type: loki
+                uid: ${datasource}
+              fieldConfig:
+                defaults:
+                    color:
+                        mode: palette-classic
+                    custom:
+                        hideFrom:
+                            legend: false
+                            tooltip: false
+                            viz: false
+                    mappings: []
+                overrides: []
+              gridPos:
+                h: 14
+                w: 6
+                x: 12
+                "y": 27
+              id: 20
+              interval: 1m
+              options:
+                legend:
+                    displayMode: list
+                    placement: bottom
+                    showLegend: true
+                pieType: pie
+                reduceOptions:
+                    calcs:
+                        - sum
+                    fields: ""
+                    values: false
+                tooltip:
+                    mode: multi
+                    sort: none
+              targets:
+                - datasource:
+                    type: loki
+                    uid: ${datasource}
+                  editorMode: code
+                  expr: 'sum by (sourcecomponent) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | drop __error__,__error_details__ [$__interval]))'
+                  legendFormat: '{{sourcecomponent}}'
+                  queryType: range
+                  range: true
+                  refId: A
+              title: Events by Source
+              type: piechart
+            - datasource:
+                type: loki
+                uid: ${datasource}
+              fieldConfig:
+                defaults:
+                    color:
+                        mode: palette-classic
+                    custom:
+                        hideFrom:
+                            legend: false
+                            tooltip: false
+                            viz: false
+                    links: []
+                    mappings: []
+                overrides: []
+              gridPos:
+                h: 14
+                w: 6
+                x: 18
+                "y": 27
+              id: 22
+              interval: 1m
+              options:
+                legend:
+                    displayMode: list
+                    placement: bottom
+                    showLegend: true
+                    values: []
+                pieType: pie
+                reduceOptions:
+                    calcs:
+                        - sum
+                    fields: ""
+                    values: false
+                tooltip:
+                    mode: multi
+                    sort: none
+              targets:
+                - datasource:
+                    type: loki
+                    uid: ${datasource}
+                  editorMode: code
+                  expr: 'sum by (kind) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} | logfmt | drop __error__,__error_details__ [$__interval]))'
+                  legendFormat: '{{kind}}'
+                  queryType: range
+                  range: true
+                  refId: A
+              title: Events by Kind
+              type: piechart
+          title: Kubernetes Events - Distribution
+          type: row
     preload: false
     refresh: 2h
-    schemaVersion: 40
+    schemaVersion: 41
     tags:
         - kubernetes-integration
         - k8s-events
@@ -1128,7 +752,7 @@ spec:
               refresh: 1
               regex: ""
               type: datasource
-            - allValue: .*
+            - allValue: ""
               current:
                 text: ""
                 value: ""
@@ -1149,7 +773,7 @@ spec:
               regex: ""
               sort: 5
               type: query
-            - allValue: .*
+            - allValue: ""
               current:
                 text:
                     - All
@@ -1166,7 +790,7 @@ spec:
               query:
                 label: namespace
                 refId: LokiVariableQueryEditor-VariableQuery
-                stream: ""
+                stream: '{cluster=~"$cluster"}'
                 type: 1
               refresh: 2
               regex: ""
@@ -1214,4 +838,4 @@ spec:
     timezone: ""
     title: K8s / Events
     uid: k8s-events
-    weekStart: ""
+    version: 15
