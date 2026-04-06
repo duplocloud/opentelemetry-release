@@ -177,7 +177,7 @@ spec:
         type: prometheus
         uid: duplo-metrics
       editorMode: code
-      expr: appo11y:duration:p95{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name=~"$service_name", http_request_method="__aggregated__", http_route="__aggregated__"}
+      expr: sum by (deployment_environment_name, service_namespace, service_name) (appo11y:duration:p95{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name=~"$service_name", http_request_method="__aggregated__", http_route="__aggregated__"})
       hide: false
       instant: false
       interval: ''
@@ -188,7 +188,7 @@ spec:
         type: prometheus
         uid: duplo-metrics
       editorMode: code
-      expr: appo11y:error:ratio{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name=~"$service_name", http_request_method="__aggregated__", http_route="__aggregated__"} * 100
+      expr: sum by (deployment_environment_name, service_namespace, service_name) (appo11y:error:ratio{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name=~"$service_name", http_request_method="__aggregated__", http_route="__aggregated__"}) * 100
       hide: false
       instant: false
       interval: ''
@@ -199,7 +199,7 @@ spec:
         type: prometheus
         uid: duplo-metrics
       editorMode: code
-      expr: appo11y:request:rate5m{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name=~"$service_name", http_request_method="__aggregated__", http_route="__aggregated__"}
+      expr: sum by (deployment_environment_name, service_namespace, service_name) (appo11y:request:rate5m{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name=~"$service_name", http_request_method="__aggregated__", http_route="__aggregated__"})
       hide: false
       instant: false
       interval: ''
@@ -221,7 +221,7 @@ spec:
         type: prometheus
         uid: duplo-metrics
       editorMode: code
-      expr: appo11y:apdex:score{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name=~"$service_name", http_request_method="__aggregated__", http_route="__aggregated__"}
+      expr: sum by (deployment_environment_name, service_namespace, service_name) (appo11y:apdex:score{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name=~"$service_name", http_request_method="__aggregated__", http_route="__aggregated__"})
       hide: false
       instant: true
       interval: ''

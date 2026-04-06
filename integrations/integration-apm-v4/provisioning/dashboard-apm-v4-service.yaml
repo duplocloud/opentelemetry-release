@@ -926,7 +926,7 @@ spec:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
-                    expr: label_join(appo11y:request:rate5m{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route")
+                    expr: sum by (operation, http_request_method, http_route) (label_join(appo11y:request:rate5m{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route"))
                     interval: 60s
                     legendFormat: '{{operation}}'
                     range: true
@@ -935,7 +935,7 @@ spec:
                         type: prometheus
                         uid: ${prometheus_datasource}
                     editorMode: code
-                    expr: label_join(appo11y:error:ratio{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route")
+                    expr: sum by (operation, http_request_method, http_route) (label_join(appo11y:error:ratio{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route"))
                     interval: 60s
                     legendFormat: '{{operation}}'
                     range: true
@@ -944,7 +944,7 @@ spec:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
-                    expr: label_join(appo11y:duration:p99{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route")
+                    expr: sum by (operation, http_request_method, http_route) (label_join(appo11y:duration:p99{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route"))
                     interval: 60s
                     legendFormat: '{{operation}}'
                     range: true
