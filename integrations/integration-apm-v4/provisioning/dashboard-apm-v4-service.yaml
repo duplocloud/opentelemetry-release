@@ -825,528 +825,528 @@ spec:
                     refId: A
             title: Apdex Score ( T= ${appdex_threshold}s)
             type: timeseries
-        -   collapsed: false
+        -   collapsed: true
             gridPos:
                 h: 1
                 w: 24
                 x: 0
                 y: 23
             id: 22
-            panels: []
-            title: Inbound Operations
-            type: row
-        -   datasource:
-                type: prometheus
-                uid: ${prometheus_datasource}
-            fieldConfig:
-                defaults:
-                    color:
-                        mode: thresholds
-                    custom:
-                        align: auto
-                        cellOptions:
-                            type: auto
-                        filterable: false
-                        inspect: false
-                    mappings: []
-                    noValue: No HTTP operation
-                    thresholds:
-                        mode: absolute
-                        steps:
-                            -   color: green
-                            -   color: red
-                                value: 80
-                overrides:
-                    -   matcher:
-                            id: byName
-                            options: Duration (p99)
-                        properties:
-                            -   id: unit
-                                value: s
-                    -   matcher:
-                            id: byName
-                            options: Rate
-                        properties:
-                            -   id: unit
-                                value: reqps
-                    -   matcher:
-                            id: byName
-                            options: Error
-                        properties:
-                            -   id: unit
-                                value: percentunit
-                    -   matcher:
-                            id: byName
-                            options: Operation
-                        properties:
-                            -   id: custom.width
-                                value: 730
-                            -   id: links
-                                value:
-                                    -   targetBlank: true
-                                        title: details
-                                        url: /d/service-dashboard-v4-ops/apm-for-opentelemetry-operations?orgId=1&var-prometheus_datasource=${prometheus_datasource}&var-deployment_environment_name=${deployment_environment_name}&var-service_namespace=${service_namespace}&var-service_name=${service_name}&var-http_route=${__data.fields.http_route}&var-http_request_method=${__data.fields.http_request_method}
-                            -   id: custom.filterable
-                                value: true
-                    -   matcher:
-                            id: byName
-                            options: http_request_method
-                        properties:
-                            -   id: custom.hidden
-                                value: true
-                    -   matcher:
-                            id: byName
-                            options: http_route
-                        properties:
-                            -   id: custom.hidden
-                                value: true
-            gridPos:
-                h: 10
-                w: 24
-                x: 0
-                y: 24
-            id: 21
-            options:
-                cellHeight: sm
-                footer:
-                    countRows: false
-                    enablePagination: true
-                    fields: ''
-                    reducer:
-                        - sum
-                    show: false
-                showHeader: true
-                sortBy:
-                    -   desc: true
-                        displayName: Operation
-            maxDataPoints: 100
-            pluginVersion: 12.0.2+security-01
-            targets:
-                -   datasource:
-                        type: prometheus
-                        uid: duplo-metrics
-                    editorMode: code
-                    expr: sum by (operation, http_request_method, http_route) (label_join(appo11y:request:rate5m{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route"))
-                    interval: 60s
-                    legendFormat: '{{operation}}'
-                    range: true
-                    refId: RPS
+            panels:
                 -   datasource:
                         type: prometheus
                         uid: ${prometheus_datasource}
-                    editorMode: code
-                    expr: sum by (operation, http_request_method, http_route) (label_join(appo11y:error:ratio{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route"))
-                    interval: 60s
-                    legendFormat: '{{operation}}'
-                    range: true
-                    refId: ERR_PCT
-                -   datasource:
-                        type: prometheus
-                        uid: duplo-metrics
-                    editorMode: code
-                    expr: sum by (operation, http_request_method, http_route) (label_join(appo11y:duration:p99{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route"))
-                    interval: 60s
-                    legendFormat: '{{operation}}'
-                    range: true
-                    refId: Duration
-            title: HTTP Operations
-            transformations:
-                -   id: timeSeriesTable
+                    fieldConfig:
+                        defaults:
+                            color:
+                                mode: thresholds
+                            custom:
+                                align: auto
+                                cellOptions:
+                                    type: auto
+                                filterable: false
+                                inspect: false
+                            mappings: []
+                            noValue: No HTTP operation
+                            thresholds:
+                                mode: absolute
+                                steps:
+                                    -   color: green
+                                    -   color: red
+                                        value: 80
+                        overrides:
+                            -   matcher:
+                                    id: byName
+                                    options: Duration (p99)
+                                properties:
+                                    -   id: unit
+                                        value: s
+                            -   matcher:
+                                    id: byName
+                                    options: Rate
+                                properties:
+                                    -   id: unit
+                                        value: reqps
+                            -   matcher:
+                                    id: byName
+                                    options: Error
+                                properties:
+                                    -   id: unit
+                                        value: percentunit
+                            -   matcher:
+                                    id: byName
+                                    options: Operation
+                                properties:
+                                    -   id: custom.width
+                                        value: 730
+                                    -   id: links
+                                        value:
+                                            -   targetBlank: true
+                                                title: details
+                                                url: /d/service-dashboard-v4-ops/apm-for-opentelemetry-operations?orgId=1&var-prometheus_datasource=${prometheus_datasource}&var-deployment_environment_name=${deployment_environment_name}&var-service_namespace=${service_namespace}&var-service_name=${service_name}&var-http_route=${__data.fields.http_route}&var-http_request_method=${__data.fields.http_request_method}
+                                    -   id: custom.filterable
+                                        value: true
+                            -   matcher:
+                                    id: byName
+                                    options: http_request_method
+                                properties:
+                                    -   id: custom.hidden
+                                        value: true
+                            -   matcher:
+                                    id: byName
+                                    options: http_route
+                                properties:
+                                    -   id: custom.hidden
+                                        value: true
+                    gridPos:
+                        h: 10
+                        w: 24
+                        x: 0
+                        y: 24
+                    id: 21
                     options:
-                        Duration:
-                            timeField: Time
-                        ERR_PCT:
-                            timeField: Time
-                        RPS:
-                            timeField: Time
-                -   id: joinByField
-                    options:
-                        byField: operation
-                        mode: outer
-                -   id: organize
-                    options:
-                        excludeByName:
-                            http_request_method 1: false
-                            http_request_method 2: true
-                            http_request_method 3: true
-                            http_route 1: false
-                            http_route 2: true
-                            http_route 3: true
-                        includeByName: {}
-                        indexByName:
-                            'Trend #Duration': 1
-                            'Trend #ERR_PCT': 2
-                            'Trend #RPS': 3
-                            operation: 0
-                        renameByName:
-                            'Trend #Duration': Duration (p99)
-                            'Trend #ERR_PCT': Error
-                            'Trend #RPS': Rate
-                            http_request_method 1: http_request_method
-                            http_route 1: http_route
-                            operation: Operation
-            type: table
-        -   collapsed: false
+                        cellHeight: sm
+                        footer:
+                            countRows: false
+                            enablePagination: true
+                            fields: ''
+                            reducer:
+                                - sum
+                            show: false
+                        showHeader: true
+                        sortBy:
+                            -   desc: true
+                                displayName: Operation
+                    maxDataPoints: 100
+                    pluginVersion: 12.0.2+security-01
+                    targets:
+                        -   datasource:
+                                type: prometheus
+                                uid: duplo-metrics
+                            editorMode: code
+                            expr: sum by (operation, http_request_method, http_route) (label_join(appo11y:request:rate5m{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route"))
+                            interval: 60s
+                            legendFormat: '{{operation}}'
+                            range: true
+                            refId: RPS
+                        -   datasource:
+                                type: prometheus
+                                uid: ${prometheus_datasource}
+                            editorMode: code
+                            expr: sum by (operation, http_request_method, http_route) (label_join(appo11y:error:ratio{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route"))
+                            interval: 60s
+                            legendFormat: '{{operation}}'
+                            range: true
+                            refId: ERR_PCT
+                        -   datasource:
+                                type: prometheus
+                                uid: duplo-metrics
+                            editorMode: code
+                            expr: sum by (operation, http_request_method, http_route) (label_join(appo11y:duration:p99{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route"))
+                            interval: 60s
+                            legendFormat: '{{operation}}'
+                            range: true
+                            refId: Duration
+                    title: HTTP Operations
+                    transformations:
+                        -   id: timeSeriesTable
+                            options:
+                                Duration:
+                                    timeField: Time
+                                ERR_PCT:
+                                    timeField: Time
+                                RPS:
+                                    timeField: Time
+                        -   id: joinByField
+                            options:
+                                byField: operation
+                                mode: outer
+                        -   id: organize
+                            options:
+                                excludeByName:
+                                    http_request_method 1: false
+                                    http_request_method 2: true
+                                    http_request_method 3: true
+                                    http_route 1: false
+                                    http_route 2: true
+                                    http_route 3: true
+                                includeByName: {}
+                                indexByName:
+                                    'Trend #Duration': 1
+                                    'Trend #ERR_PCT': 2
+                                    'Trend #RPS': 3
+                                    operation: 0
+                                renameByName:
+                                    'Trend #Duration': Duration (p99)
+                                    'Trend #ERR_PCT': Error
+                                    'Trend #RPS': Rate
+                                    http_request_method 1: http_request_method
+                                    http_route 1: http_route
+                                    operation: Operation
+                    type: table
+            title: Inbound Operations
+            type: row
+        -   collapsed: true
             gridPos:
                 h: 1
                 w: 24
                 x: 0
                 y: 34
             id: 28
-            panels: []
+            panels:
+                -   datasource:
+                        type: prometheus
+                        uid: ${prometheus_datasource}
+                    fieldConfig:
+                        defaults:
+                            color:
+                                mode: thresholds
+                            custom:
+                                align: auto
+                                cellOptions:
+                                    type: auto
+                                inspect: false
+                            mappings: []
+                            noValue: No HTTP call
+                            thresholds:
+                                mode: absolute
+                                steps:
+                                    -   color: green
+                                    -   color: red
+                                        value: 80
+                        overrides:
+                            -   matcher:
+                                    id: byName
+                                    options: Duration (P99)
+                                properties:
+                                    -   id: unit
+                                        value: s
+                            -   matcher:
+                                    id: byName
+                                    options: Rate
+                                properties:
+                                    -   id: unit
+                                        value: reqps
+                            -   matcher:
+                                    id: byName
+                                    options: Error
+                                properties:
+                                    -   id: unit
+                                        value: percentunit
+                    gridPos:
+                        h: 8
+                        w: 12
+                        x: 0
+                        y: 35
+                    id: 23
+                    options:
+                        cellHeight: sm
+                        footer:
+                            countRows: false
+                            fields: ''
+                            reducer:
+                                - sum
+                            show: false
+                        showHeader: true
+                    maxDataPoints: 100
+                    pluginVersion: 12.0.2+security-01
+                    targets:
+                        -   datasource:
+                                type: prometheus
+                                uid: duplo-metrics
+                            editorMode: code
+                            expr: |-
+                                sum by (outbound_service) (
+                                  label_join(
+                                    rate(
+                                      http_client_request_duration_seconds_count{
+                                        deployment_environment_name=~"$deployment_environment_name",
+                                        service_namespace=~"$service_namespace",
+                                        service_name="$service_name"
+                                      }[$__rate_interval]
+                                    ),
+                                    "outbound_service",
+                                    " ",
+                                    "server_address"
+                                  )
+                                )
+                            interval: 60s
+                            legendFormat: '{{server_address}} {{http_request_method}} {{url_template}}'
+                            range: true
+                            refId: RPS
+                        -   datasource:
+                                type: prometheus
+                                uid: ${prometheus_datasource}
+                            editorMode: code
+                            expr: |-
+                                (
+                                  sum by (outbound_service) (
+                                    label_join(
+                                      rate(
+                                        http_client_request_duration_seconds_count{
+                                          deployment_environment_name=~"$deployment_environment_name",
+                                          service_namespace=~"$service_namespace",
+                                          service_name="$service_name",
+                                          http_response_status_code=~"5.."
+                                        }[$__rate_interval]
+                                      ),
+                                      "outbound_service",
+                                      " ",
+                                      "server_address"
+                                    )
+                                  )
+                                  /
+                                  sum by (outbound_service) (
+                                    label_join(
+                                      rate(
+                                        http_client_request_duration_seconds_count{
+                                          deployment_environment_name=~"$deployment_environment_name",
+                                          service_namespace=~"$service_namespace",
+                                          service_name="$service_name"
+                                        }[$__rate_interval]
+                                      ),
+                                      "outbound_service",
+                                      " ",
+                                      "server_address"
+                                    )
+                                  )
+                                )
+                                or
+                                (
+                                  0
+                                  *
+                                  sum by (outbound_service) (
+                                    label_join(
+                                      rate(
+                                        http_client_request_duration_seconds_count{
+                                          deployment_environment_name=~"$deployment_environment_name",
+                                          service_namespace=~"$service_namespace",
+                                          service_name="$service_name"
+                                        }[$__rate_interval]
+                                      ),
+                                      "outbound_service",
+                                      " ",
+                                      "server_address"
+                                    )
+                                  )
+                                )
+                            interval: 60s
+                            legendFormat: '{{server_address}} {{http_request_method}} {{url_template}}'
+                            range: true
+                            refId: ERR_PCT
+                        -   datasource:
+                                type: prometheus
+                                uid: duplo-metrics
+                            editorMode: code
+                            expr: |-
+                                histogram_quantile(
+                                  0.99,
+                                  sum by (le, outbound_service) (
+                                    label_join(
+                                      rate(
+                                        http_client_request_duration_seconds_bucket{
+                                          deployment_environment_name=~"$deployment_environment_name",
+                                          service_namespace=~"$service_namespace",
+                                          service_name="$service_name"
+                                        }[5m]
+                                      ),
+                                      "outbound_service",
+                                      " ",
+                                      "server_address"
+                                    )
+                                  )
+                                )
+                            interval: 60s
+                            legendFormat: '{{server_address}} {{http_request_method}} {{url_template}}'
+                            range: true
+                            refId: DURATION
+                    title: Outbound HTTP Services
+                    transformations:
+                        -   id: timeSeriesTable
+                            options:
+                                Duration:
+                                    timeField: Time
+                                ERR_PCT:
+                                    timeField: Time
+                                RPS:
+                                    timeField: Time
+                        -   id: joinByField
+                            options:
+                                byField: outbound_service
+                                mode: outer
+                        -   id: organize
+                            options:
+                                excludeByName: {}
+                                includeByName: {}
+                                indexByName:
+                                    'Trend #DURATION': 1
+                                    'Trend #ERR_PCT': 2
+                                    'Trend #RPS': 3
+                                    outbound_service: 0
+                                renameByName:
+                                    'Trend #DURATION': Duration (P99)
+                                    'Trend #Duration': Duration (p99)
+                                    'Trend #ERR_PCT': Error
+                                    'Trend #RPS': Rate
+                                    operation: Operation
+                                    outbound_service: Service
+                    type: table
+                -   datasource:
+                        type: prometheus
+                        uid: ${prometheus_datasource}
+                    fieldConfig:
+                        defaults:
+                            color:
+                                mode: thresholds
+                            custom:
+                                align: auto
+                                cellOptions:
+                                    type: auto
+                                inspect: false
+                            mappings: []
+                            noValue: No database call
+                            thresholds:
+                                mode: absolute
+                                steps:
+                                    -   color: green
+                                    -   color: red
+                                        value: 80
+                        overrides:
+                            -   matcher:
+                                    id: byName
+                                    options: Duration (P99)
+                                properties:
+                                    -   id: unit
+                                        value: s
+                            -   matcher:
+                                    id: byName
+                                    options: Rate
+                                properties:
+                                    -   id: unit
+                                        value: reqps
+                            -   matcher:
+                                    id: byName
+                                    options: Error
+                                properties:
+                                    -   id: unit
+                                        value: percentunit
+                    gridPos:
+                        h: 8
+                        w: 12
+                        x: 12
+                        y: 35
+                    id: 24
+                    options:
+                        cellHeight: sm
+                        footer:
+                            countRows: false
+                            fields: ''
+                            reducer:
+                                - sum
+                            show: false
+                        showHeader: true
+                        sortBy: []
+                    maxDataPoints: 100
+                    pluginVersion: 12.0.2+security-01
+                    targets:
+                        -   datasource:
+                                type: prometheus
+                                uid: duplo-metrics
+                            editorMode: code
+                            expr: |-
+                                sum by (database) (
+                                  label_join(
+                                    rate(
+                                      db_client_operation_duration_seconds_count{
+                                        deployment_environment_name=~"$deployment_environment_name",
+                                        service_namespace=~"$service_namespace",
+                                        service_name="$service_name"
+                                      }[$__rate_interval]
+                                    ),
+                                    "database",
+                                    "/",
+                                    "server_address",
+                                    "db_namespace"
+                                  )
+                                )
+                            interval: 60s
+                            legendFormat: '{{server_address}} {{db_namespace}}'
+                            range: true
+                            refId: RPS
+                        -   datasource:
+                                type: prometheus
+                                uid: ${prometheus_datasource}
+                            editorMode: code
+                            expr: "(\n        sum by (database) (\n            label_join(\n                rate(db_client_operation_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\", http_response_status_code=~\"5..\"}[$__rate_interval]),\n                \"database\",\n                \"/\",\n                \"server_address\",\n                \"db_namespace\"\n            )\n        )\n     / \n        sum by (database) (\n            label_join(\n                rate(db_client_operation_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"database\",\n                \"/\",\n                \"server_address\",\n                \"db_namespace\"\n            )\n        )\n    ) or (0 * \n        sum by (database) (\n            label_join(\n\
+                                \                rate(db_client_operation_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"database\",\n                \"/\",\n                \"server_address\",\n                \"db_namespace\"\n            )\n        )\n    )"
+                            interval: 60s
+                            legendFormat: '{{server_address}} {{db_namespace}}'
+                            range: true
+                            refId: ERR_PCT
+                        -   datasource:
+                                type: prometheus
+                                uid: duplo-metrics
+                            editorMode: code
+                            expr: |-
+                                histogram_quantile(
+                                  0.99,
+                                  sum by (le, database) (
+                                    label_join(
+                                      rate(
+                                        db_client_operation_duration_seconds_bucket{
+                                          deployment_environment_name=~"$deployment_environment_name",
+                                          service_namespace=~"$service_namespace",
+                                          service_name="$service_name"
+                                        }[5m]
+                                      ),
+                                      "database",
+                                      "/",
+                                      "server_address",
+                                      "db_namespace"
+                                    )
+                                  )
+                                )
+                            interval: 60s
+                            legendFormat: '{{server_address}} {{db_namespace}}'
+                            range: true
+                            refId: DURATION
+                    title: Outbound Databases
+                    transformations:
+                        -   id: timeSeriesTable
+                            options:
+                                DURATION:
+                                    timeField: Time
+                                Duration:
+                                    timeField: Time
+                                ERR_PCT:
+                                    timeField: Time
+                                RPS:
+                                    timeField: Time
+                        -   id: joinByField
+                            options:
+                                byField: database
+                                mode: outer
+                        -   id: organize
+                            options:
+                                excludeByName: {}
+                                includeByName: {}
+                                indexByName:
+                                    'Trend #DURATION': 1
+                                    'Trend #ERR_PCT': 2
+                                    'Trend #RPS': 3
+                                    database: 0
+                                renameByName:
+                                    'Trend #DURATION': Duration (P99)
+                                    'Trend #Duration': Duration (p99)
+                                    'Trend #ERR_PCT': Error
+                                    'Trend #RPS': Rate
+                                    database: Database
+                                    database_operation: Database Operation
+                                    operation: Operation
+                                    outbound_service: Service
+                    type: table
             title: Outbound Services and Databases
             type: row
-        -   datasource:
-                type: prometheus
-                uid: ${prometheus_datasource}
-            fieldConfig:
-                defaults:
-                    color:
-                        mode: thresholds
-                    custom:
-                        align: auto
-                        cellOptions:
-                            type: auto
-                        inspect: false
-                    mappings: []
-                    noValue: No HTTP call
-                    thresholds:
-                        mode: absolute
-                        steps:
-                            -   color: green
-                            -   color: red
-                                value: 80
-                overrides:
-                    -   matcher:
-                            id: byName
-                            options: Duration (P99)
-                        properties:
-                            -   id: unit
-                                value: s
-                    -   matcher:
-                            id: byName
-                            options: Rate
-                        properties:
-                            -   id: unit
-                                value: reqps
-                    -   matcher:
-                            id: byName
-                            options: Error
-                        properties:
-                            -   id: unit
-                                value: percentunit
-            gridPos:
-                h: 8
-                w: 12
-                x: 0
-                y: 35
-            id: 23
-            options:
-                cellHeight: sm
-                footer:
-                    countRows: false
-                    fields: ''
-                    reducer:
-                        - sum
-                    show: false
-                showHeader: true
-            maxDataPoints: 100
-            pluginVersion: 12.0.2+security-01
-            targets:
-                -   datasource:
-                        type: prometheus
-                        uid: duplo-metrics
-                    editorMode: code
-                    expr: |-
-                        sum by (outbound_service) (
-                          label_join(
-                            rate(
-                              http_client_request_duration_seconds_count{
-                                deployment_environment_name=~"$deployment_environment_name",
-                                service_namespace=~"$service_namespace",
-                                service_name="$service_name"
-                              }[$__rate_interval]
-                            ),
-                            "outbound_service",
-                            " ",
-                            "server_address"
-                          )
-                        )
-                    interval: 60s
-                    legendFormat: '{{server_address}} {{http_request_method}} {{url_template}}'
-                    range: true
-                    refId: RPS
-                -   datasource:
-                        type: prometheus
-                        uid: ${prometheus_datasource}
-                    editorMode: code
-                    expr: |-
-                        (
-                          sum by (outbound_service) (
-                            label_join(
-                              rate(
-                                http_client_request_duration_seconds_count{
-                                  deployment_environment_name=~"$deployment_environment_name",
-                                  service_namespace=~"$service_namespace",
-                                  service_name="$service_name",
-                                  http_response_status_code=~"5.."
-                                }[$__rate_interval]
-                              ),
-                              "outbound_service",
-                              " ",
-                              "server_address"
-                            )
-                          )
-                          /
-                          sum by (outbound_service) (
-                            label_join(
-                              rate(
-                                http_client_request_duration_seconds_count{
-                                  deployment_environment_name=~"$deployment_environment_name",
-                                  service_namespace=~"$service_namespace",
-                                  service_name="$service_name"
-                                }[$__rate_interval]
-                              ),
-                              "outbound_service",
-                              " ",
-                              "server_address"
-                            )
-                          )
-                        )
-                        or
-                        (
-                          0
-                          *
-                          sum by (outbound_service) (
-                            label_join(
-                              rate(
-                                http_client_request_duration_seconds_count{
-                                  deployment_environment_name=~"$deployment_environment_name",
-                                  service_namespace=~"$service_namespace",
-                                  service_name="$service_name"
-                                }[$__rate_interval]
-                              ),
-                              "outbound_service",
-                              " ",
-                              "server_address"
-                            )
-                          )
-                        )
-                    interval: 60s
-                    legendFormat: '{{server_address}} {{http_request_method}} {{url_template}}'
-                    range: true
-                    refId: ERR_PCT
-                -   datasource:
-                        type: prometheus
-                        uid: duplo-metrics
-                    editorMode: code
-                    expr: |-
-                        histogram_quantile(
-                          0.99,
-                          sum by (le, outbound_service) (
-                            label_join(
-                              rate(
-                                http_client_request_duration_seconds_bucket{
-                                  deployment_environment_name=~"$deployment_environment_name",
-                                  service_namespace=~"$service_namespace",
-                                  service_name="$service_name"
-                                }[5m]
-                              ),
-                              "outbound_service",
-                              " ",
-                              "server_address"
-                            )
-                          )
-                        )
-                    interval: 60s
-                    legendFormat: '{{server_address}} {{http_request_method}} {{url_template}}'
-                    range: true
-                    refId: DURATION
-            title: Outbound HTTP Services
-            transformations:
-                -   id: timeSeriesTable
-                    options:
-                        Duration:
-                            timeField: Time
-                        ERR_PCT:
-                            timeField: Time
-                        RPS:
-                            timeField: Time
-                -   id: joinByField
-                    options:
-                        byField: outbound_service
-                        mode: outer
-                -   id: organize
-                    options:
-                        excludeByName: {}
-                        includeByName: {}
-                        indexByName:
-                            'Trend #DURATION': 1
-                            'Trend #ERR_PCT': 2
-                            'Trend #RPS': 3
-                            outbound_service: 0
-                        renameByName:
-                            'Trend #DURATION': Duration (P99)
-                            'Trend #Duration': Duration (p99)
-                            'Trend #ERR_PCT': Error
-                            'Trend #RPS': Rate
-                            operation: Operation
-                            outbound_service: Service
-            type: table
-        -   datasource:
-                type: prometheus
-                uid: ${prometheus_datasource}
-            fieldConfig:
-                defaults:
-                    color:
-                        mode: thresholds
-                    custom:
-                        align: auto
-                        cellOptions:
-                            type: auto
-                        inspect: false
-                    mappings: []
-                    noValue: No database call
-                    thresholds:
-                        mode: absolute
-                        steps:
-                            -   color: green
-                            -   color: red
-                                value: 80
-                overrides:
-                    -   matcher:
-                            id: byName
-                            options: Duration (P99)
-                        properties:
-                            -   id: unit
-                                value: s
-                    -   matcher:
-                            id: byName
-                            options: Rate
-                        properties:
-                            -   id: unit
-                                value: reqps
-                    -   matcher:
-                            id: byName
-                            options: Error
-                        properties:
-                            -   id: unit
-                                value: percentunit
-            gridPos:
-                h: 8
-                w: 12
-                x: 12
-                y: 35
-            id: 24
-            options:
-                cellHeight: sm
-                footer:
-                    countRows: false
-                    fields: ''
-                    reducer:
-                        - sum
-                    show: false
-                showHeader: true
-                sortBy: []
-            maxDataPoints: 100
-            pluginVersion: 12.0.2+security-01
-            targets:
-                -   datasource:
-                        type: prometheus
-                        uid: duplo-metrics
-                    editorMode: code
-                    expr: |-
-                        sum by (database) (
-                          label_join(
-                            rate(
-                              db_client_operation_duration_seconds_count{
-                                deployment_environment_name=~"$deployment_environment_name",
-                                service_namespace=~"$service_namespace",
-                                service_name="$service_name"
-                              }[$__rate_interval]
-                            ),
-                            "database",
-                            "/",
-                            "server_address",
-                            "db_namespace"
-                          )
-                        )
-                    interval: 60s
-                    legendFormat: '{{server_address}} {{db_namespace}}'
-                    range: true
-                    refId: RPS
-                -   datasource:
-                        type: prometheus
-                        uid: ${prometheus_datasource}
-                    editorMode: code
-                    expr: "(\n        sum by (database) (\n            label_join(\n                rate(db_client_operation_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\", http_response_status_code=~\"5..\"}[$__rate_interval]),\n                \"database\",\n                \"/\",\n                \"server_address\",\n                \"db_namespace\"\n            )\n        )\n     / \n        sum by (database) (\n            label_join(\n                rate(db_client_operation_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"database\",\n                \"/\",\n                \"server_address\",\n                \"db_namespace\"\n            )\n        )\n    ) or (0 * \n        sum by (database) (\n            label_join(\n\
-                        \                rate(db_client_operation_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"database\",\n                \"/\",\n                \"server_address\",\n                \"db_namespace\"\n            )\n        )\n    )"
-                    interval: 60s
-                    legendFormat: '{{server_address}} {{db_namespace}}'
-                    range: true
-                    refId: ERR_PCT
-                -   datasource:
-                        type: prometheus
-                        uid: duplo-metrics
-                    editorMode: code
-                    expr: |-
-                        histogram_quantile(
-                          0.99,
-                          sum by (le, database) (
-                            label_join(
-                              rate(
-                                db_client_operation_duration_seconds_bucket{
-                                  deployment_environment_name=~"$deployment_environment_name",
-                                  service_namespace=~"$service_namespace",
-                                  service_name="$service_name"
-                                }[5m]
-                              ),
-                              "database",
-                              "/",
-                              "server_address",
-                              "db_namespace"
-                            )
-                          )
-                        )
-                    interval: 60s
-                    legendFormat: '{{server_address}} {{db_namespace}}'
-                    range: true
-                    refId: DURATION
-            title: Outbound Databases
-            transformations:
-                -   id: timeSeriesTable
-                    options:
-                        DURATION:
-                            timeField: Time
-                        Duration:
-                            timeField: Time
-                        ERR_PCT:
-                            timeField: Time
-                        RPS:
-                            timeField: Time
-                -   id: joinByField
-                    options:
-                        byField: database
-                        mode: outer
-                -   id: organize
-                    options:
-                        excludeByName: {}
-                        includeByName: {}
-                        indexByName:
-                            'Trend #DURATION': 1
-                            'Trend #ERR_PCT': 2
-                            'Trend #RPS': 3
-                            database: 0
-                        renameByName:
-                            'Trend #DURATION': Duration (P99)
-                            'Trend #Duration': Duration (p99)
-                            'Trend #ERR_PCT': Error
-                            'Trend #RPS': Rate
-                            database: Database
-                            database_operation: Database Operation
-                            operation: Operation
-                            outbound_service: Service
-            type: table
         -   collapsed: true
             gridPos:
                 h: 1
@@ -1463,51 +1463,51 @@ spec:
                     type: table
             title: Slow Traces (> 0.5s)
             type: row
-        -   collapsed: false
+        -   collapsed: true
             gridPos:
                 h: 1
                 w: 24
                 x: 0
                 y: 44
             id: 25
-            panels: []
-            title: OTLP Logs
-            type: row
-        -   datasource:
-                type: loki
-                uid: ${loki_datasource}
-            fieldConfig:
-                defaults: {}
-                overrides: []
-            gridPos:
-                h: 15
-                w: 24
-                x: 0
-                y: 45
-            id: 26
-            options:
-                dedupStrategy: none
-                enableInfiniteScrolling: true
-                enableLogDetails: true
-                prettifyLogMessage: false
-                showCommonLabels: false
-                showLabels: false
-                showTime: true
-                sortOrder: Descending
-                wrapLogMessage: false
-            maxDataPoints: 100
-            pluginVersion: 12.0.2+security-01
-            targets:
+            panels:
                 -   datasource:
                         type: loki
-                        uid: duplo-logging
-                    direction: backward
-                    editorMode: code
-                    expr: "{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=~\"$service_name\"} | line_format `\e[1m{{if .detected_level }}{{alignRight 7 .detected_level}}{{else if .severity_text}}{{alignRight 5 .severity_text}}{{end}}\e[0m \e[90m[{{alignRight 10 .instance}}{{if .thread_name}}/{{alignRight 20 .thread_name}}{{else if eq \"java\" .telemetry_sdk_language }}                    {{end}}]\e[0m \e[36m{{if .scope_name }}{{alignRight 40 .scope_name}}{{end}}{{if .exception_type}} \e[1;101m \e[0m{{end}} {{if .exception_type}}\e[1;91m{{.exception_type}}\e[0m{{end}}{{if .exception_message}} \e[1;91m{{.exception_message}}\e[0m {{end}} \e[0m {{__line__}} {{if .trace_id}} \e[37m\e[3m[trace_id={{.trace_id}}]{{end}}`"
-                    queryType: range
-                    refId: A
-            title: ''
-            type: logs
+                        uid: ${loki_datasource}
+                    fieldConfig:
+                        defaults: {}
+                        overrides: []
+                    gridPos:
+                        h: 15
+                        w: 24
+                        x: 0
+                        y: 45
+                    id: 26
+                    options:
+                        dedupStrategy: none
+                        enableInfiniteScrolling: true
+                        enableLogDetails: true
+                        prettifyLogMessage: false
+                        showCommonLabels: false
+                        showLabels: false
+                        showTime: true
+                        sortOrder: Descending
+                        wrapLogMessage: false
+                    maxDataPoints: 100
+                    pluginVersion: 12.0.2+security-01
+                    targets:
+                        -   datasource:
+                                type: loki
+                                uid: duplo-logging
+                            direction: backward
+                            editorMode: code
+                            expr: "{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=~\"$service_name\"} | line_format `\e[1m{{if .detected_level }}{{alignRight 7 .detected_level}}{{else if .severity_text}}{{alignRight 5 .severity_text}}{{end}}\e[0m \e[90m[{{alignRight 10 .instance}}{{if .thread_name}}/{{alignRight 20 .thread_name}}{{else if eq \"java\" .telemetry_sdk_language }}                    {{end}}]\e[0m \e[36m{{if .scope_name }}{{alignRight 40 .scope_name}}{{end}}{{if .exception_type}} \e[1;101m \e[0m{{end}} {{if .exception_type}}\e[1;91m{{.exception_type}}\e[0m{{end}}{{if .exception_message}} \e[1;91m{{.exception_message}}\e[0m {{end}} \e[0m {{__line__}} {{if .trace_id}} \e[37m\e[3m[trace_id={{.trace_id}}]{{end}}`"
+                            queryType: range
+                            refId: A
+                    title: ''
+                    type: logs
+            title: OTLP Logs
+            type: row
     preload: false
     refresh: 30s
     schemaVersion: 41
