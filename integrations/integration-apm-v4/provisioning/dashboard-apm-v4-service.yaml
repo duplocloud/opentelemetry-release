@@ -137,6 +137,7 @@ spec:
                 content: |
                     <h1><img src="https://opentelemetry.io/img/logos/opentelemetry-logo-nav.png" alt="OpenTelemetry Icon" width="25" height=""> Service ${service_namespace}/${service_name} (env: ${deployment_environment_name})</h1>
                 mode: html
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             title: ''
             type: text
@@ -178,17 +179,20 @@ spec:
                 showPercentChange: false
                 textMode: auto
                 wideLayout: true
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
+                    exemplar: false
                     expr: |
                         timestamp(sum by (deployment_environment_name, service_namespace, service_name) (http_server_request_duration_seconds_count{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name"}) or absent{})
+                    instant: true
                     interval: 60s
                     legendFormat: __auto
-                    range: true
+                    range: false
                     refId: A
             timeFrom: now-24h
             title: Latest metrics received
@@ -233,6 +237,7 @@ spec:
                 showPercentChange: false
                 textMode: auto
                 wideLayout: true
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -241,7 +246,7 @@ spec:
                     direction: backward
                     editorMode: code
                     expr: sum(count_over_time({service_name="$service_name", exporter="OTLP"} [5m]))
-                    queryType: range
+                    queryType: instant
                     refId: A
             timeFrom: now-24h
             title: Latest logs received
@@ -285,6 +290,7 @@ spec:
                 showPercentChange: false
                 textMode: auto
                 wideLayout: true
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -383,6 +389,7 @@ spec:
                 textMode: auto
                 wideLayout: true
                 wrapText: false
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -474,6 +481,7 @@ spec:
                     hideZeros: false
                     mode: single
                     sort: none
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -580,6 +588,7 @@ spec:
                     hideZeros: false
                     mode: single
                     sort: none
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -661,6 +670,7 @@ spec:
                     hideZeros: false
                     mode: single
                     sort: none
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -714,6 +724,7 @@ spec:
                 showUnfilled: false
                 sizing: auto
                 valueMode: text
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -801,6 +812,7 @@ spec:
                     hideZeros: false
                     mode: single
                     sort: none
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -907,13 +919,14 @@ spec:
                 sortBy:
                     -   desc: true
                         displayName: Operation
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
-                    expr: "\n        sum by (operation, http_request_method, http_route ) (\n            label_join(\n                rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n            )\n        )\n    "
+                    expr: label_join(appo11y:request:rate5m{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route")
                     interval: 60s
                     legendFormat: '{{operation}}'
                     range: true
@@ -922,8 +935,7 @@ spec:
                         type: prometheus
                         uid: ${prometheus_datasource}
                     editorMode: code
-                    expr: "(\n        sum by (operation ) (\n            label_join(\n                rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\", http_response_status_code=~\"5..\"}[$__rate_interval]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n            )\n        )\n     / \n        sum by (operation ) (\n            label_join(\n                rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n            )\n        )\n    ) or (0 * \n        sum by (operation) (\n          \
-                        \  label_join(\n                rate(http_server_request_duration_seconds_count{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[$__rate_interval]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n            )\n        )\n    )"
+                    expr: label_join(appo11y:error:ratio{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route")
                     interval: 60s
                     legendFormat: '{{operation}}'
                     range: true
@@ -932,7 +944,7 @@ spec:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
-                    expr: "\n        histogram_quantile(\n            0.99,\n            sum by (le, operation) (\n                label_join(\n                rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~\"$deployment_environment_name\", service_namespace=~\"$service_namespace\", service_name=\"$service_name\"}[5m]),\n                \"operation\",\n                \" \",\n                \"http_request_method\",\n                \"http_route\"\n                )\n            )\n        )\n    "
+                    expr: label_join(appo11y:duration:p99{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_route!="__aggregated__"}, "operation", " ", "http_request_method", "http_route")
                     interval: 60s
                     legendFormat: '{{operation}}'
                     range: true
@@ -1038,6 +1050,7 @@ spec:
                         - sum
                     show: false
                 showHeader: true
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -1235,6 +1248,7 @@ spec:
                     show: false
                 showHeader: true
                 sortBy: []
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -1411,6 +1425,7 @@ spec:
                         frameIndex: 0
                         showHeader: true
                         sortBy: []
+                    maxDataPoints: 100
                     pluginVersion: 12.0.2+security-01
                     targets:
                         -   datasource:
@@ -1480,6 +1495,7 @@ spec:
                 showTime: true
                 sortOrder: Descending
                 wrapLogMessage: false
+            maxDataPoints: 100
             pluginVersion: 12.0.2+security-01
             targets:
                 -   datasource:
@@ -1600,6 +1616,32 @@ spec:
                 refresh: 2
                 regex: ''
                 sort: 1
+                type: query
+            -   current:
+                    text: "0.5"
+                    value: "0.5"
+                datasource:
+                    type: prometheus
+                    uid: duplo-metrics
+                definition: query_result(service_apdex_threshold_satisfied_bucket{deployment_environment_name=~"$deployment_environment_name",
+                    service_namespace=~"$service_namespace", service_name="$service_name"}
+                    OR label_replace(absent(service_apdex_threshold_satisfied_bucket{deployment_environment_name=~"$deployment_environment_name",
+                    service_namespace=~"$service_namespace", service_name="$service_name"}),
+                    "le", "0.5", "", ""))
+                hide: 2
+                label: appdex_threshold
+                name: appdex_threshold
+                options: []
+                query:
+                    qryType: 3
+                    query: query_result(service_apdex_threshold_satisfied_bucket{deployment_environment_name=~"$deployment_environment_name",
+                        service_namespace=~"$service_namespace", service_name="$service_name"}
+                        OR label_replace(absent(service_apdex_threshold_satisfied_bucket{deployment_environment_name=~"$deployment_environment_name",
+                        service_namespace=~"$service_namespace", service_name="$service_name"}),
+                        "le", "0.5", "", ""))
+                    refId: PrometheusVariableQueryEditor-VariableQuery
+                refresh: 1
+                regex: /le="([^"]+)"/
                 type: query
     time:
         from: now-30m
