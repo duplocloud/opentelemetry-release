@@ -188,7 +188,7 @@ spec:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
-                    expr: histogram_quantile(0.99, sum by(le, deployment_environment_name, service_namespace, service_name) (rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route"}[$__rate_interval])))
+                    expr: appo11y:duration:p99{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route", http_route!="__aggregated__"}
                     interval: 60s
                     legendFormat: P99
                     range: true
@@ -197,7 +197,7 @@ spec:
                         type: prometheus
                         uid: ${prometheus_datasource}
                     editorMode: code
-                    expr: histogram_quantile(0.9, sum by(le, deployment_environment_name, service_namespace, service_name) (rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route"}[$__rate_interval])))
+                    expr: appo11y:duration:p95{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route", http_route!="__aggregated__"}
                     interval: 60s
                     legendFormat: P90
                     range: true
@@ -206,7 +206,7 @@ spec:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
-                    expr: avg by(deployment_environment_name, service_namespace, service_name) (rate(http_server_request_duration_seconds_sum{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route"}[$__rate_interval])) / avg by(deployment_environment_name, service_namespace, service_name) (rate(http_server_request_duration_seconds_count{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route"}[$__rate_interval]))
+                    expr: appo11y:duration:avg{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route", http_route!="__aggregated__"}
                     interval: 60s
                     legendFormat: AVG
                     range: true
@@ -298,45 +298,7 @@ spec:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
-                    expr: |-
-                        (
-                          sum by(deployment_environment_name, service_namespace, service_name) (
-                            rate(
-                              http_server_request_duration_seconds_count{
-                                deployment_environment_name=~"$deployment_environment_name",
-                                service_namespace=~"$service_namespace",
-                                service_name="$service_name",
-                                http_response_status_code=~"5..", http_request_method=~"$http_request_method", http_route=~"$http_route"
-                              }[$__rate_interval]
-                            )
-                          ) * 100
-                        )
-                        /
-                        (
-                          sum by(deployment_environment_name, service_namespace, service_name) (
-                            rate(
-                              http_server_request_duration_seconds_count{
-                                deployment_environment_name=~"$deployment_environment_name",
-                                service_namespace=~"$service_namespace",
-                                service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route"
-                              }[$__rate_interval]
-                            )
-                          )
-                        )
-                        or
-                        (
-                          0
-                          *
-                          sum by(deployment_environment_name, service_namespace, service_name) (
-                            rate(
-                              http_server_request_duration_seconds_count{
-                                deployment_environment_name=~"$deployment_environment_name",
-                                service_namespace=~"$service_namespace",
-                                service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route"
-                              }[$__rate_interval]
-                            )
-                          )
-                        )
+                    expr: appo11y:error:ratio{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route", http_route!="__aggregated__"} * 100
                     interval: 60s
                     legendFormat: 5xx
                     range: true
@@ -422,7 +384,7 @@ spec:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
-                    expr: '(sum(rate(http_server_request_duration_seconds_count{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route"}[$__rate_interval])) by (deployment_environment_name, service_namespace, service_name)) '
+                    expr: appo11y:request:rate5m{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route", http_route!="__aggregated__"}
                     interval: 60s
                     legendFormat: Requests
                     range: true
@@ -476,7 +438,7 @@ spec:
                         type: prometheus
                         uid: duplo-metrics
                     editorMode: code
-                    expr: sum by (le) (rate(http_server_request_duration_seconds_bucket{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route"}[$__rate_interval]))
+                    expr: appo11y:duration:distribution{deployment_environment_name=~"$deployment_environment_name", service_namespace=~"$service_namespace", service_name="$service_name", http_request_method=~"$http_request_method", http_route=~"$http_route", http_route!="__aggregated__"}
                     format: heatmap
                     legendFormat: '{{le}}'
                     range: true
