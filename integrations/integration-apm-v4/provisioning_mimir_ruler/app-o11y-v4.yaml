@@ -1,0 +1,160 @@
+namespace: app-o11y-v4
+groups:
+    - name: appo11y_apm_v4
+      interval: 1m
+      rules:
+
+        # appo11y:request:rate5m — per operation
+        - record: appo11y:request:rate5m
+          expr: |
+            sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route) (
+              rate(http_server_request_duration_seconds_count[5m])
+            )
+
+        # appo11y:request:rate5m — aggregated
+        - record: appo11y:request:rate5m
+          expr: |
+            sum by (deployment_environment_name, service_namespace, service_name) (
+              rate(http_server_request_duration_seconds_count[5m])
+            )
+          labels:
+            http_request_method: __aggregated__
+            http_route: __aggregated__
+
+        # appo11y:error:ratio — per operation
+        - record: appo11y:error:ratio
+          expr: |
+            (
+              sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route) (
+                rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[5m])
+              )
+              or
+              0 * sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route) (
+                rate(http_server_request_duration_seconds_count[5m])
+              )
+            )
+            /
+            sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route) (
+              rate(http_server_request_duration_seconds_count[5m])
+            )
+
+        # appo11y:error:ratio — aggregated
+        - record: appo11y:error:ratio
+          expr: |
+            (
+              sum by (deployment_environment_name, service_namespace, service_name) (
+                rate(http_server_request_duration_seconds_count{http_response_status_code=~"5.."}[5m])
+              )
+              or
+              0 * sum by (deployment_environment_name, service_namespace, service_name) (
+                rate(http_server_request_duration_seconds_count[5m])
+              )
+            )
+            /
+            sum by (deployment_environment_name, service_namespace, service_name) (
+              rate(http_server_request_duration_seconds_count[5m])
+            )
+          labels:
+            http_request_method: __aggregated__
+            http_route: __aggregated__
+
+        # appo11y:duration:avg — per operation
+        - record: appo11y:duration:avg
+          expr: |
+            sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route) (
+              rate(http_server_request_duration_seconds_sum[5m])
+            )
+            /
+            sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route) (
+              rate(http_server_request_duration_seconds_count[5m])
+            )
+
+        # appo11y:duration:avg — aggregated
+        - record: appo11y:duration:avg
+          expr: |
+            sum by (deployment_environment_name, service_namespace, service_name) (
+              rate(http_server_request_duration_seconds_sum[5m])
+            )
+            /
+            sum by (deployment_environment_name, service_namespace, service_name) (
+              rate(http_server_request_duration_seconds_count[5m])
+            )
+          labels:
+            http_request_method: __aggregated__
+            http_route: __aggregated__
+
+        # appo11y:duration:distribution — per operation
+        - record: appo11y:duration:distribution
+          expr: |
+            sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route, le) (
+              rate(http_server_request_duration_seconds_bucket[5m])
+            )
+
+        # appo11y:duration:distribution — aggregated
+        - record: appo11y:duration:distribution
+          expr: |
+            sum by (deployment_environment_name, service_namespace, service_name, le) (
+              rate(http_server_request_duration_seconds_bucket[5m])
+            )
+          labels:
+            http_request_method: __aggregated__
+            http_route: __aggregated__
+
+        # appo11y:apdex:score — single rule covers both per-op and aggregated
+        # Satisfied  = requests within T  (service_apdex_threshold_satisfied_bucket, fallback le="0.5")
+        # Tolerating = requests within 4T (service_apdex_threshold_tolerating_bucket, fallback le="2.5")
+        # Formula: (satisfied + tolerating/2) / total
+        - record: appo11y:apdex:score
+          expr: |
+            (
+              sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route) (
+                (
+                  appo11y:duration:distribution
+                  * on(service_namespace, service_name, le) group_left()
+                  service_apdex_threshold_satisfied_bucket
+                )
+                or
+                (
+                  appo11y:duration:distribution{le="0.5"}
+                  unless on(service_namespace, service_name)
+                  service_apdex_threshold_satisfied_bucket
+                )
+              )
+              +
+              sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route) (
+                (
+                  appo11y:duration:distribution
+                  * on(service_namespace, service_name, le) group_left()
+                  service_apdex_threshold_tolerating_bucket
+                )
+                or
+                (
+                  appo11y:duration:distribution{le="2.5"}
+                  unless on(service_namespace, service_name)
+                  service_apdex_threshold_tolerating_bucket
+                )
+              )
+            )
+            / 2
+            /
+            sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route) (
+              appo11y:duration:distribution{le="+Inf"}
+            )
+
+        # appo11y:duration:p99 — single rule covers both per-op and aggregated
+        - record: appo11y:duration:p99
+          expr: |
+            histogram_quantile(0.99,
+              sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route, le) (
+                appo11y:duration:distribution
+              )
+            )
+
+        # appo11y:duration:p95 — single rule covers both per-op and aggregated
+        - record: appo11y:duration:p95
+          expr: |
+            histogram_quantile(0.95,
+              sum by (deployment_environment_name, service_namespace, service_name, http_request_method, http_route, le) (
+                appo11y:duration:distribution
+              )
+            )
