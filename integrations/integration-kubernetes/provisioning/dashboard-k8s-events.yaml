@@ -338,57 +338,13 @@ spec:
                         legend: false
                         tooltip: false
                         viz: false
+                links:
+                    - targetBlank: true
+                      title: 'Filter: ${__series.name}'
+                      url: /d/k8s-events/k8s-events?${__all_variables}&${__url_time_range}&var-contains=${__field.labels.search_key}
                 mappings: []
                 noValue: "0"
-            overrides:
-                - matcher:
-                    id: byName
-                    options: Failed
-                  properties:
-                    - id: displayName
-                      value: Image Pull Failed
-                - matcher:
-                    id: byName
-                    options: Killing
-                  properties:
-                    - id: displayName
-                      value: Liveness Probe Failed
-                - matcher:
-                    id: byName
-                    options: FailedMount
-                  properties:
-                    - id: displayName
-                      value: Volume Mount Failed
-                - matcher:
-                    id: byName
-                    options: FailedScheduling
-                  properties:
-                    - id: displayName
-                      value: Scheduling Failed
-                - matcher:
-                    id: byName
-                    options: OOMKilling
-                  properties:
-                    - id: displayName
-                      value: Container OOM Killed
-                - matcher:
-                    id: byName
-                    options: BackOff
-                  properties:
-                    - id: displayName
-                      value: Container Crashed
-                - matcher:
-                    id: byName
-                    options: TaintManagerEviction
-                  properties:
-                    - id: displayName
-                      value: Pod Evicted
-                - matcher:
-                    id: byName
-                    options: SystemOOM
-                  properties:
-                    - id: displayName
-                      value: System OOM
+            overrides: []
           gridPos:
             h: 10
             w: 9
@@ -396,6 +352,7 @@ spec:
             "y": 15
           id: 4
           interval: 1m
+          maxDataPoints: 100
           options:
             displayLabels:
                 - value
@@ -406,6 +363,7 @@ spec:
                 showLegend: true
                 values:
                     - percent
+                    - value
             pieType: pie
             reduceOptions:
                 calcs:
@@ -423,8 +381,22 @@ spec:
                 uid: ${datasource}
               direction: backward
               editorMode: code
-              expr: 'sum by (reason) (count_over_time({job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"} |~ `(?i)$contains` | logfmt | drop __error__,__error_details__ | reason=~"Failed|Killing|FailedMount|FailedScheduling|OOMKilling|BackOff|TaintManagerEviction|SystemOOM" [$__interval]))'
-              legendFormat: '{{reason}}'
+              expr: |-
+                sum by (event_category, search_key) (
+                  count_over_time(
+                    {job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace=~"$namespace"}
+                    |~ `(?i)$contains`
+                    | logfmt
+                    | drop __error__,__error_details__
+                    | reason=~"Failed|Killing|FailedMount|FailedScheduling|OOMKilling|BackOff|TaintManagerEviction|SystemOOM|Evicted|Unhealthy"
+                    | label_format
+                      event_category=`{{if and (eq .reason "Failed") (contains "Error: ImagePullBackOff" .msg)}}Image Pull Failed{{else if and (eq .reason "Killing") (contains "failed liveness probe" .msg)}}Liveness Probe Failed{{else if and (eq .reason "Killing") (contains "failed startup probe" .msg)}}Startup Probe Failed{{else if and (eq .reason "TaintManagerEviction") (contains "Marking for deletion Pod" .msg)}}Pod Evicted{{else if eq .reason "FailedMount"}}Volume Mount Failed{{else if eq .reason "FailedScheduling"}}Scheduling Failed{{else if eq .reason "OOMKilling"}}Container OOM Killed{{else if eq .reason "BackOff"}}Container Crashed{{else if eq .reason "SystemOOM"}}System OOM{{else if eq .reason "Evicted"}}Node Pressure Eviction{{else if and (eq .reason "Unhealthy") (contains "Readiness probe failed" .msg)}}Readiness Probe Failed{{end}}`,
+                      search_key=`{{if and (eq .reason "Failed") (contains "Error: ImagePullBackOff" .msg)}}ImagePullBackOff{{else if and (eq .reason "Killing") (contains "failed liveness probe" .msg)}}failed liveness probe{{else if and (eq .reason "Killing") (contains "failed startup probe" .msg)}}failed startup probe{{else if and (eq .reason "TaintManagerEviction") (contains "Marking for deletion Pod" .msg)}}TaintManagerEviction{{else if eq .reason "FailedMount"}}FailedMount{{else if eq .reason "FailedScheduling"}}FailedScheduling{{else if eq .reason "OOMKilling"}}OOMKilling{{else if eq .reason "BackOff"}}BackOff{{else if eq .reason "SystemOOM"}}SystemOOM{{else if eq .reason "Evicted"}}Evicted{{else if and (eq .reason "Unhealthy") (contains "Readiness probe failed" .msg)}}Readiness probe failed{{end}}`
+                    | event_category != ""
+                    [$__interval]
+                  )
+                )
+              legendFormat: '{{event_category}}'
               queryType: range
               range: true
               refId: A
@@ -438,7 +410,7 @@ spec:
             "y": 25
           id: 40
           panels: []
-          title: OOM Killed Pods(from metrics)
+          title: OOM Killed Pods
           type: row
         - datasource:
             type: datasource
@@ -481,15 +453,37 @@ spec:
             - datasource:
                 type: datasource
                 uid: '-- Dashboard --'
-              panelId: 44
+              panelId: 46
               refId: A
-          title: OOM Killed Containers (in range)
+          description: Data sourced from kube-state-metrics (Prometheus), not Kubernetes Events.
+          title: OOM Killed Pods Count
           transformations:
+            - id: labelsToFields
+              options:
+                mode: columns
+            - id: merge
+              options: {}
+            - id: groupBy
+              options:
+                fields:
+                    namespace:
+                        aggregations: []
+                        operation: groupby
+                    pod:
+                        aggregations: []
+                        operation: groupby
+                    container:
+                        aggregations: []
+                        operation: groupby
+                    Value:
+                        aggregations:
+                            - max
+                        operation: aggregate
             - id: filterFieldsByName
               options:
                 include:
                     names:
-                        - Value
+                        - namespace
             - id: reduce
               options:
                 includeTimeField: false
@@ -498,8 +492,8 @@ spec:
                     - count
           type: stat
         - datasource:
-            type: prometheus
-            uid: duplo-metrics
+            type: datasource
+            uid: '-- Dashboard --'
           fieldConfig:
             defaults:
                 color:
@@ -510,6 +504,7 @@ spec:
                         type: auto
                     filterable: true
                     inspect: false
+                decimals: 0
                 mappings: []
                 thresholds:
                     mode: absolute
@@ -554,36 +549,39 @@ spec:
           pluginVersion: 12.0.2+security-01
           targets:
             - datasource:
-                type: prometheus
-                uid: duplo-metrics
-              expr: |-
-                (
-                  increase(kube_pod_container_status_restarts_total{cluster=~"$cluster", namespace=~"$namespace"}[$__range]) > 0
-                ) * on(cluster, namespace, pod, container) group_left()
-                (max_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled", cluster=~"$cluster", namespace=~"$namespace"}[$__range]) == 1)
-              format: table
-              instant: true
-              legendFormat: '{{namespace}}/{{pod}} ({{container}})'
+                type: datasource
+                uid: '-- Dashboard --'
+              panelId: 46
               refId: A
+          description: Data sourced from kube-state-metrics (Prometheus), not Kubernetes Events.
           title: OOM Killed Pod Details
           transformations:
-            - id: filterFieldsByName
+            - id: labelsToFields
               options:
-                include:
-                    names:
-                        - namespace
-                        - pod
-                        - container
-                        - Value
-            - id: organize
+                mode: columns
+            - id: merge
+              options: {}
+            - id: groupBy
               options:
-                renameByName:
-                    Value: OOM Restarts
+                fields:
+                    namespace:
+                        aggregations: []
+                        operation: groupby
+                    pod:
+                        aggregations: []
+                        operation: groupby
+                    container:
+                        aggregations: []
+                        operation: groupby
+                    Value:
+                        aggregations:
+                            - sum
+                        operation: aggregate
             - id: sortBy
               options:
                 fields:
                     - desc: true
-                      displayName: OOM Restarts
+                      displayName: Sum (Value)
           type: table
         - datasource:
             type: prometheus
@@ -655,10 +653,11 @@ spec:
                   sum by (cluster, namespace, pod, container) (
                     increase(kube_pod_container_status_restarts_total{cluster=~"$cluster", namespace=~"$namespace"}[$__rate_interval])
                   ) * on(cluster, namespace, pod, container) group_left()
-                  (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", cluster=~"$cluster", namespace=~"$namespace"} == 1)
+                  (max_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled", cluster=~"$cluster", namespace=~"$namespace"}[$__range]) == 1)
                 ) > 0
               legendFormat: '{{namespace}}/{{pod}} ({{container}})'
               refId: A
+          description: Data sourced from kube-state-metrics (Prometheus), not Kubernetes Events.
           title: OOM Driven Restart Rate
           type: timeseries
         - collapsed: true
@@ -1069,4 +1068,4 @@ spec:
     timezone: ""
     title: K8s / Events
     uid: k8s-events
-    version: 15
+    version: 25
