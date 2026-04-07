@@ -430,12 +430,243 @@ spec:
               refId: A
           title: Event Reason Counts
           type: piechart
-        - collapsed: true
+        - collapsed: false
           gridPos:
             h: 1
             w: 24
             x: 0
             "y": 25
+          id: 40
+          panels: []
+          title: OOM Killed Pods(from metrics)
+          type: row
+        - datasource:
+            type: datasource
+            uid: '-- Dashboard --'
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+                        - color: orange
+                          value: 1
+                        - color: red
+                          value: 5
+                unit: short
+            overrides: []
+          gridPos:
+            h: 8
+            w: 5
+            x: 0
+            "y": 26
+          id: 42
+          options:
+            colorMode: background
+            graphMode: none
+            justifyMode: center
+            orientation: auto
+            reduceOptions:
+                calcs:
+                    - lastNotNull
+                fields: ""
+                values: false
+            textMode: auto
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - datasource:
+                type: datasource
+                uid: '-- Dashboard --'
+              panelId: 44
+              refId: A
+          title: OOM Killed Containers (in range)
+          transformations:
+            - id: filterFieldsByName
+              options:
+                include:
+                    names:
+                        - Value
+            - id: reduce
+              options:
+                includeTimeField: false
+                mode: reduceFields
+                reducers:
+                    - count
+          type: stat
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: thresholds
+                custom:
+                    align: auto
+                    cellOptions:
+                        type: auto
+                    filterable: true
+                    inspect: false
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+            overrides:
+                - matcher:
+                    id: byName
+                    options: OOM Restarts
+                  properties:
+                    - id: custom.width
+                      value: 120
+                    - id: thresholds
+                      value:
+                        mode: absolute
+                        steps:
+                            - color: orange
+                              value: null
+                            - color: red
+                              value: 5
+                    - id: custom.cellOptions
+                      value:
+                        type: color-background
+          gridPos:
+            h: 8
+            w: 19
+            x: 5
+            "y": 26
+          id: 44
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                enablePagination: true
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            showHeader: true
+            sortBy: []
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              expr: |-
+                (
+                  increase(kube_pod_container_status_restarts_total{cluster=~"$cluster", namespace=~"$namespace"}[$__range]) > 0
+                ) * on(cluster, namespace, pod, container) group_left()
+                (max_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled", cluster=~"$cluster", namespace=~"$namespace"}[$__range]) == 1)
+              format: table
+              instant: true
+              legendFormat: '{{namespace}}/{{pod}} ({{container}})'
+              refId: A
+          title: OOM Killed Pod Details
+          transformations:
+            - id: filterFieldsByName
+              options:
+                include:
+                    names:
+                        - namespace
+                        - pod
+                        - container
+                        - Value
+            - id: organize
+              options:
+                renameByName:
+                    Value: OOM Restarts
+            - id: sortBy
+              options:
+                fields:
+                    - desc: true
+                      displayName: OOM Restarts
+          type: table
+        - datasource:
+            type: prometheus
+            uid: duplo-metrics
+          fieldConfig:
+            defaults:
+                color:
+                    mode: palette-classic
+                custom:
+                    axisBorderShow: false
+                    axisCenteredZero: false
+                    axisColorMode: text
+                    axisLabel: ""
+                    axisPlacement: auto
+                    barAlignment: 0
+                    barWidthFactor: 0.6
+                    drawStyle: bars
+                    fillOpacity: 70
+                    gradientMode: none
+                    hideFrom:
+                        legend: false
+                        tooltip: false
+                        viz: false
+                    insertNulls: false
+                    lineInterpolation: linear
+                    lineWidth: 1
+                    pointSize: 5
+                    scaleDistribution:
+                        type: linear
+                    showPoints: never
+                    spanNulls: false
+                    stacking:
+                        group: A
+                        mode: normal
+                    thresholdsStyle:
+                        mode: "off"
+                mappings: []
+                thresholds:
+                    mode: absolute
+                    steps:
+                        - color: green
+                          value: null
+            overrides: []
+          gridPos:
+            h: 10
+            w: 24
+            x: 0
+            "y": 34
+          id: 46
+          interval: 1m
+          maxDataPoints: 100
+          options:
+            legend:
+                calcs: []
+                displayMode: list
+                placement: bottom
+                showLegend: true
+            tooltip:
+                hideZeros: true
+                mode: multi
+                sort: desc
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - datasource:
+                type: prometheus
+                uid: duplo-metrics
+              expr: |-
+                (
+                  sum by (cluster, namespace, pod, container) (
+                    increase(kube_pod_container_status_restarts_total{cluster=~"$cluster", namespace=~"$namespace"}[$__rate_interval])
+                  ) * on(cluster, namespace, pod, container) group_left()
+                  (kube_pod_container_status_last_terminated_reason{reason="OOMKilled", cluster=~"$cluster", namespace=~"$namespace"} == 1)
+                ) > 0
+              legendFormat: '{{namespace}}/{{pod}} ({{container}})'
+              refId: A
+          title: OOM Driven Restart Rate
+          type: timeseries
+        - collapsed: true
+          gridPos:
+            h: 1
+            w: 24
+            x: 0
+            "y": 44
           id: 38
           panels:
             - datasource:
@@ -480,7 +711,7 @@ spec:
             h: 1
             w: 24
             x: 0
-            "y": 26
+            "y": 45
           id: 30
           panels:
             - datasource:
