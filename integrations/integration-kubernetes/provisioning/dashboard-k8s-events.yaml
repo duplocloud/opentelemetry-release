@@ -653,7 +653,11 @@ spec:
                   sum by (cluster, namespace, pod, container) (
                     increase(kube_pod_container_status_restarts_total{cluster=~"$cluster", namespace=~"$namespace"}[$__rate_interval])
                   ) * on(cluster, namespace, pod, container) group_left()
-                  (max_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled", cluster=~"$cluster", namespace=~"$namespace"}[$__range]) == 1)
+                  (
+                    max by (cluster, namespace, pod, container) (
+                      max_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled", cluster=~"$cluster", namespace=~"$namespace"}[$__range]) == 1
+                    )
+                  )
                 ) > 0
               legendFormat: '{{namespace}}/{{pod}} ({{container}})'
               refId: A
@@ -1068,4 +1072,4 @@ spec:
     timezone: ""
     title: K8s / Events
     uid: k8s-events
-    version: 25
+    version: 26
