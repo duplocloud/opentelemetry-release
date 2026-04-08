@@ -197,4 +197,69 @@ spec:
           ruleGroup: pod-alerts
           title: AlertmanagerWebhookFailed
           uid: AlertmanagerWebhookFailed
+        - annotations:
+            description: 'Pod {{ $labels.name }} in namespace {{ $labels.namespace }} (cluster: {{ $labels.cluster }}) has been evicted. Message: {{ $labels.msg }}'
+            summary: 'Pod eviction detected: {{ $labels.namespace }}/{{ $labels.name }}'
+          condition: C
+          data:
+            - datasourceUid: duplo-logging
+              model:
+                datasource:
+                    type: loki
+                    uid: duplo-logging
+                editorMode: code
+                expr: |-
+                    sum by (cluster, namespace, name, msg) (
+                      count_over_time(
+                        {job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter"}
+                        | logfmt
+                        | drop __error__,__error_details__
+                        | reason="Evicted"
+                        [5m]
+                      )
+                    )
+                intervalMs: 60000
+                maxDataPoints: 43200
+                queryType: instant
+                refId: A
+              queryType: instant
+              refId: A
+              relativeTimeRange:
+                from: 600
+            - datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 60000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+              refId: C
+              relativeTimeRange: {}
+          execErrState: Error
+          folderUID: duplo-common
+          for: 0s
+          labels:
+            severity: warning
+          noDataState: OK
+          orgID: 1
+          ruleGroup: pod-alerts
+          title: pod-evicted
+          uid: pod-evicted
     title: pod-alerts
