@@ -1,0 +1,31 @@
+namespace: integration-apm-v4
+groups:
+    - name: apm-alerts
+      interval: 1m
+      rules:
+        - alert: ApdexScoreCritical
+          expr: |-
+            (
+              appo11y:apdex:score{
+                http_request_method="__aggregated__",
+                http_route="__aggregated__"
+              } < 0.75
+            )
+            and on(deployment_environment_name, service_namespace, service_name)
+            (
+              appo11y:request:rate5m{
+                http_request_method="__aggregated__",
+                http_route="__aggregated__"
+              } >= 1
+            )
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: 'Apdex score degraded: {{ $labels.service_namespace }}/{{ $labels.service_name }}'
+            description: >-
+              Apdex score for service {{ $labels.service_name }} in namespace
+              {{ $labels.service_namespace }} (env: {{ $labels.deployment_environment_name }})
+              has dropped to {{ $value | printf "%.2f" }}. A score below 0.75 is rated Poor —
+              a significant portion of users are experiencing slow or unacceptable response times.
+              This is not a low-traffic false positive — the service is actively receiving requests.
