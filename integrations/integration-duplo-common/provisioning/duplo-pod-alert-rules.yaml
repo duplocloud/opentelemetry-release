@@ -7,7 +7,7 @@ spec:
     interval: 60
     rules:
         - annotations:
-            description: 'Pod `{{ $labels.pod }}` in namespace `{{ $labels.namespace }}` (cluster: `{{ $labels.cluster }}`) has restarted within the last 5 minutes.'
+            description: 'Pod `{{ $labels.pod }}` in namespace `{{ $labels.namespace }}` (cluster: `{{ $labels.cluster }}`) has restarted within the last 5 minutes. Reason: `{{ if $labels.reason }}{{ $labels.reason }}{{ else }}unknown{{ end }}`'
             summary: 'Pod restart detected: {{ $labels.namespace }}/{{ $labels.pod }}'
           condition: C
           data:

@@ -241,12 +241,104 @@ spec:
                     - desc: true
                       field: Last Seen
           type: table
+        - gridPos:
+            h: 8
+            w: 24
+            x: 0
+            "y": 14
+          id: 37
+          options:
+            cellHeight: sm
+            footer:
+                countRows: false
+                enablePagination: true
+                fields: ""
+                reducer:
+                    - sum
+                show: false
+            showHeader: true
+            sortBy: []
+          pluginVersion: 12.0.2+security-01
+          targets:
+            - datasource:
+                type: loki
+                uid: ${datasource}
+              direction: backward
+              editorMode: code
+              expr: '{job=~"integrations/kubernetes/eventhandler|infra-monitoring/eventrouter", cluster=~"$cluster", namespace!~".+"} | logfmt | drop __error__,__error_details__'
+              queryType: range
+              refId: A
+          title: Cluster-Scoped Events (Node / PV)
+          transformations:
+            - id: extractFields
+              options:
+                replace: false
+                source: labels
+            - id: filterFieldsByName
+              options:
+                include:
+                    names:
+                        - labels
+                        - Time
+                        - count
+                        - kind
+                        - msg
+                        - name
+                        - namespace
+                        - reason
+                        - sourcecomponent
+                        - type
+                        - cluster
+                    pattern: /^(labels|type|reason|namespace|msg|kind|name|sourcecomponent|count|Time|firstTimestamp|lastTimestamp)$/
+            - id: organize
+              options:
+                excludeByName:
+                    firstTimestamp: true
+                includeByName: {}
+                indexByName:
+                    Time: 10
+                    cluster: 3
+                    count: 9
+                    kind: 5
+                    labels: 0
+                    msg: 2
+                    name: 7
+                    namespace: 4
+                    reason: 6
+                    sourcecomponent: 8
+                    type: 1
+                renameByName:
+                    Time: Created
+                    cluster: Cluster
+                    count: Count
+                    kind: Kind
+                    labels: Full event
+                    lastTimestamp: Last Seen
+                    msg: Message
+                    name: Involved Object
+                    namespace: Namespace
+                    reason: Reason
+                    sourcecomponent: Source
+                    type: Type
+            - id: convertFieldType
+              options:
+                conversions:
+                    - destinationType: Time
+                      targetField: creationTimestamp
+                fields: {}
+            - id: sortBy
+              options:
+                fields: {}
+                sort:
+                    - desc: true
+                      field: Last Seen
+          type: table
         - collapsed: false
           gridPos:
             h: 1
             w: 24
             x: 0
-            "y": 14
+            "y": 22
           id: 32
           panels: []
           title: Kubernetes Events - Stats
@@ -299,7 +391,7 @@ spec:
             h: 10
             w: 15
             x: 0
-            "y": 15
+            "y": 23
           id: 2
           interval: 1m
           maxDataPoints: 100
@@ -349,7 +441,7 @@ spec:
             h: 10
             w: 9
             x: 15
-            "y": 15
+            "y": 23
           id: 4
           interval: 1m
           maxDataPoints: 100
@@ -407,7 +499,7 @@ spec:
             h: 1
             w: 24
             x: 0
-            "y": 25
+            "y": 33
           id: 40
           panels: []
           title: OOM Killed Pods
@@ -435,7 +527,7 @@ spec:
             h: 8
             w: 5
             x: 0
-            "y": 26
+            "y": 34
           id: 42
           options:
             colorMode: background
@@ -533,7 +625,7 @@ spec:
             h: 8
             w: 19
             x: 5
-            "y": 26
+            "y": 34
           id: 44
           options:
             cellHeight: sm
@@ -629,7 +721,7 @@ spec:
             h: 10
             w: 24
             x: 0
-            "y": 34
+            "y": 42
           id: 46
           interval: 1m
           maxDataPoints: 100
@@ -669,7 +761,7 @@ spec:
             h: 1
             w: 24
             x: 0
-            "y": 44
+            "y": 52
           id: 38
           panels:
             - datasource:
@@ -714,7 +806,7 @@ spec:
             h: 1
             w: 24
             x: 0
-            "y": 45
+            "y": 53
           id: 30
           panels:
             - datasource:
