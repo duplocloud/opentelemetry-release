@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "PersistentVolume usage showing space and inode utilisation for all volumes in the selected namespace."
     links:
         - asDropdown: true
           includeVars: true
@@ -91,6 +92,7 @@ spec:
                 sum without(instance, node) (topk(1, (kubelet_volume_stats_available_bytes{cluster="$cluster", job="integrations/kubernetes/kubelet", namespace="$namespace", persistentvolumeclaim="$volume"})))
               legendFormat: Free Space
           title: Volume Space Usage
+          description: "Used and available storage space on each PersistentVolume over time."
           type: timeseries
         - datasource:
             type: datasource
@@ -135,6 +137,7 @@ spec:
                 * 100)
               instant: true
           title: Volume Space Usage
+          description: "Used and available storage space on each PersistentVolume over time."
           type: gauge
         - datasource:
             type: datasource
@@ -180,6 +183,7 @@ spec:
                 )
               legendFormat: Free inodes
           title: Volume inodes Usage
+          description: "Used and available inodes on each PersistentVolume. Inode exhaustion prevents new file creation even if space is available."
           type: timeseries
         - datasource:
             type: datasource
@@ -220,6 +224,7 @@ spec:
                 * 100)
               instant: true
           title: Volume inodes Usage
+          description: "Used and available inodes on each PersistentVolume. Inode exhaustion prevents new file creation even if space is available."
           type: gauge
     refresh: 1m
     schemaVersion: 39

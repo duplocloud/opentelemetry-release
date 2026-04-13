@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "Cluster-wide compute resource overview for both Linux and Windows nodes. Shows CPU and memory utilisation, request/limit commitment across all namespaces, and network I/O trends."
     links:
         - asDropdown: true
           includeVars: true
@@ -46,6 +47,7 @@ spec:
           title: Kubernetes
           type: dashboards
     panels:
+        # ── Linux node stats row ────────────────────────────────────────────
         - datasource:
             type: datasource
             uid: -- Mixed --
@@ -68,7 +70,8 @@ spec:
                 uid: ${datasource}
               expr: cluster:node_cpu:ratio_rate5m{cluster="$cluster"}
               instant: true
-          title: CPU Utilisation
+          title: 'Linux: CPU Utilisation'
+          description: "Current cluster-wide CPU utilisation across all Linux nodes, averaged over 5 minutes."
           type: stat
         - datasource:
             type: datasource
@@ -92,7 +95,8 @@ spec:
                 uid: ${datasource}
               expr: sum(namespace_cpu:kube_pod_container_resource_requests:sum{cluster="$cluster"}) / sum(kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="cpu",cluster="$cluster"})
               instant: true
-          title: CPU Requests Commitment
+          title: 'Linux: CPU Requests Commitment'
+          description: "Fraction of total allocatable CPU on Linux nodes claimed by pod CPU requests. Values above 1 indicate over-subscription."
           type: stat
         - datasource:
             type: datasource
@@ -116,7 +120,8 @@ spec:
                 uid: ${datasource}
               expr: sum(namespace_cpu:kube_pod_container_resource_limits:sum{cluster="$cluster"}) / sum(kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="cpu",cluster="$cluster"})
               instant: true
-          title: CPU Limits Commitment
+          title: 'Linux: CPU Limits Commitment'
+          description: "Fraction of total allocatable CPU on Linux nodes claimed by pod CPU limits. High values increase the risk of CPU throttling."
           type: stat
         - datasource:
             type: datasource
@@ -140,7 +145,8 @@ spec:
                 uid: ${datasource}
               expr: 1 - sum(:node_memory_MemAvailable_bytes:sum{cluster="$cluster"}) / sum(node_memory_MemTotal_bytes{job="integrations/node_exporter",cluster="$cluster"})
               instant: true
-          title: Memory Utilisation
+          title: 'Linux: Memory Utilisation'
+          description: "Current cluster-wide memory utilisation across all Linux nodes."
           type: stat
         - datasource:
             type: datasource
@@ -164,7 +170,8 @@ spec:
                 uid: ${datasource}
               expr: sum(namespace_memory:kube_pod_container_resource_requests:sum{cluster="$cluster"}) / sum(kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="memory",cluster="$cluster"})
               instant: true
-          title: Memory Requests Commitment
+          title: 'Linux: Memory Requests Commitment'
+          description: "Fraction of total allocatable memory on Linux nodes claimed by pod memory requests."
           type: stat
         - datasource:
             type: datasource
@@ -188,8 +195,161 @@ spec:
                 uid: ${datasource}
               expr: sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster="$cluster"}) / sum(kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics",resource="memory",cluster="$cluster"})
               instant: true
-          title: Memory Limits Commitment
+          title: 'Linux: Memory Limits Commitment'
+          description: "Fraction of total allocatable memory on Linux nodes claimed by pod memory limits."
           type: stat
+        # ── Windows node stats row ──────────────────────────────────────────
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                unit: percentunit
+          gridPos:
+            h: 3
+            w: 4
+            x: 0
+            "y": 3
+          id: 7
+          interval: 1m
+          options:
+            colorMode: none
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: 1 - avg(rate(windows_cpu_time_total{cluster="$cluster", job="integrations/windows_exporter", mode="idle"}[$__rate_interval]))
+              instant: true
+          title: 'Windows: CPU Utilisation'
+          description: "Current cluster-wide CPU utilisation across all Windows nodes, averaged over the last scrape interval."
+          type: stat
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                unit: percentunit
+          gridPos:
+            h: 3
+            w: 4
+            x: 4
+            "y": 3
+          id: 8
+          interval: 1m
+          options:
+            colorMode: none
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: sum(kube_pod_windows_container_resource_cpu_cores_request{cluster="$cluster"}) / sum(node:windows_node_num_cpu:sum{cluster="$cluster"})
+              instant: true
+          title: 'Windows: CPU Requests Commitment'
+          description: "Fraction of total CPU cores on Windows nodes claimed by pod CPU requests."
+          type: stat
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                unit: percentunit
+          gridPos:
+            h: 3
+            w: 4
+            x: 8
+            "y": 3
+          id: 9
+          interval: 1m
+          options:
+            colorMode: none
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: sum(kube_pod_windows_container_resource_cpu_cores_limit{cluster="$cluster"}) / sum(node:windows_node_num_cpu:sum{cluster="$cluster"})
+              instant: true
+          title: 'Windows: CPU Limits Commitment'
+          description: "Fraction of total CPU cores on Windows nodes claimed by pod CPU limits."
+          type: stat
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                unit: percentunit
+          gridPos:
+            h: 3
+            w: 4
+            x: 12
+            "y": 3
+          id: 10
+          interval: 1m
+          options:
+            colorMode: none
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: 1 - sum(:windows_node_memory_MemFreeCached_bytes:sum{cluster="$cluster"}) / sum(:windows_node_memory_MemTotal_bytes:sum{cluster="$cluster"})
+              instant: true
+          title: 'Windows: Memory Utilisation'
+          description: "Current memory utilisation across all Windows nodes based on available vs total physical memory."
+          type: stat
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                unit: percentunit
+          gridPos:
+            h: 3
+            w: 4
+            x: 16
+            "y": 3
+          id: 11
+          interval: 1m
+          options:
+            colorMode: none
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: sum(kube_pod_windows_container_resource_memory_request{cluster="$cluster"}) / sum(:windows_node_memory_MemTotal_bytes:sum{cluster="$cluster"})
+              instant: true
+          title: 'Windows: Memory Requests Commitment'
+          description: "Fraction of total Windows node memory claimed by pod memory requests."
+          type: stat
+        - datasource:
+            type: datasource
+            uid: -- Mixed --
+          fieldConfig:
+            defaults:
+                unit: percentunit
+          gridPos:
+            h: 3
+            w: 4
+            x: 20
+            "y": 3
+          id: 12
+          interval: 1m
+          options:
+            colorMode: none
+          pluginVersion: v11.4.0
+          targets:
+            - datasource:
+                type: prometheus
+                uid: ${datasource}
+              expr: sum(kube_pod_windows_container_resource_memory_limit{cluster="$cluster"}) / sum(:windows_node_memory_MemTotal_bytes:sum{cluster="$cluster"})
+              instant: true
+          title: 'Windows: Memory Limits Commitment'
+          description: "Fraction of total Windows node memory claimed by pod memory limits."
+          type: stat
+        # ── Combined CPU ────────────────────────────────────────────────────
         - datasource:
             type: datasource
             uid: -- Mixed --
@@ -200,11 +360,11 @@ spec:
                     showPoints: never
                     spanNulls: true
           gridPos:
-            h: 6
+            h: 7
             w: 24
             x: 0
             "y": 6
-          id: 7
+          id: 13
           interval: 1m
           options:
             legend:
@@ -221,9 +381,15 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="$cluster"}
+                  or
+                  namespace_pod_container:windows_container_cpu_usage_seconds_total:sum_rate{cluster="$cluster"}
+                ) by (namespace)
               legendFormat: __auto
           title: CPU Usage
+          description: "CPU cores consumed over time. Covers both Linux (cadvisor) and Windows (windows-exporter) containers."
           type: timeseries
         - datasource:
             type: datasource
@@ -243,13 +409,13 @@ spec:
                     - id: links
                       value:
                         - title: Drill down to pods
-                          url: /d/k8s-resources-namespace/k8s-resources-namespace?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
+                          url: /d/k8s-resources-namespace-combined/k8s-resources-namespace-combined?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
           gridPos:
-            h: 6
+            h: 7
             w: 24
             x: 0
-            "y": 12
-          id: 8
+            "y": 13
+          id: 14
           pluginVersion: v11.4.0
           targets:
             - datasource:
@@ -267,34 +433,72 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="$cluster"}
+                  or
+                  namespace_pod_container:windows_container_cpu_usage_seconds_total:sum_rate{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(namespace_cpu:kube_pod_container_resource_requests:sum{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  namespace_cpu:kube_pod_container_resource_requests:sum{cluster="$cluster"}
+                  or
+                  kube_pod_windows_container_resource_cpu_cores_request{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="$cluster"}) by (namespace) / sum(namespace_cpu:kube_pod_container_resource_requests:sum{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="$cluster"}
+                  or
+                  namespace_pod_container:windows_container_cpu_usage_seconds_total:sum_rate{cluster="$cluster"}
+                ) by (namespace)
+                /
+                sum(
+                  namespace_cpu:kube_pod_container_resource_requests:sum{cluster="$cluster"}
+                  or
+                  kube_pod_windows_container_resource_cpu_cores_request{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(namespace_cpu:kube_pod_container_resource_limits:sum{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  namespace_cpu:kube_pod_container_resource_limits:sum{cluster="$cluster"}
+                  or
+                  kube_pod_windows_container_resource_cpu_cores_limit{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="$cluster"}) by (namespace) / sum(namespace_cpu:kube_pod_container_resource_limits:sum{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="$cluster"}
+                  or
+                  namespace_pod_container:windows_container_cpu_usage_seconds_total:sum_rate{cluster="$cluster"}
+                ) by (namespace)
+                /
+                sum(
+                  namespace_cpu:kube_pod_container_resource_limits:sum{cluster="$cluster"}
+                  or
+                  kube_pod_windows_container_resource_cpu_cores_limit{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
           title: CPU Quota
+          description: "Per-namespace/pod/container table showing CPU usage vs requests and limits, including utilisation percentages."
           transformations:
             - id: joinByField
               options:
@@ -337,6 +541,7 @@ spec:
                     'Value #G': CPU Limits %
                     namespace: Namespace
           type: table
+        # ── Combined Memory ─────────────────────────────────────────────────
         - datasource:
             type: datasource
             uid: -- Mixed --
@@ -348,11 +553,11 @@ spec:
                     spanNulls: true
                 unit: bytes
           gridPos:
-            h: 6
+            h: 7
             w: 24
             x: 0
-            "y": 18
-          id: 9
+            "y": 20
+          id: 15
           interval: 1m
           options:
             legend:
@@ -369,14 +574,22 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(container_memory_rss{job="integrations/kubernetes/cadvisor", cluster="$cluster", container!=""}) by (namespace)
+              expr: |
+                sum(
+                  container_memory_rss{job="integrations/kubernetes/cadvisor", cluster="$cluster", container!=""}
+                  or
+                  windows_container_private_working_set_usage{cluster="$cluster"}
+                ) by (namespace)
               legendFormat: __auto
-          title: Memory
+          title: Memory Usage (RSS / Private Working Set)
+          description: "Memory in use over time. Uses RSS for Linux containers and Private Working Set for Windows containers."
           type: timeseries
         - datasource:
             type: datasource
             uid: -- Mixed --
           fieldConfig:
+            defaults:
+                unit: bytes
             overrides:
                 - matcher:
                     id: byRegexp
@@ -409,13 +622,13 @@ spec:
                     - id: links
                       value:
                         - title: Drill down to pods
-                          url: /d/k8s-resources-namespace/k8s-resources-namespace?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
+                          url: /d/k8s-resources-namespace-combined/k8s-resources-namespace-combined?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
           gridPos:
-            h: 6
+            h: 7
             w: 24
             x: 0
-            "y": 24
-          id: 10
+            "y": 27
+          id: 16
           pluginVersion: v11.4.0
           targets:
             - datasource:
@@ -433,34 +646,72 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(container_memory_rss{job="integrations/kubernetes/cadvisor", cluster="$cluster", container!=""}) by (namespace)
+              expr: |
+                sum(
+                  container_memory_rss{job="integrations/kubernetes/cadvisor", cluster="$cluster", container!=""}
+                  or
+                  windows_container_private_working_set_usage{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(namespace_memory:kube_pod_container_resource_requests:sum{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  namespace_memory:kube_pod_container_resource_requests:sum{cluster="$cluster"}
+                  or
+                  kube_pod_windows_container_resource_memory_request{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(container_memory_rss{job="integrations/kubernetes/cadvisor", cluster="$cluster", container!=""}) by (namespace) / sum(namespace_memory:kube_pod_container_resource_requests:sum{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  container_memory_rss{job="integrations/kubernetes/cadvisor", cluster="$cluster", container!=""}
+                  or
+                  windows_container_private_working_set_usage{cluster="$cluster"}
+                ) by (namespace)
+                /
+                sum(
+                  namespace_memory:kube_pod_container_resource_requests:sum{cluster="$cluster"}
+                  or
+                  kube_pod_windows_container_resource_memory_request{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  namespace_memory:kube_pod_container_resource_limits:sum{cluster="$cluster"}
+                  or
+                  kube_pod_windows_container_resource_memory_limit{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(container_memory_rss{job="integrations/kubernetes/cadvisor", cluster="$cluster", container!=""}) by (namespace) / sum(namespace_memory:kube_pod_container_resource_limits:sum{cluster="$cluster"}) by (namespace)
+              expr: |
+                sum(
+                  container_memory_rss{job="integrations/kubernetes/cadvisor", cluster="$cluster", container!=""}
+                  or
+                  windows_container_private_working_set_usage{cluster="$cluster"}
+                ) by (namespace)
+                /
+                sum(
+                  namespace_memory:kube_pod_container_resource_limits:sum{cluster="$cluster"}
+                  or
+                  kube_pod_windows_container_resource_memory_limit{cluster="$cluster"}
+                ) by (namespace)
               format: table
               instant: true
           title: Memory Requests by Namespace
+          description: "Table of memory usage vs requests and limits per namespace, including utilisation percentages."
           transformations:
             - id: joinByField
               options:
@@ -503,6 +754,7 @@ spec:
                     'Value #G': Memory Limits %
                     namespace: Namespace
           type: table
+        # ── Network (Linux cadvisor — packets/bandwidth) ────────────────────
         - datasource:
             type: datasource
             uid: -- Mixed --
@@ -527,25 +779,35 @@ spec:
                     - id: links
                       value:
                         - title: Drill down to pods
-                          url: /d/k8s-resources-namespace/k8s-resources-namespace?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
+                          url: /d/k8s-resources-namespace-combined/k8s-resources-namespace-combined?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
           gridPos:
             h: 6
             w: 24
             x: 0
-            "y": 30
-          id: 11
+            "y": 34
+          id: 17
           pluginVersion: v11.4.0
           targets:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(rate(container_network_receive_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
+              expr: |
+                sum(
+                  rate(container_network_receive_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])
+                  or
+                  rate(windows_container_network_received_bytes_total{cluster="$cluster", namespace=~".+"}[$__rate_interval])
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(rate(container_network_transmit_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
+              expr: |
+                sum(
+                  rate(container_network_transmit_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])
+                  or
+                  rate(windows_container_network_transmitted_bytes_total{cluster="$cluster", namespace=~".+"}[$__rate_interval])
+                ) by (namespace)
               format: table
               instant: true
             - datasource:
@@ -573,6 +835,7 @@ spec:
               format: table
               instant: true
           title: Current Network Usage
+          description: "Snapshot table of current network bandwidth and packet rates per namespace or pod."
           transformations:
             - id: joinByField
               options:
@@ -625,223 +888,7 @@ spec:
             h: 6
             w: 24
             x: 0
-            "y": 36
-          id: 12
-          interval: 1m
-          options:
-            legend:
-                asTable: true
-                calcs:
-                    - lastNotNull
-                displayMode: table
-                placement: right
-                showLegend: true
-            tooltip:
-                mode: single
-          pluginVersion: v11.4.0
-          targets:
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum(rate(container_network_receive_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
-              legendFormat: __auto
-          title: Receive Bandwidth
-          type: timeseries
-        - datasource:
-            type: datasource
-            uid: -- Mixed --
-          fieldConfig:
-            defaults:
-                custom:
-                    fillOpacity: 10
-                    showPoints: never
-                    spanNulls: true
-                unit: Bps
-          gridPos:
-            h: 6
-            w: 24
-            x: 0
-            "y": 42
-          id: 13
-          interval: 1m
-          options:
-            legend:
-                asTable: true
-                calcs:
-                    - lastNotNull
-                displayMode: table
-                placement: right
-                showLegend: true
-            tooltip:
-                mode: single
-          pluginVersion: v11.4.0
-          targets:
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum(rate(container_network_transmit_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
-              legendFormat: __auto
-          title: Transmit Bandwidth
-          type: timeseries
-        - datasource:
-            type: datasource
-            uid: -- Mixed --
-          fieldConfig:
-            defaults:
-                custom:
-                    fillOpacity: 10
-                    showPoints: never
-                    spanNulls: true
-                unit: Bps
-          gridPos:
-            h: 6
-            w: 24
-            x: 0
-            "y": 48
-          id: 14
-          interval: 1m
-          options:
-            legend:
-                asTable: true
-                calcs:
-                    - lastNotNull
-                displayMode: table
-                placement: right
-                showLegend: true
-            tooltip:
-                mode: single
-          pluginVersion: v11.4.0
-          targets:
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: avg(irate(container_network_receive_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
-              legendFormat: __auto
-          title: 'Average Container Bandwidth by Namespace: Received'
-          type: timeseries
-        - datasource:
-            type: datasource
-            uid: -- Mixed --
-          fieldConfig:
-            defaults:
-                custom:
-                    fillOpacity: 10
-                    showPoints: never
-                    spanNulls: true
-                unit: Bps
-          gridPos:
-            h: 6
-            w: 24
-            x: 0
-            "y": 54
-          id: 15
-          interval: 1m
-          options:
-            legend:
-                asTable: true
-                calcs:
-                    - lastNotNull
-                displayMode: table
-                placement: right
-                showLegend: true
-            tooltip:
-                mode: single
-          pluginVersion: v11.4.0
-          targets:
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: avg(irate(container_network_transmit_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
-              legendFormat: __auto
-          title: 'Average Container Bandwidth by Namespace: Transmitted'
-          type: timeseries
-        - datasource:
-            type: datasource
-            uid: -- Mixed --
-          fieldConfig:
-            defaults:
-                custom:
-                    fillOpacity: 10
-                    showPoints: never
-                    spanNulls: true
-                unit: pps
-          gridPos:
-            h: 6
-            w: 24
-            x: 0
-            "y": 60
-          id: 16
-          interval: 1m
-          options:
-            legend:
-                asTable: true
-                calcs:
-                    - lastNotNull
-                displayMode: table
-                placement: right
-                showLegend: true
-            tooltip:
-                mode: single
-          pluginVersion: v11.4.0
-          targets:
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum(irate(container_network_receive_packets_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
-              legendFormat: __auto
-          title: Rate of Received Packets
-          type: timeseries
-        - datasource:
-            type: datasource
-            uid: -- Mixed --
-          fieldConfig:
-            defaults:
-                custom:
-                    fillOpacity: 10
-                    showPoints: never
-                    spanNulls: true
-                unit: pps
-          gridPos:
-            h: 6
-            w: 24
-            x: 0
-            "y": 66
-          id: 17
-          interval: 1m
-          options:
-            legend:
-                asTable: true
-                calcs:
-                    - lastNotNull
-                displayMode: table
-                placement: right
-                showLegend: true
-            tooltip:
-                mode: single
-          pluginVersion: v11.4.0
-          targets:
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum(irate(container_network_transmit_packets_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
-              legendFormat: __auto
-          title: Rate of Transmitted Packets
-          type: timeseries
-        - datasource:
-            type: datasource
-            uid: -- Mixed --
-          fieldConfig:
-            defaults:
-                custom:
-                    fillOpacity: 10
-                    showPoints: never
-                    spanNulls: true
-                unit: pps
-          gridPos:
-            h: 6
-            w: 24
-            x: 0
-            "y": 72
+            "y": 40
           id: 18
           interval: 1m
           options:
@@ -859,9 +906,15 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(irate(container_network_receive_packets_dropped_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
+              expr: |
+                sum(
+                  rate(container_network_receive_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])
+                  or
+                  rate(windows_container_network_received_bytes_total{cluster="$cluster", namespace=~".+"}[$__rate_interval])
+                ) by (namespace)
               legendFormat: __auto
-          title: Rate of Received Packets Dropped
+          title: Receive Bandwidth
+          description: "Rate of bytes received from the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -872,12 +925,12 @@ spec:
                     fillOpacity: 10
                     showPoints: never
                     spanNulls: true
-                unit: pps
+                unit: Bps
           gridPos:
             h: 6
             w: 24
             x: 0
-            "y": 78
+            "y": 46
           id: 19
           interval: 1m
           options:
@@ -895,10 +948,17 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: sum(irate(container_network_transmit_packets_dropped_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])) by (namespace)
+              expr: |
+                sum(
+                  rate(container_network_transmit_bytes_total{job="integrations/kubernetes/cadvisor", cluster="$cluster", namespace=~".+"}[$__rate_interval])
+                  or
+                  rate(windows_container_network_transmitted_bytes_total{cluster="$cluster", namespace=~".+"}[$__rate_interval])
+                ) by (namespace)
               legendFormat: __auto
-          title: Rate of Transmitted Packets Dropped
+          title: Transmit Bandwidth
+          description: "Rate of bytes transmitted over the network, broken down by namespace or pod."
           type: timeseries
+        # ── Storage IO (Linux only — no container-level equivalent on Windows)
         - datasource:
             type: datasource
             uid: -- Mixed --
@@ -913,7 +973,7 @@ spec:
             h: 6
             w: 24
             x: 0
-            "y": 84
+            "y": 52
           id: 20
           interval: 1m
           options:
@@ -933,7 +993,8 @@ spec:
                 uid: ${datasource}
               expr: ceil(sum by(namespace) (rate(container_fs_reads_total{job="integrations/kubernetes/cadvisor", container!="", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", cluster="$cluster", namespace!=""}[$__rate_interval]) + rate(container_fs_writes_total{job="integrations/kubernetes/cadvisor", container!="", cluster="$cluster", namespace!=""}[$__rate_interval])))
               legendFormat: __auto
-          title: IOPS(Reads+Writes)
+          title: 'IOPS (Reads+Writes) — Linux nodes'
+          description: "Combined read and write I/O operations per second for Linux containers. Not available for Windows containers."
           type: timeseries
         - datasource:
             type: datasource
@@ -949,7 +1010,7 @@ spec:
             h: 6
             w: 24
             x: 0
-            "y": 90
+            "y": 58
           id: 21
           interval: 1m
           options:
@@ -969,122 +1030,14 @@ spec:
                 uid: ${datasource}
               expr: sum by(namespace) (rate(container_fs_reads_bytes_total{job="integrations/kubernetes/cadvisor", container!="", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", cluster="$cluster", namespace!=""}[$__rate_interval]) + rate(container_fs_writes_bytes_total{job="integrations/kubernetes/cadvisor", container!="", cluster="$cluster", namespace!=""}[$__rate_interval]))
               legendFormat: __auto
-          title: ThroughPut(Read+Write)
+          title: 'ThroughPut (Read+Write) — Linux nodes'
+          description: "Combined read and write disk throughput for Linux containers. Not available for Windows containers."
           type: timeseries
-        - datasource:
-            type: datasource
-            uid: -- Mixed --
-          fieldConfig:
-            overrides:
-                - matcher:
-                    id: byRegexp
-                    options: /IOPS/
-                  properties:
-                    - id: unit
-                      value: iops
-                - matcher:
-                    id: byRegexp
-                    options: /Throughput/
-                  properties:
-                    - id: unit
-                      value: Bps
-                - matcher:
-                    id: byName
-                    options: Namespace
-                  properties:
-                    - id: links
-                      value:
-                        - title: Drill down to pods
-                          url: /d/k8s-resources-namespace/k8s-resources-namespace?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
-          gridPos:
-            h: 6
-            w: 24
-            x: 0
-            "y": 96
-          id: 22
-          pluginVersion: v11.4.0
-          targets:
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum by(namespace) (rate(container_fs_reads_total{job="integrations/kubernetes/cadvisor", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", container!="", cluster="$cluster", namespace!=""}[$__rate_interval]))
-              format: table
-              instant: true
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum by(namespace) (rate(container_fs_writes_total{job="integrations/kubernetes/cadvisor", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", container!="", cluster="$cluster", namespace!=""}[$__rate_interval]))
-              format: table
-              instant: true
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum by(namespace) (rate(container_fs_reads_total{job="integrations/kubernetes/cadvisor", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", container!="", cluster="$cluster", namespace!=""}[$__rate_interval]) + rate(container_fs_writes_total{job="integrations/kubernetes/cadvisor", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", container!="", cluster="$cluster", namespace!=""}[$__rate_interval]))
-              format: table
-              instant: true
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum by(namespace) (rate(container_fs_reads_bytes_total{job="integrations/kubernetes/cadvisor", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", container!="", cluster="$cluster", namespace!=""}[$__rate_interval]))
-              format: table
-              instant: true
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum by(namespace) (rate(container_fs_writes_bytes_total{job="integrations/kubernetes/cadvisor", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", container!="", cluster="$cluster", namespace!=""}[$__rate_interval]))
-              format: table
-              instant: true
-            - datasource:
-                type: prometheus
-                uid: ${datasource}
-              expr: sum by(namespace) (rate(container_fs_reads_bytes_total{job="integrations/kubernetes/cadvisor", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", container!="", cluster="$cluster", namespace!=""}[$__rate_interval]) + rate(container_fs_writes_bytes_total{job="integrations/kubernetes/cadvisor", device=~"(/dev.+)|mmcblk.p.+|nvme.+|rbd.+|sd.+|vd.+|xvd.+|dm-.+|dasd.+", container!="", cluster="$cluster", namespace!=""}[$__rate_interval]))
-              format: table
-              instant: true
-          title: Current Storage IO
-          transformations:
-            - id: joinByField
-              options:
-                byField: namespace
-                mode: outer
-            - id: organize
-              options:
-                excludeByName:
-                    Time: true
-                    Time 1: true
-                    Time 2: true
-                    Time 3: true
-                    Time 4: true
-                    Time 5: true
-                    Time 6: true
-                indexByName:
-                    Time 1: 0
-                    Time 2: 1
-                    Time 3: 2
-                    Time 4: 3
-                    Time 5: 4
-                    Time 6: 5
-                    'Value #A': 7
-                    'Value #B': 8
-                    'Value #C': 9
-                    'Value #D': 10
-                    'Value #E': 11
-                    'Value #F': 12
-                    namespace: 6
-                renameByName:
-                    'Value #A': IOPS(Reads)
-                    'Value #B': IOPS(Writes)
-                    'Value #C': IOPS(Reads + Writes)
-                    'Value #D': Throughput(Read)
-                    'Value #E': Throughput(Write)
-                    'Value #F': Throughput(Read + Write)
-                    namespace: Namespace
-          type: table
     refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-integration
-        - resource
-        - compute
+        - kubernetes-windows-integration
     templating:
         list:
             - current:
@@ -1103,7 +1056,7 @@ spec:
               hide: 0
               label: cluster
               name: cluster
-              query: label_values(up{job="integrations/kubernetes/cadvisor"}, cluster)
+              query: label_values(kube_node_info{job="integrations/kubernetes/kube-state-metrics"}, cluster)
               refresh: 2
               sort: 1
               type: query
@@ -1127,6 +1080,6 @@ spec:
     time:
         from: now-1h
         to: now
-    timezone: browser
-    title: K8s / Compute Resources / Cluster
+    timezone: utc
+    title: K8s / Compute Resources / Cluster (Linux + Windows)
     uid: k8s-resources-cluster

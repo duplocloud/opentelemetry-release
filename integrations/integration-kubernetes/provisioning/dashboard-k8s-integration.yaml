@@ -173,6 +173,7 @@ spec:
               legendFormat: Node Exporter
               refId: D
           title: Configuration status
+          description: "Configuration status."
           type: stat
         - gridPos:
             h: 3
@@ -236,6 +237,7 @@ spec:
               legendFormat: '{{ instance }}'
               refId: A
           title: Running pods
+          description: "Running pods."
           type: stat
         - datasource:
             uid: ${datasource}
@@ -282,6 +284,7 @@ spec:
               legendFormat: '{{ instance }}'
               refId: A
           title: Running containers
+          description: "Running containers."
           type: stat
         - gridPos:
             h: 13
@@ -304,6 +307,7 @@ spec:
                 - resource
           pluginVersion: 11.2.0
           title: Resource consumption visibility
+          description: "Resource consumption visibility."
           type: dashlist
         - datasource:
             uid: ${datasource}
@@ -373,6 +377,7 @@ spec:
               legendFormat: '{{namespace}}'
               refId: A
           title: Cluster CPU usage (by Namespace)
+          description: "Cluster CPU usage (by Namespace)."
           type: timeseries
         - gridPos:
             h: 4
@@ -421,6 +426,7 @@ spec:
               expr: '{job!="", cluster="$cluster"} | logfmt | line_format "{{.kind}} {{.name}}: {{.msg}}"'
               refId: A
           title: Events
+          description: "Events."
           type: logs
         - gridPos:
             h: 6
@@ -443,6 +449,7 @@ spec:
                 - cluster
           pluginVersion: 11.2.0
           title: Cluster operations visibility
+          description: "Cluster operations visibility."
           type: dashlist
     refresh: 1m
     schemaVersion: 39

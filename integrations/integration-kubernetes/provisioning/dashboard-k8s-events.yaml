@@ -50,6 +50,7 @@ spec:
           id: 34
           panels: []
           title: Kubernetes Events - Details
+          description: "Kubernetes Events - Details."
           type: row
         - datasource:
             default: false
@@ -176,6 +177,7 @@ spec:
               queryType: range
               refId: A
           title: Events Details
+          description: "Detailed log of all Kubernetes events in the selected namespace and cluster, including reason, message, and source."
           transformations:
             - id: extractFields
               options:
@@ -269,6 +271,7 @@ spec:
               queryType: range
               refId: A
           title: Cluster-Scoped Events (Node / PV)
+          description: "Kubernetes events scoped to cluster-level objects such as Nodes and PersistentVolumes."
           transformations:
             - id: extractFields
               options:
@@ -342,6 +345,7 @@ spec:
           id: 32
           panels: []
           title: Kubernetes Events - Stats
+          description: "Kubernetes Events - Stats."
           type: row
         - datasource:
             default: false
@@ -417,6 +421,7 @@ spec:
               queryType: range
               refId: A
           title: Overview
+          description: "Timeline of Kubernetes event counts over time. Spikes indicate periods of cluster activity or instability."
           type: timeseries
         - datasource:
             type: loki
@@ -493,6 +498,7 @@ spec:
               range: true
               refId: A
           title: Event Reason Counts
+          description: "Distribution of events by reason code. Use this to quickly identify the most common failure or warning types."
           type: piechart
         - collapsed: false
           gridPos:
@@ -503,6 +509,7 @@ spec:
           id: 40
           panels: []
           title: OOM Killed Pods
+          description: "OOM Killed Pods."
           type: row
         - datasource:
             type: datasource
@@ -549,6 +556,7 @@ spec:
               refId: A
           description: Data sourced from kube-state-metrics (Prometheus), not Kubernetes Events.
           title: OOM Killed Pods Count
+          description: "Total number of pods that have been OOM killed in the selected time range."
           transformations:
             - id: labelsToFields
               options:
@@ -647,6 +655,7 @@ spec:
               refId: A
           description: Data sourced from kube-state-metrics (Prometheus), not Kubernetes Events.
           title: OOM Killed Pod Details
+          description: "Details of pods that were OOM killed, including namespace, pod name, container, and time."
           transformations:
             - id: labelsToFields
               options:
@@ -755,6 +764,7 @@ spec:
               refId: A
           description: Data sourced from kube-state-metrics (Prometheus), not Kubernetes Events.
           title: OOM Driven Restart Rate
+          description: "Rate of container restarts caused by OOM kills. Sustained restarts indicate containers need higher memory limits."
           type: timeseries
         - collapsed: true
           gridPos:
@@ -798,8 +808,10 @@ spec:
                   range: true
                   refId: A
               title: ""
+              description: "."
               type: logs
           title: Kubernetes Events - Raw Logs
+          description: "Kubernetes Events - Raw Logs."
           type: row
         - collapsed: true
           gridPos:
@@ -912,6 +924,7 @@ spec:
                   range: true
                   refId: A
               title: Events by Reason
+              description: "Distribution of events by reason. Identifies the most frequent event types."
               type: piechart
             - datasource:
                 type: loki
@@ -960,6 +973,7 @@ spec:
                   range: true
                   refId: A
               title: Events by Namespace
+              description: "Distribution of events by namespace. Highlights namespaces generating the most activity."
               type: piechart
             - datasource:
                 type: loki
@@ -1007,6 +1021,7 @@ spec:
                   range: true
                   refId: A
               title: Events by Source
+              description: "Distribution of events by source component. Identifies which Kubernetes components are generating events."
               type: piechart
             - datasource:
                 type: loki
@@ -1056,8 +1071,10 @@ spec:
                   range: true
                   refId: A
               title: Events by Kind
+              description: "Distribution of events by resource kind. Shows which resource types are most frequently causing events."
               type: piechart
           title: Kubernetes Events - Distribution
+          description: "Kubernetes Events - Distribution."
           type: row
     preload: false
     refresh: 2h

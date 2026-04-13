@@ -1,10 +1,20 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-kubernetes-windows
+    folder: integration-kubernetes
     name: k8s-windows-cluster-rsrc-use
 spec:
     editable: false
+    description: "USE method (Utilisation, Saturation, Errors) view of Windows node resources across the cluster. Identifies saturated nodes before they impact workloads."
+    links:
+        - asDropdown: true
+          includeVars: true
+          keepTime: true
+          tags:
+            - kubernetes-integration
+          targetBlank: false
+          title: Kubernetes
+          type: dashboards
     panels:
         - datasource:
             type: datasource
@@ -41,6 +51,7 @@ spec:
               expr: node:windows_node_cpu_utilisation:avg5m{cluster="$cluster"} * node:windows_node_num_cpu:sum{cluster="$cluster"} / scalar(sum(node:windows_node_num_cpu:sum{cluster="$cluster"}))
               legendFormat: '{{instance}}'
           title: CPU Utilisation
+          description: "Current CPU utilisation percentage. Derived from node-level metrics."
           type: timeseries
         - datasource:
             type: datasource
@@ -77,6 +88,7 @@ spec:
               expr: node:windows_node_memory_utilisation:ratio{cluster="$cluster"}
               legendFormat: '{{instance}}'
           title: Memory Utilisation
+          description: "Current memory utilisation percentage across the cluster."
           type: timeseries
         - datasource:
             type: datasource
@@ -113,6 +125,7 @@ spec:
               expr: node:windows_node_memory_swap_io_pages:irate{cluster="$cluster"}
               legendFormat: '{{instance}}'
           title: Memory Saturation (Swap I/O Pages)
+          description: "Rate of swap page operations. Elevated values indicate memory pressure causing paging activity."
           type: timeseries
         - datasource:
             type: datasource
@@ -149,6 +162,7 @@ spec:
               expr: node:windows_node_disk_utilisation:avg_irate{cluster="$cluster"} / scalar(node:windows_node:sum{cluster="$cluster"})
               legendFormat: '{{instance}}'
           title: Disk IO Utilisation
+          description: "Percentage of time the disk is busy with read or write operations. Values near 100% indicate saturation."
           type: timeseries
         - datasource:
             type: datasource
@@ -185,6 +199,7 @@ spec:
               expr: node:windows_node_net_utilisation:sum_irate{cluster="$cluster"}
               legendFormat: '{{instance}}'
           title: Net Utilisation (Transmitted)
+          description: "Total outbound network throughput across all Windows nodes or the selected node."
           type: timeseries
         - datasource:
             type: datasource
@@ -221,6 +236,7 @@ spec:
               expr: node:windows_node_net_saturation:sum_irate{cluster="$cluster"}
               legendFormat: '{{instance}}'
           title: Net Utilisation (Dropped)
+          description: "Rate of inbound and outbound packets dropped across Windows nodes. Non-zero values indicate network saturation."
           type: timeseries
         - datasource:
             type: datasource
@@ -257,11 +273,13 @@ spec:
               expr: sum by (instance)(node:windows_node_filesystem_usage:{cluster="$cluster"})
               legendFormat: '{{instance}}'
           title: Disk Capacity
+          description: "Disk space utilisation percentage per volume across all Windows nodes."
           type: timeseries
     refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-windows-integration
+        - kubernetes-integration
     templating:
         list:
             - current:

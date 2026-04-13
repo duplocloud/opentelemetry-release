@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "Cross-cluster compute resource overview. Compares CPU and memory utilisation, requests, and limits across multiple Kubernetes clusters."
     links:
         - asDropdown: true
           includeVars: true
@@ -69,6 +70,7 @@ spec:
               expr: sum(cluster:node_cpu:ratio_rate5m) / count(cluster:node_cpu:ratio_rate5m)
               instant: true
           title: CPU Utilisation
+          description: "Current CPU utilisation percentage. Derived from node-level metrics."
           type: stat
         - datasource:
             type: datasource
@@ -93,6 +95,7 @@ spec:
               expr: sum(kube_pod_container_resource_requests{job="integrations/kubernetes/kube-state-metrics", resource="cpu"}) / sum(kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics", resource="cpu"})
               instant: true
           title: CPU Requests Commitment
+          description: "Fraction of total allocatable CPU claimed by pod CPU requests across the cluster."
           type: stat
         - datasource:
             type: datasource
@@ -117,6 +120,7 @@ spec:
               expr: sum(kube_pod_container_resource_limits{job="integrations/kubernetes/kube-state-metrics", resource="cpu"}) / sum(kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics", resource="cpu"})
               instant: true
           title: CPU Limits Commitment
+          description: "Fraction of total allocatable CPU claimed by pod CPU limits across the cluster."
           type: stat
         - datasource:
             type: datasource
@@ -141,6 +145,7 @@ spec:
               expr: 1 - sum(:node_memory_MemAvailable_bytes:sum) / sum(node_memory_MemTotal_bytes{job="integrations/node_exporter"})
               instant: true
           title: Memory Utilisation
+          description: "Current memory utilisation percentage across the cluster."
           type: stat
         - datasource:
             type: datasource
@@ -165,6 +170,7 @@ spec:
               expr: sum(kube_pod_container_resource_requests{job="integrations/kubernetes/kube-state-metrics", resource="memory"}) / sum(kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics", resource="memory"})
               instant: true
           title: Memory Requests Commitment
+          description: "Fraction of total allocatable memory claimed by pod memory requests."
           type: stat
         - datasource:
             type: datasource
@@ -189,6 +195,7 @@ spec:
               expr: sum(kube_pod_container_resource_limits{job="integrations/kubernetes/kube-state-metrics", resource="memory"}) / sum(kube_node_status_allocatable{job="integrations/kubernetes/kube-state-metrics", resource="memory"})
               instant: true
           title: Memory Limits Commitment
+          description: "Fraction of total allocatable memory claimed by pod memory limits."
           type: stat
         - datasource:
             type: datasource
@@ -220,6 +227,7 @@ spec:
               expr: sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate) by (cluster)
               legendFormat: __auto
           title: CPU Usage
+          description: "CPU cores consumed over time. Covers both Linux (cadvisor) and Windows (windows-exporter) containers."
           type: timeseries
         - datasource:
             type: datasource
@@ -279,6 +287,7 @@ spec:
               format: table
               instant: true
           title: CPU Quota
+          description: "Per-namespace/pod/container table showing CPU usage vs requests and limits, including utilisation percentages."
           transformations:
             - id: joinByField
               options:
@@ -344,6 +353,7 @@ spec:
               expr: sum(container_memory_rss{job="integrations/kubernetes/cadvisor", container!=""}) by (cluster)
               legendFormat: __auto
           title: Memory Usage (w/o cache)
+          description: "Memory usage excluding page cache, representing the true working memory footprint of running containers."
           type: timeseries
         - datasource:
             type: datasource
@@ -405,6 +415,7 @@ spec:
               format: table
               instant: true
           title: Memory Requests by Cluster
+          description: "Table of memory usage vs requests and limits per cluster."
           transformations:
             - id: joinByField
               options:

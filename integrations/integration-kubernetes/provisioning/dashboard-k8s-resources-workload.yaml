@@ -36,6 +36,7 @@ spec:
       textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
       titleFormat: '{{msg}}'
   editable: false
+  description: "Compute and network resources for a single workload (Deployment, StatefulSet, DaemonSet). Shows CPU, memory, and network per pod."
   links:
   - asDropdown: true
     includeVars: true
@@ -80,6 +81,7 @@ spec:
       expr: "sum(\n    node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster=\"$cluster\", namespace=\"$namespace\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", namespace=\"$namespace\", workload=\"$workload\", workload_type=~\"$type\"}\n) by (pod)\n"
       legendFormat: __auto
     title: CPU Usage
+    description: "CPU cores consumed over time. Covers both Linux (cadvisor) and Windows (windows-exporter) containers."
     type: timeseries
   - datasource:
       type: datasource
@@ -139,6 +141,7 @@ spec:
       format: table
       instant: true
     title: CPU Quota
+    description: "Per-namespace/pod/container table showing CPU usage vs requests and limits, including utilisation percentages."
     transformations:
     - id: joinByField
       options:
@@ -208,6 +211,7 @@ spec:
       expr: "sum(\n    container_memory_working_set_bytes{cluster=\"$cluster\", namespace=\"$namespace\", container!=\"\", image!=\"\"}\n  * on(namespace,pod)\n    group_left(workload, workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster=\"$cluster\", namespace=\"$namespace\", workload=\"$workload\", workload_type=~\"$type\"}\n) by (pod)\n"
       legendFormat: __auto
     title: Memory Usage
+    description: "Memory breakdown on the selected Windows node: used, cached, and available bytes."
     type: timeseries
   - datasource:
       type: datasource
@@ -269,6 +273,7 @@ spec:
       format: table
       instant: true
     title: Memory Quota
+    description: "Per-namespace/pod/container table showing memory usage vs requests and limits."
     transformations:
     - id: joinByField
       options:
@@ -409,6 +414,7 @@ spec:
       format: table
       instant: true
     title: Current Network Usage
+    description: "Snapshot table of current network bandwidth and packet rates per namespace or pod."
     transformations:
     - id: joinByField
       options:
@@ -488,6 +494,7 @@ spec:
         '
       legendFormat: __auto
     title: Receive Bandwidth
+    description: "Rate of bytes received from the network, broken down by namespace or pod."
     type: timeseries
   - datasource:
       type: datasource
@@ -530,6 +537,7 @@ spec:
         '
       legendFormat: __auto
     title: Transmit Bandwidth
+    description: "Rate of bytes transmitted over the network, broken down by namespace or pod."
     type: timeseries
   - datasource:
       type: datasource
@@ -572,6 +580,7 @@ spec:
         '
       legendFormat: __auto
     title: 'Average Container Bandwidth by Pod: Received'
+    description: "Average inbound network bandwidth per container aggregated by pod."
     type: timeseries
   - datasource:
       type: datasource
@@ -614,6 +623,7 @@ spec:
         '
       legendFormat: __auto
     title: 'Average Container Bandwidth by Pod: Transmitted'
+    description: "Average outbound network bandwidth per container aggregated by pod."
     type: timeseries
   - datasource:
       type: datasource
@@ -656,6 +666,7 @@ spec:
         '
       legendFormat: __auto
     title: Rate of Received Packets
+    description: "Packet receive rate per namespace, pod, or workload."
     type: timeseries
   - datasource:
       type: datasource
@@ -698,6 +709,7 @@ spec:
         '
       legendFormat: __auto
     title: Rate of Transmitted Packets
+    description: "Packet transmit rate per namespace, pod, or workload."
     type: timeseries
   - datasource:
       type: datasource
@@ -740,6 +752,7 @@ spec:
         '
       legendFormat: __auto
     title: Rate of Received Packets Dropped
+    description: "Rate of inbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
     type: timeseries
   - datasource:
       type: datasource
@@ -782,6 +795,7 @@ spec:
         '
       legendFormat: __auto
     title: Rate of Transmitted Packets Dropped
+    description: "Rate of outbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
     type: timeseries
   - datasource:
       type: datasource
@@ -960,6 +974,7 @@ spec:
       instant: true
       refId: E
     title: Pod Overview
+    description: "Table showing all pods in the workload with their current status, node, restarts, and age."
     transformations:
     - id: joinByField
       options:
@@ -1101,6 +1116,7 @@ spec:
       legendFormat: HPA Max
       refId: D
     title: Pod Count & HPA
+    description: "Pod count over time alongside Horizontal Pod Autoscaler min/max/desired replicas."
     type: timeseries
   refresh: 1m
   schemaVersion: 39
