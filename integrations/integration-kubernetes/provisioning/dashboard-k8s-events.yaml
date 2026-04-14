@@ -921,7 +921,6 @@ spec:
                   range: true
                   refId: A
               title: Events by Reason
-              description: "Distribution of events by reason. Identifies the most frequent event types."
               type: piechart
             - datasource:
                 type: loki
