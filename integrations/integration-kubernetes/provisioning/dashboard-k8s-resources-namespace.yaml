@@ -656,5 +656,5 @@ spec:
         from: now-1h
         to: now
     timezone: utc
-    title: K8s / Compute Resources / Namespace (Linux + Windows)
+    title: K8s / Compute Resources / Namespace (Pods)
     uid: k8s-resources-namespace

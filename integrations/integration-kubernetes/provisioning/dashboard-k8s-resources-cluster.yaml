@@ -1081,5 +1081,5 @@ spec:
         from: now-1h
         to: now
     timezone: utc
-    title: K8s / Compute Resources / Cluster (Linux + Windows)
+    title: K8s / Compute Resources / Cluster
     uid: k8s-resources-cluster

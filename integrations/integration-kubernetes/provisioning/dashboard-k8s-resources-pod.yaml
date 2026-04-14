@@ -779,5 +779,5 @@ spec:
         from: now-1h
         to: now
     timezone: utc
-    title: K8s / Compute Resources / Pod (Linux + Windows)
+    title: K8s / Compute Resources / Pod
     uid: k8s-resources-pod
