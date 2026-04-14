@@ -787,7 +787,6 @@ spec:
               range: true
               refId: B
           title: Persistent Storage Utilization Efficiency
-          description: "Ratio of used PVC storage to provisioned storage over time."
           type: timeseries
         - datasource:
             type: loki

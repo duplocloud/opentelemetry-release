@@ -556,7 +556,6 @@ spec:
               refId: A
           description: Data sourced from kube-state-metrics (Prometheus), not Kubernetes Events.
           title: OOM Killed Pods Count
-          description: "Total number of pods that have been OOM killed in the selected time range."
           transformations:
             - id: labelsToFields
               options:
@@ -655,7 +654,6 @@ spec:
               refId: A
           description: Data sourced from kube-state-metrics (Prometheus), not Kubernetes Events.
           title: OOM Killed Pod Details
-          description: "Details of pods that were OOM killed, including namespace, pod name, container, and time."
           transformations:
             - id: labelsToFields
               options:
@@ -764,7 +762,6 @@ spec:
               refId: A
           description: Data sourced from kube-state-metrics (Prometheus), not Kubernetes Events.
           title: OOM Driven Restart Rate
-          description: "Rate of container restarts caused by OOM kills. Sustained restarts indicate containers need higher memory limits."
           type: timeseries
         - collapsed: true
           gridPos:

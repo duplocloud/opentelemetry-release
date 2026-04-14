@@ -173,7 +173,6 @@ spec:
               legendFormat: Node Exporter
               refId: D
           title: Configuration status
-          description: "Configuration status."
           type: stat
         - gridPos:
             h: 3
