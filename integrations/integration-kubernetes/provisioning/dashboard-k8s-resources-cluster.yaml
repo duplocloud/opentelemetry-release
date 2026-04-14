@@ -409,7 +409,7 @@ spec:
                     - id: links
                       value:
                         - title: Drill down to pods
-                          url: /d/k8s-resources-namespace-combined/k8s-resources-namespace-combined?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
+                          url: /d/k8s-resources-namespace/k8s-resources-namespace?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
           gridPos:
             h: 7
             w: 24
@@ -622,7 +622,7 @@ spec:
                     - id: links
                       value:
                         - title: Drill down to pods
-                          url: /d/k8s-resources-namespace-combined/k8s-resources-namespace-combined?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
+                          url: /d/k8s-resources-namespace/k8s-resources-namespace?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
           gridPos:
             h: 7
             w: 24
@@ -779,7 +779,7 @@ spec:
                     - id: links
                       value:
                         - title: Drill down to pods
-                          url: /d/k8s-resources-namespace-combined/k8s-resources-namespace-combined?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
+                          url: /d/k8s-resources-namespace/k8s-resources-namespace?${datasource:queryparam}&var-cluster=$cluster&var-namespace=${__data.fields.Namespace}
           gridPos:
             h: 6
             w: 24
