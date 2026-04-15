@@ -95,11 +95,21 @@ groups:
             max by (cluster, instance, volume) (windows_logical_disk_free_bytes{job="integrations/windows_exporter"} / windows_logical_disk_size_bytes{job="integrations/windows_exporter"})
         - record: :windows_node_net_utilisation:sum_irate
           expr: |
+            sum by (cluster) (
+              irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[1m])
+              + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[1m])
+            )
+            or
             sum by (cluster) (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m]))
         - record: node:windows_node_net_utilisation:sum_irate
           expr: |
             sum by (cluster, instance) (
-              (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m]))
+              irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[1m])
+              + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[1m])
+            )
+            or
+            sum by (cluster, instance) (
+              irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m])
             )
         - record: :windows_node_net_saturation:sum_irate
           expr: |
@@ -142,9 +152,9 @@ groups:
         - record: 'node:windows_node_filesystem_avail:'
           expr: max by (cluster, instance, volume) (windows_logical_disk_free_bytes{job="integrations/windows_exporter"} / windows_logical_disk_size_bytes{job="integrations/windows_exporter"})
         - record: :windows_node_net_utilisation:sum_irate
-          expr: sum by (cluster) (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m]))
+          expr: sum by (cluster) (irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[1m]) + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[1m])) or sum by (cluster) (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m]))
         - record: node:windows_node_net_utilisation:sum_irate
-          expr: sum by (cluster, instance) ((irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m])))
+          expr: sum by (cluster, instance) (irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[1m]) + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[1m])) or sum by (cluster, instance) (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m]))
         - record: :windows_node_net_saturation:sum_irate
           expr: sum by (cluster) (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[1m])) + sum by (cluster) (irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[1m]))
         - record: node:windows_node_net_saturation:sum_irate
