@@ -162,3 +162,46 @@ groups:
             sum by (cluster, namespace, pod, container) (
               rate(windows_container_total_runtime{}[5m])
             )
+    - name: windows.container.linux-compat.rules
+      rules:
+        # Contributes Windows container CPU into the same recording rule Linux dashboards use.
+        # KSM-based resource request/limit recording rules already cover all OS types.
+        - record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate
+          expr: |
+            sum by (cluster, namespace, pod, container) (
+              rate(windows_container_total_runtime{namespace!=""}[5m])
+            )
+        # Memory WSS — fake cadvisor job label so dashboards match job="integrations/kubernetes/cadvisor"
+        # image label copied from container name to satisfy image!="" filters
+        - record: container_memory_working_set_bytes
+          expr: |
+            label_replace(
+              label_replace(
+                windows_container_private_working_set_usage{namespace!=""},
+                "job", "integrations/kubernetes/cadvisor", "job", ".*"
+              ),
+              "image", "$1", "container", "(.+)"
+            )
+        # Memory RSS — commit bytes is the closest Windows approximation
+        - record: container_memory_rss
+          expr: |
+            label_replace(
+              label_replace(
+                windows_container_memory_usage{namespace!=""},
+                "job", "integrations/kubernetes/cadvisor", "job", ".*"
+              ),
+              "image", "$1", "container", "(.+)"
+            )
+        # Network — fake cadvisor job label so network panels pick up Windows pods
+        - record: container_network_receive_bytes_total
+          expr: |
+            label_replace(
+              windows_container_network_received_bytes_total{namespace!=""},
+              "job", "integrations/kubernetes/cadvisor", "job", ".*"
+            )
+        - record: container_network_transmit_bytes_total
+          expr: |
+            label_replace(
+              windows_container_network_transmitted_bytes_total{namespace!=""},
+              "job", "integrations/kubernetes/cadvisor", "job", ".*"
+            )
