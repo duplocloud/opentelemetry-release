@@ -454,10 +454,7 @@ spec:
               label: instance
               multi: true
               name: instance
-              query: label_values(
-                  {__name__=~"windows_system_boot_time_timestamp|windows_system_system_up_time", cluster="$cluster"},
-                  instance
-                )
+              query: label_values(windows_cpu_time_total{job="integrations/windows_exporter", cluster="$cluster"}, instance)
               refresh: 2
               type: query
     time:
