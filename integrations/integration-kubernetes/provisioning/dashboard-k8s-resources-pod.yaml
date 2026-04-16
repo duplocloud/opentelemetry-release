@@ -992,10 +992,7 @@ spec:
       uid: ${datasource}
     fieldConfig:
       defaults:
-        links:
-        - targetBlank: false
-          title: Linux node overview
-          url: /d/nodes?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.name}
+        links: []
       overrides: []
     gridPos:
       h: 4
@@ -1006,7 +1003,7 @@ spec:
     links:
     - targetBlank: false
       title: Linux node overview
-      url: /d/nodes?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.name}
+      url: /d/nodes?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${node}
     options:
       colorMode: none
       graphMode: none
@@ -1252,6 +1249,16 @@ spec:
       label: pod
       name: pod
       query: label_values(kube_pod_info{job="integrations/kubernetes/kube-state-metrics", cluster="$cluster", namespace="$namespace"}, pod)
+      refresh: 2
+      sort: 1
+      type: query
+    - datasource:
+        type: prometheus
+        uid: ${datasource}
+      hide: 2
+      label: node
+      name: node
+      query: label_values(kube_pod_info{job="integrations/kubernetes/kube-state-metrics", cluster="$cluster", namespace="$namespace", pod="$pod"}, node)
       refresh: 2
       sort: 1
       type: query
