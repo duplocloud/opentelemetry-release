@@ -992,13 +992,7 @@ spec:
       uid: ${datasource}
     fieldConfig:
       defaults:
-        links:
-        - targetBlank: false
-          title: Linux node overview
-          url: /d/nodes?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${node}
-        - targetBlank: false
-          title: Windows node overview
-          url: /d/windows-overview?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${node}
+        links: []
       overrides: []
     gridPos:
       h: 4
@@ -1006,7 +1000,13 @@ spec:
       x: 3
       "y": 0
     id: 18
-    links: []
+    links:
+    - targetBlank: false
+      title: Linux node overview
+      url: /d/nodes?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${node}
+    - targetBlank: false
+      title: Windows node overview
+      url: /d/windows-overview?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${node}
     options:
       colorMode: none
       graphMode: none
