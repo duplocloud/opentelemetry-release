@@ -998,7 +998,7 @@ spec:
           url: /d/nodes?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.name}
         - targetBlank: false
           title: Windows node overview
-          url: /d/k8s-windows-node-rsrc-use?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.name}
+          url: /d/windows-overview?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.name}
       overrides: []
     gridPos:
       h: 4
