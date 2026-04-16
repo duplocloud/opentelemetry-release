@@ -162,6 +162,20 @@ groups:
             sum by (cluster, namespace, pod, container) (
               rate(windows_container_total_runtime{}[5m])
             )
+    - name: windows.cluster.compat.rules
+      rules:
+        # Combined Linux + Windows cluster memory utilisation.
+        # Linux uses node-exporter recording rules; Windows uses windows-exporter recording rules.
+        # vector(0) fallback ensures the rule evaluates correctly in single-OS clusters.
+        - record: cluster:node_memory_utilisation:ratio
+          expr: |
+            1 - (
+              (sum(:node_memory_MemAvailable_bytes:sum) or vector(0))
+              + (sum(node:windows_node_memory_bytes_available:sum) or vector(0))
+            ) / (
+              (sum(node_memory_MemTotal_bytes{job="integrations/node_exporter"}) or vector(0))
+              + (sum(node:windows_node_memory_bytes_total:sum) or vector(0))
+            )
     - name: windows.container.linux-compat.rules
       rules:
         # Contributes Windows container CPU into the same recording rule Linux dashboards use.
