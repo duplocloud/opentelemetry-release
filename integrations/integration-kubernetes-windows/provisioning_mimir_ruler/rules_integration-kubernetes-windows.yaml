@@ -74,14 +74,14 @@ groups:
             irate(windows_memory_swap_page_operations_total{job="integrations/windows_exporter"}[5m])
         - record: :windows_node_disk_utilisation:avg_irate
           expr: |
-            avg by (cluster) (irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[1m]) +
-                irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[1m])
+            avg by (cluster) (irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[2m]) +
+                irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[2m])
               )
         - record: node:windows_node_disk_utilisation:avg_irate
           expr: |
             avg by (cluster, instance) (
-              (irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[1m]) +
-               irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[1m]))
+              (irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[2m]) +
+               irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[2m]))
             )
         - record: 'node:windows_node_filesystem_usage:'
           expr: |
@@ -96,30 +96,30 @@ groups:
         - record: :windows_node_net_utilisation:sum_irate
           expr: |
             sum by (cluster) (
-              irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[1m])
-              + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[1m])
+              irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[2m])
+              + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[2m])
             )
             or
-            sum by (cluster) (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m]))
+            sum by (cluster) (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[2m]))
         - record: node:windows_node_net_utilisation:sum_irate
           expr: |
             sum by (cluster, instance) (
-              irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[1m])
-              + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[1m])
+              irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[2m])
+              + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[2m])
             )
             or
             sum by (cluster, instance) (
-              irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m])
+              irate(windows_net_bytes_total{job="integrations/windows_exporter"}[2m])
             )
         - record: :windows_node_net_saturation:sum_irate
           expr: |
-            sum by (cluster) (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[1m])) +
-            sum by (cluster) (irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[1m]))
+            sum by (cluster) (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[2m])) +
+            sum by (cluster) (irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[2m]))
         - record: node:windows_node_net_saturation:sum_irate
           expr: |
             sum by (cluster, instance) (
-              (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[1m]) +
-              irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[1m]))
+              (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[2m]) +
+              irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[2m]))
             )
     - name: windows.pod.rules
       rules:
