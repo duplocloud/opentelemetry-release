@@ -995,10 +995,10 @@ spec:
         links:
         - targetBlank: false
           title: Linux node overview
-          url: /d/nodes?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.name}
+          url: /d/nodes?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.labels.node}
         - targetBlank: false
           title: Windows node overview
-          url: /d/windows-overview?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.name}
+          url: /d/windows-overview?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.labels.node}
       overrides: []
     gridPos:
       h: 4
@@ -1006,13 +1006,7 @@ spec:
       x: 3
       "y": 0
     id: 18
-    links:
-    - targetBlank: false
-      title: Linux node overview
-      url: /d/nodes?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.name}
-    - targetBlank: false
-      title: Windows node overview
-      url: /d/k8s-windows-node-rsrc-use?var-datasource=${datasource}&var-cluster=${cluster}&var-instance=${__series.name}
+    links: []
     options:
       colorMode: none
       graphMode: none
