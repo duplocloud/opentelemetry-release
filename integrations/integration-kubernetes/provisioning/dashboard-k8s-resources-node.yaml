@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "Compute resources consumed on a single Kubernetes node. Shows CPU and memory usage per pod alongside node-level capacity and quota."
     links:
         - asDropdown: true
           includeVars: true
@@ -110,6 +111,7 @@ spec:
               expr: sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{cluster="$cluster", node=~"$node"}) by (pod)
               legendFormat: '{{pod}}'
           title: CPU Usage
+          description: "CPU cores consumed over time. Covers both Linux (cadvisor) and Windows (windows-exporter) containers."
           type: timeseries
         - datasource:
             type: datasource
@@ -169,6 +171,7 @@ spec:
               format: table
               instant: true
           title: CPU Quota
+          description: "Per-namespace/pod/container table showing CPU usage vs requests and limits, including utilisation percentages."
           transformations:
             - id: joinByField
               options:
@@ -256,6 +259,7 @@ spec:
               expr: sum(node_namespace_pod_container:container_memory_working_set_bytes{cluster="$cluster", node=~"$node", container!=""}) by (pod)
               legendFormat: '{{pod}}'
           title: Memory Usage (w/cache)
+          description: "Total memory usage including page cache. Useful for understanding full memory pressure on the node."
           type: timeseries
         - datasource:
             type: datasource
@@ -322,6 +326,7 @@ spec:
               expr: sum(node_namespace_pod_container:container_memory_rss{cluster="$cluster", node=~"$node", container!=""}) by (pod)
               legendFormat: '{{pod}}'
           title: Memory Usage (w/o cache)
+          description: "Memory usage excluding page cache, representing the true working memory footprint of running containers."
           type: timeseries
         - datasource:
             type: datasource
@@ -401,6 +406,7 @@ spec:
               format: table
               instant: true
           title: Memory Quota
+          description: "Per-namespace/pod/container table showing memory usage vs requests and limits."
           transformations:
             - id: joinByField
               options:

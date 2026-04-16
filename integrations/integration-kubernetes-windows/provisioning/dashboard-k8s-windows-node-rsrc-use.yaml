@@ -1,10 +1,20 @@
 apiVersion: grizzly.grafana.com/v1alpha1
 kind: Dashboard
 metadata:
-    folder: integration-kubernetes-windows
+    folder: integration-kubernetes
     name: k8s-windows-node-rsrc-use
 spec:
     editable: false
+    description: "USE method deep-dive into a single Windows node. Shows per-core CPU, memory breakdown, disk I/O, and network saturation metrics."
+    links:
+        - asDropdown: true
+          includeVars: true
+          keepTime: true
+          tags:
+            - kubernetes-integration
+          targetBlank: false
+          title: Kubernetes
+          type: dashboards
     panels:
         - datasource:
             type: datasource
@@ -41,6 +51,7 @@ spec:
               expr: node:windows_node_cpu_utilisation:avg5m{cluster="$cluster", instance="$instance"}
               legendFormat: Utilisation
           title: CPU Utilisation
+          description: "Current CPU utilisation percentage. Derived from node-level metrics."
           type: timeseries
         - datasource:
             type: datasource
@@ -77,6 +88,7 @@ spec:
               expr: sum by (core) (irate(windows_cpu_time_total{cluster="$cluster", job="integrations/windows_exporter", mode!="idle", instance="$instance"}[$__rate_interval]))
               legendFormat: '{{core}}'
           title: CPU Usage Per Core
+          description: "CPU utilisation broken down by individual logical processor core on the selected Windows node."
           type: timeseries
         - datasource:
             type: datasource
@@ -113,6 +125,7 @@ spec:
               expr: node:windows_node_memory_utilisation:{cluster="$cluster", instance="$instance"}
               legendFormat: Memory
           title: Memory Utilisation %
+          description: "Percentage of physical memory in use on the selected Windows node."
           type: timeseries
         - datasource:
             type: datasource
@@ -148,7 +161,10 @@ spec:
                 uid: ${datasource}
               expr: |
                 max(
-                  windows_os_visible_memory_bytes{cluster="$cluster", job="integrations/windows_exporter", instance="$instance"}
+                  (
+                    windows_memory_physical_total_bytes{cluster="$cluster", job="integrations/windows_exporter", instance="$instance"}
+                    or windows_os_visible_memory_bytes{cluster="$cluster", job="integrations/windows_exporter", instance="$instance"}
+                  )
                   - windows_memory_available_bytes{cluster="$cluster", job="integrations/windows_exporter", instance="$instance"}
                 )
               legendFormat: memory used
@@ -163,6 +179,7 @@ spec:
               expr: max(windows_memory_available_bytes{cluster="$cluster", job="integrations/windows_exporter", instance="$instance"})
               legendFormat: memory free
           title: Memory Usage
+          description: "Memory breakdown on the selected Windows node: used, cached, and available bytes."
           type: timeseries
         - datasource:
             type: datasource
@@ -199,6 +216,7 @@ spec:
               expr: node:windows_node_memory_swap_io_pages:irate{cluster="$cluster", instance="$instance"}
               legendFormat: Swap IO
           title: Memory Saturation (Swap I/O) Pages
+          description: "Rate of swap page operations on the selected node. Sustained paging indicates insufficient RAM."
           type: timeseries
         - datasource:
             type: datasource
@@ -235,6 +253,7 @@ spec:
               expr: node:windows_node_disk_utilisation:avg_irate{cluster="$cluster", instance="$instance"}
               legendFormat: Utilisation
           title: Disk IO Utilisation
+          description: "Percentage of time the disk is busy with read or write operations. Values near 100% indicate saturation."
           type: timeseries
         - datasource:
             type: datasource
@@ -288,6 +307,7 @@ spec:
               expr: max(rate(windows_logical_disk_read_seconds_total{cluster="$cluster", job="integrations/windows_exporter",  instance="$instance"}[$__rate_interval]) + rate(windows_logical_disk_write_seconds_total{cluster="$cluster", job="integrations/windows_exporter", instance="$instance"}[$__rate_interval]))
               legendFormat: io time
           title: Disk IO
+          description: "Disk read and write throughput in bytes per second plus total I/O time on the selected Windows node."
           type: timeseries
         - datasource:
             type: datasource
@@ -324,6 +344,7 @@ spec:
               expr: node:windows_node_filesystem_usage:{cluster="$cluster", instance="$instance"}
               legendFormat: '{{volume}}'
           title: Disk Utilisation
+          description: "Percentage of disk space used per volume on the selected Windows node."
           type: timeseries
         - datasource:
             type: datasource
@@ -360,6 +381,7 @@ spec:
               expr: node:windows_node_net_utilisation:sum_irate{cluster="$cluster", instance="$instance"}
               legendFormat: Utilisation
           title: Net Utilisation (Transmitted)
+          description: "Total outbound network throughput across all Windows nodes or the selected node."
           type: timeseries
         - datasource:
             type: datasource
@@ -396,11 +418,13 @@ spec:
               expr: node:windows_node_net_saturation:sum_irate{cluster="$cluster", instance="$instance"}
               legendFormat: Saturation
           title: Net Saturation (Dropped)
+          description: "Rate of dropped packets on the selected Windows node. Indicates network interface saturation."
           type: timeseries
     refresh: 1m
     schemaVersion: 39
     tags:
         - kubernetes-windows-integration
+        - kubernetes-integration
     templating:
         list:
             - current:
@@ -430,7 +454,7 @@ spec:
               label: instance
               multi: true
               name: instance
-              query: label_values(windows_system_system_up_time{cluster="$cluster"}, instance)
+              query: label_values(windows_cpu_time_total{job="integrations/windows_exporter", cluster="$cluster"}, instance)
               refresh: 2
               type: query
     time:

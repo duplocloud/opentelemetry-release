@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "Network bandwidth and packet rates broken down by pod within the selected namespace."
     links:
         - asDropdown: true
           includeVars: true
@@ -88,6 +89,7 @@ spec:
                 )
               legendFormat: __auto
           title: Current Rate of Bytes Received
+          description: "Current rate of inbound bytes across the selected scope."
           type: gauge
         - datasource:
             type: datasource
@@ -131,6 +133,7 @@ spec:
                 )
               legendFormat: __auto
           title: Current Rate of Bytes Transmitted
+          description: "Current rate of outbound bytes across the selected scope."
           type: gauge
         - datasource:
             type: datasource
@@ -250,6 +253,7 @@ spec:
               format: table
               instant: true
           title: Current Network Usage
+          description: "Snapshot table of current network bandwidth and packet rates per namespace or pod."
           transformations:
             - id: joinByField
               options:
@@ -327,6 +331,7 @@ spec:
                 )
               legendFormat: __auto
           title: Receive Bandwidth
+          description: "Rate of bytes received from the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -367,6 +372,7 @@ spec:
                 )
               legendFormat: __auto
           title: Transmit Bandwidth
+          description: "Rate of bytes transmitted over the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -407,6 +413,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of Received Packets
+          description: "Packet receive rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -447,6 +454,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of Transmitted Packets
+          description: "Packet transmit rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -487,6 +495,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of Received Packets Dropped
+          description: "Rate of inbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
         - datasource:
             type: datasource
@@ -527,6 +536,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of Transmitted Packets Dropped
+          description: "Rate of outbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
     refresh: 1m
     schemaVersion: 39

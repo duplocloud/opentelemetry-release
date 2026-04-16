@@ -2,7 +2,7 @@ apiVersion: grizzly.grafana.com/v1alpha1
 kind: PrometheusRuleGroup
 metadata:
     name: windows-node-alerts
-    namespace: integrations-windows-node
+    namespace: integration-windows-node
 spec:
     rules:
       - alert: WindowsCPUHighUsage
@@ -49,12 +49,10 @@ spec:
             Windows disk {{ $labels.name }} is not in healthy state, currently in '{{ $labels.status }}' status.
           summary: Windows physical disk is not healthy.
       - alert: WindowsMemoryHighUtilization
-        expr: >
-          100 - ((windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter"}
-
-          /
-
-          windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter"}) * 100) > 90
+        expr: |-
+          100 - ((windows_memory_physical_free_bytes{job=~"integrations/windows_exporter"} / windows_memory_physical_total_bytes{job=~"integrations/windows_exporter"}) * 100) > 90
+          or
+          100 - ((windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter"} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter"}) * 100) > 90
         for: 15m
         keep_firing_for: 5m
         labels:

@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "Network bandwidth and packet rates for all workloads within the selected namespace."
     links:
         - asDropdown: true
           includeVars: true
@@ -75,6 +76,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Current Rate of Bytes Received
+          description: "Current rate of inbound bytes across the selected scope."
           type: bargauge
         - datasource:
             type: datasource
@@ -105,6 +107,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Current Rate of Bytes Transmitted
+          description: "Current rate of outbound bytes across the selected scope."
           type: bargauge
         - datasource:
             type: datasource
@@ -135,6 +138,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Average Rate of Bytes Received
+          description: "Average rate of inbound bytes across the selected scope."
           type: bargauge
         - datasource:
             type: datasource
@@ -165,6 +169,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Average Rate of Bytes Transmitted
+          description: "Average rate of outbound bytes across the selected scope."
           type: bargauge
         - datasource:
             type: datasource
@@ -204,6 +209,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Receive Bandwidth
+          description: "Rate of bytes received from the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -243,6 +249,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Transmit Bandwidth
+          description: "Rate of bytes transmitted over the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -282,6 +289,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Rate of Received Packets
+          description: "Packet receive rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -321,6 +329,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Rate of Transmitted Packets
+          description: "Packet transmit rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -360,6 +369,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Rate of Received Packets Dropped
+          description: "Rate of inbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
         - datasource:
             type: datasource
@@ -399,6 +409,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster",namespace=~"$namespace", workload=~"$workload", workload_type=~"$type"}) by (pod))
               legendFormat: __auto
           title: Rate of Transmitted Packets Dropped
+          description: "Rate of outbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
     refresh: 1m
     schemaVersion: 39

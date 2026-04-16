@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "Compute and network resources for all workloads within a namespace, grouped by workload type."
     links:
         - asDropdown: true
           includeVars: true
@@ -122,6 +123,7 @@ spec:
               expr: scalar(max(kube_resourcequota{cluster="$cluster", namespace="$namespace", type="hard",resource=~"limits.cpu"}))
               legendFormat: quota - limits
           title: CPU Usage
+          description: "CPU cores consumed over time. Covers both Linux (cadvisor) and Windows (windows-exporter) containers."
           type: timeseries
         - datasource:
             type: datasource
@@ -228,6 +230,7 @@ spec:
               format: table
               instant: true
           title: CPU Quota
+          description: "Per-namespace/pod/container table showing CPU usage vs requests and limits, including utilisation percentages."
           transformations:
             - id: joinByField
               options:
@@ -355,6 +358,7 @@ spec:
               expr: scalar(max(kube_resourcequota{cluster="$cluster", namespace="$namespace", type="hard",resource=~"limits.memory"}))
               legendFormat: quota - limits
           title: Memory Usage
+          description: "Memory breakdown on the selected Windows node: used, cached, and available bytes."
           type: timeseries
         - datasource:
             type: datasource
@@ -463,6 +467,7 @@ spec:
               format: table
               instant: true
           title: Memory Quota
+          description: "Per-namespace/pod/container table showing memory usage vs requests and limits."
           transformations:
             - id: joinByField
               options:
@@ -601,6 +606,7 @@ spec:
               format: table
               instant: true
           title: Current Network Usage
+          description: "Snapshot table of current network bandwidth and packet rates per namespace or pod."
           transformations:
             - id: joinByField
               options:
@@ -677,6 +683,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster", namespace="$namespace", workload=~".+", workload_type=~"$type"}) by (workload))
               legendFormat: __auto
           title: Receive Bandwidth
+          description: "Rate of bytes received from the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -716,6 +723,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster", namespace="$namespace", workload=~".+", workload_type=~"$type"}) by (workload))
               legendFormat: __auto
           title: Transmit Bandwidth
+          description: "Rate of bytes transmitted over the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -755,6 +763,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster", namespace="$namespace", workload=~".+", workload_type=~"$type"}) by (workload))
               legendFormat: __auto
           title: 'Average Container Bandwidth by Workload: Received'
+          description: "Average inbound network bandwidth per container aggregated by workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -794,6 +803,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster", namespace="$namespace", workload=~".+", workload_type=~"$type"}) by (workload))
               legendFormat: __auto
           title: 'Average Container Bandwidth by Workload: Transmitted'
+          description: "Average outbound network bandwidth per container aggregated by workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -833,6 +843,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster", namespace="$namespace", workload=~".+", workload_type=~"$type"}) by (workload))
               legendFormat: __auto
           title: Rate of Received Packets
+          description: "Packet receive rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -872,6 +883,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster", namespace="$namespace", workload=~".+", workload_type=~"$type"}) by (workload))
               legendFormat: __auto
           title: Rate of Transmitted Packets
+          description: "Packet transmit rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -911,6 +923,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster", namespace="$namespace", workload=~".+", workload_type=~"$type"}) by (workload))
               legendFormat: __auto
           title: Rate of Received Packets Dropped
+          description: "Rate of inbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
         - datasource:
             type: datasource
@@ -950,6 +963,7 @@ spec:
                 group_left(workload,workload_type) namespace_workload_pod:kube_pod_owner:relabel{cluster="$cluster", namespace="$namespace", workload=~".+", workload_type=~"$type"}) by (workload))
               legendFormat: __auto
           title: Rate of Transmitted Packets Dropped
+          description: "Rate of outbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
     refresh: 1m
     schemaVersion: 39

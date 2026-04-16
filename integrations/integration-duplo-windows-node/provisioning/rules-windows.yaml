@@ -2,7 +2,7 @@ apiVersion: grizzly.grafana.com/v1alpha1
 kind: PrometheusRuleGroup
 metadata:
     name: windows-node-rules
-    namespace: integrations-windows-node
+    namespace: integration-windows-node
 spec:
     rules:
       - record: asserts:resource:usage
@@ -12,7 +12,10 @@ spec:
           asserts_resource_type: cpu:usage
           asserts_source: windows_exporter
       - record: asserts:resource:usage
-        expr: 1 - windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter", asserts_env!=""} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter", asserts_env!=""}
+        expr: |-
+          1 - windows_memory_physical_free_bytes{job=~"integrations/windows_exporter", asserts_env!=""} / windows_memory_physical_total_bytes{job=~"integrations/windows_exporter", asserts_env!=""}
+          or
+          1 - windows_os_physical_memory_free_bytes{job=~"integrations/windows_exporter", asserts_env!=""} / windows_cs_physical_memory_bytes{job=~"integrations/windows_exporter", asserts_env!=""}
         labels:
           asserts_entity_type: Node
           asserts_resource_type: memory:usage

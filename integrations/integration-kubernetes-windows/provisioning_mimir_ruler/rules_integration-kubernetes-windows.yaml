@@ -5,7 +5,8 @@ groups:
         - record: node:windows_node:sum
           expr: |
             count by (cluster) (
-              windows_system_system_up_time{job="integrations/windows_exporter"}
+              windows_system_boot_time_timestamp{job="integrations/windows_exporter"}
+              or windows_system_system_up_time{job="integrations/windows_exporter"}
             )
         - record: node:windows_node_num_cpu:sum
           expr: |
@@ -20,12 +21,23 @@ groups:
             1 - avg by (cluster, instance) (
               rate(windows_cpu_time_total{job="integrations/windows_exporter",mode="idle"}[1m])
             )
+        - record: :windows_node_cpu_utilisation:avg5m
+          expr: |
+            1 - avg by (cluster) (rate(windows_cpu_time_total{job="integrations/windows_exporter",mode="idle"}[5m]))
+        - record: node:windows_node_cpu_utilisation:avg5m
+          expr: |
+            1 - avg by (cluster, instance) (
+              rate(windows_cpu_time_total{job="integrations/windows_exporter",mode="idle"}[5m])
+            )
         - record: ':windows_node_memory_utilisation:'
           expr: |
             1 -
             sum by (cluster) (windows_memory_available_bytes{job="integrations/windows_exporter"})
             /
-            sum by (cluster) (windows_os_visible_memory_bytes{job="integrations/windows_exporter"})
+            sum by (cluster) (
+              windows_memory_physical_total_bytes{job="integrations/windows_exporter"}
+              or windows_os_visible_memory_bytes{job="integrations/windows_exporter"}
+            )
         - record: :windows_node_memory_MemFreeCached_bytes:sum
           expr: |
             sum by (cluster) (windows_memory_available_bytes{job="integrations/windows_exporter"} + windows_memory_cache_bytes{job="integrations/windows_exporter"})
@@ -34,7 +46,10 @@ groups:
             (windows_memory_cache_bytes{job="integrations/windows_exporter"} + windows_memory_modified_page_list_bytes{job="integrations/windows_exporter"} + windows_memory_standby_cache_core_bytes{job="integrations/windows_exporter"} + windows_memory_standby_cache_normal_priority_bytes{job="integrations/windows_exporter"} + windows_memory_standby_cache_reserve_bytes{job="integrations/windows_exporter"})
         - record: :windows_node_memory_MemTotal_bytes:sum
           expr: |
-            sum by (cluster) (windows_os_visible_memory_bytes{job="integrations/windows_exporter"})
+            sum by (cluster) (
+              windows_memory_physical_total_bytes{job="integrations/windows_exporter"}
+              or windows_os_visible_memory_bytes{job="integrations/windows_exporter"}
+            )
         - record: node:windows_node_memory_bytes_available:sum
           expr: |
             sum by (cluster, instance) (
@@ -43,7 +58,8 @@ groups:
         - record: node:windows_node_memory_bytes_total:sum
           expr: |
             sum by (cluster, instance) (
-              windows_os_visible_memory_bytes{job="integrations/windows_exporter"}
+              windows_memory_physical_total_bytes{job="integrations/windows_exporter"}
+              or windows_os_visible_memory_bytes{job="integrations/windows_exporter"}
             )
         - record: node:windows_node_memory_utilisation:ratio
           expr: |
@@ -58,14 +74,14 @@ groups:
             irate(windows_memory_swap_page_operations_total{job="integrations/windows_exporter"}[5m])
         - record: :windows_node_disk_utilisation:avg_irate
           expr: |
-            avg by (cluster) (irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[1m]) +
-                irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[1m])
+            avg by (cluster) (irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[2m]) +
+                irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[2m])
               )
         - record: node:windows_node_disk_utilisation:avg_irate
           expr: |
             avg by (cluster, instance) (
-              (irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[1m]) +
-               irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[1m]))
+              (irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[2m]) +
+               irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[2m]))
             )
         - record: 'node:windows_node_filesystem_usage:'
           expr: |
@@ -79,56 +95,32 @@ groups:
             max by (cluster, instance, volume) (windows_logical_disk_free_bytes{job="integrations/windows_exporter"} / windows_logical_disk_size_bytes{job="integrations/windows_exporter"})
         - record: :windows_node_net_utilisation:sum_irate
           expr: |
-            sum by (cluster) (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m]))
+            sum by (cluster) (
+              irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[2m])
+              + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[2m])
+            )
+            or
+            sum by (cluster) (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[2m]))
         - record: node:windows_node_net_utilisation:sum_irate
           expr: |
             sum by (cluster, instance) (
-              (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m]))
+              irate(windows_net_bytes_received_total{job="integrations/windows_exporter"}[2m])
+              + irate(windows_net_bytes_sent_total{job="integrations/windows_exporter"}[2m])
+            )
+            or
+            sum by (cluster, instance) (
+              irate(windows_net_bytes_total{job="integrations/windows_exporter"}[2m])
             )
         - record: :windows_node_net_saturation:sum_irate
           expr: |
-            sum by (cluster) (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[1m])) +
-            sum by (cluster) (irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[1m]))
+            sum by (cluster) (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[2m])) +
+            sum by (cluster) (irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[2m]))
         - record: node:windows_node_net_saturation:sum_irate
           expr: |
             sum by (cluster, instance) (
-              (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[1m]) +
-              irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[1m]))
+              (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[2m]) +
+              irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[2m]))
             )
-    - name: windows.node.rules-half
-      rules:
-        - record: :windows_node_memory_MemFreeCached_bytes:sum
-          expr: sum by (cluster) (windows_memory_available_bytes{job="integrations/windows_exporter"} + windows_memory_cache_bytes{job="integrations/windows_exporter"})
-        - record: node:windows_node_memory_totalCached_bytes:sum
-          expr: (windows_memory_cache_bytes{job="integrations/windows_exporter"} + windows_memory_modified_page_list_bytes{job="integrations/windows_exporter"} + windows_memory_standby_cache_core_bytes{job="integrations/windows_exporter"} + windows_memory_standby_cache_normal_priority_bytes{job="integrations/windows_exporter"} + windows_memory_standby_cache_reserve_bytes{job="integrations/windows_exporter"})
-        - record: :windows_node_memory_MemTotal_bytes:sum
-          expr: sum by (cluster) (windows_os_visible_memory_bytes{job="integrations/windows_exporter"})
-        - record: node:windows_node_memory_bytes_available:sum
-          expr: sum by (cluster, instance) ((windows_memory_available_bytes{job="integrations/windows_exporter"}))
-        - record: node:windows_node_memory_bytes_total:sum
-          expr: sum by (cluster, instance) (windows_os_visible_memory_bytes{job="integrations/windows_exporter"})
-        - record: node:windows_node_memory_utilisation:ratio
-          expr: (node:windows_node_memory_bytes_total:sum - node:windows_node_memory_bytes_available:sum) / scalar(sum by (cluster) (node:windows_node_memory_bytes_total:sum))
-        - record: 'node:windows_node_memory_utilisation:'
-          expr: 1 - (node:windows_node_memory_bytes_available:sum / node:windows_node_memory_bytes_total:sum)
-        - record: node:windows_node_memory_swap_io_pages:irate
-          expr: irate(windows_memory_swap_page_operations_total{job="integrations/windows_exporter"}[5m])
-        - record: :windows_node_disk_utilisation:avg_irate
-          expr: avg by (cluster) (irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[1m]) + irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[1m]))
-        - record: node:windows_node_disk_utilisation:avg_irate
-          expr: avg by (cluster, instance) ((irate(windows_logical_disk_read_seconds_total{job="integrations/windows_exporter"}[1m]) + irate(windows_logical_disk_write_seconds_total{job="integrations/windows_exporter"}[1m])))
-        - record: 'node:windows_node_filesystem_usage:'
-          expr: max by (cluster, instance, volume) ((windows_logical_disk_size_bytes{job="integrations/windows_exporter"} - windows_logical_disk_free_bytes{job="integrations/windows_exporter"}) / windows_logical_disk_size_bytes{job="integrations/windows_exporter"})
-        - record: 'node:windows_node_filesystem_avail:'
-          expr: max by (cluster, instance, volume) (windows_logical_disk_free_bytes{job="integrations/windows_exporter"} / windows_logical_disk_size_bytes{job="integrations/windows_exporter"})
-        - record: :windows_node_net_utilisation:sum_irate
-          expr: sum by (cluster) (irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m]))
-        - record: node:windows_node_net_utilisation:sum_irate
-          expr: sum by (cluster, instance) ((irate(windows_net_bytes_total{job="integrations/windows_exporter"}[1m])))
-        - record: :windows_node_net_saturation:sum_irate
-          expr: sum by (cluster) (irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[1m])) + sum by (cluster) (irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[1m]))
-        - record: node:windows_node_net_saturation:sum_irate
-          expr: sum by (cluster, instance) ((irate(windows_net_packets_received_discarded_total{job="integrations/windows_exporter"}[1m]) + irate(windows_net_packets_outbound_discarded_total{job="integrations/windows_exporter"}[1m])))
     - name: windows.pod.rules
       rules:
         - record: windows_pod_container_available
@@ -169,4 +161,61 @@ groups:
           expr: |
             sum by (cluster, namespace, pod, container) (
               rate(windows_container_total_runtime{}[5m])
+            )
+    - name: windows.cluster.compat.rules
+      rules:
+        # Combined Linux + Windows cluster memory utilisation.
+        # Linux uses node-exporter recording rules; Windows uses windows-exporter recording rules.
+        # vector(0) fallback ensures the rule evaluates correctly in single-OS clusters.
+        - record: cluster:node_memory_utilisation:ratio
+          expr: |
+            1 - (
+              (sum(:node_memory_MemAvailable_bytes:sum) or vector(0))
+              + (sum(node:windows_node_memory_bytes_available:sum) or vector(0))
+            ) / (
+              (sum(node_memory_MemTotal_bytes{job="integrations/node_exporter"}) or vector(0))
+              + (sum(node:windows_node_memory_bytes_total:sum) or vector(0))
+            )
+    - name: windows.container.linux-compat.rules
+      rules:
+        # Contributes Windows container CPU into the same recording rule Linux dashboards use.
+        # KSM-based resource request/limit recording rules already cover all OS types.
+        - record: node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate
+          expr: |
+            sum by (cluster, namespace, pod, container) (
+              rate(windows_container_total_runtime{namespace!=""}[5m])
+            )
+        # Memory WSS — fake cadvisor job label so dashboards match job="integrations/kubernetes/cadvisor"
+        # image label copied from container name to satisfy image!="" filters
+        - record: container_memory_working_set_bytes
+          expr: |
+            label_replace(
+              label_replace(
+                windows_container_private_working_set_usage{namespace!=""},
+                "job", "integrations/kubernetes/cadvisor", "job", ".*"
+              ),
+              "image", "$1", "container", "(.+)"
+            )
+        # Memory RSS — commit bytes is the closest Windows approximation
+        - record: container_memory_rss
+          expr: |
+            label_replace(
+              label_replace(
+                windows_container_memory_usage{namespace!=""},
+                "job", "integrations/kubernetes/cadvisor", "job", ".*"
+              ),
+              "image", "$1", "container", "(.+)"
+            )
+        # Network — fake cadvisor job label so network panels pick up Windows pods
+        - record: container_network_receive_bytes_total
+          expr: |
+            label_replace(
+              windows_container_network_received_bytes_total{namespace!=""},
+              "job", "integrations/kubernetes/cadvisor", "job", ".*"
+            )
+        - record: container_network_transmit_bytes_total
+          expr: |
+            label_replace(
+              windows_container_network_transmitted_bytes_total{namespace!=""},
+              "job", "integrations/kubernetes/cadvisor", "job", ".*"
             )

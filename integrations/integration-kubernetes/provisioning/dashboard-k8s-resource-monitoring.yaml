@@ -121,6 +121,7 @@ spec:
               range: false
               refId: storage
           title: Nodes
+          description: "Overview of all nodes in the cluster including status, CPU, memory, and pod count."
           transformations:
             - id: joinByField
               options:
@@ -218,6 +219,7 @@ spec:
               refId: A
               step: 10
           title: Memory Usage %
+          description: "Memory utilisation percentage per node or namespace over time."
           type: timeseries
         - datasource:
             type: prometheus
@@ -297,6 +299,7 @@ spec:
               refId: A
               step: 10
           title: CPU Usage
+          description: "CPU cores consumed over time. Covers both Linux (cadvisor) and Windows (windows-exporter) containers."
           type: timeseries
         - datasource:
             type: prometheus
@@ -378,6 +381,7 @@ spec:
               refId: A
               step: 10
           title: Pods Restarted
+          description: "Number of pod restarts over time. Frequent restarts may indicate application instability or resource constraints."
           type: timeseries
         - datasource:
             type: prometheus
@@ -467,6 +471,7 @@ spec:
               refId: B
               step: 10
           title: Pods Running Count
+          description: "Number of pods currently in Running state. Drops indicate scheduling failures or evictions."
           type: timeseries
         - datasource:
             type: prometheus
@@ -545,6 +550,7 @@ spec:
               refId: A
               step: 10
           title: Top 5 Memory Intense Pods
+          description: "The 5 pods consuming the most memory. Use this to identify memory-heavy workloads."
           type: timeseries
         - datasource:
             type: prometheus
@@ -720,6 +726,7 @@ spec:
               range: false
               refId: pod_info
           title: Memory usage per container
+          description: "Breakdown of memory usage by container within the selected pod or namespace."
           transformations:
             - id: merge
               options:
@@ -828,6 +835,7 @@ spec:
               range: true
               refId: A
           title: Total pod memory usage
+          description: "Total memory consumed by all containers in the selected pod."
           type: timeseries
         - datasource:
             type: prometheus
@@ -906,6 +914,7 @@ spec:
               range: true
               refId: A
           title: Pod CPU usage (mcores)
+          description: "CPU usage in millicores per container within the selected scope."
           type: timeseries
     refresh: false
     schemaVersion: 39

@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "Network bandwidth and packet rates for a single pod, showing per-interface receive and transmit throughput."
     links:
         - asDropdown: true
           includeVars: true
@@ -80,6 +81,7 @@ spec:
               expr: sum(rate(container_network_receive_bytes_total{cluster="$cluster",namespace=~"$namespace", pod=~"$pod"}[$__rate_interval]))
               legendFormat: __auto
           title: Current Rate of Bytes Received
+          description: "Current rate of inbound bytes across the selected scope."
           type: gauge
         - datasource:
             type: datasource
@@ -115,6 +117,7 @@ spec:
               expr: sum(rate(container_network_transmit_bytes_total{cluster="$cluster",namespace=~"$namespace", pod=~"$pod"}[$__rate_interval]))
               legendFormat: __auto
           title: Current Rate of Bytes Transmitted
+          description: "Current rate of outbound bytes across the selected scope."
           type: gauge
         - datasource:
             type: datasource
@@ -147,6 +150,7 @@ spec:
               expr: sum(rate(container_network_receive_bytes_total{cluster="$cluster",namespace=~"$namespace", pod=~"$pod"}[$__rate_interval])) by (pod)
               legendFormat: __auto
           title: Receive Bandwidth
+          description: "Rate of bytes received from the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -179,6 +183,7 @@ spec:
               expr: sum(rate(container_network_transmit_bytes_total{cluster="$cluster",namespace=~"$namespace", pod=~"$pod"}[$__rate_interval])) by (pod)
               legendFormat: __auto
           title: Transmit Bandwidth
+          description: "Rate of bytes transmitted over the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -211,6 +216,7 @@ spec:
               expr: sum(rate(container_network_receive_packets_total{cluster="$cluster",namespace=~"$namespace", pod=~"$pod"}[$__rate_interval])) by (pod)
               legendFormat: __auto
           title: Rate of Received Packets
+          description: "Packet receive rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -243,6 +249,7 @@ spec:
               expr: sum(rate(container_network_transmit_packets_total{cluster="$cluster",namespace=~"$namespace", pod=~"$pod"}[$__rate_interval])) by (pod)
               legendFormat: __auto
           title: Rate of Transmitted Packets
+          description: "Packet transmit rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -275,6 +282,7 @@ spec:
               expr: sum(rate(container_network_receive_packets_dropped_total{cluster="$cluster",namespace=~"$namespace", pod=~"$pod"}[$__rate_interval])) by (pod)
               legendFormat: __auto
           title: Rate of Received Packets Dropped
+          description: "Rate of inbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
         - datasource:
             type: datasource
@@ -307,6 +315,7 @@ spec:
               expr: sum(rate(container_network_transmit_packets_dropped_total{cluster="$cluster",namespace=~"$namespace", pod=~"$pod"}[$__rate_interval])) by (pod)
               legendFormat: __auto
           title: Rate of Transmitted Packets Dropped
+          description: "Rate of outbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
     refresh: 1m
     schemaVersion: 39

@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "Cluster resource efficiency dashboard. Compares actual utilisation against requested resources to identify over- and under-provisioned workloads."
     fiscalYearStartMonth: 0
     graphTooltip: 0
     links: []
@@ -49,6 +50,7 @@ spec:
           id: 15
           panels: []
           title: Overview
+          description: "Timeline of Kubernetes event counts over time. Spikes indicate periods of cluster activity or instability."
           type: row
         - datasource:
             uid: $prometheus_datasource
@@ -101,6 +103,7 @@ spec:
               legendFormat: ""
               refId: A
           title: Average CPU Utilization
+          description: "Average CPU utilisation across all nodes in the cluster over the selected time range."
           type: stat
         - datasource:
             uid: $prometheus_datasource
@@ -153,6 +156,7 @@ spec:
               legendFormat: ""
               refId: A
           title: Average Memory Utilization
+          description: "Average memory utilisation across all nodes in the cluster over the selected time range."
           type: stat
         - datasource:
             uid: $prometheus_datasource
@@ -205,6 +209,7 @@ spec:
               legendFormat: ""
               refId: A
           title: Average Node "/" Storage Utilization
+          description: "Average root filesystem storage utilisation across all nodes."
           type: stat
         - datasource:
             uid: $prometheus_datasource
@@ -258,6 +263,7 @@ spec:
               legendFormat: ""
               refId: A
           title: Average Pods Created
+          description: "Average number of pods created per unit time across the cluster."
           type: stat
         - datasource:
             uid: $prometheus_datasource
@@ -310,6 +316,7 @@ spec:
               legendFormat: ""
               refId: A
           title: Max CPU Utilization
+          description: "Peak CPU utilisation recorded on any single node over the selected time range."
           type: stat
         - datasource:
             uid: $prometheus_datasource
@@ -362,6 +369,7 @@ spec:
               legendFormat: ""
               refId: A
           title: Max Memory Utilization
+          description: "Peak memory utilisation recorded on any single node over the selected time range."
           type: stat
         - datasource:
             uid: $prometheus_datasource
@@ -414,6 +422,7 @@ spec:
               legendFormat: ""
               refId: A
           title: Max Node "/" Storage Utilization
+          description: "Peak root filesystem utilisation recorded on any single node."
           type: stat
         - datasource:
             uid: $prometheus_datasource
@@ -467,6 +476,7 @@ spec:
               legendFormat: ""
               refId: A
           title: Average Pods Evicted
+          description: "Average rate of pod evictions. Elevated values indicate resource pressure causing the scheduler to evict pods."
           type: stat
         - collapsed: false
           gridPos:
@@ -477,6 +487,7 @@ spec:
           id: 16
           panels: []
           title: Efficiency
+          description: "Efficiency."
           type: row
         - datasource:
             type: prometheus
@@ -579,6 +590,7 @@ spec:
               range: true
               refId: C
           title: Cluster Memory Utilization Efficiency
+          description: "Memory utilisation efficiency trend: ratio of used memory to requested memory across the cluster."
           type: timeseries
         - datasource:
             type: prometheus
@@ -681,6 +693,7 @@ spec:
               range: true
               refId: C
           title: Cluster CPU Utilization Efficiency
+          description: "CPU utilisation efficiency trend: ratio of consumed CPU to requested CPU across the cluster."
           type: timeseries
         - datasource:
             type: prometheus
@@ -845,6 +858,7 @@ spec:
               range: true
               refId: A
           title: Pods Started
+          description: "Rate of new pods starting in the cluster. Useful for detecting deployment activity or crash-loop storms."
           type: timeseries
         - datasource:
             type: prometheus
@@ -916,6 +930,7 @@ spec:
               range: true
               refId: A
           title: Pods Evicted
+          description: "Rate of pod evictions. Sustained evictions indicate node memory or disk pressure."
           type: timeseries
     refresh: 1m
     schemaVersion: 39

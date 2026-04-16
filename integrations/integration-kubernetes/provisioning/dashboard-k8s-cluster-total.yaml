@@ -36,6 +36,7 @@ spec:
               textFormat: '{{kind}}: {{name}} in namespace: {{namespace}} on node: {{sourcehost}}'
               titleFormat: '{{msg}}'
     editable: false
+    description: "Cluster-wide network traffic summary. Shows total inbound and outbound bandwidth, packet rates, and TCP retransmit rates across all namespaces."
     links:
         - asDropdown: true
           includeVars: true
@@ -85,6 +86,7 @@ spec:
                 )
               legendFormat: __auto
           title: Current Rate of Bytes Received
+          description: "Current rate of inbound bytes across the selected scope."
           type: timeseries
         - datasource:
             type: datasource
@@ -125,6 +127,7 @@ spec:
                 )
               legendFormat: __auto
           title: Current Rate of Bytes Transmitted
+          description: "Current rate of outbound bytes across the selected scope."
           type: timeseries
         - datasource:
             type: datasource
@@ -272,6 +275,7 @@ spec:
               format: table
               instant: true
           title: Current Status
+          description: "Snapshot table of current network status for all workloads/pods in the cluster or namespace."
           transformations:
             - id: joinByField
               options:
@@ -357,6 +361,7 @@ spec:
                 )
               legendFormat: __auto
           title: Average Rate of Bytes Received
+          description: "Average rate of inbound bytes across the selected scope."
           type: timeseries
         - datasource:
             type: datasource
@@ -397,6 +402,7 @@ spec:
                 )
               legendFormat: __auto
           title: Average Rate of Bytes Transmitted
+          description: "Average rate of outbound bytes across the selected scope."
           type: timeseries
         - datasource:
             type: datasource
@@ -437,6 +443,7 @@ spec:
                 )
               legendFormat: __auto
           title: Receive Bandwidth
+          description: "Rate of bytes received from the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -477,6 +484,7 @@ spec:
                 )
               legendFormat: __auto
           title: Transmit Bandwidth
+          description: "Rate of bytes transmitted over the network, broken down by namespace or pod."
           type: timeseries
         - datasource:
             type: datasource
@@ -517,6 +525,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of Received Packets
+          description: "Packet receive rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -557,6 +566,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of Transmitted Packets
+          description: "Packet transmit rate per namespace, pod, or workload."
           type: timeseries
         - datasource:
             type: datasource
@@ -597,6 +607,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of Received Packets Dropped
+          description: "Rate of inbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
         - datasource:
             type: datasource
@@ -637,6 +648,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of Transmitted Packets Dropped
+          description: "Rate of outbound packets dropped. Non-zero values indicate network congestion or misconfiguration."
           type: timeseries
         - datasource:
             type: datasource
@@ -677,6 +689,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of TCP Retransmits out of all sent segments
+          description: "Fraction of TCP segments that were retransmitted. High values indicate network instability."
           type: timeseries
         - datasource:
             type: datasource
@@ -717,6 +730,7 @@ spec:
                 )
               legendFormat: __auto
           title: Rate of TCP SYN Retransmits out of all retransmits
+          description: "Fraction of retransmits that are SYN retransmits. Elevated values suggest connection setup issues."
           type: timeseries
     refresh: 1m
     schemaVersion: 39
