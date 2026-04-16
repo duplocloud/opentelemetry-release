@@ -142,7 +142,7 @@ spec:
             - datasource:
                 type: prometheus
                 uid: ${datasource}
-              expr: cluster:node_memory_utilisation:ratio
+              expr: 1 - sum(:node_memory_MemAvailable_bytes:sum) / sum(node_memory_MemTotal_bytes{job="integrations/node_exporter"})
               instant: true
           title: Memory Utilisation
           description: "Current memory utilisation percentage across the cluster."
