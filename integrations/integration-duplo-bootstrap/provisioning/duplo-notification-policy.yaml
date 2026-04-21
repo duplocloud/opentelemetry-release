@@ -6,7 +6,7 @@ spec:
   group_by:
     - grafana_folder
     - alertname
-  receiver: grafana-default-email
+  receiver: empty
   orgId: 1
   routes:
     - object_matchers:
