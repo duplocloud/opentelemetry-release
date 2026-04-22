@@ -62,7 +62,7 @@ spec:
                     type: prometheus
                     uid: duplo-metrics
                 editorMode: code
-                expr: probe_duration_seconds{job="aos-blackbox-exporter"} > on(instance, cluster) group_left() job:probe_latency_threshold
+                expr: probe_duration_seconds{job=~".*blackbox.*"} > on(instance, job) group_left() job:probe_latency_threshold
                 instant: true
                 intervalMs: 1000
                 legendFormat: __auto

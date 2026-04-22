@@ -1,6 +1,12 @@
 namespace: integration-blackboxexporter
 groups:
     - name: blackbox.rules.latency
+      interval: 1m
       rules:
-        - expr: vector(3)
-          record: job:probe_latency_threshold
+        - record: job:probe_latency_threshold
+          expr: |-
+            job:probe_latency_threshold:overrides
+            or on(instance, job)
+            (probe_duration_seconds{job=~".*blackbox.*"} * 0 + 1)
+          labels:
+            job: aos-blackbox-exporter
