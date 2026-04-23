@@ -335,7 +335,7 @@ def collect_image_versions(prometheus_url: str, labels: Dict[str, str]) -> Optio
     # PromQL query for all components
     query = f'''
     count by(cluster, namespace, container, image, pod) (
-      kube_pod_container_info{{namespace=~"{namespace_filter}", container!~"config-reloader|loki-sc-rules|memcached|gateway|exporter|kube-rbac-proxy|nginx|pushgateway"}}
+      kube_pod_container_info{{namespace=~"{namespace_filter}", container!~"config-reloader|loki-sc-rules|memcached|gateway|exporter|kube-rbac-proxy|nginx|pushgateway|duplo-observability|otel-collector"}}
     )
     '''
 
