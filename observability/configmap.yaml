@@ -21,7 +21,7 @@ data:
         cd opentelemetry-release
         git pull
     else
-        git clone $REPO_URL opentelemetry-release
+        git clone -b cron-job-adding-k8s-version $REPO_URL opentelemetry-release
         cd opentelemetry-release
     fi
 
