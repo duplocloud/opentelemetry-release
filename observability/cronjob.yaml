@@ -24,9 +24,9 @@ spec:
             - name: LOKI_URL
               value: "https://logs.prod-apps.duplocloud.net"
             - name: CLUSTER
-              value: "duploinfra-o11y"
+              value: "duploinfra-nonprod"
             - name: NAMESPACE
-              value: "duploservices-o11y-otel"
+              value: "duploservices-otel-nonprod"
             - name: CUSTOMER
               value: "duplo-cloud"
             - name: ENVIRONMENT

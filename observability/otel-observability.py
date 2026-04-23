@@ -201,12 +201,13 @@ def send_to_loki(
             logger.error(f"Error sending data to Loki: {e}")
 
 
-def format_and_send_image_data(images: Dict[str, Dict[str, Dict[str, Dict[str, str]]]]) -> None:
+def format_and_send_image_data(images: Dict[str, Dict[str, Dict[str, Dict[str, str]]]], helm_versions: Optional[Dict[str, str]] = None) -> None:
     """
     Format and send image data to Loki.
 
     Args:
         images: Dictionary containing image information for different services
+        helm_versions: Optional dict of chart name -> chart_version from HelmReleases
     """
     current_time = int(time.time() * 1000000000)  # Current time in nanoseconds
 
@@ -231,15 +232,18 @@ def format_and_send_image_data(images: Dict[str, Dict[str, Dict[str, Dict[str, s
                     values
                 )
 
-            # Process monitoring images
+            # Process monitoring images — inject k8s-monitoring chart version if available
             if categories['monitoring']:
+                monitoring_spec = dict(categories['monitoring'])
+                if helm_versions and 'k8s-monitoring' in helm_versions:
+                    monitoring_spec['k8s-monitoring'] = helm_versions['k8s-monitoring']
                 values = [
                     [str(current_time), json.dumps({
                         "metadata": {
                             "cluster": cluster,
                             "namespace": namespace
                         },
-                        "spec": categories['monitoring']
+                        "spec": monitoring_spec
                     })]
                 ]
                 send_to_loki(
@@ -405,8 +409,13 @@ def collect_and_send_version_data(prometheus_url: str, labels: Dict[str, str]) -
         logger.error("Failed to collect image versions")
         return
 
+    # Collect helm chart versions to inject k8s-monitoring version into monitoring spec
+    namespace = os.getenv('NAMESPACE', '')
+    helm_records = collect_helm_chart_versions(namespace)
+    helm_versions = {r['spec']['chart']: r['spec']['chart_version'] for r in helm_records}
+
     # Format and send image data
-    format_and_send_image_data(images)
+    format_and_send_image_data(images, helm_versions)
     logger.info("Completed image data collection and sending")
 
 
