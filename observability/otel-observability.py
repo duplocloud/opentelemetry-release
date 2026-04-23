@@ -694,72 +694,74 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
 
 
-def collect_k8s_versions(prometheus_url: str) -> List[Dict[str, Any]]:
-    """
-    Collect Kubernetes version information from Prometheus.
 
-    Queries:
-    - kubernetes_build_info  → API server git_version per cluster
-    - kube_node_info         → per-node kubelet_version, kernel_version, os_image,
-                               container_runtime_version
+def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
+    """
+    Collect Helm chart versions from HelmRelease resources via the Kubernetes API.
+
+    Uses the in-cluster service account token to query the K8s API for
+    HelmRelease resources and extract chart name, version, and ready status.
 
     Returns:
-        List of version-info dicts, one per cluster (API server) and one per node.
+        List of dicts with chart version info per HelmRelease.
     """
-    logger.info("Collecting Kubernetes version data")
-    records: List[Dict[str, Any]] = []
+    logger.info("Collecting Helm chart versions from Kubernetes API")
+    records = []
 
-    # API server version
-    api_data = query_prometheus(prometheus_url, 'kubernetes_build_info')
-    if api_data:
-        for result in api_data.get('data', {}).get('result', []):
-            m = result.get('metric', {})
-            cluster = m.get('cluster')
-            git_version = m.get('git_version')
-            if cluster and git_version:
-                records.append({
-                    "metadata": {"cluster": cluster},
-                    "spec": {"component": "api-server", "version": git_version}
-                })
+    token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+    k8s_host = os.getenv('KUBERNETES_SERVICE_HOST', 'kubernetes.default.svc')
+    k8s_port = os.getenv('KUBERNETES_SERVICE_PORT', '443')
 
-    # Per-node versions
-    node_data = query_prometheus(prometheus_url, 'kube_node_info')
-    if node_data:
-        for result in node_data.get('data', {}).get('result', []):
-            m = result.get('metric', {})
-            cluster = m.get('cluster')
-            node = m.get('node')
-            if not cluster or not node:
-                continue
+    try:
+        with open(token_path) as f:
+            token = f.read().strip()
+    except OSError as e:
+        logger.error(f"Could not read service account token: {e}")
+        return records
+
+    url = f"https://{k8s_host}:{k8s_port}/apis/helm.toolkit.fluxcd.io/v2/namespaces/{namespace}/helmreleases"
+    headers = {'Authorization': f'Bearer {token}'}
+
+    try:
+        response = requests.get(url, headers=headers, verify=ca_path, timeout=_REQUEST_TIMEOUT)
+        response.raise_for_status()
+        items = response.json().get('items', [])
+        for hr in items:
+            name = hr['metadata']['name']
+            chart_spec = hr.get('spec', {}).get('chart', {}).get('spec', {})
+            chart = chart_spec.get('chart')
+            version = chart_spec.get('version')
+            conditions = hr.get('status', {}).get('conditions', [])
+            ready = next((c['status'] for c in conditions if c['type'] == 'Ready'), 'Unknown')
             records.append({
-                "metadata": {"cluster": cluster, "node": node},
+                "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
                 "spec": {
-                    "component": "node",
-                    "kubelet_version": m.get('kubelet_version'),
-                    "kubeproxy_version": m.get('kubeproxy_version'),
-                    "kernel_version": m.get('kernel_version'),
-                    "os_image": m.get('os_image'),
-                    "container_runtime_version": m.get('container_runtime_version'),
+                    "release": name,
+                    "chart": chart,
+                    "chart_version": version,
+                    "ready": ready
                 }
             })
+        logger.info(f"Collected {len(records)} HelmRelease chart version records")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error querying Kubernetes API for HelmReleases: {e}")
 
-    logger.info(f"Collected {len(records)} Kubernetes version records")
     return records
 
 
-def collect_and_send_k8s_versions(prometheus_url: str) -> None:
-    """Collect Kubernetes version data from Prometheus and send it to Loki."""
-    logger.info("Collecting and sending Kubernetes version data")
-
-    records = collect_k8s_versions(prometheus_url)
+def collect_and_send_helm_chart_versions(namespace: str) -> None:
+    """Collect Helm chart versions and send to Loki."""
+    logger.info("Collecting and sending Helm chart versions")
+    records = collect_helm_chart_versions(namespace)
     if not records:
-        logger.warning("No Kubernetes version data collected")
+        logger.warning("No Helm chart version data collected")
         return
 
     current_time_ns = str(int(time.time() * 1e9))
     values = [[current_time_ns, json.dumps(r)] for r in records]
-    send_to_loki("k8s_versions", "prometheus", "k8s_version_info", values)
-    logger.info("Completed Kubernetes version data collection and sending")
+    send_to_loki("helm_chart_versions", "kubernetes", "helm_chart_version_info", values)
+    logger.info("Completed Helm chart version collection and sending")
 
 
 def main() -> None:
@@ -771,7 +773,7 @@ def main() -> None:
     2. Validates required environment variables
     3. Collects and sends image data
     4. Collects and sends Grafana usage data
-    5. Collects and sends Kubernetes version data
+    5. Collects and sends Helm chart versions
     """
     logger.info("Starting monitoring data collection")
 
@@ -782,12 +784,13 @@ def main() -> None:
 
     # Get configuration from environment
     prometheus_url = os.getenv('PROMETHEUS_URL')
+    namespace = os.getenv('NAMESPACE', '')
 
     # Collect and send data to Loki
     collect_and_send_version_data(prometheus_url, labels)
     collect_and_send_grafana_usage(prometheus_url)
-    collect_and_send_k8s_versions(prometheus_url)
     collect_and_send_otel_pod_node_usage(prometheus_url, labels)
+    collect_and_send_helm_chart_versions(namespace)
 
     logger.info("Completed monitoring data collection")
 
