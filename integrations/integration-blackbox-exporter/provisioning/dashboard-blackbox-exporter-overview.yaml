@@ -16,7 +16,7 @@ spec:
               name: Annotations & Alerts
               type: dashboard
     description: Monitor HTTP endpoint availability, SSL certificates, probe latency, and overall health across all targets.
-    editable: false
+    editable: true
     fiscalYearStartMonth: 0
     graphTooltip: 1
     links: []
@@ -24,7 +24,7 @@ spec:
         - datasource:
             type: prometheus
             uid: ${DS_PROMETHEUS}
-          description: Percentage of successful probes over the last hour for the selected namespace.
+          description: Percentage of successful probes over the dashboard's selected time range, averaged across all probes in the selected namespace(s).
           fieldConfig:
             defaults:
                 color:
@@ -38,7 +38,7 @@ spec:
                     steps:
                         - color: red
                         - color: green
-                          value: 99
+                          value: 99.9
                 unit: percent
             overrides: []
           gridPos:
@@ -65,7 +65,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: probe_success{job=~"$job", namespace=~"$namespace"}*100
+              expr: avg(avg_over_time(probe_success{job=~"$job", namespace=~"$namespace"}[$__range])) * 100
               range: true
               refId: A
           title: Global Uptime
@@ -114,7 +114,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: count(probe_success{job=~"$job", namespace=~"$namespace"})
+              expr: count(last_over_time(probe_success{job=~"$job", namespace=~"$namespace"}[31m]))
               range: true
               refId: A
           title: Total Targets
@@ -126,6 +126,7 @@ spec:
           fieldConfig:
             defaults:
                 mappings: []
+                noValue: "0"
                 thresholds:
                     mode: absolute
                     steps:
@@ -155,7 +156,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: count(probe_success{job=~"$job", namespace=~"$namespace"} == 1)
+              expr: count(last_over_time(probe_success{job=~"$job", namespace=~"$namespace"}[31m]) == 1) or vector(0)
               range: true
               refId: A
           title: Healthy Targets
@@ -201,7 +202,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: count(probe_success{job=~"$job", namespace=~"$namespace"} == 0)
+              expr: count(last_over_time(probe_success{job=~"$job", namespace=~"$namespace"}[31m]) == 0) or vector(0)
               legendFormat: Targets Down
               range: true
               refId: A
@@ -250,7 +251,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: avg(probe_duration_seconds{job=~"$job", namespace=~"$namespace"})
+              expr: avg(last_over_time(probe_duration_seconds{job=~"$job", namespace=~"$namespace"}[31m]))
               range: true
               refId: A
           title: Average Latency
@@ -476,7 +477,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: probe_success{job=~"$job", instance=~"$target"}
+              expr: last_over_time(probe_success{job=~"$job", instance=~"$target"}[31m])
               format: table
               instant: true
               interval: ""
@@ -486,7 +487,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: probe_http_ssl{job=~"$job", instance=~"$target"} > 0
+              expr: last_over_time(probe_http_ssl{job=~"$job", instance=~"$target"}[31m]) > 0
               format: table
               instant: true
               interval: ""
@@ -496,7 +497,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: (probe_ssl_earliest_cert_expiry{job=~"$job", instance=~"$target"} - time()) / 3600 / 24
+              expr: (last_over_time(probe_ssl_earliest_cert_expiry{job=~"$job", instance=~"$target"}[31m]) - time()) / 3600 / 24
               format: table
               instant: true
               interval: ""
@@ -506,7 +507,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: probe_http_status_code{job=~"$job", instance=~"$target"} > 0
+              expr: last_over_time(probe_http_status_code{job=~"$job", instance=~"$target"}[31m]) > 0
               format: table
               instant: true
               interval: ""
@@ -516,7 +517,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: avg_over_time(probe_duration_seconds{job=~"$job", instance=~"$target"}[1m])
+              expr: avg_over_time(probe_duration_seconds{job=~"$job", instance=~"$target"}[31m])
               format: table
               hide: false
               instant: false
@@ -528,7 +529,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: probe_tls_version_info{job=~"$job", instance=~"$target"}
+              expr: last_over_time(probe_tls_version_info{job=~"$job", instance=~"$target"}[31m])
               format: table
               instant: true
               interval: ""
@@ -538,7 +539,7 @@ spec:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
               editorMode: code
-              expr: avg_over_time(probe_dns_lookup_time_seconds{job=~"$job", instance=~"$target"}[1m])
+              expr: avg_over_time(probe_dns_lookup_time_seconds{job=~"$job", instance=~"$target"}[31m])
               format: table
               instant: true
               interval: ""
@@ -582,6 +583,13 @@ spec:
                     'Value #A': false
                     'Value #B': false
                     'Value #F': true
+                    app 1: true
+                    app 2: true
+                    app 3: true
+                    app 4: true
+                    app 5: true
+                    app 6: true
+                    app 7: true
                     cluster: true
                     cluster 1: true
                     cluster 2: true
@@ -604,6 +612,14 @@ spec:
                     endpoint 5: true
                     endpoint 6: true
                     endpoint 7: true
+                    environment: false
+                    environment 1: false
+                    environment 2: true
+                    environment 3: true
+                    environment 4: true
+                    environment 5: true
+                    environment 6: true
+                    environment 7: true
                     job: true
                     job 1: true
                     job 2: true
@@ -629,6 +645,26 @@ spec:
                     pod 5: true
                     pod 6: true
                     pod 7: true
+                    product 1: false
+                    product 2: true
+                    product 3: true
+                    product 4: true
+                    product 5: true
+                    product 6: true
+                    product 7: true
+                    region 1: false
+                    region 2: true
+                    region 3: true
+                    region 4: true
+                    region 5: true
+                    region 6: true
+                    region 7: true
+                    repo 2: true
+                    repo 3: true
+                    repo 4: true
+                    repo 5: true
+                    repo 6: true
+                    repo 7: true
                     service 1: true
                     service 2: true
                     service 3: true
@@ -691,7 +727,11 @@ spec:
                     'Value #F': ""
                     'Value #G': DNS Lookup Duration (s)
                     'Value #H': Probe IP
+                    environment 1: Environment
                     instance: Instance
+                    product 1: Product
+                    region 1: Region
+                    repo 1: Repo
                     type 6: ""
                     version: TLS Version
           type: table
@@ -738,15 +778,15 @@ spec:
               datasource:
                 type: prometheus
                 uid: ${DS_PROMETHEUS}
-              definition: label_values(probe_success,job)
-              hide: 0
+              definition: label_values(probe_success{job="aos-blackbox-exporter"},job)
+              hide: 2
               includeAll: false
               label: Job
               name: job
               options: []
               query:
                 qryType: 1
-                query: label_values(probe_success,job)
+                query: label_values(probe_success{job="aos-blackbox-exporter"},job)
                 refId: PrometheusVariableQueryEditor-VariableQuery
               refresh: 1
               regex: ""
@@ -773,7 +813,7 @@ spec:
               sort: 1
               type: query
     time:
-        from: now-15m
+        from: now-1h
         to: now
     timepicker: {}
     timezone: ""
