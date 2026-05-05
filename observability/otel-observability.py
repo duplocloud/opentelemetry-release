@@ -459,7 +459,7 @@ def collect_grafana_db_lock_errors(labels: Dict[str, str]) -> Dict[str, Any]:
     service = 'grafana-ui'
 
     source_loki_url = f"http://duplo-logging-gateway.{namespace}.svc.cluster.local"
-    query = f'sum(count_over_time({{namespace="{namespace}", service_name="{service}"}} |= `database is locked` |= `logger=sqlstore` [24h]))'
+    query = f'sum(count_over_time({{namespace="{namespace}", service_name="{service}"}} |= `database is locked` != `logger=tsdb` [24h]))'
 
     data = query_loki(source_loki_url, query)
 
