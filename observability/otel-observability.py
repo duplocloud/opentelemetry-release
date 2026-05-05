@@ -299,7 +299,7 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     
     # Validate required environment variables
     required_vars = [
-        'PROMETHEUS_URL', 'LOKI_URL', 'CLUSTER', 'NAMESPACE', 
+        'PROMETHEUS_URL', 'LOKI_URL', 'CLUSTER', 'NAMESPACE',
         'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL'
     ]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
@@ -426,6 +426,77 @@ def collect_and_send_grafana_usage(prometheus_url: str, labels: Dict[str, str]) 
     # Format and send Grafana usage data
     format_and_send_grafana_usage_data(grafana_usage, labels)
     logger.info("Completed Grafana usage data collection and sending")
+
+def query_loki(loki_url: str, query: str, username: Optional[str] = None, password: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """
+    Run a LogQL instant metric query against Loki and return the response.
+    """
+    try:
+        logger.info(f"Querying Loki with query: {query}")
+        auth = (username, password) if username and password else None
+        response = requests.get(
+            f"{loki_url}/loki/api/v1/query",
+            params={'query': query},
+            auth=auth
+        )
+        response.raise_for_status()
+        logger.debug("Successfully received response from Loki")
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error querying Loki: {e}")
+        return None
+
+
+def collect_grafana_db_lock_errors(labels: Dict[str, str]) -> Dict[str, Any]:
+    """
+    Count 'database is locked' errors in grafana-ui logs over the last 24h.
+
+    Returns a dict with the count and metadata, ready to send to central Loki.
+    """
+    logger.info("Collecting Grafana DB lock error count")
+
+    namespace = labels.get('namespace') or os.getenv('NAMESPACE', '')
+    service = 'grafana-ui'
+
+    source_loki_url = f"http://duplo-logging-gateway.{namespace}.svc.cluster.local"
+    query = f'sum(count_over_time({{namespace="{namespace}", service_name="{service}"}} |= `database is locked` |= `logger=sqlstore` [24h]))'
+
+    data = query_loki(source_loki_url, query)
+
+    count = 0
+    if data and 'data' in data and 'result' in data['data'] and data['data']['result']:
+        try:
+            count = int(float(data['data']['result'][0]['value'][1]))
+        except (KeyError, IndexError, ValueError) as e:
+            logger.error(f"Error parsing Loki DB lock count: {e}")
+
+    logger.info(f"Grafana DB lock error count (last 24h): {count}")
+    return {
+        "namespace": namespace,
+        "service": service,
+        "db_lock_error_count_24h": count
+    }
+
+
+def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str]) -> None:
+    """
+    Collect Grafana DB lock error count from source Loki and send to central Loki.
+    """
+    logger.info("Collecting and sending Grafana DB lock error data")
+
+    result = collect_grafana_db_lock_errors(labels)
+
+    current_time = str(int(time.time() * 1_000_000_000))
+    values = [[current_time, json.dumps(result)]]
+
+    send_to_loki(
+        "grafana_db_lock_errors",
+        "loki",
+        "db_lock_error_count_24h",
+        values
+    )
+    logger.info("Completed Grafana DB lock error data collection and sending")
+
 
 def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> None:
     """
@@ -660,11 +731,12 @@ def main() -> None:
     
     # Get configuration from environment
     prometheus_url = os.getenv('PROMETHEUS_URL')
-    
+
     # Collect and send data to Loki
     collect_and_send_version_data(prometheus_url, labels)
     collect_and_send_grafana_usage(prometheus_url, labels)
     collect_and_send_otel_pod_node_usage(prometheus_url, labels)
+    collect_and_send_grafana_db_lock_errors(labels)
     
     logger.info("Completed monitoring data collection")
 
