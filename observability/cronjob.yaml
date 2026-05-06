@@ -51,4 +51,4 @@ spec:
             configMap:
               name: otel-scripts
               defaultMode: 0755
-          restartPolicy: OnFailure 
+          restartPolicy: OnFailure
