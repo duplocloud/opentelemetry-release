@@ -755,6 +755,29 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
     else:
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
 
+def find_active_prometheus_tenant(prometheus_url: str, tenants: List[Dict[str, str]]) -> Optional[Dict[str, str]]:
+    """
+    Try each Prometheus tenant with a lightweight query and return the first one
+    that returns data. Falls back to None (no auth) if no tenants or none return data.
+    """
+    if not tenants:
+        logger.info("No Prometheus tenants discovered — using single-tenant mode")
+        return None
+
+    probe_query = 'count(up)'
+    for credentials in tenants:
+        username = credentials.get('username')
+        password = credentials.get('password')
+        response = query_prometheus(prometheus_url, probe_query, username, password)
+        if response and response.get('data', {}).get('result'):
+            logger.info(f"Active Prometheus tenant found: {username}")
+            return credentials
+        logger.info(f"Prometheus tenant '{username}' returned no data, trying next")
+
+    logger.warning("No active Prometheus tenant found — falling back to no auth")
+    return None
+
+
 def main() -> None:
     """
     Main function that orchestrates the monitoring data collection process.
@@ -780,13 +803,15 @@ def main() -> None:
     prometheus_tenants = get_tenant_credentials(namespace, 'metricsservice')
     loki_tenants = get_tenant_credentials(namespace, 'logsservice')
 
-    # Prometheus collections — run per tenant (or once in single-tenant mode)
-    for credentials in (prometheus_tenants or [None]):
-        collect_and_send_version_data(prometheus_url, labels, credentials)
-        collect_and_send_grafana_usage(prometheus_url, labels, credentials)
-        collect_and_send_otel_pod_node_usage(prometheus_url, labels, credentials)
+    # Find the first Prometheus tenant that returns data
+    prometheus_creds = find_active_prometheus_tenant(prometheus_url, prometheus_tenants)
 
-    # Loki collections — run per tenant (or once in single-tenant mode)
+    # Prometheus collections — run once with the active tenant's credentials
+    collect_and_send_version_data(prometheus_url, labels, prometheus_creds)
+    collect_and_send_grafana_usage(prometheus_url, labels, prometheus_creds)
+    collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
+
+    # Loki collections — query all tenants, aggregate into single count
     collect_and_send_grafana_db_lock_errors(labels, loki_tenants or None)
     
     logger.info("Completed monitoring data collection")
