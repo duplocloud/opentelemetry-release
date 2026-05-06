@@ -1,14 +1,11 @@
-#!/bin/bash
+#!/bin/sh
 set -e
 
-# Install git if not present (depending on base image)
-if ! command -v git &> /dev/null; then
-    apt-get update && apt-get install -y git
-fi
+# Install python3 and pip (alpine/git image)
+apk add --no-cache python3 py3-pip
 
 # Clone/pull the latest version of the script
 REPO_URL="https://github.com/duplocloud/opentelemetry-release.git"
-SCRIPT_PATH="otel-observability.py"
 
 if [ -d "opentelemetry-release" ]; then
     cd opentelemetry-release
@@ -19,8 +16,9 @@ else
 fi
 
 cd observability
+
 # Install requirements
-pip install -r requirements.txt
+pip3 install --break-system-packages -r requirements.txt
 
 # Run the script
-python $SCRIPT_PATH 
+python3 otel-observability.py 
