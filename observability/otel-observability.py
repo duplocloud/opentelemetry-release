@@ -9,6 +9,7 @@ It extracts information about monitoring components, their images, and Grafana u
 import json
 import logging
 import os
+import re
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union, Tuple
@@ -706,15 +707,16 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
 
 def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     """
-    Collect Helm chart versions from HelmRelease resources via the Kubernetes API.
+    Collect Helm chart versions from pod labels via the Kubernetes API.
 
-    Uses the in-cluster service account token to query the K8s API for
-    HelmRelease resources and extract chart name, version, and ready status.
+    Queries pods with the 'helm.sh/chart' label and extracts chart name
+    and version. Deduplicates by release name so only one record per
+    Helm release is returned. Does not require Flux, CRDs, or secret access.
 
     Returns:
-        List of dicts with chart version info per HelmRelease.
+        List of dicts with chart version info per Helm release.
     """
-    logger.info("Collecting Helm chart versions from Kubernetes API")
+    logger.info("Collecting Helm chart versions from pod labels")
     records = []
 
     token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
@@ -729,32 +731,40 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
         logger.error(f"Could not read service account token: {e}")
         return records
 
-    url = f"https://{k8s_host}:{k8s_port}/apis/helm.toolkit.fluxcd.io/v2/namespaces/{namespace}/helmreleases"
+    url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods"
     headers = {'Authorization': f'Bearer {token}'}
+    params = {'labelSelector': 'helm.sh/chart'}
 
     try:
-        response = requests.get(url, headers=headers, verify=ca_path, timeout=_REQUEST_TIMEOUT)
+        response = requests.get(url, headers=headers, verify=ca_path, timeout=_REQUEST_TIMEOUT, params=params)
         response.raise_for_status()
         items = response.json().get('items', [])
-        for hr in items:
-            name = hr['metadata']['name']
-            chart_spec = hr.get('spec', {}).get('chart', {}).get('spec', {})
-            chart = chart_spec.get('chart')
-            version = chart_spec.get('version')
-            conditions = hr.get('status', {}).get('conditions', [])
-            ready = next((c['status'] for c in conditions if c['type'] == 'Ready'), 'Unknown')
+        seen_releases = set()
+        for pod in items:
+            labels = pod.get('metadata', {}).get('labels', {})
+            chart_label = labels.get('helm.sh/chart', '')
+            release_name = labels.get('app.kubernetes.io/instance', '')
+            if not chart_label or release_name in seen_releases:
+                continue
+            # chart_label format: "chartname-1.2.3"
+            match = re.match(r'^(.+)-(\d+\..+)$', chart_label)
+            if match:
+                chart_name, chart_version = match.group(1), match.group(2)
+            else:
+                chart_name, chart_version = chart_label, None
+            seen_releases.add(release_name)
             records.append({
                 "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
                 "spec": {
-                    "release": name,
-                    "chart": chart,
-                    "chart_version": version,
-                    "ready": ready
+                    "release": release_name,
+                    "chart": chart_name,
+                    "chart_version": chart_version,
+                    "ready": "True"
                 }
             })
-        logger.info(f"Collected {len(records)} HelmRelease chart version records")
+        logger.info(f"Collected {len(records)} Helm chart version records")
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error querying Kubernetes API for HelmReleases: {e}")
+        logger.error(f"Error querying Kubernetes API for pod labels: {e}")
 
     return records
 
