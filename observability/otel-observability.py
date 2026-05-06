@@ -6,7 +6,6 @@ This script collects monitoring data from Prometheus and sends it to Loki.
 It extracts information about monitoring components, their images, and Grafana usage.
 """
 
-import base64
 import json
 import logging
 import os
@@ -24,47 +23,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
-def get_tenant_credentials(namespace: str, secret_prefix: str) -> List[Dict[str, str]]:
-    """
-    Discover tenant credentials from k8s secrets matching <secret_prefix>*-duplo-monitoring-k8s-monitoring.
-    Uses the in-cluster service account token. Returns empty list if unavailable (single-tenant mode).
-    """
-    token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
-    ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
-
-    if not os.path.exists(token_path):
-        logger.info("No service account token found — running in single-tenant mode")
-        return []
-
-    try:
-        with open(token_path) as f:
-            token = f.read().strip()
-
-        response = requests.get(
-            f"https://kubernetes.default.svc/api/v1/namespaces/{namespace}/secrets",
-            headers={'Authorization': f'Bearer {token}'},
-            verify=ca_path
-        )
-        response.raise_for_status()
-
-        tenants = []
-        suffix = '-duplo-monitoring-k8s-monitoring'
-        for item in response.json().get('items', []):
-            name = item['metadata']['name']
-            if name.startswith(secret_prefix) and name.endswith(suffix):
-                data = item.get('data', {})
-                username = base64.b64decode(data['username']).decode() if 'username' in data else ''
-                password = base64.b64decode(data['password']).decode() if 'password' in data else ''
-                if username and password:
-                    tenants.append({'username': username, 'password': password})
-                    logger.info(f"Discovered tenant: {username}")
-
-        logger.info(f"Found {len(tenants)} tenant(s) for prefix '{secret_prefix}'")
-        return tenants
-    except Exception as e:
-        logger.warning(f"Could not discover tenant credentials for prefix '{secret_prefix}': {e}")
-        return []
 
 
 def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = None, password: Optional[str] = None) -> Optional[Dict[str, Any]]:
@@ -480,17 +438,17 @@ def query_loki(loki_url: str, query: str, username: Optional[str] = None, passwo
         return None
 
 
-def collect_grafana_db_lock_errors(labels: Dict[str, str], credentials: Optional[Dict[str, str]] = None) -> int:
+def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str]) -> None:
     """
-    Count 'database is locked' errors in grafana-ui logs over the last 24h for one tenant.
-    Returns the integer count. Caller is responsible for aggregating across tenants.
+    Count 'database is locked' errors in grafana-ui logs over the last 24h and send to central Loki.
+    Source Loki credentials from SOURCE_LOKI_USERNAME / SOURCE_LOKI_PASSWORD env vars (optional).
     """
-    logger.info("Collecting Grafana DB lock error count")
+    logger.info("Collecting and sending Grafana DB lock error data")
 
     namespace = labels.get('namespace') or os.getenv('NAMESPACE', '')
     service = 'grafana-ui'
-    username = credentials.get('username') if credentials else None
-    password = credentials.get('password') if credentials else None
+    username = os.getenv('SOURCE_LOKI_USERNAME')
+    password = os.getenv('SOURCE_LOKI_PASSWORD')
 
     source_loki_url = os.getenv('SOURCE_LOKI_URL') or f"http://duplo-logging-gateway.{namespace}.svc.cluster.local"
     query = f'sum(count_over_time({{namespace="{namespace}", service_name="{service}"}} |= `database is locked` != `logger=tsdb` [24h]))'
@@ -504,30 +462,13 @@ def collect_grafana_db_lock_errors(labels: Dict[str, str], credentials: Optional
         except (KeyError, IndexError, ValueError) as e:
             logger.error(f"Error parsing Loki DB lock count: {e}")
 
-    logger.info(f"Grafana DB lock error count (last 24h): {count} (tenant: {username or 'single-tenant'})")
-    return count
+    logger.info(f"Grafana DB lock error count (last 24h): {count}")
 
-
-def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str], loki_tenants: Optional[List[Dict[str, str]]] = None) -> None:
-    """
-    Collect Grafana DB lock error count from source Loki and send to central Loki.
-    Queries all Loki tenants and aggregates into a single count — Grafana is one shared
-    service in the otel namespace, its logs exist in only one tenant but we sum across
-    all to avoid needing to know which tenant holds otel namespace logs.
-    """
-    logger.info("Collecting and sending Grafana DB lock error data")
-
-    tenants = loki_tenants or [None]
-    total_count = sum(collect_grafana_db_lock_errors(labels, creds) for creds in tenants)
-
-    logger.info(f"Grafana DB lock error total count (last 24h, all tenants): {total_count}")
-
-    namespace = labels.get('namespace') or os.getenv('NAMESPACE', '')
     current_time = str(int(time.time() * 1_000_000_000))
     values = [[current_time, json.dumps({
         "namespace": namespace,
-        "service": "grafana-ui",
-        "db_lock_error_count_24h": total_count
+        "service": service,
+        "db_lock_error_count_24h": count
     })]]
 
     send_to_loki(
@@ -755,28 +696,6 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
     else:
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
 
-def find_active_prometheus_tenant(prometheus_url: str, tenants: List[Dict[str, str]]) -> Optional[Dict[str, str]]:
-    """
-    Try each Prometheus tenant with a lightweight query and return the first one
-    that returns data. Falls back to None (no auth) if no tenants or none return data.
-    """
-    if not tenants:
-        logger.info("No Prometheus tenants discovered — using single-tenant mode")
-        return None
-
-    probe_query = 'count(up)'
-    for credentials in tenants:
-        username = credentials.get('username')
-        password = credentials.get('password')
-        response = query_prometheus(prometheus_url, probe_query, username, password)
-        if response and response.get('data', {}).get('result'):
-            logger.info(f"Active Prometheus tenant found: {username}")
-            return credentials
-        logger.info(f"Prometheus tenant '{username}' returned no data, trying next")
-
-    logger.warning("No active Prometheus tenant found — falling back to no auth")
-    return None
-
 
 def main() -> None:
     """
@@ -797,22 +716,16 @@ def main() -> None:
     
     # Get configuration from environment
     prometheus_url = os.getenv('PROMETHEUS_URL')
-    namespace = labels.get('namespace') or os.getenv('NAMESPACE', '')
+    prometheus_creds = {
+        'username': os.getenv('PROMETHEUS_USERNAME', ''),
+        'password': os.getenv('PROMETHEUS_PASSWORD', '')
+    } if os.getenv('PROMETHEUS_USERNAME') else None
 
-    # Discover tenants dynamically from k8s secrets (empty list = single-tenant mode)
-    prometheus_tenants = get_tenant_credentials(namespace, 'metricsservice')
-    loki_tenants = get_tenant_credentials(namespace, 'logsservice')
-
-    # Find the first Prometheus tenant that returns data
-    prometheus_creds = find_active_prometheus_tenant(prometheus_url, prometheus_tenants)
-
-    # Prometheus collections — run once with the active tenant's credentials
+    # Collect and send data
     collect_and_send_version_data(prometheus_url, labels, prometheus_creds)
     collect_and_send_grafana_usage(prometheus_url, labels, prometheus_creds)
     collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
-
-    # Loki collections — query all tenants, aggregate into single count
-    collect_and_send_grafana_db_lock_errors(labels, loki_tenants or None)
+    collect_and_send_grafana_db_lock_errors(labels)
     
     logger.info("Completed monitoring data collection")
 
