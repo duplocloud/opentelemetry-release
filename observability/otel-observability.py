@@ -480,10 +480,10 @@ def query_loki(loki_url: str, query: str, username: Optional[str] = None, passwo
         return None
 
 
-def collect_grafana_db_lock_errors(labels: Dict[str, str], credentials: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+def collect_grafana_db_lock_errors(labels: Dict[str, str], credentials: Optional[Dict[str, str]] = None) -> int:
     """
-    Count 'database is locked' errors in grafana-ui logs over the last 24h.
-    Accepts optional Loki tenant credentials for multi-tenant setups.
+    Count 'database is locked' errors in grafana-ui logs over the last 24h for one tenant.
+    Returns the integer count. Caller is responsible for aggregating across tenants.
     """
     logger.info("Collecting Grafana DB lock error count")
 
@@ -505,30 +505,30 @@ def collect_grafana_db_lock_errors(labels: Dict[str, str], credentials: Optional
             logger.error(f"Error parsing Loki DB lock count: {e}")
 
     logger.info(f"Grafana DB lock error count (last 24h): {count} (tenant: {username or 'single-tenant'})")
-    result = {
-        "namespace": namespace,
-        "service": service,
-        "db_lock_error_count_24h": count
-    }
-    if username:
-        result["tenant"] = username
-    return result
+    return count
 
 
 def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str], loki_tenants: Optional[List[Dict[str, str]]] = None) -> None:
     """
     Collect Grafana DB lock error count from source Loki and send to central Loki.
-    Iterates per tenant in multi-tenant setups; falls back to single-tenant if no tenants provided.
+    Queries all Loki tenants and aggregates into a single count — Grafana is one shared
+    service in the otel namespace, its logs exist in only one tenant but we sum across
+    all to avoid needing to know which tenant holds otel namespace logs.
     """
     logger.info("Collecting and sending Grafana DB lock error data")
 
     tenants = loki_tenants or [None]
-    current_time = str(int(time.time() * 1_000_000_000))
-    values = []
+    total_count = sum(collect_grafana_db_lock_errors(labels, creds) for creds in tenants)
 
-    for credentials in tenants:
-        result = collect_grafana_db_lock_errors(labels, credentials)
-        values.append([current_time, json.dumps(result)])
+    logger.info(f"Grafana DB lock error total count (last 24h, all tenants): {total_count}")
+
+    namespace = labels.get('namespace') or os.getenv('NAMESPACE', '')
+    current_time = str(int(time.time() * 1_000_000_000))
+    values = [[current_time, json.dumps({
+        "namespace": namespace,
+        "service": "grafana-ui",
+        "db_lock_error_count_24h": total_count
+    })]]
 
     send_to_loki(
         "grafana_db_lock_errors",
