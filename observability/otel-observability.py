@@ -447,8 +447,8 @@ def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str]) -> None:
 
     namespace = labels.get('namespace') or os.getenv('NAMESPACE', '')
     service = 'grafana-ui'
-    username = os.getenv('SOURCE_LOKI_USERNAME')
-    password = os.getenv('SOURCE_LOKI_PASSWORD')
+    username = os.getenv('SOURCE_LOKI_USERNAME', '').strip() or None
+    password = os.getenv('SOURCE_LOKI_PASSWORD', '').strip() or None
 
     source_loki_url = os.getenv('SOURCE_LOKI_URL') or f"http://duplo-logging-gateway.{namespace}.svc.cluster.local"
     query = f'sum(count_over_time({{namespace="{namespace}", service_name="{service}"}} |= `database is locked` != `logger=tsdb` [24h]))'
@@ -716,10 +716,9 @@ def main() -> None:
     
     # Get configuration from environment
     prometheus_url = os.getenv('PROMETHEUS_URL')
-    prometheus_creds = {
-        'username': os.getenv('SOURCE_PROMETHEUS_USERNAME', ''),
-        'password': os.getenv('SOURCE_PROMETHEUS_PASSWORD', '')
-    } if os.getenv('SOURCE_PROMETHEUS_USERNAME') else None
+    prom_user = os.getenv('SOURCE_PROMETHEUS_USERNAME', '').strip()
+    prom_pass = os.getenv('SOURCE_PROMETHEUS_PASSWORD', '').strip()
+    prometheus_creds = {'username': prom_user, 'password': prom_pass} if prom_user and prom_pass else None
 
     # Collect and send data
     collect_and_send_version_data(prometheus_url, labels, prometheus_creds)
