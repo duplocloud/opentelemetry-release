@@ -717,9 +717,9 @@ def main() -> None:
     # Get configuration from environment
     prometheus_url = os.getenv('PROMETHEUS_URL')
     prometheus_creds = {
-        'username': os.getenv('PROMETHEUS_USERNAME', ''),
-        'password': os.getenv('PROMETHEUS_PASSWORD', '')
-    } if os.getenv('PROMETHEUS_USERNAME') else None
+        'username': os.getenv('SOURCE_PROMETHEUS_USERNAME', ''),
+        'password': os.getenv('SOURCE_PROMETHEUS_PASSWORD', '')
+    } if os.getenv('SOURCE_PROMETHEUS_USERNAME') else None
 
     # Collect and send data
     collect_and_send_version_data(prometheus_url, labels, prometheus_creds)
