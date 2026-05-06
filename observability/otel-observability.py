@@ -24,22 +24,27 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def query_prometheus(prometheus_url: str, query: str) -> Optional[Dict[str, Any]]:
+
+def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = None, password: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """
     Query Prometheus and return the response.
-    
+
     Args:
         prometheus_url: URL of the Prometheus instance
         query: PromQL query to execute
-        
+        username: Optional basic auth username (for multi-tenant Mimir)
+        password: Optional basic auth password (for multi-tenant Mimir)
+
     Returns:
         JSON response from Prometheus or None if the query fails
     """
     try:
         logger.info(f"Querying Prometheus with query: {query}")
+        auth = (username, password) if username and password else None
         response = requests.get(
             f"{prometheus_url}/api/v1/query",
-            params={'query': query}
+            params={'query': query},
+            auth=auth
         )
         response.raise_for_status()
         logger.debug("Successfully received response from Prometheus")
@@ -299,7 +304,7 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     
     # Validate required environment variables
     required_vars = [
-        'PROMETHEUS_URL', 'LOKI_URL', 'CLUSTER', 'NAMESPACE', 
+        'PROMETHEUS_URL', 'LOKI_URL', 'CLUSTER', 'NAMESPACE',
         'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL'
     ]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
@@ -311,32 +316,32 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     return True, labels, []
 
 
-def collect_image_versions(prometheus_url: str, labels: Dict[str, str]) -> Optional[Dict[str, Dict[str, Dict[str, Dict[str, str]]]]]:
+def collect_image_versions(prometheus_url: str, labels: Dict[str, str], credentials: Optional[Dict[str, str]] = None) -> Optional[Dict[str, Dict[str, Dict[str, Dict[str, str]]]]]:
     """
     Collect image versions for monitoring components from Prometheus.
-    
+
     Args:
         prometheus_url: URL of the Prometheus instance
         labels: Dictionary containing additional labels
-        
+        credentials: Optional dict with 'username' and 'password' for multi-tenant Mimir
+
     Returns:
         Dictionary with image information categorized by cluster and namespace, then by 'main' and 'monitoring',
         or None if collection fails
     """
     logger.info("Collecting image versions from Prometheus")
-    
-    # Get namespace filter from labels with fallback to default
+
     namespace_filter = labels.get('namespace_filter', '.*otel.*')
-    
-    # PromQL query for all components
+    username = credentials.get('username') if credentials else None
+    password = credentials.get('password') if credentials else None
+
     query = f'''
     count by(cluster, namespace, container, image, pod) (
       kube_pod_container_info{{namespace=~"{namespace_filter}", container!~"config-reloader|loki-sc-rules|memcached|gateway|exporter|kube-rbac-proxy|nginx|pushgateway"}}
     )
     '''
-    
-    # Query Prometheus for container images
-    prometheus_response = query_prometheus(prometheus_url, query)
+
+    prometheus_response = query_prometheus(prometheus_url, query, username, password)
     if not prometheus_response:
         logger.error("Failed to query Prometheus for image versions")
         return None
@@ -351,23 +356,25 @@ def collect_image_versions(prometheus_url: str, labels: Dict[str, str]) -> Optio
     return images
 
 
-def collect_grafana_usage(prometheus_url: str) -> Dict[str, int]:
+def collect_grafana_usage(prometheus_url: str, credentials: Optional[Dict[str, str]] = None) -> Dict[str, int]:
     """
     Collect Grafana datasource usage information from Prometheus.
-    
+
     Args:
         prometheus_url: URL of the Prometheus instance
-        
+        credentials: Optional dict with 'username' and 'password' for multi-tenant Mimir
+
     Returns:
         Dictionary with datasource names as keys and usage counts as values
     """
     logger.info("Collecting Grafana usage data")
-    
-    # PromQL query for Grafana datasource usage
+
+    username = credentials.get('username') if credentials else None
+    password = credentials.get('password') if credentials else None
+
     query = "sum by (datasource) (clamp_min(sum_over_time(clamp_min(increase(grafana_datasource_request_total[1h]), 0)[24h:1h]) - 24 * min_over_time(clamp_min(increase(grafana_datasource_request_total[1h]), 0)[24h:1h]), 0))"
 
-    # Query Prometheus for Grafana usage
-    data = query_prometheus(prometheus_url, query)
+    data = query_prometheus(prometheus_url, query, username, password)
     if not data:
         logger.warning("Could not fetch Grafana usage data from Prometheus")
         return {}
@@ -389,56 +396,104 @@ def collect_grafana_usage(prometheus_url: str) -> Dict[str, int]:
         return {}
 
 
-def collect_and_send_version_data(prometheus_url: str, labels: Dict[str, str]) -> None:
+def collect_and_send_version_data(prometheus_url: str, labels: Dict[str, str], credentials: Optional[Dict[str, str]] = None) -> None:
     """
     Collect image versions from Prometheus and send them to Loki.
-    
-    Args:
-        prometheus_url: URL of the Prometheus instance
-        labels: Dictionary containing additional labels
     """
     logger.info("Collecting and sending image data")
-    
-    # Collect image versions
-    images = collect_image_versions(prometheus_url, labels)
+    images = collect_image_versions(prometheus_url, labels, credentials)
     if not images:
         logger.error("Failed to collect image versions")
         return
-    
-    # Format and send image data
     format_and_send_image_data(images, labels)
     logger.info("Completed image data collection and sending")
 
 
-def collect_and_send_grafana_usage(prometheus_url: str, labels: Dict[str, str]) -> None:
+def collect_and_send_grafana_usage(prometheus_url: str, labels: Dict[str, str], credentials: Optional[Dict[str, str]] = None) -> None:
     """
     Collect Grafana usage data from Prometheus and send it to Loki.
-    
-    Args:
-        prometheus_url: URL of the Prometheus instance
-        labels: Dictionary containing additional labels
     """
     logger.info("Collecting and sending Grafana usage data")
-    
-    # Collect Grafana usage
-    grafana_usage = collect_grafana_usage(prometheus_url)
-    
-    # Format and send Grafana usage data
+    grafana_usage = collect_grafana_usage(prometheus_url, credentials)
     format_and_send_grafana_usage_data(grafana_usage, labels)
     logger.info("Completed Grafana usage data collection and sending")
 
-def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> None:
+def query_loki(loki_url: str, query: str, username: Optional[str] = None, password: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    """
+    Run a LogQL instant metric query against Loki and return the response.
+    """
+    try:
+        logger.info(f"Querying Loki with query: {query}")
+        auth = (username, password) if username and password else None
+        response = requests.get(
+            f"{loki_url}/loki/api/v1/query",
+            params={'query': query},
+            auth=auth
+        )
+        response.raise_for_status()
+        logger.debug("Successfully received response from Loki")
+        return response.json()
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error querying Loki: {e}")
+        return None
+
+
+def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str]) -> None:
+    """
+    Count 'database is locked' errors in grafana-ui logs over the last 24h and send to central Loki.
+    Source Loki credentials from SOURCE_LOKI_USERNAME / SOURCE_LOKI_PASSWORD env vars (optional).
+    """
+    logger.info("Collecting and sending Grafana DB lock error data")
+
+    namespace = labels.get('namespace') or os.getenv('NAMESPACE', '')
+    service = 'grafana-ui'
+    username = os.getenv('SOURCE_LOKI_USERNAME', '').strip() or None
+    password = os.getenv('SOURCE_LOKI_PASSWORD', '').strip() or None
+
+    source_loki_url = os.getenv('SOURCE_LOKI_URL') or f"http://duplo-logging-gateway.{namespace}.svc.cluster.local"
+    query = f'sum(count_over_time({{namespace="{namespace}", service_name="{service}"}} |= `database is locked` != `logger=tsdb` [24h]))'
+
+    data = query_loki(source_loki_url, query, username, password)
+
+    count = 0
+    if data and 'data' in data and 'result' in data['data'] and data['data']['result']:
+        try:
+            count = int(float(data['data']['result'][0]['value'][1]))
+        except (KeyError, IndexError, ValueError) as e:
+            logger.error(f"Error parsing Loki DB lock count: {e}")
+
+    logger.info(f"Grafana DB lock error count (last 24h): {count}")
+
+    current_time = str(int(time.time() * 1_000_000_000))
+    values = [[current_time, json.dumps({
+        "namespace": namespace,
+        "service": service,
+        "db_lock_error_count_24h": count
+    })]]
+
+    send_to_loki(
+        "grafana_db_lock_errors",
+        "loki",
+        "db_lock_error_count_24h",
+        values
+    )
+    logger.info("Completed Grafana DB lock error data collection and sending")
+
+
+def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, credentials: Optional[Dict[str, str]] = None) -> None:
     """
     Collects 24h pod/node resource stats and otel_node_count for all clusters/namespaces;
     sends them in a *single* Loki push, one log-line per resource, in your requested JSON format.
     """
     logger.info("Collecting 24h OTEL pod/node usage statistics")
     namespace_regex = labels.get('namespace_filter', '.*otel.*')
+    username = credentials.get('username') if credentials else None
+    password = credentials.get('password') if credentials else None
 
     # 1. Excluded pods (DaemonSet/Job)
     def excluded_pods_by_owner_kind(kind):
         query = f'kube_pod_owner{{namespace=~"{namespace_regex}",owner_kind="{kind}"}}'
-        response = query_prometheus(prometheus_url, query) or {}
+        response = query_prometheus(prometheus_url, query, username, password) or {}
         return {(m['metric'].get('cluster'), m['metric'].get('namespace'), m['metric'].get('pod'))
                 for m in response.get("data", {}).get("result", [])}
 
@@ -449,7 +504,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
     # 2. Pod-to-node mapping
     pod_to_node = {}
     pod_node_query = f'kube_pod_info{{namespace=~"{namespace_regex}"}}'
-    pod_node_response = query_prometheus(prometheus_url, pod_node_query) or {}
+    pod_node_response = query_prometheus(prometheus_url, pod_node_query, username, password) or {}
     for record in pod_node_response.get("data", {}).get("result", []):
         cluster = record['metric'].get('cluster')
         namespace = record['metric'].get('namespace')
@@ -460,7 +515,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
 
     # 3. Node -> instance_type mapping
     instance_type_query = 'kube_node_labels{job="integrations/kubernetes/kube-state-metrics"}'
-    instance_type_data = query_prometheus(prometheus_url, instance_type_query) or {}
+    instance_type_data = query_prometheus(prometheus_url, instance_type_query, username, password) or {}
     node_instance_type = {}
     for res in instance_type_data.get("data", {}).get("result", []):
         cluster = res['metric'].get('cluster')
@@ -475,7 +530,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
 
     # 4. Pod resource requests/limits
     def extract_pod_resource_usage(prometheus_query):
-        response = query_prometheus(prometheus_url, prometheus_query)
+        response = query_prometheus(prometheus_url, prometheus_query, username, password)
         result = {}
         if response and 'result' in response.get('data', {}):
             for record in response['data']['result']:
@@ -501,7 +556,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
         "mem_min": f'min by (pod,namespace,cluster) (min_over_time(container_memory_rss{{{label_filter}}}[24h]))',
         "mem_max": f'max by (pod,namespace,cluster) (max_over_time(container_memory_rss{{{label_filter}}}[24h]))',
     }
-    pod_usage_stats = {k: query_prometheus(prometheus_url, query) for k, query in promql_templates.items()}
+    pod_usage_stats = {k: query_prometheus(prometheus_url, query, username, password) for k, query in promql_templates.items()}
 
     def usage_stat(stat, cluster, pod_name, namespace):
         for record in (pod_usage_stats[stat] or {}).get('data', {}).get('result', []):
@@ -564,7 +619,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
         mem_min_query = mem_avg_query.replace("avg_over_time", "min_over_time")
         mem_max_query = mem_avg_query.replace("avg_over_time", "max_over_time")
         def get_stat(query):
-            data = query_prometheus(prometheus_url, query)
+            data = query_prometheus(prometheus_url, query, username, password)
             try:
                 if data and 'result' in data['data'] and data['data']['result']:
                     return float(data['data']['result'][0]['value'][1])
@@ -641,6 +696,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict) -> N
     else:
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
 
+
 def main() -> None:
     """
     Main function that orchestrates the monitoring data collection process.
@@ -660,11 +716,15 @@ def main() -> None:
     
     # Get configuration from environment
     prometheus_url = os.getenv('PROMETHEUS_URL')
-    
-    # Collect and send data to Loki
-    collect_and_send_version_data(prometheus_url, labels)
-    collect_and_send_grafana_usage(prometheus_url, labels)
-    collect_and_send_otel_pod_node_usage(prometheus_url, labels)
+    prom_user = os.getenv('SOURCE_PROMETHEUS_USERNAME', '').strip()
+    prom_pass = os.getenv('SOURCE_PROMETHEUS_PASSWORD', '').strip()
+    prometheus_creds = {'username': prom_user, 'password': prom_pass} if prom_user and prom_pass else None
+
+    # Collect and send data
+    collect_and_send_version_data(prometheus_url, labels, prometheus_creds)
+    collect_and_send_grafana_usage(prometheus_url, labels, prometheus_creds)
+    collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
+    collect_and_send_grafana_db_lock_errors(labels)
     
     logger.info("Completed monitoring data collection")
 
