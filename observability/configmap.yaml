@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: otel-scripts
-  namespace: duploservices-otel-nonprod
+  namespace: duploservices-aos
 data:
   entrypoint.sh: |
     #!/bin/sh

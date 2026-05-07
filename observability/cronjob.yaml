@@ -1,10 +1,10 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: otel-observability-collector
-  namespace: duploservices-otel-nonprod
+  name: otel-observability-test
+  namespace: duploservices-aos
 spec:
-  schedule: "0 0 * * *"  # Run every 24 hours at midnight
+  schedule: "0/5 * * * *"  # Run every 24 hours at midnight
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid
@@ -14,37 +14,24 @@ spec:
         spec:
           containers:
           - name: otel-collector
-            image: alpine/git:latest
-            command:
-            - /bin/sh  # Alpine uses sh instead of bash
-            - /scripts/entrypoint.sh
+            image: duplocloud/duplo-observability:stable
             env:
             - name: PROMETHEUS_URL
               value: "http://duplo-metrics-nginx:80/prometheus"
             - name: LOKI_URL
               value: "https://logs.prod-apps.duplocloud.net"
-            - name: LOKI_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: loki-credentials
-                  key: username
-            - name: LOKI_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: loki-credentials
-                  key: password
             - name: CLUSTER
-              value: "duploinfra-nonprod"
+              value: "duploinfra-aos"
             - name: NAMESPACE
-              value: "duploservices-otel-nonprod"
+              value: "duploservices-aos"
             - name: CUSTOMER
-              value: "duplocloud"
+              value: "duplo-cloud"
             - name: ENVIRONMENT
-              value: "test24"
+              value: "aos-demo"
             - name: DUPLO_URL
-              value: "https://test24.duplocloud.net"
+              value: "https://aos-demo.duplocloud.net"
             - name: NAMESPACE_FILTER
-              value: ".*otel.*"
+              value: ".*aos.*"
             - name: GPG_PASSPHRASE
               valueFrom:
                 secretKeyRef:
@@ -52,12 +39,7 @@ spec:
                   key: gpg_passphrase
             - name: JOB_VERSION
               value: "2.1.0"
-            volumeMounts:
-            - name: scripts
-              mountPath: /scripts
-          volumes:
-          - name: scripts
-            configMap:
-              name: otel-scripts
-              defaultMode: 0755
+            - name: BRANCH_NAME
+              value: "cronjob-test"
+          serviceAccountName: duploservices-aos-edit-user
           restartPolicy: OnFailure
