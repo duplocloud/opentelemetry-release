@@ -23,8 +23,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-_REQUEST_TIMEOUT = 30  # seconds for all HTTP calls
-
 
 def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = None, password: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """
@@ -728,7 +726,7 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     params = {'labelSelector': 'owner=helm,status=deployed'}
 
     try:
-        response = requests.get(url, headers=headers, verify=ca_path, timeout=_REQUEST_TIMEOUT, params=params)
+        response = requests.get(url, headers=headers, verify=ca_path, params=params)
         response.raise_for_status()
         items = response.json().get('items', [])
         seen_releases = set()
