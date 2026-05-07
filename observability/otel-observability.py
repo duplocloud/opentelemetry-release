@@ -24,6 +24,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+
 def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = None, password: Optional[str] = None) -> Optional[Dict[str, Any]]:
     """
     Query Prometheus and return the response.
@@ -695,88 +696,6 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
 
 
-def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
-    """
-    Collect Helm chart versions from Helm release secrets via the Kubernetes API.
-
-    Queries all secrets with owner=helm,status=deployed labels and decodes each
-    release to extract chart name and version. This captures all Helm releases
-    including those whose pods don't carry the helm.sh/chart label (e.g. Pyroscope).
-    """
-    import base64
-    import gzip
-
-    logger.info("Collecting Helm chart versions from Helm release secrets")
-    records = []
-
-    token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
-    ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
-    k8s_host = os.getenv('KUBERNETES_SERVICE_HOST', 'kubernetes.default.svc')
-    k8s_port = os.getenv('KUBERNETES_SERVICE_PORT', '443')
-
-    try:
-        with open(token_path) as f:
-            token = f.read().strip()
-    except OSError as e:
-        logger.error(f"Could not read service account token: {e}")
-        return records
-
-    url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
-    headers = {'Authorization': f'Bearer {token}'}
-    params = {'labelSelector': 'owner=helm,status=deployed'}
-
-    try:
-        response = requests.get(url, headers=headers, verify=ca_path, params=params)
-        response.raise_for_status()
-        items = response.json().get('items', [])
-        seen_releases = set()
-        for secret in items:
-            release_name = secret.get('metadata', {}).get('labels', {}).get('name', '')
-            if not release_name or release_name in seen_releases:
-                continue
-            release_b64 = secret.get('data', {}).get('release')
-            if not release_b64:
-                continue
-            try:
-                # K8s base64-encodes secret data; Helm also base64+gzip-encodes the release.
-                # So the value is double-encoded: base64(base64(gzip(json))).
-                helm_encoded = base64.b64decode(release_b64)
-                release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
-                chart_name = release_data.get('chart', {}).get('metadata', {}).get('name', release_name)
-                chart_version = release_data.get('chart', {}).get('metadata', {}).get('version')
-            except Exception as e:
-                logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
-                continue
-            seen_releases.add(release_name)
-            records.append({
-                "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
-                "spec": {
-                    "release": release_name,
-                    "chart": chart_name,
-                    "chart_version": chart_version,
-                    "ready": "True"
-                }
-            })
-        logger.info(f"Collected {len(records)} Helm chart version records")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error querying Kubernetes API for Helm secrets: {e}")
-
-    return records
-
-
-def collect_and_send_helm_chart_versions(namespace: str) -> None:
-    """Collect Helm chart versions from pod labels and send to Loki."""
-    logger.info("Collecting and sending Helm chart versions")
-    records = collect_helm_chart_versions(namespace)
-    if not records:
-        logger.warning("No Helm chart version data collected")
-        return
-    current_time_ns = str(int(time.time() * 1e9))
-    values = [[current_time_ns, json.dumps(r)] for r in records]
-    send_to_loki("helm_chart_versions", "kubernetes", "helm_chart_version_info", values)
-    logger.info("Completed Helm chart version collection and sending")
-
-
 def main() -> None:
     """
     Main function that orchestrates the monitoring data collection process.
@@ -809,8 +728,7 @@ def main() -> None:
     collect_and_send_grafana_usage(prometheus_url, labels, prometheus_creds)
     collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
     collect_and_send_grafana_db_lock_errors(labels, loki_creds)
-    collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
-
+    
     logger.info("Completed monitoring data collection")
 
 
