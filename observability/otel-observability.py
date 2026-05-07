@@ -9,7 +9,6 @@ It extracts information about monitoring components, their images, and Grafana u
 import json
 import logging
 import os
-import re
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union, Tuple
@@ -698,43 +697,18 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
 
 
-def _get_helm_release_version_from_secret(namespace: str, release_name: str, k8s_host: str, k8s_port: str, headers: dict, ca_path: str) -> Optional[str]:
-    """
-    Decode the Helm release secret to get the real chart version.
-    Used as a fallback for umbrella charts where pod labels show sub-chart names.
-    """
-    import base64, gzip
-    url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
-    params = {'labelSelector': f'owner=helm,status=deployed,name={release_name}'}
-    try:
-        response = requests.get(url, headers=headers, verify=ca_path, timeout=_REQUEST_TIMEOUT, params=params)
-        response.raise_for_status()
-        items = response.json().get('items', [])
-        if not items:
-            return None
-        release_b64 = items[0].get('data', {}).get('release')
-        if not release_b64:
-            return None
-        # K8s base64-encodes secret data; Helm also base64+gzip-encodes the release.
-        # So the value is double-encoded: base64(base64(gzip(json))).
-        helm_encoded = base64.b64decode(release_b64)
-        release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
-        return release_data.get('chart', {}).get('metadata', {}).get('version')
-    except Exception as e:
-        logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
-        return None
-
-
 def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     """
-    Collect Helm chart versions from pod labels via the Kubernetes API.
+    Collect Helm chart versions from Helm release secrets via the Kubernetes API.
 
-    Queries pods with the 'helm.sh/chart' label and extracts chart name
-    and version. Deduplicates by release name. For umbrella charts where
-    pod labels show a sub-chart name instead of the release name, falls back
-    to decoding the Helm release secret to get the correct chart version.
+    Queries all secrets with owner=helm,status=deployed labels and decodes each
+    release to extract chart name and version. This captures all Helm releases
+    including those whose pods don't carry the helm.sh/chart label (e.g. Pyroscope).
     """
-    logger.info("Collecting Helm chart versions from pod labels")
+    import base64
+    import gzip
+
+    logger.info("Collecting Helm chart versions from Helm release secrets")
     records = []
 
     token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
@@ -749,37 +723,32 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
         logger.error(f"Could not read service account token: {e}")
         return records
 
-    url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods"
+    url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
     headers = {'Authorization': f'Bearer {token}'}
-    params = {'labelSelector': 'helm.sh/chart'}
+    params = {'labelSelector': 'owner=helm,status=deployed'}
 
     try:
         response = requests.get(url, headers=headers, verify=ca_path, timeout=_REQUEST_TIMEOUT, params=params)
         response.raise_for_status()
         items = response.json().get('items', [])
         seen_releases = set()
-        for pod in items:
-            labels = pod.get('metadata', {}).get('labels', {})
-            chart_label = labels.get('helm.sh/chart', '')
-            release_name = labels.get('app.kubernetes.io/instance', '')
-            if not chart_label or release_name in seen_releases:
+        for secret in items:
+            release_name = secret.get('metadata', {}).get('labels', {}).get('name', '')
+            if not release_name or release_name in seen_releases:
                 continue
-            # chart_label format: "chartname-1.2.3"
-            match = re.match(r'^(.+)-(\d+\..+)$', chart_label)
-            if match:
-                chart_name, chart_version = match.group(1), match.group(2)
-            else:
-                chart_name, chart_version = chart_label, None
-            # Umbrella chart: pod sub-chart name doesn't match release name
-            # Fall back to decoding Helm release secret for the correct version
-            if chart_name != release_name:
-                logger.debug(f"Release '{release_name}' has sub-chart pod label '{chart_name}', fetching version from secret")
-                secret_version = _get_helm_release_version_from_secret(
-                    namespace, release_name, k8s_host, k8s_port, headers, ca_path
-                )
-                if secret_version:
-                    chart_name = release_name
-                    chart_version = secret_version
+            release_b64 = secret.get('data', {}).get('release')
+            if not release_b64:
+                continue
+            try:
+                # K8s base64-encodes secret data; Helm also base64+gzip-encodes the release.
+                # So the value is double-encoded: base64(base64(gzip(json))).
+                helm_encoded = base64.b64decode(release_b64)
+                release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
+                chart_name = release_data.get('chart', {}).get('metadata', {}).get('name', release_name)
+                chart_version = release_data.get('chart', {}).get('metadata', {}).get('version')
+            except Exception as e:
+                logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
+                continue
             seen_releases.add(release_name)
             records.append({
                 "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
@@ -792,7 +761,7 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
             })
         logger.info(f"Collected {len(records)} Helm chart version records")
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error querying Kubernetes API for pod labels: {e}")
+        logger.error(f"Error querying Kubernetes API for Helm secrets: {e}")
 
     return records
 
