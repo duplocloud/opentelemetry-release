@@ -9,7 +9,6 @@ It extracts information about monitoring components, their images, and Grafana u
 import json
 import logging
 import os
-import re
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union, Tuple
@@ -23,9 +22,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
-
-_REQUEST_TIMEOUT = 30   # seconds for all HTTP calls
-_LOKI_CHUNK_SIZE = 500  # max log lines per Loki push
 
 
 
@@ -47,7 +43,8 @@ def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = 
         auth = (username, password) if username and password else None
         response = requests.get(
             f"{prometheus_url}/api/v1/query",
-            params={'query': query}
+            params={'query': query},
+            auth=auth
         )
         response.raise_for_status()
         logger.debug("Successfully received response from Prometheus")
@@ -60,24 +57,24 @@ def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = 
 def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[Dict[str, Dict[str, Dict[str, Dict[str, str]]]]]:
     """
     Extract image information for monitoring components and daemonsets.
-
+    
     Args:
         prometheus_response: Response from Prometheus containing container information
-
+        
     Returns:
         Dictionary with image information categorized by cluster and namespace, then by 'main' and 'monitoring'
     """
     try:
         logger.info("Extracting monitoring images from Prometheus response")
         images = {}
-
+        
         for result in prometheus_response['data']['result']:
             container = result['metric']['container']
             image = result['metric']['image']
             pod = result['metric']['pod']
             cluster = result['metric']['cluster']
             namespace = result['metric']['namespace']
-
+            
             # Initialize cluster and namespace structure if not exists
             if cluster not in images:
                 images[cluster] = {}
@@ -86,13 +83,13 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
                     'main': {},
                     'monitoring': {}
                 }
-
+            
             # Determine category based on pod name
             category = 'monitoring' if pod.startswith('duplo-monitoring-') else 'main'
-
+            
             # Map container names to their service names
             service_name = None
-
+            
             # Check for special cases first
             if container in ['ingester', 'distributor', 'compactor', 'querier', 'query-frontend', 'ruler', 'store-gateway', 'metrics-generator']:
                 # Check if it's tempo or mimir
@@ -117,11 +114,11 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
             else:
                 # Default case: use container name as service name
                 service_name = container
-
+            
             if service_name:
                 images[cluster][namespace][category][service_name] = image
                 logger.debug(f"Added image for service {service_name} in category {category} for cluster {cluster} namespace {namespace}")
-
+                
         logger.info(f"Successfully extracted images for {sum(len(ns['main']) + len(ns['monitoring']) for cluster in images.values() for ns in cluster.values())} services")
         return images
     except (KeyError, IndexError) as e:
@@ -132,25 +129,25 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
 def send_to_loki(
     job: str,
     source: str,
-    data_type: str,
+    type: str,
     values: List[List[str]]
 ) -> None:
     """
     Send data to Loki in JSON format with stream labels.
-
+    
     Args:
         job: Job name for the stream
         source: Source of the data
-        data_type: Type of data
+        type: Type of data
         values: List of [timestamp, value] pairs to send
     """
-    logger.info(f"Sending {data_type} data to Loki ({len(values)} entries)")
-
+    logger.info(f"Sending {type} data to Loki")
+    
     # Get Loki credentials and URL from environment
     loki_url = os.getenv('LOKI_URL')
     loki_username = os.getenv('LOKI_USERNAME')
     loki_password = os.getenv('LOKI_PASSWORD')
-
+    
     # Get static labels from environment variables
     cluster = os.getenv('CLUSTER', '')
     namespace = os.getenv('NAMESPACE', '')
@@ -158,12 +155,12 @@ def send_to_loki(
     environment = os.getenv('ENVIRONMENT', '')
     duplo_url = os.getenv('DUPLO_URL', '')
     job_version = os.getenv('JOB_VERSION', '')
-
+    
     # Prepare the stream with labels
     stream = {
         "job": job,
         "source": source,
-        "type": data_type,
+        "type": type,
         "cluster": cluster,
         "namespace": namespace,
         "customer": customer,
@@ -171,50 +168,52 @@ def send_to_loki(
         "duplo_url": duplo_url,
         "job_version": job_version
     }
+    
+    # Create the payload
+    payload = {
+        "streams": [
+            {
+                "stream": stream,
+                "values": values
+            }
+        ]
+    }
+    
+    # Log the payload for debugging
+    logger.debug(f"Loki payload: {json.dumps(payload, indent=2)}")
 
-    auth = (loki_username, loki_password) if loki_username and loki_password else None
-    if auth:
-        logger.debug("Using basic authentication for Loki")
-
-    headers = {'Content-Type': 'application/json'}
-
-    # Send in chunks to avoid oversized payloads
-    for chunk_start in range(0, len(values), _LOKI_CHUNK_SIZE):
-        chunk = values[chunk_start:chunk_start + _LOKI_CHUNK_SIZE]
-        payload = {
-            "streams": [
-                {
-                    "stream": stream,
-                    "values": chunk
-                }
-            ]
-        }
-        logger.debug(f"Loki payload chunk [{chunk_start}:{chunk_start + len(chunk)}]: {json.dumps(payload, indent=2)}")
-        try:
-            response = requests.post(
-                f"{loki_url}/loki/api/v1/push",
-                json=payload,
-                headers=headers,
-                auth=auth,
-                timeout=_REQUEST_TIMEOUT
-            )
-            response.raise_for_status()
-            logger.info(f"Successfully sent chunk of {len(chunk)} {data_type} entries to Loki")
-            logger.debug(f"Loki response status code: {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            logger.error(f"Error sending data to Loki: {e}")
+    try:
+        headers = {'Content-Type': 'application/json'}
+        
+        # Add authentication if credentials are provided
+        auth = None
+        if loki_username and loki_password:
+            auth = (loki_username, loki_password)
+            logger.debug("Using basic authentication for Loki")
+        
+        response = requests.post(
+            f"{loki_url}/loki/api/v1/push",
+            json=payload,
+            headers=headers,
+            auth=auth
+        )
+        response.raise_for_status()
+        logger.info(f"Successfully sent {type} data to Loki")
+        logger.debug(f"Loki response status code: {response.status_code}")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error sending data to Loki: {e}")
 
 
-def format_and_send_image_data(images: Dict[str, Dict[str, Dict[str, Dict[str, str]]]], helm_versions: Optional[Dict[str, str]] = None) -> None:
+def format_and_send_image_data(images: Dict[str, Dict[str, Dict[str, Dict[str, str]]]], labels: Dict[str, str]) -> None:
     """
     Format and send image data to Loki.
-
+    
     Args:
         images: Dictionary containing image information for different services
-        helm_versions: Optional dict of chart name -> chart_version from HelmReleases
+        labels: Dictionary containing additional labels
     """
     current_time = int(time.time() * 1000000000)  # Current time in nanoseconds
-
+    
     # Process each cluster and namespace
     for cluster, namespaces in images.items():
         for namespace, categories in namespaces.items():
@@ -235,19 +234,16 @@ def format_and_send_image_data(images: Dict[str, Dict[str, Dict[str, Dict[str, s
                     "main",
                     values
                 )
-
-            # Process monitoring images — inject k8s-monitoring chart version if available
+            
+            # Process monitoring images
             if categories['monitoring']:
-                monitoring_spec = dict(categories['monitoring'])
-                if helm_versions and 'k8s-monitoring' in helm_versions:
-                    monitoring_spec['k8s-monitoring'] = helm_versions['k8s-monitoring']
                 values = [
                     [str(current_time), json.dumps({
                         "metadata": {
                             "cluster": cluster,
                             "namespace": namespace
                         },
-                        "spec": monitoring_spec
+                        "spec": categories['monitoring']
                     })]
                 ]
                 send_to_loki(
@@ -258,23 +254,20 @@ def format_and_send_image_data(images: Dict[str, Dict[str, Dict[str, Dict[str, s
                 )
 
 
-def format_and_send_grafana_usage_data(grafana_usage: Dict[str, int]) -> None:
+def format_and_send_grafana_usage_data(grafana_usage: Dict[str, int], labels: Dict[str, str]) -> None:
     """
     Format and send Grafana usage data to Loki.
-
+    
     Args:
         grafana_usage: Dictionary containing Grafana datasource usage information
+        labels: Dictionary containing additional labels
     """
-    if not grafana_usage:
-        logger.info("No Grafana usage data to send")
-        return
-
     current_time = int(time.time() * 1000000000)  # Current time in nanoseconds
-
+    
     values = [
         [str(current_time), json.dumps(grafana_usage)]
     ]
-
+    
     send_to_loki(
         "grafana_usage",
         "prometheus",
@@ -286,13 +279,17 @@ def format_and_send_grafana_usage_data(grafana_usage: Dict[str, int]) -> None:
 def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     """
     Validate required environment variables and return configuration.
-
+    
     Returns:
         Tuple containing:
         - Boolean indicating if validation was successful
         - Dictionary of labels from environment variables
         - List of missing environment variables
     """
+    # Configuration from environment variables
+    prometheus_url = os.getenv('PROMETHEUS_URL')
+    loki_url = os.getenv('LOKI_URL')
+    
     # Additional labels from environment variables
     labels = {
         'cluster': os.getenv('CLUSTER', ''),
@@ -304,18 +301,18 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
         # Ability to filter the custom OTEL namespace for the query
         'namespace_filter': os.getenv('NAMESPACE_FILTER', '.*otel.*')
     }
-
+    
     # Validate required environment variables
     required_vars = [
         'PROMETHEUS_URL', 'LOKI_URL', 'CLUSTER', 'NAMESPACE',
         'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL'
     ]
     missing_vars = [var for var in required_vars if not os.getenv(var)]
-
+    
     if missing_vars:
         logger.error(f"Missing required environment variables: {', '.join(missing_vars)}")
         return False, labels, missing_vars
-
+    
     return True, labels, []
 
 
@@ -340,7 +337,7 @@ def collect_image_versions(prometheus_url: str, labels: Dict[str, str], credenti
 
     query = f'''
     count by(cluster, namespace, container, image, pod) (
-      kube_pod_container_info{{namespace=~"{namespace_filter}", container!~"config-reloader|loki-sc-rules|memcached|gateway|exporter|kube-rbac-proxy|nginx|pushgateway|duplo-observability|otel-collector"}}
+      kube_pod_container_info{{namespace=~"{namespace_filter}", container!~"config-reloader|loki-sc-rules|memcached|gateway|exporter|kube-rbac-proxy|nginx|pushgateway"}}
     )
     '''
 
@@ -348,13 +345,13 @@ def collect_image_versions(prometheus_url: str, labels: Dict[str, str], credenti
     if not prometheus_response:
         logger.error("Failed to query Prometheus for image versions")
         return None
-
+    
     # Extract monitoring images
     images = extract_monitoring_images(prometheus_response)
     if not images:
         logger.error("Failed to extract monitoring images from Prometheus response")
         return None
-
+    
     logger.info("Successfully collected image versions")
     return images
 
@@ -381,7 +378,7 @@ def collect_grafana_usage(prometheus_url: str, credentials: Optional[Dict[str, s
     if not data:
         logger.warning("Could not fetch Grafana usage data from Prometheus")
         return {}
-
+    
     # Extract datasource usage data
     usage_data = {}
     try:
@@ -391,7 +388,7 @@ def collect_grafana_usage(prometheus_url: str, credentials: Optional[Dict[str, s
                 value = float(result['value'][1])  # Get the instant value
                 usage_data[datasource] = round(value)  # Round to nearest integer
                 logger.debug(f"Datasource {datasource} usage: {usage_data[datasource]}")
-
+        
         logger.info(f"Successfully collected usage data for {len(usage_data)} datasources")
         return usage_data
     except (KeyError, IndexError, ValueError) as e:
@@ -485,7 +482,7 @@ def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str], credentials:
 def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, credentials: Optional[Dict[str, str]] = None) -> None:
     """
     Collects 24h pod/node resource stats and otel_node_count for all clusters/namespaces;
-    sends them in a *single* Loki push (chunked), one log-line per resource, in your requested JSON format.
+    sends them in a *single* Loki push, one log-line per resource, in your requested JSON format.
     """
     logger.info("Collecting 24h OTEL pod/node usage statistics")
     namespace_regex = labels.get('namespace_filter', '.*otel.*')
@@ -543,13 +540,12 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
                 if cluster and namespace and pod_name:
                     result[(cluster, namespace, pod_name)] = value
         return result
-
     cpu_request = extract_pod_resource_usage(f'sum by(pod,namespace,cluster) (kube_pod_container_resource_requests{{resource="cpu",namespace=~"{namespace_regex}"}})')
     mem_request = extract_pod_resource_usage(f'sum by(pod,namespace,cluster) (kube_pod_container_resource_requests{{resource="memory",namespace=~"{namespace_regex}"}})')
     cpu_limit = extract_pod_resource_usage(f'sum by(pod,namespace,cluster) (kube_pod_container_resource_limits{{resource="cpu",namespace=~"{namespace_regex}"}})')
     mem_limit = extract_pod_resource_usage(f'sum by(pod,namespace,cluster) (kube_pod_container_resource_limits{{resource="memory",namespace=~"{namespace_regex}"}})')
 
-    # 5. Pod 24h usage — query all stats up front, then build O(1) lookup dicts
+    # 5. Pod 24h usage
     label_filter = f'namespace=~"{namespace_regex}",container!="",container!="POD"'
     promql_templates = {
         "cpu_avg": f'avg by (pod,namespace,cluster) (avg_over_time(rate(container_cpu_usage_seconds_total{{{label_filter}}}[5m])[24h:5m]))',
@@ -561,14 +557,15 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
     }
     pod_usage_stats = {k: query_prometheus(prometheus_url, query, username, password) for k, query in promql_templates.items()}
 
-    # Build O(1) lookup dicts (replaces the O(n²) linear scan)
-    stat_lookup = _build_stat_lookup(pod_usage_stats)
+    def usage_stat(stat, cluster, pod_name, namespace):
+        for record in (pod_usage_stats[stat] or {}).get('data', {}).get('result', []):
+            m = record.get('metric', {})
+            if m.get('cluster') == cluster and m.get('pod') == pod_name and m.get('namespace') == namespace:
+                return float(record['value'][1])
+        return None
 
-    def usage_stat(stat: str, cluster: str, pod_name: str, namespace: str) -> Optional[float]:
-        return stat_lookup[stat].get((cluster, namespace, pod_name))
-
-    pods_by_namespace: Dict[Tuple[str, str], list] = {}
-    nodes_by_namespace: Dict[Tuple[str, str], set] = {}
+    pods_by_namespace = {}
+    nodes_by_namespace = {}
 
     for record in (pod_usage_stats['cpu_avg'] or {}).get('data', {}).get('result', []):
         cluster = record['metric'].get('cluster')
@@ -582,32 +579,19 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         ns_key = (cluster, namespace)
         nodes_by_namespace.setdefault(ns_key, set()).add(node_name)
         pods_by_namespace.setdefault(ns_key, [])
-
-        # Fetch each stat once and reuse the value
-        cpu_avg_v = usage_stat('cpu_avg', cluster, pod_name, namespace)
-        cpu_min_v = usage_stat('cpu_min', cluster, pod_name, namespace)
-        cpu_max_v = usage_stat('cpu_max', cluster, pod_name, namespace)
-        mem_avg_v = usage_stat('mem_avg', cluster, pod_name, namespace)
-        mem_min_v = usage_stat('mem_min', cluster, pod_name, namespace)
-        mem_max_v = usage_stat('mem_max', cluster, pod_name, namespace)
-        cpu_req_v = cpu_request.get((cluster, namespace, pod_name))
-        cpu_lim_v = cpu_limit.get((cluster, namespace, pod_name))
-        mem_req_v = mem_request.get((cluster, namespace, pod_name))
-        mem_lim_v = mem_limit.get((cluster, namespace, pod_name))
-
         pod_info = {
             "pod": pod_name,
             "node": node_name,
-            "cpu_millicores_avg":     round(cpu_avg_v * 1000, 4) if cpu_avg_v is not None else None,
-            "cpu_millicores_min":     round(cpu_min_v * 1000, 4) if cpu_min_v is not None else None,
-            "cpu_millicores_max":     round(cpu_max_v * 1000, 4) if cpu_max_v is not None else None,
-            "memory_MB_avg":          round(mem_avg_v / (1024 * 1024), 3) if mem_avg_v is not None else None,
-            "memory_MB_min":          round(mem_min_v / (1024 * 1024), 3) if mem_min_v is not None else None,
-            "memory_MB_max":          round(mem_max_v / (1024 * 1024), 3) if mem_max_v is not None else None,
-            "cpu_millicores_request": round(cpu_req_v * 1000, 2) if cpu_req_v is not None else None,
-            "cpu_millicores_limit":   round(cpu_lim_v * 1000, 2) if cpu_lim_v is not None else None,
-            "memory_MB_request":      round(mem_req_v / (1024 * 1024), 2) if mem_req_v is not None else None,
-            "memory_MB_limit":        round(mem_lim_v / (1024 * 1024), 2) if mem_lim_v is not None else None,
+            "cpu_millicores_avg": round(usage_stat('cpu_avg', cluster, pod_name, namespace)*1000, 4) if usage_stat('cpu_avg', cluster, pod_name, namespace) is not None else None,
+            "cpu_millicores_min": round(usage_stat('cpu_min', cluster, pod_name, namespace)*1000, 4) if usage_stat('cpu_min', cluster, pod_name, namespace) is not None else None,
+            "cpu_millicores_max": round(usage_stat('cpu_max', cluster, pod_name, namespace)*1000, 4) if usage_stat('cpu_max', cluster, pod_name, namespace) is not None else None,
+            "memory_MB_avg": round(usage_stat('mem_avg', cluster, pod_name, namespace) / (1024 * 1024), 3) if usage_stat('mem_avg', cluster, pod_name, namespace) is not None else None,
+            "memory_MB_min": round(usage_stat('mem_min', cluster, pod_name, namespace) / (1024 * 1024), 3) if usage_stat('mem_min', cluster, pod_name, namespace) is not None else None,
+            "memory_MB_max": round(usage_stat('mem_max', cluster, pod_name, namespace) / (1024 * 1024), 3) if usage_stat('mem_max', cluster, pod_name, namespace) is not None else None,
+            "cpu_millicores_request": round(cpu_request.get((cluster, namespace, pod_name), 0) * 1000, 2) if cpu_request.get((cluster, namespace, pod_name)) is not None else None,
+            "cpu_millicores_limit": round(cpu_limit.get((cluster, namespace, pod_name), 0) * 1000, 2) if cpu_limit.get((cluster, namespace, pod_name)) is not None else None,
+            "memory_MB_request": round(mem_request.get((cluster, namespace, pod_name), 0) / (1024 * 1024), 2) if mem_request.get((cluster, namespace, pod_name)) is not None else None,
+            "memory_MB_limit": round(mem_limit.get((cluster, namespace, pod_name), 0) / (1024 * 1024), 2) if mem_limit.get((cluster, namespace, pod_name)) is not None else None,
         }
         pods_by_namespace[ns_key].append(pod_info)
 
@@ -656,7 +640,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
     sent_count = 0
     for cluster, namespace in all_ns_keys:
         pods = pods_by_namespace.get((cluster, namespace), [])
-        node_names = sorted({pod["node"] for pod in pods})
+        node_names = sorted(list({pod["node"] for pod in pods}))
 
         # Log node count entry
         entry_node_count = {
@@ -673,7 +657,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
 
         # Log individual node entries
         for node_name in node_names:
-            stats = all_node_stats.get((cluster, node_name), {})
+            stats = node_resource_stats(prometheus_url, node_name, cluster)
             node_info = {
                 "metadata": {
                     "cluster": cluster,
@@ -707,24 +691,23 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
             "otel_combined_usage_24h_per_ns",
             values
         )
-        logger.info(f"Sent {sent_count} Loki log entries")
+        logger.info(f"Sent {sent_count} Loki log entries in one POST")
     else:
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
 
 
-
 def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     """
-    Collect Helm chart versions from pod labels via the Kubernetes API.
+    Collect Helm chart versions from Helm release secrets via the Kubernetes API.
 
-    Queries pods with the 'helm.sh/chart' label and extracts chart name
-    and version. Deduplicates by release name so only one record per
-    Helm release is returned. Does not require Flux, CRDs, or secret access.
-
-    Returns:
-        List of dicts with chart version info per Helm release.
+    Queries all secrets with owner=helm,status=deployed labels and decodes each
+    release to extract chart name and version. This captures all Helm releases
+    including those whose pods don't carry the helm.sh/chart label (e.g. Pyroscope).
     """
-    logger.info("Collecting Helm chart versions from pod labels")
+    import base64
+    import gzip
+
+    logger.info("Collecting Helm chart versions from Helm release secrets")
     records = []
 
     token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
@@ -739,27 +722,32 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
         logger.error(f"Could not read service account token: {e}")
         return records
 
-    url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods"
+    url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
     headers = {'Authorization': f'Bearer {token}'}
-    params = {'labelSelector': 'helm.sh/chart'}
+    params = {'labelSelector': 'owner=helm,status=deployed'}
 
     try:
-        response = requests.get(url, headers=headers, verify=ca_path, timeout=_REQUEST_TIMEOUT, params=params)
+        response = requests.get(url, headers=headers, verify=ca_path, params=params)
         response.raise_for_status()
         items = response.json().get('items', [])
         seen_releases = set()
-        for pod in items:
-            labels = pod.get('metadata', {}).get('labels', {})
-            chart_label = labels.get('helm.sh/chart', '')
-            release_name = labels.get('app.kubernetes.io/instance', '')
-            if not chart_label or release_name in seen_releases:
+        for secret in items:
+            release_name = secret.get('metadata', {}).get('labels', {}).get('name', '')
+            if not release_name or release_name in seen_releases:
                 continue
-            # chart_label format: "chartname-1.2.3"
-            match = re.match(r'^(.+)-(\d+\..+)$', chart_label)
-            if match:
-                chart_name, chart_version = match.group(1), match.group(2)
-            else:
-                chart_name, chart_version = chart_label, None
+            release_b64 = secret.get('data', {}).get('release')
+            if not release_b64:
+                continue
+            try:
+                # K8s base64-encodes secret data; Helm also base64+gzip-encodes the release.
+                # So the value is double-encoded: base64(base64(gzip(json))).
+                helm_encoded = base64.b64decode(release_b64)
+                release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
+                chart_name = release_data.get('chart', {}).get('metadata', {}).get('name', release_name)
+                chart_version = release_data.get('chart', {}).get('metadata', {}).get('version')
+            except Exception as e:
+                logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
+                continue
             seen_releases.add(release_name)
             records.append({
                 "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
@@ -772,24 +760,22 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
             })
         logger.info(f"Collected {len(records)} Helm chart version records")
     except requests.exceptions.RequestException as e:
-        logger.error(f"Error querying Kubernetes API for pod labels: {e}")
+        logger.error(f"Error querying Kubernetes API for Helm secrets: {e}")
 
     return records
 
 
 def collect_and_send_helm_chart_versions(namespace: str) -> None:
-    """Collect Helm chart versions and send to Loki."""
+    """Collect Helm chart versions from Helm release secrets and send to Loki."""
     logger.info("Collecting and sending Helm chart versions")
     records = collect_helm_chart_versions(namespace)
     if not records:
         logger.warning("No Helm chart version data collected")
         return
-
     current_time_ns = str(int(time.time() * 1e9))
     values = [[current_time_ns, json.dumps(r)] for r in records]
     send_to_loki("helm_chart_versions", "kubernetes", "helm_chart_version_info", values)
     logger.info("Completed Helm chart version collection and sending")
-
 
 
 def main() -> None:
@@ -801,25 +787,33 @@ def main() -> None:
     2. Validates required environment variables
     3. Collects and sends image data
     4. Collects and sends Grafana usage data
-    5. Collects and sends Helm chart versions
     """
     logger.info("Starting monitoring data collection")
 
     # Validate environment variables
-    is_valid, labels, _ = validate_environment_variables()
+    is_valid, labels, missing_vars = validate_environment_variables()
     if not is_valid:
         return
 
     # Get configuration from environment
     prometheus_url = os.getenv('PROMETHEUS_URL')
-    
-    # Collect and send data to Loki
-    collect_and_send_version_data(prometheus_url, labels)
-    collect_and_send_grafana_usage(prometheus_url, labels)
-    collect_and_send_otel_pod_node_usage(prometheus_url, labels)
-    
+    prom_user = os.getenv('SOURCE_PROMETHEUS_USERNAME', '').strip()
+    prom_pass = os.getenv('SOURCE_PROMETHEUS_PASSWORD', '').strip()
+    prometheus_creds = {'username': prom_user, 'password': prom_pass} if prom_user and prom_pass else None
+
+    loki_user = os.getenv('SOURCE_LOKI_USERNAME', '').strip()
+    loki_pass = os.getenv('SOURCE_LOKI_PASSWORD', '').strip()
+    loki_creds = {'username': loki_user, 'password': loki_pass} if loki_user and loki_pass else None
+
+    # Collect and send data
+    collect_and_send_version_data(prometheus_url, labels, prometheus_creds)
+    collect_and_send_grafana_usage(prometheus_url, labels, prometheus_creds)
+    collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
+    collect_and_send_grafana_db_lock_errors(labels, loki_creds)
+    collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
+
     logger.info("Completed monitoring data collection")
 
 
 if __name__ == "__main__":
-    main()
+    main() 
