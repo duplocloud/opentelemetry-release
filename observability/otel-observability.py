@@ -698,13 +698,38 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
 
 
+def _get_helm_release_version_from_secret(namespace: str, release_name: str, k8s_host: str, k8s_port: str, headers: dict, ca_path: str) -> Optional[str]:
+    """
+    Decode the Helm release secret to get the real chart version.
+    Used as a fallback for umbrella charts where pod labels show sub-chart names.
+    """
+    import base64, gzip
+    url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
+    params = {'labelSelector': f'owner=helm,status=deployed,name={release_name}'}
+    try:
+        response = requests.get(url, headers=headers, verify=ca_path, timeout=_REQUEST_TIMEOUT, params=params)
+        response.raise_for_status()
+        items = response.json().get('items', [])
+        if not items:
+            return None
+        release_b64 = items[0].get('data', {}).get('release')
+        if not release_b64:
+            return None
+        release_data = json.loads(gzip.decompress(base64.b64decode(release_b64)).decode('utf-8'))
+        return release_data.get('chart', {}).get('metadata', {}).get('version')
+    except Exception as e:
+        logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
+        return None
+
+
 def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     """
     Collect Helm chart versions from pod labels via the Kubernetes API.
 
     Queries pods with the 'helm.sh/chart' label and extracts chart name
-    and version. Deduplicates by release name so only one record per
-    Helm release is returned. Does not require Flux, CRDs, or secret access.
+    and version. Deduplicates by release name. For umbrella charts where
+    pod labels show a sub-chart name instead of the release name, falls back
+    to decoding the Helm release secret to get the correct chart version.
     """
     logger.info("Collecting Helm chart versions from pod labels")
     records = []
@@ -742,6 +767,16 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
                 chart_name, chart_version = match.group(1), match.group(2)
             else:
                 chart_name, chart_version = chart_label, None
+            # Umbrella chart: pod sub-chart name doesn't match release name
+            # Fall back to decoding Helm release secret for the correct version
+            if chart_name != release_name:
+                logger.debug(f"Release '{release_name}' has sub-chart pod label '{chart_name}', fetching version from secret")
+                secret_version = _get_helm_release_version_from_secret(
+                    namespace, release_name, k8s_host, k8s_port, headers, ca_path
+                )
+                if secret_version:
+                    chart_name = release_name
+                    chart_version = secret_version
             seen_releases.add(release_name)
             records.append({
                 "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
