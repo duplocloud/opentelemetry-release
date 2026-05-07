@@ -715,7 +715,10 @@ def _get_helm_release_version_from_secret(namespace: str, release_name: str, k8s
         release_b64 = items[0].get('data', {}).get('release')
         if not release_b64:
             return None
-        release_data = json.loads(gzip.decompress(base64.b64decode(release_b64)).decode('utf-8'))
+        # K8s base64-encodes secret data; Helm also base64+gzip-encodes the release.
+        # So the value is double-encoded: base64(base64(gzip(json))).
+        helm_encoded = base64.b64decode(release_b64)
+        release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
         return release_data.get('chart', {}).get('metadata', {}).get('version')
     except Exception as e:
         logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
