@@ -438,17 +438,16 @@ def query_loki(loki_url: str, query: str, username: Optional[str] = None, passwo
         return None
 
 
-def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str]) -> None:
+def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str], credentials: Optional[Dict[str, str]] = None) -> None:
     """
     Count 'database is locked' errors in grafana-ui logs over the last 24h and send to central Loki.
-    Source Loki credentials from SOURCE_LOKI_USERNAME / SOURCE_LOKI_PASSWORD env vars (optional).
     """
     logger.info("Collecting and sending Grafana DB lock error data")
 
     namespace = labels.get('namespace') or os.getenv('NAMESPACE', '')
     service = 'grafana-ui'
-    username = os.getenv('SOURCE_LOKI_USERNAME', '').strip() or None
-    password = os.getenv('SOURCE_LOKI_PASSWORD', '').strip() or None
+    username = credentials.get('username') if credentials else None
+    password = credentials.get('password') if credentials else None
 
     source_loki_url = os.getenv('SOURCE_LOKI_URL') or f"http://duplo-logging-gateway.{namespace}.svc.cluster.local"
     query = f'sum(count_over_time({{namespace="{namespace}", service_name="{service}"}} |= `database is locked` != `logger=tsdb` [24h]))'
@@ -720,11 +719,15 @@ def main() -> None:
     prom_pass = os.getenv('SOURCE_PROMETHEUS_PASSWORD', '').strip()
     prometheus_creds = {'username': prom_user, 'password': prom_pass} if prom_user and prom_pass else None
 
+    loki_user = os.getenv('SOURCE_LOKI_USERNAME', '').strip()
+    loki_pass = os.getenv('SOURCE_LOKI_PASSWORD', '').strip()
+    loki_creds = {'username': loki_user, 'password': loki_pass} if loki_user and loki_pass else None
+
     # Collect and send data
     collect_and_send_version_data(prometheus_url, labels, prometheus_creds)
     collect_and_send_grafana_usage(prometheus_url, labels, prometheus_creds)
     collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
-    collect_and_send_grafana_db_lock_errors(labels)
+    collect_and_send_grafana_db_lock_errors(labels, loki_creds)
     
     logger.info("Completed monitoring data collection")
 
