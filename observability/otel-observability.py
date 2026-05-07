@@ -731,6 +731,7 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
         response.raise_for_status()
         items = response.json().get('items', [])
         seen_releases = set()
+        seen_charts = set()  # tracks (release_name, chart_name) to avoid duplicates across passes
         for secret in items:
             release_name = secret.get('metadata', {}).get('labels', {}).get('name', '')
             if not release_name or release_name in seen_releases:
@@ -749,6 +750,7 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
                 logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
                 continue
             seen_releases.add(release_name)
+            seen_charts.add((release_name, chart_name))
             records.append({
                 "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
                 "spec": {
@@ -768,7 +770,6 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
         pod_url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods"
         pod_response = requests.get(pod_url, headers=headers, verify=ca_path, params={'labelSelector': 'helm.sh/chart'})
         pod_response.raise_for_status()
-        seen_sub_charts = set()
         for pod in pod_response.json().get('items', []):
             labels = pod.get('metadata', {}).get('labels', {})
             chart_label = labels.get('helm.sh/chart', '')
@@ -780,11 +781,11 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
             if not match:
                 continue
             sub_chart_name, sub_chart_version = match.group(1), match.group(2)
-            # Only add if this is a sub-chart (chart name differs from release name)
+            # Skip if already captured from secrets pass, or not a sub-chart
             key = (release_name, sub_chart_name)
-            if sub_chart_name == release_name or key in seen_sub_charts:
+            if key in seen_charts:
                 continue
-            seen_sub_charts.add(key)
+            seen_charts.add(key)
             records.append({
                 "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
                 "spec": {
