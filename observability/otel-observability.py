@@ -698,17 +698,12 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
 
 def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     """
-    Collect Helm chart versions using Helm release secrets as the primary source.
-
-    Pass 1 (secrets): Queries secrets with owner=helm,status=deployed — the authoritative
-    source for chart name and version for all releases, including umbrella charts.
-
-    Pass 2 (pod labels, fallback): Adds any releases not covered by secrets, using
-    helm.sh/chart + app.kubernetes.io/instance pod labels. DaemonSet pods are skipped.
+    Collect Helm chart versions from Helm release secrets (owner=helm,status=deployed).
+    Secrets are the authoritative source for chart name and version for all releases,
+    including umbrella charts.
     """
     import base64
     import gzip
-    import re
 
     logger.info("Collecting Helm chart versions")
     records = []
@@ -726,12 +721,9 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
         logger.error(f"Could not read service account token: {e}")
         return records
 
-    headers = {'Authorization': f'Bearer {token}'}
-
-    # Pass 1: Helm secrets — primary source (authoritative chart name/version for all releases)
     try:
         url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
-        response = requests.get(url, headers=headers, verify=ca_path,
+        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path,
                                 params={'labelSelector': 'owner=helm,status=deployed'})
         response.raise_for_status()
         for secret in response.json().get('items', []):
@@ -762,45 +754,8 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
                 }
             })
             logger.debug(f"Secret: release '{release_name}', chart '{chart_name}' v{chart_version}")
-        logger.info(f"Collected {len(records)} Helm chart version records from secrets")
     except requests.exceptions.RequestException as e:
         logger.error(f"Error querying Kubernetes API for Helm secrets: {e}")
-
-    # Pass 2: Pod labels — fallback for releases not covered by secrets
-    try:
-        pod_url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods"
-        pod_response = requests.get(pod_url, headers=headers, verify=ca_path,
-                                    params={'labelSelector': 'helm.sh/chart'})
-        pod_response.raise_for_status()
-        fallback_count = 0
-        for pod in pod_response.json().get('items', []):
-            owner_refs = pod.get('metadata', {}).get('ownerReferences', [])
-            if any(ref.get('kind') == 'DaemonSet' for ref in owner_refs):
-                continue
-            pod_labels = pod.get('metadata', {}).get('labels', {})
-            chart_label = pod_labels.get('helm.sh/chart', '')
-            release_name = pod_labels.get('app.kubernetes.io/instance', '')
-            if not chart_label or not release_name or release_name in seen_releases:
-                continue
-            match = re.match(r'^(.+)-(\d+\..+)$', chart_label)
-            if not match:
-                continue
-            chart_name, chart_version = match.group(1), match.group(2)
-            seen_releases.add(release_name)
-            records.append({
-                "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
-                "spec": {
-                    "release": release_name,
-                    "chart": chart_name,
-                    "chart_version": chart_version,
-                    "ready": "True"
-                }
-            })
-            fallback_count += 1
-            logger.debug(f"Pod label fallback: release '{release_name}', chart '{chart_name}' v{chart_version}")
-        logger.info(f"Added {fallback_count} Helm chart records from pod label fallback")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error querying Kubernetes API for pod labels: {e}")
 
     logger.info(f"Total Helm chart version records: {len(records)}")
     return records
