@@ -1,0 +1,126 @@
+namespace: integration-blackbox-exporter
+groups:
+    - name: synthetic-monitoring.probe-down
+      rules:
+        - alert: ProbeDown
+          expr: probe_success{sensitivity="high"} == 0
+          for: 3m
+          labels:
+            severity: critical
+            sensitivity: high
+          annotations:
+            description: 'Probe {{ $labels.instance }} (job {{ $labels.job }}) has been failing for at least 3 minutes (4+ consecutive failed scrapes). This is a high-sensitivity probe and indicates active downtime.'
+            summary: Probe {{ $labels.instance }} is DOWN (high sensitivity)
+
+        - alert: ProbeDown
+          expr: last_over_time(probe_success{sensitivity="medium"}[16m]) == 0
+          for: 30m
+          labels:
+            severity: warning
+            sensitivity: medium
+          annotations:
+            description: 'Probe {{ $labels.instance }} (job {{ $labels.job }}) has been failing for at least 30 minutes (3 consecutive failed 15m scrapes).'
+            summary: Probe {{ $labels.instance }} is DOWN (medium sensitivity)
+
+        - alert: ProbeDown
+          expr: last_over_time(probe_success{sensitivity="low"}[31m]) == 0
+          for: 90m
+          labels:
+            severity: warning
+            sensitivity: low
+          annotations:
+            description: 'Probe {{ $labels.instance }} (job {{ $labels.job }}) has been failing for at least 90 minutes (4 consecutive failed 30m scrapes).'
+            summary: Probe {{ $labels.instance }} is DOWN (low sensitivity)
+
+    - name: synthetic-monitoring.probe-latency
+      rules:
+        - alert: BlackboxHighLatency
+          expr: avg_over_time(probe_duration_seconds{sensitivity="high"}[5m]) > 0.5
+          for: 1m
+          labels:
+            severity: warning
+            sensitivity: high
+          annotations:
+            description: 'Endpoint {{ $labels.instance }} 5-minute average response time is {{ $value | humanizeDuration }} — above the 500ms threshold.'
+            summary: 'Latency anomaly: {{ $labels.instance }} (high sensitivity)'
+
+        - alert: BlackboxHighLatency
+          expr: avg_over_time(probe_duration_seconds{sensitivity="medium"}[16m]) > 0.5
+          for: 30m
+          labels:
+            severity: warning
+            sensitivity: medium
+          annotations:
+            description: 'Endpoint {{ $labels.instance }} response time is {{ $value | humanizeDuration }} — above the 500ms threshold for at least 30 minutes.'
+            summary: 'Latency anomaly: {{ $labels.instance }} (medium sensitivity)'
+
+        - alert: BlackboxHighLatency
+          expr: avg_over_time(probe_duration_seconds{sensitivity="low"}[31m]) > 0.5
+          for: 90m
+          labels:
+            severity: warning
+            sensitivity: low
+          annotations:
+            description: 'Endpoint {{ $labels.instance }} response time is {{ $value | humanizeDuration }} — above the 500ms threshold for at least 90 minutes.'
+            summary: 'Latency anomaly: {{ $labels.instance }} (low sensitivity)'
+
+    - name: synthetic-monitoring.ssl
+      rules:
+        - alert: BlackboxSSLCertificateExpiringSoon
+          expr: |
+            (last_over_time(probe_ssl_earliest_cert_expiry{job=~".*blackbox.*"}[31m]) > 0)
+            and
+            ((last_over_time(probe_ssl_earliest_cert_expiry{job=~".*blackbox.*"}[31m]) - time()) / 86400 < 28)
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            description: 'Certificate for {{ $labels.instance }} expires within 28 days. Renew before expiry to avoid HTTPS errors and probe failures.'
+            summary: SSL certificate for {{ $labels.instance }} expires soon
+
+    - name: synthetic-monitoring.exporter
+      rules:
+        - alert: BlackboxExporterDown
+          expr: min by (cluster, namespace) (up{job=~".*blackbox.*"}) < 1
+          for: 5m
+          labels:
+            severity: critical
+            owner: duplo
+          annotations:
+            description: 'The Blackbox Exporter is responding with up=0. All synthetic monitoring probes routed through this exporter are silent — no ProbeDown alerts can fire until this is restored. Check pod health, service endpoints, or network access.'
+            summary: Blackbox Exporter is unreachable in {{ $labels.cluster }}/{{ $labels.namespace }}
+
+    - name: synthetic-monitoring.config-drift
+      rules:
+        - alert: ProbeMissingSensitivityLabel
+          expr: |
+            probe_success
+            unless on(instance, job)
+            probe_success{sensitivity=~"high|medium|low"}
+          for: 30m
+          labels:
+            severity: warning
+          annotations:
+            description: 'Probe {{ $labels.instance }} on job {{ $labels.job }} doesn''t have a valid sensitivity label set (must be one of: high, medium, low). It will be scraped but won''t be covered by any ProbeDown alert. Add or fix `sensitivity: high|medium|low` in the targets.staticConfig.labels field of the Probe CR.'
+            summary: Probe {{ $labels.instance }} has no valid sensitivity label
+
+        - alert: ProbeIntervalMismatchHigh
+          expr: count_over_time(probe_success{sensitivity="high"}[1h]) < 50
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            description: 'Probe {{ $labels.instance }} is labeled sensitivity=high but its scrape cadence over the last hour ({{ $value }} samples/hour) doesn''t match the expected ~60/hr (1m interval). Set `spec.interval: 60s` in the Probe CR to fix.'
+            summary: Probe {{ $labels.instance }} (sensitivity=high) has wrong scrape interval
+
+        - alert: ProbeIntervalMismatchSlow
+          expr: |
+            count_over_time(probe_success{sensitivity=~"medium|low"}[1h]) > 6
+            or
+            count_over_time(probe_success{sensitivity=~"medium|low"}[1h]) < 1
+          for: 1h
+          labels:
+            severity: warning
+          annotations:
+            description: 'Probe {{ $labels.instance }} scrape cadence over the last hour ({{ $value }} samples/hour) doesn''t match expected for sensitivity={{ $labels.sensitivity }} (medium ≈ 4/hr, low ≈ 2/hr). Set `spec.interval` correctly in the Probe CR.'
+            summary: Probe {{ $labels.instance }} (sensitivity={{ $labels.sensitivity }}) has wrong scrape interval
