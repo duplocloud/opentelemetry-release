@@ -698,17 +698,13 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
 
 def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     """
-    Collect Helm chart versions combining pod labels and Helm secrets.
+    Collect Helm chart versions using Helm release secrets as the primary source.
 
-    Pass 1 (pod labels): Uses helm.sh/chart + app.kubernetes.io/instance labels to identify
-    actively running releases. DaemonSet pods are skipped. For umbrella charts, pods carry
-    sub-chart labels rather than the top-level chart label.
+    Pass 1 (secrets): Queries secrets with owner=helm,status=deployed — the authoritative
+    source for chart name and version for all releases, including umbrella charts.
 
-    Pass 2 (secrets): Uses Helm release secrets (owner=helm,status=deployed) as the
-    authoritative source for chart name/version. Overrides pass 1 records when the secret
-    reveals a different chart name (umbrella chart case, e.g. 'aos' pods show 'blackbox-exporter'
-    but the secret shows the real 'aos' chart). Also adds releases with no pod coverage
-    (e.g. Pyroscope/duplo-profiling).
+    Pass 2 (pod labels, fallback): Adds any releases not covered by secrets, using
+    helm.sh/chart + app.kubernetes.io/instance pod labels. DaemonSet pods are skipped.
     """
     import base64
     import gzip
@@ -716,7 +712,7 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
 
     logger.info("Collecting Helm chart versions")
     records = []
-    seen_charts = set()  # (release_name, chart_name) — deduplicates across both passes
+    seen_releases = set()
 
     token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
     ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
@@ -732,58 +728,15 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
 
     headers = {'Authorization': f'Bearer {token}'}
 
-    # Pass 1: Pod labels — primary source (reflects only actively running releases)
-    try:
-        pod_url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods"
-        pod_response = requests.get(pod_url, headers=headers, verify=ca_path,
-                                    params={'labelSelector': 'helm.sh/chart'})
-        pod_response.raise_for_status()
-        for pod in pod_response.json().get('items', []):
-            # Skip DaemonSet pods: one pod per node means hundreds of iterations
-            # in large environments for a single chart. One Deployment/StatefulSet pod suffices.
-            owner_refs = pod.get('metadata', {}).get('ownerReferences', [])
-            if any(ref.get('kind') == 'DaemonSet' for ref in owner_refs):
-                continue
-            labels = pod.get('metadata', {}).get('labels', {})
-            chart_label = labels.get('helm.sh/chart', '')
-            release_name = labels.get('app.kubernetes.io/instance', '')
-            if not chart_label or not release_name:
-                continue
-            match = re.match(r'^(.+)-(\d+\..+)$', chart_label)
-            if not match:
-                continue
-            chart_name, chart_version = match.group(1), match.group(2)
-            key = (release_name, chart_name)
-            if key in seen_charts:
-                continue
-            seen_charts.add(key)
-            records.append({
-                "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
-                "spec": {
-                    "release": release_name,
-                    "chart": chart_name,
-                    "chart_version": chart_version,
-                    "ready": "True"
-                }
-            })
-        logger.info(f"Collected {len(records)} Helm chart version records from pod labels")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error querying Kubernetes API for pod labels: {e}")
-
-    # Pass 2: Secrets — authoritative source for chart name/version.
-    # For releases already found via pod labels, override if the secret reveals a different
-    # chart name (e.g. umbrella charts like 'aos' whose pods carry sub-chart labels).
-    # For releases with no pod coverage, add them (e.g. Pyroscope).
-    releases_from_pods = {r["spec"]["release"]: i for i, r in enumerate(records)}
+    # Pass 1: Helm secrets — primary source (authoritative chart name/version for all releases)
     try:
         url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
         response = requests.get(url, headers=headers, verify=ca_path,
                                 params={'labelSelector': 'owner=helm,status=deployed'})
         response.raise_for_status()
-        fallback_count = 0
         for secret in response.json().get('items', []):
             release_name = secret.get('metadata', {}).get('labels', {}).get('name', '')
-            if not release_name:
+            if not release_name or release_name in seen_releases:
                 continue
             release_b64 = secret.get('data', {}).get('release')
             if not release_b64:
@@ -798,35 +751,56 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
             except Exception as e:
                 logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
                 continue
-            if release_name in releases_from_pods:
-                # Override pod-label record if the secret reveals a different (umbrella) chart name
-                existing_idx = releases_from_pods[release_name]
-                existing_chart = records[existing_idx]["spec"]["chart"]
-                if existing_chart != chart_name:
-                    logger.debug(f"Umbrella override: release '{release_name}' chart '{existing_chart}' -> '{chart_name}' v{chart_version}")
-                    records[existing_idx]["spec"]["chart"] = chart_name
-                    records[existing_idx]["spec"]["chart_version"] = chart_version
-                    seen_charts.discard((release_name, existing_chart))
-                    seen_charts.add((release_name, chart_name))
-            else:
-                key = (release_name, chart_name)
-                if key in seen_charts:
-                    continue
-                seen_charts.add(key)
-                records.append({
-                    "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
-                    "spec": {
-                        "release": release_name,
-                        "chart": chart_name,
-                        "chart_version": chart_version,
-                        "ready": "True"
-                    }
-                })
-                fallback_count += 1
-                logger.debug(f"Fallback secret: release '{release_name}', chart '{chart_name}' v{chart_version}")
-        logger.info(f"Added {fallback_count} Helm chart records from secrets fallback (no pod labels)")
+            seen_releases.add(release_name)
+            records.append({
+                "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
+                "spec": {
+                    "release": release_name,
+                    "chart": chart_name,
+                    "chart_version": chart_version,
+                    "ready": "True"
+                }
+            })
+            logger.debug(f"Secret: release '{release_name}', chart '{chart_name}' v{chart_version}")
+        logger.info(f"Collected {len(records)} Helm chart version records from secrets")
     except requests.exceptions.RequestException as e:
         logger.error(f"Error querying Kubernetes API for Helm secrets: {e}")
+
+    # Pass 2: Pod labels — fallback for releases not covered by secrets
+    try:
+        pod_url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods"
+        pod_response = requests.get(pod_url, headers=headers, verify=ca_path,
+                                    params={'labelSelector': 'helm.sh/chart'})
+        pod_response.raise_for_status()
+        fallback_count = 0
+        for pod in pod_response.json().get('items', []):
+            owner_refs = pod.get('metadata', {}).get('ownerReferences', [])
+            if any(ref.get('kind') == 'DaemonSet' for ref in owner_refs):
+                continue
+            pod_labels = pod.get('metadata', {}).get('labels', {})
+            chart_label = pod_labels.get('helm.sh/chart', '')
+            release_name = pod_labels.get('app.kubernetes.io/instance', '')
+            if not chart_label or not release_name or release_name in seen_releases:
+                continue
+            match = re.match(r'^(.+)-(\d+\..+)$', chart_label)
+            if not match:
+                continue
+            chart_name, chart_version = match.group(1), match.group(2)
+            seen_releases.add(release_name)
+            records.append({
+                "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
+                "spec": {
+                    "release": release_name,
+                    "chart": chart_name,
+                    "chart_version": chart_version,
+                    "ready": "True"
+                }
+            })
+            fallback_count += 1
+            logger.debug(f"Pod label fallback: release '{release_name}', chart '{chart_name}' v{chart_version}")
+        logger.info(f"Added {fallback_count} Helm chart records from pod label fallback")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error querying Kubernetes API for pod labels: {e}")
 
     logger.info(f"Total Helm chart version records: {len(records)}")
     return records
