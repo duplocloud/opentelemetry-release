@@ -22,4 +22,5 @@ cd observability
 # Install requirements
 pip install -r requirements.txt
 
+# Run the script
 python $SCRIPT_PATH
