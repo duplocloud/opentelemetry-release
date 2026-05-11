@@ -6,6 +6,8 @@ This script collects monitoring data from Prometheus and sends it to Loki.
 It extracts information about monitoring components, their images, and Grafana usage.
 """
 
+import base64
+import gzip
 import json
 import logging
 import os
@@ -702,12 +704,9 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     Secrets are the authoritative source for chart name and version for all releases,
     including umbrella charts.
     """
-    import base64
-    import gzip
-
     logger.info("Collecting Helm chart versions")
-    records = []
-    seen_releases = set()
+    # Maps release_name -> (revision, record) to keep only the highest revision
+    best_records: Dict[str, Any] = {}
 
     token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
     ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
@@ -719,7 +718,7 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
             token = f.read().strip()
     except OSError as e:
         logger.error(f"Could not read service account token: {e}")
-        return records
+        return []
 
     try:
         url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
@@ -728,11 +727,23 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
         response.raise_for_status()
         for secret in response.json().get('items', []):
             release_name = secret.get('metadata', {}).get('labels', {}).get('name', '')
-            if not release_name or release_name in seen_releases:
+            if not release_name:
                 continue
             release_b64 = secret.get('data', {}).get('release')
             if not release_b64:
                 continue
+
+            # Extract revision from secret name: sh.helm.release.v1.<release>.v<N>
+            secret_name = secret.get('metadata', {}).get('name', '')
+            try:
+                revision = int(secret_name.rsplit('.v', 1)[-1])
+            except (ValueError, IndexError):
+                revision = 0
+
+            # Skip if we already have a higher revision for this release
+            if release_name in best_records and best_records[release_name][0] >= revision:
+                continue
+
             try:
                 # K8s base64-encodes secret data; Helm also base64+gzip-encodes the release.
                 # So the value is double-encoded: base64(base64(gzip(json))).
@@ -740,11 +751,16 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
                 release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
                 chart_name = release_data.get('chart', {}).get('metadata', {}).get('name', release_name)
                 chart_version = release_data.get('chart', {}).get('metadata', {}).get('version')
+                subcharts = [
+                    (dep.get('name'), dep.get('version'))
+                    for dep in release_data.get('chart', {}).get('metadata', {}).get('dependencies', [])
+                    if dep.get('name')
+                ]
             except Exception as e:
                 logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
                 continue
-            seen_releases.add(release_name)
-            records.append({
+
+            best_records[release_name] = (revision, {
                 "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
                 "spec": {
                     "release": release_name,
@@ -752,11 +768,26 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
                     "chart_version": chart_version,
                     "ready": "True"
                 }
-            })
-            logger.debug(f"Secret: release '{release_name}', chart '{chart_name}' v{chart_version}")
+            }, subcharts)
+            logger.debug(f"Secret: release '{release_name}' revision {revision}, chart '{chart_name}' v{chart_version}, subcharts: {len(subcharts)}")
     except requests.exceptions.RequestException as e:
         logger.error(f"Error querying Kubernetes API for Helm secrets: {e}")
 
+    records = []
+    for revision, parent_record, subcharts in best_records.values():
+        records.append(parent_record)
+        parent_chart_name = parent_record['spec']['chart']
+        for dep_name, dep_version in subcharts:
+            records.append({
+                "metadata": dict(parent_record['metadata']),
+                "spec": {
+                    "release": parent_record['spec']['release'],
+                    "chart": dep_name,
+                    "chart_version": dep_version,
+                    "parent_chart": parent_chart_name,
+                    "ready": "True"
+                }
+            })
     logger.info(f"Total Helm chart version records: {len(records)}")
     return records
 
