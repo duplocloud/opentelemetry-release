@@ -22,8 +22,4 @@ cd observability
 # Install requirements
 pip install -r requirements.txt
 
-# SCRIPT_NAME selects which collection script to run.
-# Defaults to otel-observability.py (main-stack behaviour unchanged).
-# Set SCRIPT_NAME=collector-observability.py for collector-only deployments.
-SCRIPT_NAME=${SCRIPT_NAME:-otel-observability.py}
-python $SCRIPT_NAME
+python $SCRIPT_PATH

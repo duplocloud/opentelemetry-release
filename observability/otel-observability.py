@@ -311,10 +311,73 @@ def format_and_send_grafana_usage_data(grafana_usage: Dict[str, int], labels: Di
     )
 
 
+def collector_identity_ping() -> None:
+    """
+    Push a single identity log line to Loki for collector-only deployments.
+
+    Collector stacks (Alloy + OTel Operator only) have no local Prometheus/Mimir.
+    Real metrics are already aggregated by the main stack's run of this script via
+    central Mimir. This function exists solely to register the collector's identity
+    labels so it appears correctly in the Customer Overview dashboard.
+    """
+    logger.info("Stack type is collector — running identity ping only")
+
+    required = ['LOKI_URL', 'CLUSTER', 'NAMESPACE', 'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL']
+    missing = [v for v in required if not os.getenv(v)]
+    if missing:
+        logger.error(f"Missing required environment variables: {', '.join(missing)}")
+        return
+
+    env = {
+        'loki_url': os.getenv('LOKI_URL'),
+        'cluster': os.getenv('CLUSTER', ''),
+        'namespace': os.getenv('NAMESPACE', ''),
+        'customer': os.getenv('CUSTOMER', ''),
+        'environment': os.getenv('ENVIRONMENT', ''),
+        'duplo_url': os.getenv('DUPLO_URL', ''),
+        'grafana_url': os.getenv('GRAFANA_URL', ''),
+        'central_duplo_url': os.getenv('CENTRAL_DUPLO_URL', ''),
+        'job_version': os.getenv('JOB_VERSION', ''),
+        'stack_type': os.getenv('STACK_TYPE', 'collector'),
+    }
+
+    stream_labels = {
+        'job': 'collector_identity',
+        'cluster': env['cluster'],
+        'namespace': env['namespace'],
+        'customer': env['customer'],
+        'environment': env['environment'],
+        'duplo_url': env['duplo_url'],
+        'grafana_url': env['grafana_url'],
+        'central_duplo_url': env['central_duplo_url'],
+        'job_version': env['job_version'],
+        'stack_type': env['stack_type'],
+    }
+
+    log_line = json.dumps({
+        'message': 'collector identity ping',
+        **{k: v for k, v in env.items() if k != 'loki_url'},
+    })
+
+    timestamp_ns = str(int(time.time() * 1e9))
+    payload = {'streams': [{'stream': stream_labels, 'values': [[timestamp_ns, log_line]]}]}
+    try:
+        response = requests.post(
+            f"{env['loki_url']}/loki/api/v1/push",
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps(payload),
+            timeout=30,
+        )
+        response.raise_for_status()
+        logger.info("Successfully pushed collector identity log to Loki")
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error pushing identity log to Loki: {e}")
+
+
 def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     """
     Validate required environment variables and return configuration.
-    
+
     Returns:
         Tuple containing:
         - Boolean indicating if validation was successful
@@ -324,7 +387,7 @@ def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     # Configuration from environment variables
     prometheus_url = os.getenv('PROMETHEUS_URL')
     loki_url = os.getenv('LOKI_URL')
-    
+
     # Additional labels from environment variables
     labels = {
         'cluster': os.getenv('CLUSTER', ''),
@@ -894,6 +957,10 @@ def main() -> None:
     4. Collects and sends Grafana usage data
     """
     logger.info("Starting monitoring data collection")
+
+    if os.getenv('STACK_TYPE', 'main') == 'collector':
+        collector_identity_ping()
+        return
 
     # Validate environment variables
     is_valid, labels, missing_vars = validate_environment_variables()
