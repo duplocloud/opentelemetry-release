@@ -328,6 +328,7 @@ def collector_identity_ping() -> None:
         'grafana_url': os.getenv('GRAFANA_URL', ''),
         'central_duplo_url': os.getenv('CENTRAL_DUPLO_URL', ''),
         'job_version': os.getenv('JOB_VERSION', ''),
+        'scribe_version': os.getenv('JOB_VERSION', ''),
         'stack_type': os.getenv('STACK_TYPE', 'collector'),
     }
     log_line = json.dumps({'message': 'collector identity ping', **{k: v for k, v in stream_labels.items() if k != 'job'}})
