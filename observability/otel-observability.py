@@ -772,6 +772,7 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
             logger.debug(f"Secret: release '{release_name}' revision {revision}, chart '{chart_name}' v{chart_version}, subcharts: {len(subcharts)}")
     except requests.exceptions.RequestException as e:
         logger.error(f"Error querying Kubernetes API for Helm secrets: {e}")
+        raise
 
     records = []
     for revision, parent_record, subcharts in best_records.values():
@@ -795,7 +796,16 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
 def collect_and_send_helm_chart_versions(namespace: str) -> None:
     """Collect Helm chart versions from Helm release secrets and send to Loki."""
     logger.info("Collecting and sending Helm chart versions")
-    records = collect_helm_chart_versions(namespace)
+    try:
+        records = collect_helm_chart_versions(namespace)
+    except requests.exceptions.RequestException as e:
+        current_time_ns = str(int(time.time() * 1e9))
+        error_record = {
+            "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
+            "spec": {"error": str(e)}
+        }
+        send_to_loki("helm_chart_versions", "kubernetes", "helm_chart_version_info", [[current_time_ns, json.dumps(error_record)]])
+        return
     if not records:
         logger.warning("No Helm chart version data collected")
         return
