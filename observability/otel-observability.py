@@ -926,6 +926,7 @@ def main() -> None:
 
     if os.getenv('STACK_TYPE', 'main') == 'collector':
         collector_identity_ping()
+        collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
         return
 
     # Validate environment variables
