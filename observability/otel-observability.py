@@ -172,9 +172,8 @@ def send_to_loki(
     environment = os.getenv('ENVIRONMENT', '')
     duplo_url = os.getenv('DUPLO_URL', '')
     job_version = os.getenv('JOB_VERSION', '')
-    # Identity labels for Customer Overview — stack type, Scribe version, managing portal, Grafana URL
     stack_type = os.getenv('STACK_TYPE', 'main')
-    scribe_version = os.getenv('JOB_VERSION', '')
+    scribe_version = os.getenv('SCRIBE_VERSION', '')
     central_duplo_url = os.getenv('CENTRAL_DUPLO_URL', '')
     grafana_url = os.getenv('GRAFANA_URL', '')
 
@@ -302,49 +301,22 @@ def format_and_send_grafana_usage_data(grafana_usage: Dict[str, int], labels: Di
     )
 
 
-def collector_identity_ping() -> None:
-    """Push a single identity log line to Loki for collector-only deployments.
+def send_identity_ping() -> None:
+    """Push a single identity log line to Loki for any stack type.
 
-    Collector stacks have no local Prometheus/Mimir — real metrics are already
-    aggregated by the main stack via central Mimir. This registers the collector's
-    identity labels so it appears correctly in the Customer Overview dashboard.
+    Both main and collector stacks call this at startup so that
+    {job="stack_identity"} returns exactly one row per deployment regardless
+    of stack type — enabling a single LogQL query in Customer Overview.
     """
-    logger.info("Stack type is collector — running identity ping only")
-
     required = ['LOKI_URL', 'CLUSTER', 'NAMESPACE', 'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL']
     missing = [v for v in required if not os.getenv(v)]
     if missing:
-        logger.error(f"Missing required environment variables: {', '.join(missing)}")
+        logger.error(f"Missing required environment variables for identity ping: {', '.join(missing)}")
         return
 
-    loki_url = os.getenv('LOKI_URL')
-    stream_labels = {
-        'job': 'collector_identity',
-        'cluster': os.getenv('CLUSTER', ''),
-        'namespace': os.getenv('NAMESPACE', ''),
-        'customer': os.getenv('CUSTOMER', ''),
-        'environment': os.getenv('ENVIRONMENT', ''),
-        'duplo_url': os.getenv('DUPLO_URL', ''),
-        'grafana_url': os.getenv('GRAFANA_URL', ''),
-        'central_duplo_url': os.getenv('CENTRAL_DUPLO_URL', ''),
-        'job_version': os.getenv('JOB_VERSION', ''),
-        'scribe_version': os.getenv('JOB_VERSION', ''),
-        'stack_type': os.getenv('STACK_TYPE', 'collector'),
-    }
-    log_line = json.dumps({'message': 'collector identity ping', **{k: v for k, v in stream_labels.items() if k != 'job'}})
     timestamp_ns = str(int(time.time() * 1e9))
-    payload = {'streams': [{'stream': stream_labels, 'values': [[timestamp_ns, log_line]]}]}
-    try:
-        response = requests.post(
-            f"{loki_url}/loki/api/v1/push",
-            headers={'Content-Type': 'application/json'},
-            data=json.dumps(payload),
-            timeout=30,
-        )
-        response.raise_for_status()
-        logger.info("Successfully pushed collector identity log to Loki")
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error pushing identity log to Loki: {e}")
+    log_line = json.dumps({'message': 'stack identity ping'})
+    send_to_loki("stack_identity", "identity", "ping", [[timestamp_ns, log_line]])
 
 
 def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
@@ -748,7 +720,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
             },
             "spec": {
                 "otel_node_count": len(node_names),
-                "total_cluster_nodes": total_nodes_by_cluster.get(cluster, len(node_names)),
+                "total_cluster_nodes": total_nodes_by_cluster.get(cluster, 0),
             }
         }
         values.append([current_time_ns, json.dumps(entry_node_count)])
@@ -924,8 +896,9 @@ def main() -> None:
     """
     logger.info("Starting monitoring data collection")
 
+    send_identity_ping()
+
     if os.getenv('STACK_TYPE', 'main') == 'collector':
-        collector_identity_ping()
         collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
         return
 
