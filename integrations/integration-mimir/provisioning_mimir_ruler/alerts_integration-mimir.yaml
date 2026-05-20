@@ -1284,7 +1284,7 @@ groups:
           expr: |
             sum by (cluster, namespace, reason) (
               rate(cortex_discarded_samples_total{reason=~"per-user-series-limit|per-metric-series-limit|ingestion_rate_limited|request_rate_limited"}[5m])
-            ) > 0
+            ) > 50
           for: 5m
           labels:
             severity: critical

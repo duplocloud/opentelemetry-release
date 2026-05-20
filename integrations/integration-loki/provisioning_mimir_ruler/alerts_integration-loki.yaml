@@ -87,7 +87,7 @@ groups:
           expr: |
             sum by (cluster, namespace, tenant, reason) (
               rate(loki_discarded_samples_total[5m])
-            ) > 0
+            ) > 50
           for: 5m
           labels:
             severity: critical
