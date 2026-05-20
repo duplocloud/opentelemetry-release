@@ -77,3 +77,29 @@ groups:
           for: 1h
           labels:
             severity: critical
+    - name: loki_discarded_samples
+      rules:
+        - alert: LokiDistributorSamplesDiscarded
+          annotations:
+            description: |
+                {{ $labels.cluster }} {{ $labels.namespace }} is discarding {{ printf "%.0f" $value }} log lines/s from tenant {{ $labels.tenant }} due to {{ $labels.reason }}.
+            summary: Loki is discarding log samples.
+          expr: |
+            sum by (cluster, namespace, tenant, reason) (
+              rate(loki_discarded_samples_total[5m])
+            ) > 0
+          for: 5m
+          labels:
+            severity: warning
+        - alert: LokiDistributorSamplesDiscarded
+          annotations:
+            description: |
+                {{ $labels.cluster }} {{ $labels.namespace }} is discarding {{ printf "%.0f" $value }} log lines/s from tenant {{ $labels.tenant }} due to {{ $labels.reason }}.
+            summary: Loki is discarding a high number of log samples.
+          expr: |
+            sum by (cluster, namespace, tenant, reason) (
+              rate(loki_discarded_samples_total[5m])
+            ) > 100
+          for: 5m
+          labels:
+            severity: critical

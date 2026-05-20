@@ -1274,6 +1274,44 @@ groups:
           for: 5m
           labels:
             severity: critical
+    - name: mimir_distributor_discarded_samples
+      rules:
+        - alert: MimirDistributorSamplesDiscarded
+          annotations:
+            message: |
+                Mimir distributor in {{ $labels.cluster }}/{{ $labels.namespace }} is discarding {{ printf "%.2f" $value }} samples/s with reason {{ $labels.reason }}.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirdistributorsamplesdiscarded
+          expr: |
+            sum by (cluster, namespace, reason) (
+              rate(cortex_discarded_samples_total{reason=~"per-user-series-limit|per-metric-series-limit|ingestion_rate_limited|request_rate_limited"}[5m])
+            ) > 0
+          for: 5m
+          labels:
+            severity: warning
+        - alert: MimirDistributorSamplesDiscarded
+          annotations:
+            message: |
+                Mimir distributor in {{ $labels.cluster }}/{{ $labels.namespace }} is discarding {{ printf "%.2f" $value }} samples/s with reason {{ $labels.reason }}.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirdistributorsamplesdiscarded
+          expr: |
+            sum by (cluster, namespace, reason) (
+              rate(cortex_discarded_samples_total{reason=~"per-user-series-limit|per-metric-series-limit|ingestion_rate_limited|request_rate_limited"}[5m])
+            ) > 100
+          for: 5m
+          labels:
+            severity: critical
+        - alert: MimirDistributorSamplesDiscardedBadTimestamps
+          annotations:
+            message: |
+                Mimir in {{ $labels.cluster }}/{{ $labels.namespace }} is discarding {{ printf "%.2f" $value }} samples/s due to {{ $labels.reason }}.
+            runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirdistributorsamplesdiscardedtimestamp
+          expr: |
+            sum by (cluster, namespace, reason) (
+              rate(cortex_discarded_samples_total{reason=~"sample-out-of-order|sample-too-old|new-value-for-timestamp|sample-timestamp-too-far-in-future"}[5m])
+            ) > 0
+          for: 15m
+          labels:
+            severity: warning
     - name: ruler_alerts
       rules:
         - alert: MimirRulerTooManyFailedPushes
