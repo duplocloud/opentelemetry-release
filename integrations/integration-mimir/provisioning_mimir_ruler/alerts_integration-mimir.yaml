@@ -1283,7 +1283,7 @@ groups:
             runbook_url: https://grafana.com/docs/mimir/latest/operators-guide/mimir-runbooks/#mimirdistributorsamplesdiscarded
           expr: |
             sum by (cluster, namespace, reason) (
-              rate(cortex_discarded_samples_total{reason=~"per-user-series-limit|per-metric-series-limit|ingestion_rate_limited|request_rate_limited"}[5m])
+              rate(cortex_discarded_samples_total{reason=~"per-user-series-limit|per-metric-series-limit|ingestion_rate_limited|request_rate_limited|max_label_names_per_series|new-value-for-timestamp|sample-out-of-order|sample-timestamp-too-old"}[5m])
             ) > 50
           for: 5m
           labels:
