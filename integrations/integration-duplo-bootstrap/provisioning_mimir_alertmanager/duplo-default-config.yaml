@@ -10,6 +10,8 @@ route:
   group_by:
     - alertname
   routes:
+    - receiver: duplo-loki-webhook
+      continue: true
     - receiver: duplo-webhook-notifications
       matchers:
         - namespace=~"${AOS_NAMESPACE_FILTER}"
@@ -21,6 +23,10 @@ route:
         - pod!~"duplo-monitoring-alloy-profiles-.*"
         - pod!~"duplo-monitoring-alloy-logs-.*"
 receivers:
+  - name: duplo-loki-webhook
+    webhook_configs:
+      - send_resolved: true
+        url: ${AOS_LOKI_WEBHOOK}
   - name: default-receiver
     slack_configs: []
   - name: duplo-webhook-notifications
