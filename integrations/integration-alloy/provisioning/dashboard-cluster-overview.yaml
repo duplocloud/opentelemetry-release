@@ -1,0 +1,352 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+  folder: integration-alloy
+  name: cluster-overview
+spec:
+  annotations:
+    list:
+      - builtIn: 1
+        datasource:
+          type: grafana
+          uid: -- Grafana --
+        enable: true
+        hide: true
+        iconColor: rgba(0, 211, 255, 1)
+        name: Annotations & Alerts
+        type: dashboard
+      - datasource: $loki_datasource
+        enable: true
+        expr: '{cluster=~"$cluster", container="kube-diff-logger"} | json | namespace_extracted="alloy" | name_extracted=~"alloy.*"'
+        iconColor: rgba(0, 211, 255, 1)
+        instant: false
+        name: Deployments
+        titleFormat: '{{cluster}}/{{namespace}}'
+  editable: false
+  graphTooltip: 1
+  links:
+    - icon: doc
+      targetBlank: true
+      title: Documentation
+      tooltip: Clustering documentation
+      type: link
+      url: https://grafana.com/docs/alloy/latest/reference/cli/run/#clustering
+    - asDropdown: true
+      icon: external link
+      includeVars: true
+      keepTime: true
+      tags:
+        - alloy-integrations
+      targetBlank: false
+      title: Dashboards
+      type: dashboards
+  panels:
+    - datasource: ${datasource}
+      gridPos:
+        h: 9
+        w: 8
+        x: 0
+        y: 0
+      id: 1
+      targets:
+        - datasource: ${datasource}
+          expr: count(cluster_node_info{cluster=~"$cluster", namespace=~"$namespace", job=~"$job"})
+          instant: true
+          legendFormat: __auto
+          range: false
+          refId: A
+      title: Nodes
+      type: stat
+    - datasource: ${datasource}
+      description: Nodes info.
+      fieldConfig:
+        defaults: {}
+        overrides:
+          - matcher:
+              id: byName
+              options: Dashboard
+            properties:
+              - id: mappings
+                value:
+                  - options:
+                      '1':
+                        index: 0
+                        text: Link
+                    type: value
+              - id: links
+                value:
+                  - targetBlank: false
+                    title: Detail dashboard for node
+                    url: /d/cluster-node/alloy-cluster-node?var-instance=${__data.fields.instance}&var-datasource=${datasource}&var-loki_datasource=${loki_datasource}&var-job=${job}&var-cluster=${cluster}&var-namespace=${namespace}
+      gridPos:
+        h: 9
+        w: 16
+        x: 8
+        y: 0
+      id: 2
+      targets:
+        - datasource: ${datasource}
+          expr: cluster_node_info{cluster=~"$cluster", namespace=~"$namespace", job=~"$job"}
+          format: table
+          instant: true
+          legendFormat: __auto
+          range: false
+          refId: A
+      title: Node table
+      transformations:
+        - id: organize
+          options:
+            excludeByName:
+              Time: true
+              Value: false
+              __name__: true
+              cluster: true
+              namespace: true
+              state: false
+            indexByName: {}
+            renameByName:
+              Value: Dashboard
+              instance: ''
+              state: ''
+      type: table
+    - datasource: ${datasource}
+      description: 'Whether the cluster state has converged.
+
+        It is normal for the cluster state to be diverged briefly as gossip events propagate. It is not normal for the cluster state to be diverged for a long period of time.
+
+        This will show one of the following:
+
+        * Converged: Nodes are aware of all other nodes, with the correct states.
+
+        * Not converged: A subset of nodes aren''t aware of their peers, or don''t have an updated view of peer states.'
+      fieldConfig:
+        defaults:
+          mappings:
+            - options:
+                '1':
+                  color: red
+                  index: 1
+                  text: Not converged
+              type: value
+            - options:
+                match: 'null'
+                result:
+                  color: green
+                  index: 0
+                  text: Converged
+              type: special
+          unit: suffix:nodes
+        overrides: []
+      gridPos:
+        h: 9
+        w: 8
+        x: 0
+        y: 9
+      id: 3
+      options:
+        colorMode: background
+        graphMode: none
+        justifyMode: auto
+        orientation: auto
+        reduceOptions:
+          calcs:
+            - lastNotNull
+          fields: ''
+          values: false
+        textMode: auto
+      targets:
+        - datasource: ${datasource}
+          expr: "clamp((\n  sum(stddev by (state) (cluster_node_peers{cluster=~\"$cluster\", namespace=~\"$namespace\", job=~\"$job\"}) != 0) or\n  (sum(abs(sum without (state) (cluster_node_peers{cluster=~\"$cluster\", namespace=~\"$namespace\", job=~\"$job\"})) - scalar(count(cluster_node_info{cluster=~\"$cluster\", namespace=~\"$namespace\", job=~\"$job\"})) != 0))\n  ),\n  1, 1\n)"
+          format: time_series
+          instant: true
+          legendFormat: __auto
+          range: false
+          refId: A
+      title: Convergence state
+      type: stat
+    - datasource: ${datasource}
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 80
+            spanNulls: true
+          mappings:
+            - options:
+                '0':
+                  color: green
+                  text: 'Yes'
+              type: value
+            - options:
+                '1':
+                  color: red
+                  text: 'No'
+              type: value
+          max: 1
+          noValue: 0
+        overrides: []
+      gridPos:
+        h: 9
+        w: 16
+        x: 8
+        y: 9
+      id: 4
+      options:
+        mergeValues: true
+      targets:
+        - datasource: ${datasource}
+          expr: "ceil(clamp((\n  sum(stddev by (state) (cluster_node_peers{cluster=~\"$cluster\", namespace=~\"$namespace\", job=~\"$job\"})) or\n  (sum(abs(sum without (state) (cluster_node_peers{cluster=~\"$cluster\", namespace=~\"$namespace\", job=~\"$job\"})) - scalar(count(cluster_node_info{cluster=~\"$cluster\", namespace=~\"$namespace\", job=~\"$job\"}))))\n  ),\n  0, 1\n))"
+          instant: false
+          legendFormat: Converged
+          range: true
+          refId: A
+      title: Convergence state timeline
+      type: state-timeline
+    - datasource: ${datasource}
+      description: "The number of cluster peers seen by each instance.\nWhen cluster is converged, every peer should see all the other instances. When we have a split brain or one\npeer not joining the cluster, we will see two or more groups of instances that report different peer numbers\nfor an extended period of time and not converging.\nThis graph helps to identify which instances may be in a split brain state.\nThe minimum cluster size shows the value of the --cluster.wait-for-size flag, which specifies the minimum \nnumber of instances required before cluster-enabled components begin processing traffic."
+      fieldConfig:
+        defaults:
+          unit: peers
+        overrides:
+          - matcher:
+              id: byName
+              options: Minimum cluster size
+            properties:
+              - id: color
+                value:
+                  fixedColor: red
+                  mode: fixed
+              - id: custom.lineStyle
+                value:
+                  dash:
+                    - 10
+                    - 10
+                  fill: dash
+              - id: custom.lineWidth
+                value: 1
+              - id: custom.dashPattern
+                value:
+                  - 10
+                  - 10
+      gridPos:
+        h: 12
+        w: 24
+        x: 0
+        y: 18
+      id: 5
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (cluster_node_peers{cluster=~"$cluster", namespace=~"$namespace", job=~"$job"})
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+        - datasource: ${datasource}
+          expr: avg(cluster_minimum_size{cluster=~"$cluster", namespace=~"$namespace", job=~"$job"})
+          instant: false
+          legendFormat: Minimum cluster size
+          range: true
+          refId: B
+      title: Number of peers seen by each instance
+      type: timeseries
+  refresh: 30s
+  schemaVersion: 42
+  tags:
+    - alloy-integrations
+  templating:
+    list:
+      - label: Data Source
+        name: datasource
+        options: []
+        query: prometheus
+        refresh: 1
+        sort: 2
+        type: datasource
+      - label: Loki Data Source
+        name: loki_datasource
+        options: []
+        query: loki
+        refresh: 1
+        sort: 2
+        type: datasource
+      - allowCustomValue: true
+        datasource: ${datasource}
+        label: cluster
+        multi: true
+        name: cluster
+        options: []
+        query:
+          query: label_values(alloy_component_controller_running_components, cluster)
+          refId: cluster
+        refresh: 2
+        sort: 1
+        type: query
+      - allowCustomValue: true
+        datasource: ${datasource}
+        label: namespace
+        multi: true
+        name: namespace
+        options: []
+        query:
+          query: label_values(alloy_component_controller_running_components{cluster=~"$cluster"}, namespace)
+          refId: namespace
+        refresh: 2
+        sort: 1
+        type: query
+      - allValue: .*
+        datasource: ${datasource}
+        includeAll: true
+        label: job
+        multi: true
+        name: job
+        options: []
+        query:
+          query: label_values(alloy_component_controller_running_components{cluster=~"$cluster", namespace=~"$namespace"}, job)
+          refId: job
+        refresh: 2
+        sort: 1
+        type: query
+      - allValue: .*
+        datasource: ${datasource}
+        includeAll: true
+        label: instance
+        multi: true
+        name: instance
+        options: []
+        query:
+          query: label_values(alloy_component_controller_running_components{cluster=~"$cluster", namespace=~"$namespace", job=~"$job"}, instance)
+          refId: instance
+        refresh: 2
+        sort: 1
+        type: query
+      - datasource:
+          type: prometheus
+          uid: ${datasource}
+        name: filters
+        type: adhoc
+      - allowCustomValue: true
+        current:
+          selected: true
+          text: instance
+          value: instance
+        label: Group by
+        name: groupby
+        query: instance,state,job,namespace,cluster,pod
+        type: custom
+  time:
+    from: now-1h
+    to: now
+  timepicker:
+    refresh_intervals:
+      - 5s
+      - 10s
+      - 30s
+      - 1m
+      - 5m
+      - 15m
+      - 30m
+      - 1h
+      - 2h
+      - 1d
+  timezone: utc
+  title: Alloy / Cluster Overview
+  uid: cluster-overview

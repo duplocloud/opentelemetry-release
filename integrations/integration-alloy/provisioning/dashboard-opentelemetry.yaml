@@ -1,0 +1,713 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+  folder: integration-alloy
+  name: opentelemetry
+spec:
+  annotations:
+    list:
+      - builtIn: 1
+        datasource:
+          type: grafana
+          uid: -- Grafana --
+        enable: true
+        hide: true
+        iconColor: rgba(0, 211, 255, 1)
+        name: Annotations & Alerts
+        type: dashboard
+  editable: false
+  graphTooltip: 1
+  links:
+    - icon: doc
+      targetBlank: true
+      title: Documentation
+      tooltip: OpenTelemetry components documentation
+      type: link
+      url: https://grafana.com/docs/alloy/latest/reference/components/otelcol.receiver.otlp/
+    - asDropdown: true
+      icon: external link
+      includeVars: true
+      keepTime: true
+      tags:
+        - alloy-integrations
+      targetBlank: false
+      title: Dashboards
+      type: dashboards
+  panels:
+    - datasource: ${datasource}
+      gridPos:
+        h: 1
+        w: 24
+        x: 0
+        y: 0
+      id: 1
+      title: Receivers [otelcol.receiver.*]
+      type: row
+    - datasource: ${datasource}
+      description: Number of metric points successfully pushed into the pipeline.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 0
+        y: 0
+      id: 2
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_receiver_accepted_metric_points_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Accepted metric points
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of metric points that could not be pushed into the pipeline.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 6
+        y: 0
+      id: 3
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_receiver_refused_metric_points_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Refused metric points
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of log records successfully pushed into the pipeline.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 12
+        y: 0
+      id: 4
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_receiver_accepted_log_records_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Accepted logs
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of log records that could not be pushed into the pipeline.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 18
+        y: 0
+      id: 5
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_receiver_refused_log_records_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Refused logs
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of spans successfully pushed into the pipeline.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 0
+        y: 10
+      id: 6
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_receiver_accepted_spans_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Accepted spans
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of spans that could not be pushed into the pipeline.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 6
+        y: 10
+      id: 7
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_receiver_refused_spans_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Refused spans
+      type: timeseries
+    - datasource: ${datasource}
+      description: The duration of inbound RPCs for otelcol.receiver.* components.
+      gridPos:
+        h: 10
+        w: 6
+        x: 12
+        y: 10
+      id: 8
+      maxDataPoints: 30
+      options:
+        calculate: false
+        color:
+          exponent: 0.5
+          fill: dark-orange
+          mode: scheme
+          scale: exponential
+          scheme: Oranges
+          steps: 65
+        exemplars:
+          color: rgba(255,0,255,0.7)
+        filterValues:
+          le: 1.0e-09
+        tooltip:
+          show: true
+          yHistogram: true
+        yAxis:
+          unit: ms
+      pluginVersion: 9.0.6
+      targets:
+        - datasource: ${datasource}
+          expr: sum by (le) (increase(rpc_server_duration_milliseconds_bucket{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance", component_id=~"otelcol.receiver.*"}[$__rate_interval]))
+          format: heatmap
+          instant: false
+          legendFormat: '{{le}}'
+          range: true
+          refId: A
+      title: RPC server duration
+      type: heatmap
+    - datasource: ${datasource}
+      description: The duration of inbound HTTP requests for otelcol.receiver.* components.
+      gridPos:
+        h: 10
+        w: 6
+        x: 18
+        y: 10
+      id: 9
+      maxDataPoints: 30
+      options:
+        calculate: false
+        color:
+          exponent: 0.5
+          fill: dark-orange
+          mode: scheme
+          scale: exponential
+          scheme: Oranges
+          steps: 65
+        exemplars:
+          color: rgba(255,0,255,0.7)
+        filterValues:
+          le: 1.0e-09
+        tooltip:
+          show: true
+          yHistogram: true
+        yAxis:
+          unit: ms
+      pluginVersion: 9.0.6
+      targets:
+        - datasource: ${datasource}
+          expr: sum by (le) (increase(http_server_duration_milliseconds_bucket{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance", component_id=~"otelcol.receiver.*"}[$__rate_interval]))
+          format: heatmap
+          instant: false
+          legendFormat: '{{le}}'
+          range: true
+          refId: A
+      title: HTTP server duration
+      type: heatmap
+    - datasource: ${datasource}
+      gridPos:
+        h: 1
+        w: 24
+        x: 0
+        y: 20
+      id: 10
+      title: Batching [otelcol.processor.batch]
+      type: row
+    - datasource: ${datasource}
+      description: Number of spans, metric datapoints, or log lines in a batch
+      fieldConfig:
+        defaults:
+          unit: short
+        overrides: []
+      gridPos:
+        h: 10
+        w: 8
+        x: 0
+        y: 20
+      id: 11
+      maxDataPoints: 30
+      options:
+        calculate: false
+        color:
+          exponent: 0.5
+          fill: dark-orange
+          mode: scheme
+          scale: exponential
+          scheme: Oranges
+          steps: 65
+        exemplars:
+          color: rgba(255,0,255,0.7)
+        filterValues:
+          le: 1.0e-09
+        tooltip:
+          show: true
+          yHistogram: true
+        yAxis:
+          unit: short
+      pluginVersion: 9.0.6
+      targets:
+        - datasource: ${datasource}
+          expr: sum by (le) (increase(otelcol_processor_batch_batch_send_size_bucket{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          format: heatmap
+          instant: false
+          legendFormat: '{{le}}'
+          range: true
+          refId: A
+      title: Number of units in the batch
+      type: heatmap
+    - datasource: ${datasource}
+      description: Number of distinct metadata value combinations being processed
+      fieldConfig:
+        defaults:
+          unit: short
+        overrides: []
+      gridPos:
+        h: 10
+        w: 8
+        x: 8
+        y: 20
+      id: 12
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (otelcol_processor_batch_metadata_cardinality{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"})
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Distinct metadata values
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of times the batch was sent due to a timeout trigger
+      fieldConfig:
+        defaults:
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 8
+        x: 16
+        y: 20
+      id: 13
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_processor_batch_timeout_trigger_send_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Timeout trigger
+      type: timeseries
+    - datasource: ${datasource}
+      gridPos:
+        h: 1
+        w: 24
+        x: 0
+        y: 30
+      id: 14
+      title: Exporters [otelcol.exporter.*]
+      type: row
+    - datasource: ${datasource}
+      description: Number of metric points successfully sent to destination.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 0
+        y: 30
+      id: 15
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_exporter_sent_metric_points_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Exported metric points
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of metric points that failed to be sent to destination.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 6
+        y: 30
+      id: 16
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_exporter_send_failed_metric_points_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Failed metric points
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of log records successfully sent to destination.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 12
+        y: 30
+      id: 17
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_exporter_sent_log_records_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Exported logs
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of log records that failed to be sent to destination.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 18
+        y: 30
+      id: 18
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_exporter_send_failed_log_records_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Failed logs
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of spans successfully sent to destination.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 0
+        y: 40
+      id: 19
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_exporter_sent_spans_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Exported spans
+      type: timeseries
+    - datasource: ${datasource}
+      description: Number of spans that failed to be sent to destination.
+      fieldConfig:
+        defaults:
+          custom:
+            fillOpacity: 20
+            gradientMode: hue
+            stacking:
+              mode: normal
+          unit: cps
+        overrides: []
+      gridPos:
+        h: 10
+        w: 6
+        x: 6
+        y: 40
+      id: 20
+      targets:
+        - datasource: ${datasource}
+          expr: sum by(${groupby}) (rate(otelcol_exporter_send_failed_spans_total{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance"}[$__rate_interval]))
+          instant: false
+          legendFormat: __auto
+          range: true
+          refId: A
+      title: Failed spans
+      type: timeseries
+    - datasource: ${datasource}
+      description: The duration of outbound RPCs for otelcol.exporter.* components.
+      gridPos:
+        h: 10
+        w: 6
+        x: 12
+        y: 40
+      id: 21
+      maxDataPoints: 30
+      options:
+        calculate: false
+        color:
+          exponent: 0.5
+          fill: dark-orange
+          mode: scheme
+          scale: exponential
+          scheme: Oranges
+          steps: 65
+        exemplars:
+          color: rgba(255,0,255,0.7)
+        filterValues:
+          le: 1.0e-09
+        tooltip:
+          show: true
+          yHistogram: true
+        yAxis:
+          unit: ms
+      pluginVersion: 9.0.6
+      targets:
+        - datasource: ${datasource}
+          expr: sum by (le) (increase(rpc_client_duration_milliseconds_bucket{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance", component_id=~"otelcol.exporter.*"}[$__rate_interval]))
+          format: heatmap
+          instant: false
+          legendFormat: '{{le}}'
+          range: true
+          refId: A
+      title: RPC client duration
+      type: heatmap
+    - datasource: ${datasource}
+      description: The duration of outbound HTTP requests for otelcol.exporter.* components.
+      gridPos:
+        h: 10
+        w: 6
+        x: 18
+        y: 40
+      id: 22
+      maxDataPoints: 30
+      options:
+        calculate: false
+        color:
+          exponent: 0.5
+          fill: dark-orange
+          mode: scheme
+          scale: exponential
+          scheme: Oranges
+          steps: 65
+        exemplars:
+          color: rgba(255,0,255,0.7)
+        filterValues:
+          le: 1.0e-09
+        tooltip:
+          show: true
+          yHistogram: true
+        yAxis:
+          unit: ms
+      pluginVersion: 9.0.6
+      targets:
+        - datasource: ${datasource}
+          expr: sum by (le) (increase(http_client_duration_milliseconds_bucket{cluster=~"$cluster", namespace=~"$namespace", job=~"$job", instance=~"$instance", component_id=~"otelcol.exporter.*"}[$__rate_interval]))
+          format: heatmap
+          instant: false
+          legendFormat: '{{le}}'
+          range: true
+          refId: A
+      title: HTTP client duration
+      type: heatmap
+  refresh: 30s
+  schemaVersion: 42
+  tags:
+    - alloy-integrations
+  templating:
+    list:
+      - label: Data Source
+        name: datasource
+        options: []
+        query: prometheus
+        refresh: 1
+        sort: 2
+        type: datasource
+      - label: Loki Data Source
+        name: loki_datasource
+        options: []
+        query: loki
+        refresh: 1
+        sort: 2
+        type: datasource
+      - allowCustomValue: true
+        datasource: ${datasource}
+        label: cluster
+        multi: true
+        name: cluster
+        options: []
+        query:
+          query: label_values(alloy_component_controller_running_components, cluster)
+          refId: cluster
+        refresh: 2
+        sort: 1
+        type: query
+      - allowCustomValue: true
+        datasource: ${datasource}
+        label: namespace
+        multi: true
+        name: namespace
+        options: []
+        query:
+          query: label_values(alloy_component_controller_running_components{cluster=~"$cluster"}, namespace)
+          refId: namespace
+        refresh: 2
+        sort: 1
+        type: query
+      - allValue: .*
+        datasource: ${datasource}
+        includeAll: true
+        label: job
+        multi: true
+        name: job
+        options: []
+        query:
+          query: label_values(alloy_component_controller_running_components{cluster=~"$cluster", namespace=~"$namespace"}, job)
+          refId: job
+        refresh: 2
+        sort: 1
+        type: query
+      - allValue: .*
+        datasource: ${datasource}
+        includeAll: true
+        label: instance
+        multi: true
+        name: instance
+        options: []
+        query:
+          query: label_values(alloy_component_controller_running_components{cluster=~"$cluster", namespace=~"$namespace", job=~"$job"}, instance)
+          refId: instance
+        refresh: 2
+        sort: 1
+        type: query
+      - datasource:
+          type: prometheus
+          uid: ${datasource}
+        name: filters
+        type: adhoc
+      - allowCustomValue: true
+        current:
+          selected: true
+          text: instance
+          value: instance
+        label: Group by
+        name: groupby
+        query: instance,receiver,transport,exporter,processor,component_id,otel_signal,otel_scope_name,job,namespace,cluster,pod
+        type: custom
+  time:
+    from: now-1h
+    to: now
+  timepicker:
+    refresh_intervals:
+      - 5s
+      - 10s
+      - 30s
+      - 1m
+      - 5m
+      - 15m
+      - 30m
+      - 1h
+      - 2h
+      - 1d
+  timezone: utc
+  title: Alloy / OpenTelemetry
+  uid: opentelemetry
