@@ -9,6 +9,14 @@ spec:
   receiver: empty
   orgId: 1
   routes:
+    - object_matchers: []
+      continue: true
+      group_by:
+        - "..."
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 999w
+      receiver: duplo-loki-webhook
     - object_matchers:
         - - owner
           - =

@@ -12,6 +12,11 @@ route:
   routes:
     - receiver: duplo-loki-webhook
       continue: true
+      group_by:
+        - "..."
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 999w
     - receiver: duplo-webhook-notifications
       matchers:
         - namespace=~"${AOS_NAMESPACE_FILTER}"
