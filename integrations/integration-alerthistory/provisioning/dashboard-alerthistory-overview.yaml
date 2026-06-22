@@ -1,0 +1,527 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Dashboard
+metadata:
+  folder: integration-alerthistory
+  name: alerthistory-overview
+spec:
+  annotations:
+    list:
+    - builtIn: 1
+      datasource:
+        type: datasource
+        uid: grafana
+      enable: true
+      hide: true
+      iconColor: rgba(0, 211, 255, 1)
+      name: Annotations & Alerts
+      type: dashboard
+  description: Overview of Grafana and Mimir alert history stored in Loki
+  editable: true
+  fiscalYearStartMonth: 0
+  graphTooltip: 1
+  links: []
+  panels:
+  - gridPos:
+      h: 3
+      w: 24
+      x: 0
+      y: 0
+    id: 1
+    options:
+      code:
+        language: plaintext
+        showLineNumbers: false
+        showMiniMap: false
+      content: '<div style="font-family: Arial, sans-serif; padding: 10px 20px; display: flex; align-items: center;"><h1 style="margin:
+        0; font-size: 2.2em; font-weight: bold; color: rgb(0, 173, 181);">Alert History Overview</h1><span style="margin-left:
+        20px; font-size: 1em; color: #aaa;">Grafana &amp; Mimir alerts stored in Loki</span></div>'
+      mode: html
+    pluginVersion: 11.5.2
+    transparent: true
+    type: text
+
+  # ── Grafana Alert State History ───────────────────────────────────────────
+  - collapsed: false
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 3
+    id: 10
+    panels: []
+    title: Grafana Alert State History
+    type: row
+  - datasource:
+      type: loki
+      uid: ${datasource}
+    description: Total alert state transitions in the selected time range.
+    fieldConfig:
+      defaults:
+        color:
+          fixedColor: orange
+          mode: fixed
+        mappings: []
+        noValue: '0'
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+            value: null
+          - color: orange
+            value: 1
+        unit: short
+      overrides: []
+    gridPos:
+      h: 4
+      w: 4
+      x: 0
+      y: 4
+    id: 11
+    options:
+      colorMode: background
+      graphMode: none
+      justifyMode: center
+      orientation: auto
+      reduceOptions:
+        calcs:
+        - sum
+        fields: ''
+        values: false
+      textMode: auto
+    pluginVersion: 11.5.2
+    targets:
+    - datasource:
+        type: loki
+        uid: ${datasource}
+      editorMode: code
+      expr: sum(count_over_time({from="state-history"} | json alertname="labels.alertname", current,
+        previous, ruleTitle, severity="labels.severity" [$__range]))
+      legendFormat: ''
+      queryType: instant
+      refId: A
+    title: Total Grafana Alert Transitions
+    type: stat
+  - datasource:
+      type: loki
+      uid: ${datasource}
+    description: Transitions into Alerting state.
+    fieldConfig:
+      defaults:
+        color:
+          fixedColor: red
+          mode: fixed
+        mappings: []
+        noValue: '0'
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+            value: null
+          - color: red
+            value: 1
+        unit: short
+      overrides: []
+    gridPos:
+      h: 4
+      w: 4
+      x: 4
+      y: 4
+    id: 12
+    options:
+      colorMode: background
+      graphMode: none
+      justifyMode: center
+      orientation: auto
+      reduceOptions:
+        calcs:
+        - sum
+        fields: ''
+        values: false
+      textMode: auto
+    pluginVersion: 11.5.2
+    targets:
+    - datasource:
+        type: loki
+        uid: ${datasource}
+      editorMode: code
+      expr: sum(count_over_time({from="state-history"} | json alertname="labels.alertname", current,
+        previous, ruleTitle, severity="labels.severity" | current=~"Alerting.*" [$__range]))
+      legendFormat: ''
+      queryType: instant
+      refId: A
+    title: Firing Transitions
+    type: stat
+  - datasource:
+      type: loki
+      uid: ${datasource}
+    description: Transitions into Normal state.
+    fieldConfig:
+      defaults:
+        color:
+          fixedColor: green
+          mode: fixed
+        mappings: []
+        noValue: '0'
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+            value: null
+          - color: green
+            value: 1
+        unit: short
+      overrides: []
+    gridPos:
+      h: 4
+      w: 4
+      x: 8
+      y: 4
+    id: 13
+    options:
+      colorMode: background
+      graphMode: none
+      justifyMode: center
+      orientation: auto
+      reduceOptions:
+        calcs:
+        - sum
+        fields: ''
+        values: false
+      textMode: auto
+    pluginVersion: 11.5.2
+    targets:
+    - datasource:
+        type: loki
+        uid: ${datasource}
+      editorMode: code
+      expr: sum(count_over_time({from="state-history"} | json alertname="labels.alertname", current,
+        previous, ruleTitle, severity="labels.severity" | current=~"Normal.*" [$__range]))
+      legendFormat: ''
+      queryType: instant
+      refId: A
+    title: Resolved Transitions
+    type: stat
+  - datasource:
+      type: loki
+      uid: ${datasource}
+    description: Number of distinct alert names with state transitions in the selected time range.
+    fieldConfig:
+      defaults:
+        color:
+          fixedColor: blue
+          mode: fixed
+        mappings: []
+        noValue: '0'
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+            value: null
+          - color: blue
+            value: 1
+        unit: short
+      overrides: []
+    gridPos:
+      h: 4
+      w: 4
+      x: 12
+      y: 4
+    id: 18
+    options:
+      colorMode: background
+      graphMode: none
+      justifyMode: center
+      orientation: auto
+      reduceOptions:
+        calcs:
+        - lastNotNull
+        fields: ''
+        values: false
+      textMode: auto
+    pluginVersion: 11.5.2
+    targets:
+    - datasource:
+        type: loki
+        uid: ${datasource}
+      editorMode: code
+      expr: count(sum by (alertname) (count_over_time({from="state-history"} | json alertname="labels.alertname",
+        current, previous, ruleTitle, severity="labels.severity" [$__range])))
+      legendFormat: ''
+      queryType: instant
+      refId: A
+    title: Unique Alerts
+    type: stat
+  - gridPos:
+      h: 4
+      w: 8
+      x: 16
+      y: 4
+    id: 17
+    options:
+      code:
+        language: plaintext
+        showLineNumbers: false
+        showMiniMap: false
+      content: '<div style="font-family: Arial, sans-serif; height: 100%; display: flex; align-items: center; justify-content:
+        center;"><a href="/d/alerthistory-grafana-details/grafana-alert-details?${datasource:queryparam}"
+        style="background: rgb(0,173,181); color: white; padding: 10px 24px; border-radius: 4px; text-decoration: none; font-size:
+        .95em; font-weight: bold; display: inline-block;">&#8594; View Grafana Details</a></div>'
+      mode: html
+    pluginVersion: 11.5.2
+    transparent: true
+    type: text
+
+  # ── Mimir Alert History ───────────────────────────────────────────────────
+  - collapsed: false
+    gridPos:
+      h: 1
+      w: 24
+      x: 0
+      y: 8
+    id: 20
+    panels: []
+    title: Mimir Alert History
+    type: row
+  - datasource:
+      type: loki
+      uid: ${datasource}
+    description: Total Mimir alert events in the selected time range.
+    fieldConfig:
+      defaults:
+        color:
+          fixedColor: orange
+          mode: fixed
+        mappings: []
+        noValue: '0'
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+            value: null
+          - color: orange
+            value: 1
+        unit: short
+      overrides: []
+    gridPos:
+      h: 4
+      w: 4
+      x: 0
+      y: 9
+    id: 21
+    options:
+      colorMode: background
+      graphMode: none
+      justifyMode: center
+      orientation: auto
+      reduceOptions:
+        calcs:
+        - sum
+        fields: ''
+        values: false
+      textMode: auto
+    pluginVersion: 11.5.2
+    targets:
+    - datasource:
+        type: loki
+        uid: ${datasource}
+      editorMode: code
+      expr: sum(count_over_time({alertname=~".+", cluster=~".+"} [$__range]))
+      legendFormat: ''
+      queryType: instant
+      refId: A
+    title: Total Mimir Alert Events
+    type: stat
+  - datasource:
+      type: loki
+      uid: ${datasource}
+    description: Count of Mimir alerts in firing state.
+    fieldConfig:
+      defaults:
+        color:
+          fixedColor: red
+          mode: fixed
+        mappings: []
+        noValue: '0'
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+            value: null
+          - color: red
+            value: 1
+        unit: short
+      overrides: []
+    gridPos:
+      h: 4
+      w: 4
+      x: 4
+      y: 9
+    id: 22
+    options:
+      colorMode: background
+      graphMode: none
+      justifyMode: center
+      orientation: auto
+      reduceOptions:
+        calcs:
+        - sum
+        fields: ''
+        values: false
+      textMode: auto
+    pluginVersion: 11.5.2
+    targets:
+    - datasource:
+        type: loki
+        uid: ${datasource}
+      editorMode: code
+      expr: sum(count_over_time({alertname=~"$alertname", cluster=~"$cluster"} | json | status="firing" [$__range]))
+      legendFormat: ''
+      queryType: instant
+      refId: A
+    title: Mimir Firing Alerts
+    type: stat
+  - datasource:
+      type: loki
+      uid: ${datasource}
+    description: Count of Mimir alerts that resolved.
+    fieldConfig:
+      defaults:
+        color:
+          fixedColor: green
+          mode: fixed
+        mappings: []
+        noValue: '0'
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+            value: null
+          - color: green
+            value: 1
+        unit: short
+      overrides: []
+    gridPos:
+      h: 4
+      w: 4
+      x: 8
+      y: 9
+    id: 23
+    options:
+      colorMode: background
+      graphMode: none
+      justifyMode: center
+      orientation: auto
+      reduceOptions:
+        calcs:
+        - sum
+        fields: ''
+        values: false
+      textMode: auto
+    pluginVersion: 11.5.2
+    targets:
+    - datasource:
+        type: loki
+        uid: ${datasource}
+      editorMode: code
+      expr: sum(count_over_time({alertname=~"$alertname", cluster=~"$cluster"} | json | status="resolved" [$__range]))
+      legendFormat: ''
+      queryType: instant
+      refId: A
+    title: Mimir Resolved Alerts
+    type: stat
+  - datasource:
+      type: loki
+      uid: ${datasource}
+    description: Number of distinct alert names with Mimir events in the selected time range.
+    fieldConfig:
+      defaults:
+        color:
+          fixedColor: blue
+          mode: fixed
+        mappings: []
+        noValue: '0'
+        thresholds:
+          mode: absolute
+          steps:
+          - color: green
+            value: null
+          - color: blue
+            value: 1
+        unit: short
+      overrides: []
+    gridPos:
+      h: 4
+      w: 4
+      x: 12
+      y: 9
+    id: 27
+    options:
+      colorMode: background
+      graphMode: none
+      justifyMode: center
+      orientation: auto
+      reduceOptions:
+        calcs:
+        - lastNotNull
+        fields: ''
+        values: false
+      textMode: auto
+    pluginVersion: 11.5.2
+    targets:
+    - datasource:
+        type: loki
+        uid: ${datasource}
+      editorMode: code
+      expr: count(sum by (alertname) (count_over_time({alertname=~".+", cluster=~".+"} [$__range])))
+      legendFormat: ''
+      queryType: instant
+      refId: A
+    title: Unique Alerts
+    type: stat
+  - gridPos:
+      h: 4
+      w: 8
+      x: 16
+      y: 9
+    id: 26
+    options:
+      code:
+        language: plaintext
+        showLineNumbers: false
+        showMiniMap: false
+      content: '<div style="font-family: Arial, sans-serif; height: 100%; display: flex; align-items: center; justify-content:
+        center;"><a href="/d/alerthistory-mimir-details/mimir-alert-details?${datasource:queryparam}"
+        style="background: rgb(0,173,181); color: white; padding: 10px 24px; border-radius: 4px; text-decoration: none; font-size:
+        .95em; font-weight: bold; display: inline-block;">&#8594; View Mimir Details</a></div>'
+      mode: html
+    pluginVersion: 11.5.2
+    transparent: true
+    type: text
+
+  refresh: 1m
+  schemaVersion: 40
+  tags:
+  - alerthistory
+  - grafana
+  - mimir
+  templating:
+    list:
+    - current:
+        text: duplo-logging
+        value: duplo-logging
+      hide: 2
+      includeAll: false
+      label: Loki Datasource
+      name: datasource
+      options: []
+      query: loki
+      refresh: 1
+      regex: ''
+      type: datasource
+  time:
+    from: now-24h
+    to: now
+  timepicker: {}
+  timezone: browser
+  title: Alert History Overview
+  uid: alerthistory-overview
