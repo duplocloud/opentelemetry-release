@@ -338,6 +338,11 @@ def collect_image_versions(prometheus_url: str, labels: Dict[str, str], credenti
 
     Returns:
         Tuple of (image dict, error string). On success error is None; on failure image dict is None.
+
+    Error handling:
+        The error string is the raw exception message from the failed request or parse step.
+        Callers are expected to pass it directly to send_error_to_loki so the real failure
+        reason is visible in Loki rather than a generic message.
     """
     logger.info("Collecting image versions from Prometheus")
 
@@ -352,13 +357,13 @@ def collect_image_versions(prometheus_url: str, labels: Dict[str, str], credenti
     '''
 
     prometheus_response, err = query_prometheus(prometheus_url, query, username, password)
-    if not prometheus_response:
+    if prometheus_response is None:
         logger.error("Failed to query Prometheus for image versions")
         return None, err
 
     # Extract monitoring images
     images = extract_monitoring_images(prometheus_response)
-    if not images:
+    if images is None:
         logger.error("Failed to extract monitoring images from Prometheus response")
         return None, "Failed to extract monitoring images from Prometheus response"
 
@@ -376,6 +381,10 @@ def collect_grafana_usage(prometheus_url: str, credentials: Optional[Dict[str, s
 
     Returns:
         Tuple of (usage dict, error string). On success error is None; on failure usage dict is None.
+
+    Error handling:
+        The error string is the raw exception or parse-error message. Callers pass it to
+        send_error_to_loki so the real failure reason appears in Loki instead of a generic message.
     """
     logger.info("Collecting Grafana usage data")
 
@@ -385,7 +394,7 @@ def collect_grafana_usage(prometheus_url: str, credentials: Optional[Dict[str, s
     query = "sum by (datasource) (clamp_min(sum_over_time(clamp_min(increase(grafana_datasource_request_total[1h]), 0)[24h:1h]) - 24 * min_over_time(clamp_min(increase(grafana_datasource_request_total[1h]), 0)[24h:1h]), 0))"
 
     data, err = query_prometheus(prometheus_url, query, username, password)
-    if not data:
+    if data is None:
         logger.warning("Could not fetch Grafana usage data from Prometheus")
         return None, err
 
@@ -509,11 +518,17 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
     """
     Collects 24h pod/node resource stats and otel_node_count for all clusters/namespaces;
     sends them in a *single* Loki push, one log-line per resource, in your requested JSON format.
+
+    Partial-failure tolerance:
+        Individual query failures are logged and accumulated in query_errors but do not halt
+        collection — remaining queries still run. If no data is collected at all, a single
+        error record including all failed query details is pushed to Loki.
     """
     logger.info("Collecting 24h OTEL pod/node usage statistics")
     namespace_regex = labels.get('namespace_filter', '.*otel.*')
     username = credentials.get('username') if credentials else None
     password = credentials.get('password') if credentials else None
+    query_errors: List[str] = []
 
     # 1. Excluded pods (DaemonSet/Job)
     def excluded_pods_by_owner_kind(kind):
@@ -527,10 +542,13 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
     job_pods = excluded_pods_by_owner_kind("Job")
     excluded_pods = daemonset_pods | job_pods
 
-    # 2. Pod-to-node mapping
+    # 2. Pod-to-node mapping (critical: without this no pods map to nodes and collection yields nothing)
     pod_to_node = {}
     pod_node_query = f'kube_pod_info{{namespace=~"{namespace_regex}"}}'
-    pod_node_response, _ = query_prometheus(prometheus_url, pod_node_query, username, password)
+    pod_node_response, pod_node_err = query_prometheus(prometheus_url, pod_node_query, username, password)
+    if pod_node_response is None:
+        logger.error(f"Critical query failed - pod-to-node mapping: {pod_node_err}")
+        query_errors.append(f"pod-to-node mapping: {pod_node_err}")
     pod_node_response = pod_node_response or {}
     for record in pod_node_response.get("data", {}).get("result", []):
         cluster = record['metric'].get('cluster')
@@ -584,8 +602,13 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         "mem_min": f'min by (pod,namespace,cluster) (min_over_time(container_memory_rss{{{label_filter}}}[24h]))',
         "mem_max": f'max by (pod,namespace,cluster) (max_over_time(container_memory_rss{{{label_filter}}}[24h]))',
     }
-    pod_usage_stats = {k: result for k, query in promql_templates.items()
-                       for result, _ in [query_prometheus(prometheus_url, query, username, password)]}
+    pod_usage_stats = {}
+    for k, query in promql_templates.items():
+        result, err = query_prometheus(prometheus_url, query, username, password)
+        pod_usage_stats[k] = result
+        if result is None:
+            logger.error(f"Pod usage query failed [{k}]: {err}")
+            query_errors.append(f"pod usage [{k}]: {err}")
 
     def usage_stat(stat, cluster, pod_name, namespace):
         for record in (pod_usage_stats[stat] or {}).get('data', {}).get('result', []):
@@ -723,8 +746,11 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         )
         logger.info(f"Sent {sent_count} Loki log entries in one POST")
     else:
-        logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
-        send_error_to_loki("otel_resource_usage", "prometheus", "otel_combined_usage_24h_per_ns", "No data collected: all Prometheus queries returned empty results")
+        error_msg = "No data collected: all Prometheus queries returned empty results"
+        if query_errors:
+            error_msg += "; failed queries: " + "; ".join(query_errors)
+        logger.warning(error_msg)
+        send_error_to_loki("otel_resource_usage", "prometheus", "otel_combined_usage_24h_per_ns", error_msg)
 
 
 def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
