@@ -412,7 +412,7 @@ def collect_and_send_version_data(prometheus_url: str, labels: Dict[str, str], c
     """
     logger.info("Collecting and sending image data")
     images, err = collect_image_versions(prometheus_url, labels, credentials)
-    if not images:
+    if images is None:
         logger.error("Failed to collect image versions")
         send_error_to_loki("monitoring_images", "prometheus", "main",
                            err or "Failed to collect image versions from Prometheus")
@@ -584,7 +584,8 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         "mem_min": f'min by (pod,namespace,cluster) (min_over_time(container_memory_rss{{{label_filter}}}[24h]))',
         "mem_max": f'max by (pod,namespace,cluster) (max_over_time(container_memory_rss{{{label_filter}}}[24h]))',
     }
-    pod_usage_stats = {k: query_prometheus(prometheus_url, query, username, password)[0] for k, query in promql_templates.items()}
+    pod_usage_stats = {k: result for k, query in promql_templates.items()
+                       for result, _ in [query_prometheus(prometheus_url, query, username, password)]}
 
     def usage_stat(stat, cluster, pod_name, namespace):
         for record in (pod_usage_stats[stat] or {}).get('data', {}).get('result', []):
