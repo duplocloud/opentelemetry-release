@@ -206,11 +206,29 @@ def send_to_loki(
         logger.error(f"Error sending data to Loki: {e}")
 
 
-def send_error_to_loki(job: str, source: str, type: str, error: str) -> None:
+def send_error_to_loki(job: str, source: str, type: str, error: Union[str, Dict[str, Any]]) -> None:
+    """
+    Push an error record to Loki under the given job/source/type stream labels.
+
+    Loki record schema (queryable via LogQL):
+        {job="<job>", source="<source>", type="<type>"}
+        | json
+        | spec_error          -- present when error is a plain string
+        | spec_failed_queries -- present when error is a structured dict (list of "key: msg" strings)
+        | spec_message        -- human-readable summary (structured dict only)
+
+    Example LogQL to find all error records:
+        {job="monitoring_images"} | json | spec_error != ""
+        {job="otel_resource_usage"} | json | spec_failed_queries != ""
+
+    Callers also emit logger.error() before calling this. The duplication is intentional:
+    local logs are ephemeral (lost on pod restart) while Loki provides durable, queryable history.
+    """
     current_time_ns = str(int(time.time() * 1_000_000_000))
+    spec = error if isinstance(error, dict) else {"error": error}
     error_record = {
         "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": os.getenv('NAMESPACE', '')},
-        "spec": {"error": error}
+        "spec": spec
     }
     send_to_loki(job, source, type, [[current_time_ns, json.dumps(error_record)]])
 
@@ -746,11 +764,14 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         )
         logger.info(f"Sent {sent_count} Loki log entries in one POST")
     else:
-        error_msg = "No data collected: all Prometheus queries returned empty results"
-        if query_errors:
-            error_msg += "; failed queries: " + "; ".join(query_errors)
-        logger.warning(error_msg)
-        send_error_to_loki("otel_resource_usage", "prometheus", "otel_combined_usage_24h_per_ns", error_msg)
+        logger.warning("No Loki messages were sent! All data may have been empty or filtered out.")
+        send_error_to_loki(
+            "otel_resource_usage", "prometheus", "otel_combined_usage_24h_per_ns",
+            {
+                "message": "No data collected: all Prometheus queries returned empty results",
+                "failed_queries": query_errors
+            }
+        )
 
 
 def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
