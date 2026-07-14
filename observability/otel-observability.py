@@ -12,7 +12,6 @@ import json
 import logging
 import os
 import time
-from datetime import datetime
 from typing import Dict, List, Optional, Any, Union, Tuple
 
 import requests
@@ -51,7 +50,7 @@ def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = 
         response.raise_for_status()
         logger.debug("Successfully received response from Prometheus")
         return response.json(), None
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, ValueError) as e:
         logger.error(f"Error querying Prometheus: {e}")
         return None, str(e)
 
@@ -184,10 +183,9 @@ def send_to_loki(
         ]
     }
     
-    # Log the payload for debugging
-    logger.debug(f"Loki payload: {json.dumps(payload, indent=2)}")
-
     try:
+        # Log the payload for debugging
+        logger.debug(f"Loki payload: {json.dumps(payload, indent=2)}")
         headers = {'Content-Type': 'application/json'}
         
         # Add authentication if credentials are provided
@@ -206,7 +204,7 @@ def send_to_loki(
         logger.info(f"Successfully sent {type} data to Loki")
         logger.debug(f"Loki response status code: {response.status_code}")
         return True
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, ValueError, TypeError) as e:
         logger.error(f"Error sending data to Loki: {e}")
         return False
 
@@ -237,14 +235,23 @@ def send_error_to_loki(job: str, source: str, type: str, error_detail: Union[str
     current_time_ns = str(int(time.time() * 1_000_000_000))
     if isinstance(error_detail, str):
         spec = {"message": error_detail, "error_type": source}
-    else:
-        spec = {"message": error_detail.get("message", ""), "error_type": source,
+    elif isinstance(error_detail, dict):
+        if "message" not in error_detail or not error_detail["message"]:
+            raise ValueError("error_detail dict must contain non-empty 'message' key")
+        spec = {"message": error_detail["message"], "error_type": source,
                 **{k: v for k, v in error_detail.items() if k != "message"}}
+    else:
+        spec = {"message": str(error_detail) if error_detail is not None else "unknown error", "error_type": source}
     error_record = {
         "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": os.getenv('NAMESPACE', '')},
         "spec": spec
     }
-    if not send_to_loki(job, source, type, [[current_time_ns, json.dumps(error_record)]]):
+    try:
+        payload = json.dumps(error_record)
+    except (TypeError, ValueError) as e:
+        logger.critical(f"FAILED to serialize error record for Loki (job={job}): {e} — spec={spec}")
+        return
+    if not send_to_loki(job, source, type, [[current_time_ns, payload]]):
         # Loki itself is unreachable — escalate to critical so the pod logs capture it.
         logger.critical(f"FAILED to push error record to Loki (job={job}): {spec}")
 
@@ -264,39 +271,33 @@ def format_and_send_image_data(images: Dict[str, Dict[str, Dict[str, Dict[str, s
         for namespace, categories in namespaces.items():
             # Process main images
             if categories['main']:
-                values = [
-                    [str(current_time), json.dumps({
-                        "metadata": {
-                            "cluster": cluster,
-                            "namespace": namespace
-                        },
+                try:
+                    payload = json.dumps({
+                        "metadata": {"cluster": cluster, "namespace": namespace},
                         "spec": categories['main']
-                    })]
-                ]
-                send_to_loki(
-                    "monitoring_images",
-                    "prometheus",
-                    "main",
-                    values
-                )
-            
+                    })
+                except (TypeError, ValueError) as e:
+                    send_error_to_loki("monitoring_images", "prometheus", "main",
+                                       f"Failed to serialize main image data: {e}")
+                    payload = None
+                if payload is not None:
+                    send_to_loki("monitoring_images", "prometheus", "main",
+                                 [[str(current_time), payload]])
+
             # Process monitoring images
             if categories['monitoring']:
-                values = [
-                    [str(current_time), json.dumps({
-                        "metadata": {
-                            "cluster": cluster,
-                            "namespace": namespace
-                        },
+                try:
+                    payload = json.dumps({
+                        "metadata": {"cluster": cluster, "namespace": namespace},
                         "spec": categories['monitoring']
-                    })]
-                ]
-                send_to_loki(
-                    "monitoring_images",
-                    "prometheus",
-                    "monitoring",
-                    values
-                )
+                    })
+                except (TypeError, ValueError) as e:
+                    send_error_to_loki("monitoring_images", "prometheus", "monitoring",
+                                       f"Failed to serialize monitoring image data: {e}")
+                    payload = None
+                if payload is not None:
+                    send_to_loki("monitoring_images", "prometheus", "monitoring",
+                                 [[str(current_time), payload]])
 
 
 def format_and_send_grafana_usage_data(grafana_usage: Dict[str, int], labels: Dict[str, str]) -> None:
@@ -309,16 +310,15 @@ def format_and_send_grafana_usage_data(grafana_usage: Dict[str, int], labels: Di
     """
     current_time = int(time.time() * 1000000000)  # Current time in nanoseconds
     
-    values = [
-        [str(current_time), json.dumps(grafana_usage)]
-    ]
-    
-    send_to_loki(
-        "grafana_usage",
-        "prometheus",
-        "datasource_usage",
-        values
-    )
+    try:
+        payload = json.dumps(grafana_usage)
+    except (TypeError, ValueError) as e:
+        send_error_to_loki("grafana_usage", "prometheus", "datasource_usage",
+                           f"Failed to serialize Grafana usage data: {e}")
+        return
+
+    send_to_loki("grafana_usage", "prometheus", "datasource_usage",
+                 [[str(current_time), payload]])
 
 
 def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
@@ -428,7 +428,7 @@ def collect_grafana_usage(prometheus_url: str, credentials: Optional[Dict[str, s
     query = "sum by (datasource) (clamp_min(sum_over_time(clamp_min(increase(grafana_datasource_request_total[1h]), 0)[24h:1h]) - 24 * min_over_time(clamp_min(increase(grafana_datasource_request_total[1h]), 0)[24h:1h]), 0))"
 
     data, err = query_prometheus(prometheus_url, query, username, password)
-    if data is None:
+    if err or data is None:
         logger.warning("Could not fetch Grafana usage data from Prometheus")
         return None, err
 
@@ -496,7 +496,7 @@ def query_loki(loki_url: str, query: str, username: Optional[str] = None, passwo
         response.raise_for_status()
         logger.debug("Successfully received response from Loki")
         return response.json(), None
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, ValueError) as e:
         logger.error(f"Error querying Loki: {e}")
         return None, str(e)
 
@@ -517,7 +517,7 @@ def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str], credentials:
 
     data, err = query_loki(source_loki_url, query, username, password)
 
-    if data is None:
+    if err or data is None:
         logger.error("Failed to query Loki for Grafana DB lock errors")
         send_error_to_loki("grafana_db_lock_errors", "loki", "db_lock_error_count_24h",
                            err or "Failed to query source Loki for Grafana DB lock errors")
@@ -629,7 +629,10 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
                 cluster = record['metric'].get('cluster')
                 namespace = record['metric'].get('namespace')
                 pod_name = record['metric'].get('pod')
-                value = float(record['value'][1])
+                try:
+                    value = float(record['value'][1])
+                except (ValueError, IndexError, KeyError):
+                    continue
                 if cluster and namespace and pod_name:
                     result[(cluster, namespace, pod_name)] = value
         return result
@@ -660,7 +663,10 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         for record in (pod_usage_stats[stat] or {}).get('data', {}).get('result', []):
             m = record.get('metric', {})
             if m.get('cluster') == cluster and m.get('pod') == pod_name and m.get('namespace') == namespace:
-                return float(record['value'][1])
+                try:
+                    return float(record['value'][1])
+                except (ValueError, IndexError, KeyError):
+                    return None
         return None
 
     pods_by_namespace = {}
@@ -733,7 +739,6 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
             "memory_percent_max": get_stat(mem_max_query),
         }
 
-    import time
     current_time_ns = str(int(time.time() * 1e9))
     values = []
     sent_count = 0
@@ -828,7 +833,7 @@ def collect_helm_chart_versions(namespace: str) -> Tuple[List[Dict[str, Any]], L
             token = f.read().strip()
     except OSError as e:
         logger.error(f"Could not read service account token: {e}")
-        return []
+        raise
 
     try:
         url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
@@ -881,7 +886,7 @@ def collect_helm_chart_versions(namespace: str) -> Tuple[List[Dict[str, Any]], L
                 }
             }, subcharts)
             logger.debug(f"Secret: release '{release_name}' revision {revision}, chart '{chart_name}' v{chart_version}, subcharts: {len(subcharts)}")
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, ValueError) as e:
         logger.error(f"Error querying Kubernetes API for Helm secrets: {e}")
         raise
 
@@ -909,7 +914,7 @@ def collect_and_send_helm_chart_versions(namespace: str) -> None:
     logger.info("Collecting and sending Helm chart versions")
     try:
         records, decode_failures = collect_helm_chart_versions(namespace)
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, OSError, ValueError) as e:
         send_error_to_loki("helm_chart_versions", "kubernetes", "helm_chart_version_info", str(e))
         return
     if decode_failures:
@@ -958,11 +963,15 @@ def main() -> None:
     loki_creds = {'username': loki_user, 'password': loki_pass} if loki_user and loki_pass else None
 
     # Collect and send data
-    collect_and_send_version_data(prometheus_url, labels, prometheus_creds)
-    collect_and_send_grafana_usage(prometheus_url, labels, prometheus_creds)
-    collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
-    collect_and_send_grafana_db_lock_errors(labels, loki_creds)
-    collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
+    try:
+        collect_and_send_version_data(prometheus_url, labels, prometheus_creds)
+        collect_and_send_grafana_usage(prometheus_url, labels, prometheus_creds)
+        collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
+        collect_and_send_grafana_db_lock_errors(labels, loki_creds)
+        collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
+    except Exception as e:
+        logger.critical(f"Unexpected error during monitoring data collection: {e}", exc_info=True)
+        return
 
     logger.info("Completed monitoring data collection")
 
