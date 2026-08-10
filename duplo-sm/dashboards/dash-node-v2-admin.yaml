@@ -1,0 +1,2206 @@
+# Rendered from grafana/dashboards/Node v2 Admin-1636538028553.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dash-node-v2-admin
+  namespace: duplo-monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Legacy Tenant Dashboards"
+data:
+  dash-node-v2-admin.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "$$hashKey": "object:2875",
+            "builtIn": 1,
+            "datasource": "prometheus",
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Duplocloud Node Dashboard allows you to access metrics about nodes or individual nodes using the dropdown menu",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 224,
+      "links": [
+        {
+          "$$hashKey": "object:2302",
+          "asDropdown": true,
+          "icon": "external link",
+          "tags": [],
+          "targetBlank": true,
+          "title": "",
+          "type": "dashboards"
+        }
+      ],
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 187,
+          "panels": [],
+          "title": "Resource Overview (associated JOB)，Host：$name，host_ip：$instance",
+          "type": "row"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Displays common metrics about the servers running in a given tenant. Some notes: if multiple network cards or multiple partitions exist, the value of the network card or partition with the highest utilization rate collected is displayed. \n\nCurrEstab is the number of TCP connections whose current status is ESTABLISHED or CLOSE-WAIT.\n\nTCP_TW - number of sockets ending TIME_WAIT status after normal timeout. \n\n5m load measures % of a single cpu used - for example, if it is 4 it means that 4 cpu cores are fully used.",
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "id": 198,
+          "options": {},
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_uname_info{tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"} - 0",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "A"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(time() - node_boot_time_seconds{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})by(host_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "D"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_memory_MemTotal_bytes{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"} - 0",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "B"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "count(node_cpu_seconds_total{mode='system', tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}) by (host_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_load5{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "L"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}[$interval])) by (instance)) * 100",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "F"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "(1 - (node_memory_MemAvailable_bytes{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"} / (node_memory_MemTotal_bytes{ tenant=~\"$tenant$\", name=~\"$name$\", private_ip=~\"$instance$\"})))* 100",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "G"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "max((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}) *100/(node_filesystem_avail_bytes {fstype=~\"ext.?|xfs\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}+(node_filesystem_size_bytes{fstype=~\"ext.?|xfs\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})))by(instance)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "E"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(node_disk_read_bytes_total{tenant=~\"^$tenant$\", name=\"$name$\",private_ip=~\"$instance$\"}[$interval])) by (private_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "H"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(node_disk_written_bytes_total{tenant=~\"^$tenant$\", name=\"$name$\",private_ip=~\"$instance$\"}[$interval])) by (private_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "I"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_netstat_Tcp_CurrEstab{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"} - 0",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "M"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "node_sockstat_TCP_tw{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"} - 0",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "TIME_WAIT",
+              "refId": "N"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "max(rate(node_network_receive_bytes_total{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}[$interval])*8) by (instance)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "J"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "max(rate(node_network_transmit_bytes_total{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}[$interval])*8) by (instance)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "K"
+            }
+          ],
+          "title": "Server Resource Overview 【Total：$total】",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {}
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "CPU Metrics for the query set - given by the name and tenant fields. \n\nThe red line is the count of the total number of CPU cores for all servers that show up with a given query. For example, if your selection has 2 servers with 2 cores of CPUs each, this value should be 4.\n\nThe yellow line is the sum of the 5 minute load averages for all individual nodes in the queryset. For example, if there are 2 servers with 2 cores of cpu each and each core is reporting 0.2 load average, this should be 0.8. The upper limit of this value should be the red line. If you are worried about cpu saturation, you should be worried if the load average gets close to the red line.\n\nThe blue line is a measure of average cpu usage across all nodes. It is an average of the average of all cores across the queryset. In the previous example, where each core is reporting 0.2, this percent should be 20%. If it gets higher than like 70/80% you should be worried.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 0,
+            "y": 8
+          },
+          "id": 191,
+          "maxPerRow": 6,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "count(node_cpu_seconds_total{ mode='system', tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "CPU Cores",
+              "refId": "B",
+              "step": 240
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "sum(node_load5{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Total 5m load",
+              "refId": "A",
+              "step": 240
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "avg(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}[$interval])) by (instance)) * 100",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Overall average used%",
+              "refId": "F",
+              "step": 240
+            }
+          ],
+          "title": "Overall total 5m load & average CPU used%: $name",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Disk utilization metrics for a given queryset across tenant and name fields.\n\nThe red line is the total amount of RAM on all servers in the queryset. For example, if you have 2 servers with 8 gb RAM, the red line should be 16gb. This is measured on the left y-axis.\n\nThe yellow line is total memory in use across all servers that match the queryset. It is represented on the left y-axis. If you are interested in visually seeing memory saturation, as this line gets closer to the red line, you should be worried.\n\nThe blue dots represent usage as a percent of total memory. This is useful for understanding memory saturation - e.g. if it is close to 100% it means that your memory usage is high. It's value is represented on the right y-axis.\n",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 8,
+            "y": 8
+          },
+          "id": 195,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "sum(node_memory_MemTotal_bytes{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Total",
+              "refId": "A",
+              "step": 4
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "sum(node_memory_MemTotal_bytes{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"} - node_memory_MemAvailable_bytes{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Total Used",
+              "refId": "B",
+              "step": 4
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "(sum(node_memory_MemTotal_bytes{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"} - node_memory_MemAvailable_bytes{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}) / sum(node_memory_MemTotal_bytes{ tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}))*100",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Overall Average Used%",
+              "refId": "H"
+            }
+          ],
+          "title": "Overall total memory & average memory used%: $name",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Disk file system metrics for all servers that match the query as defined by tenant and name.\n\nThe red line is a sum total of all storage across all nodes in the queryset. For example, if there are 5 servers with 100,80,20,100,100 gb of disk storage each, the value should be 400 gb. The left y-axis relates to this metric.\n\nThe yellow line is a measure of the utilization of that storage space. If those 5 servers included in the query use 10 GB each, the yellow line should be at 50  GB. Furthermore, a visual representation of saturation is when the yellow line approaches the red line. The left y-axis relates to this metric.\n\nThe blue dots is a percentage of memory used across the entire query. It adds up all the used space and divides it by all the total memory to come up with a percentage. The right y-axis relates to this metric.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 16,
+            "y": 8
+          },
+          "id": 197,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "sum(avg(node_filesystem_size_bytes{fstype=~\"xfs|ext.*\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})by(device,instance))",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Total",
+              "refId": "E"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "sum(avg(node_filesystem_size_bytes{fstype=~\"xfs|ext.*\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})by(device,instance)) - sum(avg(node_filesystem_avail_bytes{fstype=~\"xfs|ext.*\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})by(device,instance))",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Total Used",
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "(sum(avg(node_filesystem_size_bytes{fstype=~\"xfs|ext.*\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})by(device,instance)) - sum(avg(node_filesystem_free_bytes{fstype=~\"xfs|ext.*\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})by(device,instance))) *100/(sum(avg(node_filesystem_avail_bytes{fstype=~\"xfs|ext.*\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})by(device,instance))+(sum(avg(node_filesystem_size_bytes{fstype=~\"xfs|ext.*\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})by(device,instance)) - sum(avg(node_filesystem_free_bytes{fstype=~\"xfs|ext.*\", tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"})by(device,instance))))",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Overall Average Used%",
+              "refId": "A"
+            }
+          ],
+          "title": "Overall total disk & average disk used%: $name",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 15
+          },
+          "id": 189,
+          "panels": [],
+          "title": "Resource Details：【$name】",
+          "type": "row"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "This is the average time servers in this tenant have been running.",
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 1
+                  },
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": 3
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 2,
+            "x": 0,
+            "y": 16
+          },
+          "id": 15,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "avg(time() - node_boot_time_seconds{tenant=~\"$tenant$\",name=~\"$name$\",private_ip=~\"$instance$\"})",
+              "format": "time_series",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A",
+              "step": 40
+            }
+          ],
+          "title": "Uptime",
+          "type": "stat"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "This charts utilization metrics for CPU, RAM, and SWAP for the entire query set across tenant, name and private ip. \n\nNotes:\nThe Used RAM Memory takes into account the amount of data stored in caches as used RAM. Contact Duplo team if you want the other metric.\n\n\n",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 1,
+              "mappings": [
+                {
+                  "options": {
+                    "0": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "max": 100,
+              "min": 0.1,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "#EAB839",
+                    "value": 70
+                  },
+                  {
+                    "color": "red",
+                    "value": 90
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 3,
+            "x": 2,
+            "y": 16
+          },
+          "id": 177,
+          "options": {
+            "displayMode": "lcd",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true,
+            "text": {}
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "100 - (avg(rate(node_cpu_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",mode=\"idle\"}[$interval])) * 100)",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "CPU Busy",
+              "refId": "A"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "avg(rate(node_cpu_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",mode=\"iowait\"}[$interval])) * 100",
+              "hide": true,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "IOwait使用率",
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "(1 - (node_memory_MemFree_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"} / (node_memory_MemTotal_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"})))* 100",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "Used RAM Memory",
+              "refId": "B"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "(node_filesystem_size_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint=\"$maxmount\"}-node_filesystem_free_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint=\"$maxmount\"})*100 /(node_filesystem_avail_bytes {tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint=\"$maxmount\"}+(node_filesystem_size_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint=\"$maxmount\"}-node_filesystem_free_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint=\"$maxmount\"}))",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "Used Max Mount($maxmount)",
+              "refId": "D"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "(1 - ((node_memory_SwapFree_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"} + 1)/ (node_memory_SwapTotal_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"} + 1))) * 100",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "Used SWAP",
+              "refId": "F"
+            }
+          ],
+          "title": "",
+          "type": "bargauge"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "the total disk, usage, available, and usage rate are consistent with the values of the Size, Used, Avail, and Use% columns of the df command, and the value of Use% will be rounded to one decimal place, which will be more accurate .\n\nNote: The Use% algorithm in df is: (size-free) * 100 / (avail + (size-free)), the result is divisible by this value, non-divisible by this value is +1, and the unit of the result is %.\nRefer to the df command source code:",
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 10,
+            "x": 5,
+            "y": 16
+          },
+          "id": 181,
+          "links": [
+            {
+              "targetBlank": true,
+              "title": "https://github.com/coreutils/coreutils/blob/master/src/df.c",
+              "url": "https://github.com/coreutils/coreutils/blob/master/src/df.c"
+            }
+          ],
+          "options": {},
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "node_filesystem_size_bytes{tenant=~\"$tenant$\", name=~\"$name$\", host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}-0",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "总量",
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "node_filesystem_avail_bytes {tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}-0",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "10s",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "(node_filesystem_size_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}-node_filesystem_free_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}) *100/(node_filesystem_avail_bytes {tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}+(node_filesystem_size_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}-node_filesystem_free_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}))",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "B"
+            }
+          ],
+          "title": "【$instance】：Disk Space Used Basic(EXT?/XFS)",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {}
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "I/O wait is the percentage of time that the CPU (or CPUs) were idle during which the system had pending I/O requests. Presence of I/O wait tells us that the system is idle when it could be processing outstanding requests. \n\nThis is the average time spent by all cpu cores in the query defined by tenant, name and hostip in the iowait state. ",
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 2,
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 20
+                  },
+                  {
+                    "color": "#d44a3a",
+                    "value": 50
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 2,
+            "x": 15,
+            "y": 16
+          },
+          "id": 20,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "last"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "avg(rate(node_cpu_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",mode=\"iowait\"}[$interval])) * 100",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A",
+              "step": 20
+            }
+          ],
+          "title": "CPU iowait",
+          "type": "stat"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Internet traffic per node per hour. \n\nThe positive metrics are node network traffic received while the negative metrics are node network traffic transmitted per hour.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 7,
+            "x": 17,
+            "y": 16
+          },
+          "id": 183,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(increase(node_network_receive_bytes_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",device=~\"$device\"}[60m])) by (private_hostname)",
+              "interval": "60m",
+              "intervalFactor": 1,
+              "legendFormat": "{{private_hostname}}_receive",
+              "metric": "",
+              "range": true,
+              "refId": "A",
+              "step": 600,
+              "target": ""
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(increase(node_network_transmit_bytes_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",device=~\"$device\"}[60m])) by (private_hostname)",
+              "hide": false,
+              "interval": "60m",
+              "intervalFactor": 1,
+              "legendFormat": "{{private_hostname}}_transmit",
+              "range": true,
+              "refId": "B",
+              "step": 600
+            }
+          ],
+          "title": "Internet traffic per hour $device",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Total count of CPU Cores for all servers in the query as specified by tenant, name, private ip.",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 1
+                  },
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": 2
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 2,
+            "x": 0,
+            "y": 18
+          },
+          "id": 14,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "value"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "count(node_cpu_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\", mode='system'})",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A",
+              "step": 20
+            }
+          ],
+          "title": "CPU Cores",
+          "type": "stat"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "inodes are data structures used by the linux filesystem to describe files and folders. If ever you get an error that says \"run out of disk space\" you should check this. Once inodes are 100% used on a server, you can have issues like data loss, application crashes, OS restarts, processes not restarting and periodic tasks not firing.\n\nThis metric is the total number of free inodes across the query defined by tenant, name and instance.",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 100000
+                  },
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": 1000000
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 2,
+            "x": 15,
+            "y": 18
+          },
+          "id": 179,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "avg(node_filesystem_files_free{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",mountpoint=\"$maxmount\",fstype=~\"ext.?|xfs\"})",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A",
+              "step": 20
+            }
+          ],
+          "title": "Free inodes:$maxmount ",
+          "type": "stat"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Sum of all RAM across all servers in this query, as defined by tenant, name and private ip.",
+          "fieldConfig": {
+            "defaults": {
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 2
+                  },
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": 3
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 2,
+            "x": 0,
+            "y": 20
+          },
+          "id": 75,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "sum(node_memory_MemTotal_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"})",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{instance}}",
+              "refId": "A",
+              "step": 20
+            }
+          ],
+          "title": "Total RAM",
+          "type": "stat"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Maximum number of file handles that the linux kernel will allocate.\n\nThis number is averaged over all nodes in a tenant and of a given name. To get something meaningful for this metric, it is recommended that users select a name of a single server in the drop down above.",
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "rgba(245, 54, 54, 0.9)"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 1024
+                  },
+                  {
+                    "color": "rgba(50, 172, 45, 0.97)",
+                    "value": 10000
+                  }
+                ]
+              },
+              "unit": "locale"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 2,
+            "x": 15,
+            "y": 20
+          },
+          "id": 178,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "avg(node_filefd_maximum{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"})",
+              "format": "time_series",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A",
+              "step": 20
+            }
+          ],
+          "title": "Total filefd",
+          "type": "stat"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "This chart breaks down the CPU utilization percent by different use cases - e.g. system, user, iowait and Total. Each metric is an average of all the cores of all the nodes in the query.\n",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 22
+          },
+          "id": 7,
+          "maxPerRow": 6,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "avg(rate(node_cpu_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",mode=\"system\"}[$interval])) by (host_ip) *100",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "System:  {{ name }}",
+              "refId": "A",
+              "step": 20
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "avg(rate(node_cpu_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",mode=\"user\"}[$interval])) by (host_ip) *100",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "User: {{host_ip}}",
+              "range": true,
+              "refId": "B",
+              "step": 240
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "avg(rate(node_cpu_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",mode=\"iowait\"}[$interval])) by (host_ip) *100",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Iowait: {{ host_ip }}",
+              "refId": "D",
+              "step": 240
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "(1 - avg(rate(node_cpu_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",mode=\"idle\"}[$interval])) by (host_ip))*100",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Total: {{ host_ip }}",
+              "range": true,
+              "refId": "F",
+              "step": 240
+            }
+          ],
+          "title": "CPU% Basic",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "This chart displays memory metrics for each node in the tenant, name and private ip query.\n\nTotal memory is the total amount of memory on a node.\n\nAvailable memory is an approximation for the amount of memory available for users to do stuff with on the node.  A full explanation is available here: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=34e431b0ae398fc54ea69ff85ec700722c9da773\n\nUsed memory is the total memory that is not available to users (e.g. total minus available as defined above)\n\nUsed% is a percent utilization rate of all Used memory (as defined above) divided by total memory. \n",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 22
+          },
+          "id": 156,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_memory_MemTotal_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Total: {{name}}",
+              "refId": "A",
+              "step": 4
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_memory_MemTotal_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"} - node_memory_MemAvailable_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Used: {{name}}",
+              "range": true,
+              "refId": "B",
+              "step": 4
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_memory_MemAvailable_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Avaliable: {{name}}",
+              "range": true,
+              "refId": "F",
+              "step": 4
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_memory_Buffers_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Memory_Buffers: {{name}}",
+              "range": true,
+              "refId": "D",
+              "step": 4
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_memory_MemFree_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"\"}",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Memory_Free {{name}}",
+              "range": true,
+              "refId": "C",
+              "step": 4
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_memory_Cached_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "Memory_Cached",
+              "range": true,
+              "refId": "E",
+              "step": 4
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "node_memory_MemTotal_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"} - (node_memory_Cached_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"} + node_memory_Buffers_bytes{htenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"} + node_memory_MemFree_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"})",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "G"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "(1 - (node_memory_MemAvailable_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"} / (node_memory_MemTotal_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"})))* 100",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 10,
+              "legendFormat": "Used% {{name}}",
+              "range": true,
+              "refId": "H"
+            }
+          ],
+          "title": "Memory Basic",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Total Network usage bandwidth for all servers in the query.\n\nThese are summed across all devices on the instance. \n\nPositive values are received traffic and negative values are transmitted traffic.\n",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 22
+          },
+          "id": 157,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(node_network_receive_bytes_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",device=~\"$device\"}[$interval])*8) by (name)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}_receive",
+              "range": true,
+              "refId": "A",
+              "step": 4
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(node_network_transmit_bytes_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",device=~\"$device\"}[$interval])*8) by (name)",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}_transmit",
+              "range": true,
+              "refId": "B",
+              "step": 4
+            }
+          ],
+          "title": "Network bandwidth usage per second $device",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Per server system load metrics as well as the count of CPUs. \n\n\n\nDepicted on the chart are the 1 minute average CPU load, 5 minute average CPU load, 15 minute average CPU load and the total number of cores. The Node Load statistics are a sum of the total load on each core on the server. So, if two cores are running at 60% utilization, it would be 1.2. The difference between the 1,5,15 minute loads is how long they average over. Users can visually see saturation when any of the load averages for a server approaches its number of cores.",
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 30
+          },
+          "id": 13,
+          "maxPerRow": 6,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_load1{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "1m load: {{name}}",
+              "metric": "",
+              "refId": "A",
+              "step": 20,
+              "target": ""
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_load5{tenant=~\"$tenant$\",name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "5m load: {{name}}",
+              "refId": "B",
+              "step": 20
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_load15{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "15m load: {{name}}",
+              "refId": "C",
+              "step": 20
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": " sum(count(node_cpu_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\", mode='system'}) by (cpu,name)) by (name)",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "CPU cores: {{name}}",
+              "refId": "D",
+              "step": 20
+            }
+          ],
+          "title": "System Load",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Per second read / write bytes for each drive on each host in the query.  ",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 30
+          },
+          "id": 168,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_disk_read_bytes_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}} {{device}}_Read bytes",
+              "range": true,
+              "refId": "A",
+              "step": 10
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_disk_written_bytes_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name }} {{device}}_Written bytes",
+              "range": true,
+              "refId": "B",
+              "step": 10
+            }
+          ],
+          "title": "Disk R/W Data",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "% of Disk space used by mountpoint and server in the query.\n\nIn some cases, the same drive device is mounted on multiple places on the linux file system of the host. Metrics are shown for each of those.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 30
+          },
+          "id": 174,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "(node_filesystem_size_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}-node_filesystem_free_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}) *100/(node_filesystem_avail_bytes {tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}+(node_filesystem_size_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}-node_filesystem_free_bytes{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.*|xfs\",mountpoint !~\".*pod.*\"}))",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: {{mountpoint}}",
+              "refId": "A"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "node_filesystem_files_free{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.?|xfs\"} / node_filesystem_files{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\",fstype=~\"ext.?|xfs\"}",
+              "hide": true,
+              "interval": "",
+              "legendFormat": "Inodes：{{instance}}：{{mountpoint}}",
+              "refId": "B"
+            }
+          ],
+          "title": "Disk Space Used% Basic",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Read/write completions per second per disk partition.\n",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 0,
+            "y": 38
+          },
+          "id": 161,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_disk_reads_completed_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: {{device}}_Reads completed",
+              "range": true,
+              "refId": "A",
+              "step": 10
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_disk_writes_completed_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: {{device}}_Writes completed",
+              "range": true,
+              "refId": "B",
+              "step": 10
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "node_disk_io_now{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{device}}",
+              "refId": "C"
+            }
+          ],
+          "title": "Disk IOps Completed（IOPS）",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "The time spent on I/O per interval per device for each server in the query.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 8,
+            "y": 38
+          },
+          "id": 175,
+          "maxPerRow": 6,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_disk_io_time_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: {{device}}_ IO time",
+              "range": true,
+              "refId": "C"
+            }
+          ],
+          "title": "Time Spent Doing I/Os",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Time spent on each read/write operation for each disk on each host over time.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 16,
+            "y": 38
+          },
+          "id": 160,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_disk_read_time_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval]) / rate(node_disk_reads_completed_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: {{device}}_Read time",
+              "refId": "B"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_disk_write_time_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval]) / rate(node_disk_writes_completed_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: {{device}}_Write time",
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "rate(node_disk_io_time_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{device}}",
+              "refId": "A",
+              "step": 10
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_disk_io_time_weighted_seconds_total{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "format": "time_series",
+              "hide": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: {{device}}",
+              "range": true,
+              "refId": "D"
+            }
+          ],
+          "title": "Disk R/W Time(Reference: less than 100ms)(beta)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Displays metrics found in netstat -s and sockstat commands on linux\n\nSockets_used - Sockets currently in use\n\nCurrEstab - TCP connections for which the current state is either ESTABLISHED or CLOSE- WAIT\n\nTCP_alloc - Allocated sockets\n\nTCP_tw - Sockets wating close\n\nUDP_inuse - Udp sockets currently in use\n\nRetransSegs - TCP retransmission packets\n\nOutSegs - Number of packets sent by TCP\n\nInSegs - Number of packets received by TCP",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 16,
+            "x": 0,
+            "y": 47
+          },
+          "id": 158,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_netstat_Tcp_CurrEstab{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: CurrEstab",
+              "refId": "A",
+              "step": 20
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_sockstat_TCP_tw{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: TCP_tw",
+              "range": true,
+              "refId": "D"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_sockstat_sockets_used{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "{{name}}: Sockets_used",
+              "range": true,
+              "refId": "B"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_sockstat_UDP_inuse{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "interval": "",
+              "legendFormat": "{{name}}: UDP_inuse",
+              "range": true,
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_sockstat_TCP_alloc{tenant=~\"$tenant$\",name=~\"$name$\",host_ip=~\"$instance$\"}",
+              "interval": "",
+              "legendFormat": "{{name}}: TCP_alloc",
+              "range": true,
+              "refId": "E"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_netstat_Tcp_PassiveOpens{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "hide": true,
+              "interval": "",
+              "legendFormat": "{{name}}: Tcp_PassiveOpens",
+              "range": true,
+              "refId": "G"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_netstat_Tcp_ActiveOpens{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "hide": true,
+              "interval": "",
+              "legendFormat": "{{name}}: Tcp_ActiveOpens",
+              "range": true,
+              "refId": "F"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_netstat_Tcp_InSegs{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "interval": "",
+              "legendFormat": "{{name}} Tcp_InSegs",
+              "range": true,
+              "refId": "H"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_netstat_Tcp_OutSegs{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "interval": "",
+              "legendFormat": "{{name}}: Tcp_OutSegs",
+              "range": true,
+              "refId": "I"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_netstat_Tcp_RetransSegs{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "hide": false,
+              "interval": "",
+              "legendFormat": "{{name}}: Tcp_RetransSegs",
+              "range": true,
+              "refId": "J"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "rate(node_netstat_TcpExt_ListenDrops{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}[$interval])",
+              "hide": true,
+              "interval": "",
+              "legendFormat": "",
+              "refId": "K"
+            }
+          ],
+          "title": "Network Sockstat",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Open file descriptors: These are a kernel level metric that show how many files are open. This can become a worry if the count is increasing constantly and not going down since there is a limit on the number of open file descriptors available in a linux filesystem.\n\nContext Switches are the process of storing the current state of the CPU in the process control block for the task it's working on so this saved state can be reloaded each time the task is resumed. A high context switch rate can have an impact on server performance. ",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 47
+          },
+          "id": 16,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_filefd_allocated{tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 5,
+              "legendFormat": "{{name}}: used filefd",
+              "refId": "B"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "rate(node_context_switches_total{tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}[$interval])",
+              "interval": "",
+              "intervalFactor": 5,
+              "legendFormat": "{{name}} switches",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "  (node_filefd_allocated{tenant=~\"$tenant$\", name=~\"$name$\",private_ip=~\"$instance$\"}/node_filefd_maximum{tenant=~\"$tenant$\", name=~\"$name$\",host_ip=~\"$instance$\"}) *100",
+              "format": "time_series",
+              "hide": true,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 5,
+              "legendFormat": "{{name}}: % of file descriptors used",
+              "refId": "C"
+            }
+          ],
+          "title": "Open  File Descriptor(left)/Context switches(right)",
+          "type": "timeseries"
+        }
+      ],
+      "preload": false,
+      "refresh": "",
+      "schemaVersion": 40,
+      "tags": [
+        "Duplo Managed"
+      ],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values(tenant)",
+            "includeAll": true,
+            "label": "Tenant",
+            "multi": true,
+            "name": "tenant",
+            "options": [],
+            "query": {
+              "query": "label_values(tenant)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values({tenant=~\"$tenant$\"}, name)",
+            "includeAll": true,
+            "label": "Name",
+            "multi": true,
+            "name": "name",
+            "options": [],
+            "query": {
+              "query": "label_values({tenant=~\"$tenant$\"}, name)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "allValue": ".*",
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values({tenant=~\"$tenant$\", name=~\"$name$\"},private_ip)",
+            "includeAll": true,
+            "label": "PrivateIP",
+            "multi": true,
+            "name": "instance",
+            "options": [],
+            "query": {
+              "query": "label_values({tenant=~\"$tenant$\", name=~\"$name$\"},private_ip)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values(node_network_info{tenant=~\"$tenant$\",  name=~\"$name$\",  host_ip=~\"$instance$\", device!~'tap.*|veth.*|br.*|docker.*|virbr.*|lo.*|cni.*'},device)",
+            "hide": 2,
+            "includeAll": true,
+            "label": "NIC",
+            "multi": true,
+            "name": "device",
+            "options": [],
+            "query": {
+              "query": "label_values(node_network_info{tenant=~\"$tenant$\",  name=~\"$name$\",  host_ip=~\"$instance$\", device!~'tap.*|veth.*|br.*|docker.*|virbr.*|lo.*|cni.*'},device)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "auto": false,
+            "auto_count": 100,
+            "auto_min": "10s",
+            "current": {
+              "text": "2m",
+              "value": "2m"
+            },
+            "label": "Interval",
+            "name": "interval",
+            "options": [
+              {
+                "selected": false,
+                "text": "30s",
+                "value": "30s"
+              },
+              {
+                "selected": false,
+                "text": "1m",
+                "value": "1m"
+              },
+              {
+                "selected": true,
+                "text": "2m",
+                "value": "2m"
+              },
+              {
+                "selected": false,
+                "text": "3m",
+                "value": "3m"
+              },
+              {
+                "selected": false,
+                "text": "5m",
+                "value": "5m"
+              },
+              {
+                "selected": false,
+                "text": "10m",
+                "value": "10m"
+              },
+              {
+                "selected": false,
+                "text": "30m",
+                "value": "30m"
+              }
+            ],
+            "query": "30s,1m,2m,3m,5m,10m,30m",
+            "refresh": 2,
+            "type": "interval"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "query_result(topk(1,sort_desc (max(node_filesystem_size_bytes{tenant=~\"$tenant$\",instance=~'$instance',fstype=~\"ext.?|xfs\",mountpoint!~\".*pods.*\"}) by (mountpoint))))",
+            "hide": 2,
+            "includeAll": false,
+            "label": "maxmount",
+            "name": "maxmount",
+            "options": [],
+            "query": {
+              "query": "query_result(topk(1,sort_desc (max(node_filesystem_size_bytes{tenant=~\"$tenant$\",instance=~'$instance',fstype=~\"ext.?|xfs\",mountpoint!~\".*pods.*\"}) by (mountpoint))))",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 2,
+            "regex": "/.*\\\"(.*)\\\".*/",
+            "sort": 5,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values({tenant=~\"$tenant$\",host_ip=~\"$instance$\"}, nodename)",
+            "hide": 2,
+            "includeAll": false,
+            "label": "show_hostname",
+            "name": "show_hostname",
+            "options": [],
+            "query": {
+              "query": "label_values({tenant=~\"$tenant$\",host_ip=~\"$instance$\"}, nodename)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "sort": 5,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "query_result(count(node_uname_info{ tenant=~\"$tenant$\", name=~\"$name$\"}))",
+            "hide": 2,
+            "includeAll": false,
+            "label": "total_servers",
+            "name": "total",
+            "options": [],
+            "query": {
+              "query": "query_result(count(node_uname_info{ tenant=~\"$tenant$\", name=~\"$name$\"}))",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "/{} (.*) .*/",
+            "type": "query"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-3h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "15s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m"
+        ]
+      },
+      "timezone": "browser",
+      "title": "Node v2 Admin",
+      "uid": "rs6d5LV7k",
+      "version": 1,
+      "weekStart": ""
+    }

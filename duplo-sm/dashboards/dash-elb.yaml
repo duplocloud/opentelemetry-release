@@ -1,0 +1,606 @@
+# Rendered from grafana/dashboards/ELB-1627495342887.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dash-elb
+  namespace: duplo-monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Cloud - AWS"
+data:
+  dash-elb.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "prometheus",
+              "uid": "P1809F7CD0C75ACF3"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "pluginId": "prometheus",
+            "pluginName": "Prometheus",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 273,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 9,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "LoadBalancerName": "$elbname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "RequestCount",
+              "metricQueryType": 0,
+              "namespace": "AWS/ELB",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Sum"
+            }
+          ],
+          "title": "Requests Count",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 1,
+                "drawStyle": "bars",
+                "fillOpacity": 96,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "stepBefore",
+                "lineWidth": 2,
+                "pointSize": 7,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "__systemRef": "hideSeriesFrom",
+                "matcher": {
+                  "id": "byNames",
+                  "options": {
+                    "mode": "exclude",
+                    "names": [
+                      "EstimatedALBActiveConnectionCount_Sum"
+                    ],
+                    "prefix": "All except:",
+                    "readOnly": true
+                  }
+                },
+                "properties": [
+                  {
+                    "id": "custom.hideFrom",
+                    "value": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": true
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 25,
+          "options": {
+            "legend": {
+              "calcs": [
+                "last"
+              ],
+              "displayMode": "list",
+              "placement": "right",
+              "showLegend": false
+            },
+            "tooltip": {
+              "mode": "single"
+            }
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "LoadBalancerName": "$elbname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "EstimatedALBActiveConnectionCount",
+              "metricQueryType": 0,
+              "namespace": "AWS/ELB",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Sum"
+            }
+          ],
+          "title": "Active Connections",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 9
+          },
+          "id": 2,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "LoadBalancerName": "$elbname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "HTTPCode_Backend_4XX",
+              "metricQueryType": 0,
+              "namespace": "AWS/ELB",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Sum"
+            }
+          ],
+          "title": "4XX Errors From the Load Balancer",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 9
+          },
+          "id": 26,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "LoadBalancerName": "$elbname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "HTTPCode_Backend_2XX",
+              "metricQueryType": 0,
+              "namespace": "AWS/ELB",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Sum"
+            }
+          ],
+          "title": "Successful Responses",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 18
+          },
+          "id": 3,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "LoadBalancerName": "$elbname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "BackendConnectionErrors",
+              "metricQueryType": 0,
+              "namespace": "AWS/ELB",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Sum"
+            }
+          ],
+          "title": "Errors From the Target Groups",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 3,
+            "x": 12,
+            "y": 18
+          },
+          "id": 28,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "mean"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "AvailabilityZone": "us-west-2b",
+                "LoadBalancerName": "$elbname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": false,
+              "metricEditorMode": 0,
+              "metricName": "HealthyHostCount",
+              "metricQueryType": 0,
+              "namespace": "AWS/ELB",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Healthy Hosts",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "links": [],
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 3,
+            "x": 15,
+            "y": 18
+          },
+          "id": 5,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "AvailabilityZone": "us-west-2b",
+                "LoadBalancerName": "$elbname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": false,
+              "metricEditorMode": 0,
+              "metricName": "UnHealthyHostCount",
+              "metricQueryType": 0,
+              "namespace": "AWS/ELB",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Unhealthy Hosts",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "links": [],
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 6,
+            "x": 18,
+            "y": 18
+          },
+          "id": 27,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "LoadBalancerName": "$elbname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "HTTPCode_Backend_3XX",
+              "metricQueryType": 0,
+              "namespace": "AWS/ELB",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Sum"
+            }
+          ],
+          "title": "3XX Responses",
+          "type": "timeseries"
+        }
+      ],
+      "preload": false,
+      "refresh": "",
+      "schemaVersion": 40,
+      "tags": [
+        "Duplo Managed"
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "region",
+            "type": "textbox",
+            "current": {
+              "selected": false,
+              "text": "us-west-2",
+              "value": "us-west-2"
+            },
+            "hide": 0,
+            "label": "region",
+            "query": "us-west-2"
+          },
+          {
+            "name": "elbname",
+            "type": "query",
+            "label": "elbname",
+            "datasource": {
+              "type": "cloudwatch",
+              "uid": "P034F075C744B399F"
+            },
+            "query": {
+              "queryType": "dimensionValues",
+              "namespace": "AWS/ELB",
+              "metricName": "RequestCount",
+              "dimensionKey": "LoadBalancerName",
+              "region": "$region"
+            },
+            "refresh": 2,
+            "hide": 0,
+            "current": {},
+            "includeAll": false,
+            "multi": false
+          }
+        ]
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "ELB",
+      "uid": "qXf1qBW7k",
+      "version": 1,
+      "weekStart": ""
+    }

@@ -1,0 +1,705 @@
+# Rendered from grafana/dashboards/RDS-1627495372522.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dash-rds
+  namespace: duplo-monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Cloud - AWS"
+data:
+  dash-rds.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "prometheus",
+              "uid": "P1809F7CD0C75ACF3"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "pluginId": "prometheus",
+            "pluginName": "Prometheus",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 251,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 0,
+            "y": 0
+          },
+          "id": 6,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "FreeStorageSpace",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Free Storage Space",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 8,
+            "y": 0
+          },
+          "id": 9,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "CPUUtilization",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "CPU Utilization",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 16,
+            "y": 0
+          },
+          "id": 13,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "DatabaseConnections",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "DB Connections",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 0,
+            "y": 9
+          },
+          "id": 2,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ReadLatency",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Read Latency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 8,
+            "y": 9
+          },
+          "id": 3,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "WriteLatency",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Write Latency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 16,
+            "y": 9
+          },
+          "id": 5,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "FreeableMemory",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Freeable Memory",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "binBps"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 0,
+            "y": 18
+          },
+          "id": 10,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ReadThroughput",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            },
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "hide": false,
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "WriteThroughput",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Read / Write Throughput",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 8,
+            "y": 18
+          },
+          "id": 11,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ReadIOPS",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            },
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "hide": false,
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "WriteIOPS",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Read / Write IOPS",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 8,
+            "x": 16,
+            "y": 18
+          },
+          "id": 4,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "DiskQueueDepth",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Disk Queue Depth",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 11,
+            "x": 0,
+            "y": 27
+          },
+          "id": 7,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "SwapUsage",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Swap Usage",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 13,
+            "x": 11,
+            "y": 27
+          },
+          "id": 12,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "DBInstanceIdentifier": "$dbInstance"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "NetworkReceiveThroughput",
+              "metricQueryType": 0,
+              "namespace": "AWS/RDS",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Network I/O",
+          "type": "timeseries"
+        }
+      ],
+      "preload": false,
+      "refresh": "",
+      "schemaVersion": 40,
+      "tags": [
+        "Duplo Managed"
+      ],
+      "templating": {
+        "list": [
+          {
+            "name": "region",
+            "type": "textbox",
+            "current": {
+              "selected": false,
+              "text": "us-west-2",
+              "value": "us-west-2"
+            },
+            "hide": 0,
+            "label": "region",
+            "query": "us-west-2"
+          },
+          {
+            "name": "dbInstance",
+            "type": "query",
+            "label": "dbInstance",
+            "datasource": {
+              "type": "cloudwatch",
+              "uid": "P034F075C744B399F"
+            },
+            "query": {
+              "queryType": "dimensionValues",
+              "namespace": "AWS/RDS",
+              "metricName": "CPUUtilization",
+              "dimensionKey": "DBInstanceIdentifier",
+              "region": "$region"
+            },
+            "refresh": 2,
+            "hide": 0,
+            "current": {},
+            "includeAll": false,
+            "multi": false
+          }
+        ]
+      },
+      "time": {
+        "from": "now-5m",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "RDS",
+      "uid": "l3c2qBZ7z",
+      "version": 1,
+      "weekStart": ""
+    }
