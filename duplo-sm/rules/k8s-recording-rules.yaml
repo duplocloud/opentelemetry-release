@@ -1,0 +1,68 @@
+# Ported from prometheus/rootfs/etc/prometheus/rules/k8s.yml
+#
+# The legacy file is itself a copy of the upstream kube-prometheus-stack
+# k8s.rules.yaml mixin (see the comment in the original), modified to add
+# `tenant`/`app` labels via a `group_left` join with kube_state_metrics'
+# kube_pod_labels. Before applying this in a real cluster, reconcile it
+# against kube-prometheus-stack's own bundled k8s.rules (defaultRules) to
+# avoid two differently-scoped copies of namespace_workload_pod:kube_pod_owner:relabel
+# both recording — this file should only be needed if the bundled version
+# doesn't carry the tenant/app labels this Duplo dashboards rely on.
+#
+# Changes vs. legacy:
+#   - job="ec2-nodes-kube-state-metrics" -> job="kube-state-metrics", the
+#     default ServiceMonitor job name kube-prometheus-stack's bundled
+#     kube-state-metrics produces. Confirm the actual job name in your
+#     cluster (`curl :9090/api/v1/label/job/values`) before relying on this —
+#     get it wrong and these recording rules silently match zero series.
+#   - `cluster` was already present in every grouping clause in the legacy
+#     file (copied from the upstream mixin) — no change needed there.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  # Short, deliberately -- see node-rules.yaml's comment on why.
+  name: legacy-k8s
+  namespace: duplo-monitoring
+  labels:
+    release: duplo-sm
+spec:
+  groups:
+  - name: k8s-recording
+    rules:
+    - expr: |-
+        max by (cluster, namespace, workload, pod, instance) (
+          label_replace(
+            label_replace(
+              kube_pod_owner{job="kube-state-metrics", owner_kind="ReplicaSet"},
+              "replicaset", "$1", "owner_name", "(.*)"
+            ) * on(replicaset, namespace) group_left(owner_name) topk by(replicaset, namespace) (
+              1, max by (replicaset, namespace, owner_name) (
+                kube_replicaset_owner{job="kube-state-metrics"}
+              )
+            ),
+            "workload", "$1", "owner_name", "(.*)"
+          )
+        ) * on (namespace, pod, instance) group_left(tenant, app) kube_pod_labels
+      labels:
+        workload_type: deployment
+      record: namespace_workload_pod:kube_pod_owner:relabel
+    - expr: |-
+        max by (cluster, namespace, workload, pod, instance) (
+          label_replace(
+            kube_pod_owner{job="kube-state-metrics", owner_kind="DaemonSet"},
+            "workload", "$1", "owner_name", "(.*)"
+          )
+        ) * on (namespace, pod, instance) group_left(tenant, app) kube_pod_labels
+      labels:
+        workload_type: daemonset
+      record: namespace_workload_pod:kube_pod_owner:relabel
+    - expr: |-
+        max by (cluster, namespace, workload, pod, instance) (
+          label_replace(
+            kube_pod_owner{job="kube-state-metrics", owner_kind="StatefulSet"},
+            "workload", "$1", "owner_name", "(.*)"
+          )
+        ) * on (namespace, pod, instance) group_left(tenant, app) kube_pod_labels
+      labels:
+        workload_type: statefulset
+      record: namespace_workload_pod:kube_pod_owner:relabel

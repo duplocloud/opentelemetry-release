@@ -1,0 +1,2142 @@
+# Rendered from grafana/dashboards/Elasticsearch Admin-1630564712551.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dash-elasticsearch-admin
+  namespace: duplo-monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Legacy Tenant Dashboards"
+data:
+  dash-elasticsearch-admin.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "grafana"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "AWS Elasticsearch dashboard let's you visualize Amazon Elasticsearch cluster health, latency, indexing rate, free storage and more.",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 222,
+      "links": [],
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 27,
+          "panels": [],
+          "title": "Overall Health",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Indicates shard allocation status.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 1
+          },
+          "id": 4,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "Green",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ClusterStatus.green",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Yellow",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ClusterStatus.yellow",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Red",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ClusterStatus.red",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Cluster Status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Indicates whether the cluster is accepting or blocking write requests. If your cluster is blocking write requests, check storage space, JVM memory pressure and CPU utilization.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 1
+          },
+          "id": 5,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "hide": true,
+              "id": "m3",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ClusterIndexWritesBlocked",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Green",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {},
+              "expression": "(m3*(-1))+1",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Average"
+            },
+            {
+              "alias": "Red",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {},
+              "expression": "m3*2",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Cluster Writes Status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Indicates where data nodes can reach the master node. Failures are usually the result of a network connectivity problem.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 8,
+            "y": 1
+          },
+          "id": 56,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "hide": true,
+              "id": "m3",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "MasterReachableFromNode",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Green",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {},
+              "expression": "m3",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Average"
+            },
+            {
+              "alias": "Red",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {},
+              "expression": "(m3*(-2))+2",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Master instance connection status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The total number of searchable documents across all indices in the cluster.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 12,
+            "y": 1
+          },
+          "id": 22,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "SearchableDocuments",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Searchable documents",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Green indicates normal behavior. Yellow indicates some Kibana instances are unhealthy. red indicates Kibana is inaccessible. In most cases, the health of Kibana mirrors the of the cluster.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 5
+          },
+          "id": 18,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "hide": true,
+              "id": "m3",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "KibanaHealthyNodes",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "1m",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            },
+            {
+              "alias": "Green",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {},
+              "expression": "FLOOR(m3)",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Average"
+            },
+            {
+              "alias": "Yellow",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {},
+              "expression": "CEIL(ABS(ABS((m3*2)-1)-1))*2",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Average"
+            },
+            {
+              "alias": "Red",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {},
+              "expression": "(CEIL(m3)*(-3))+3",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "refId": "D",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Kibana Status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The total amount of free storage space, accross all data nodes.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 5
+          },
+          "id": 21,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "hide": false,
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "FreeStorageSpace",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Sum"
+            }
+          ],
+          "title": "Total free storage space",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Failure indicate that no automated snapshot has succeeded in the past 36 hours.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 8,
+            "y": 5
+          },
+          "id": 25,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "hide": true,
+              "id": "m3",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "AutomatedSnapshotFailure",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Green",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {},
+              "expression": "(m3*(-1))+1",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Average"
+            },
+            {
+              "alias": "Red",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {},
+              "expression": "m3*2",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 1,
+              "metricName": "",
+              "metricQueryType": 0,
+              "namespace": "",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Snapshot failure status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The total number of documents marked for deletion across all indices in the cluster.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 12,
+            "y": 5
+          },
+          "id": 23,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "DeletedDocuments",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Deleted Documents",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The total number of nodes for your cluster. This metric can increase (often doubling) during configuration changes and service software updates.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 9
+          },
+          "id": 6,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "Nodes",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Minimum"
+            }
+          ],
+          "title": "Total nodes",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 13
+          },
+          "id": 29,
+          "panels": [],
+          "title": "Key Performance indicators",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The number of indexing operations per minute. For example, a single call to the _bulk API that adds two documents and updates two counts as four operations plus four additional operations per replica. Document deletions do not towards this metric.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 14
+          },
+          "id": 20,
+          "interval": "30s",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "IndexingRate",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Indexing Rate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The number of search operations per minute for all shards in the cluster. For example, a single call to the _search API that returns results from five shards counts as five operations.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 14
+          },
+          "id": 19,
+          "interval": "30s",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "SearchRate",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "SearchRate",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The average time that it takes a shard to complete an indexing operation.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 8,
+            "y": 14
+          },
+          "id": 17,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "IndexingLatency",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Indexing Latency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The average time that it takes a shard to complete a search  operation.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 12,
+            "y": 14
+          },
+          "id": 33,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "SearchLatency",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Average"
+            }
+          ],
+          "title": "Search Latency",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The total number of HTTP requests and the number of requests that included and invalid (or missing) host header. Valid requests include the domain endpoint as the host header. ",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 20,
+            "y": 14
+          },
+          "id": 35,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "ElasticSearchRequests",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ElasticsearchRequests",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Sum"
+            },
+            {
+              "alias": "InvalidHostHeaderRequests",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "InvalidHostHeaderRequests",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "1m",
+              "refId": "D",
+              "region": "$region",
+              "statistic": "Sum"
+            }
+          ],
+          "title": "Invalid Host Header Requests",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The number of requests to a domain, aggregated by HTTP response code (2xx, 3xx, 4xx, 5xx).",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 18
+          },
+          "id": 34,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "2XX",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "2xx",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "1m",
+              "refId": "D",
+              "region": "$region",
+              "statistic": "Sum"
+            },
+            {
+              "alias": "3XX",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "3xx",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Sum"
+            },
+            {
+              "alias": "4XX",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "4xx",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Sum"
+            },
+            {
+              "alias": "5XX",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "5xx",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Sum"
+            }
+          ],
+          "title": "HTTP Requests by Response code",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 22
+          },
+          "id": 51,
+          "panels": [],
+          "title": "Elasticsearch JVM Thread Pool",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Metrics for the write thread pool: number of threads, tasks in the queue and rejected tasks. If the queue size is consistently high or rejected count is high, consider scaling your cluster.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 23
+          },
+          "id": 8,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "ThreadCount",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolWriteThreads",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Queue Depth",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolWriteQueue",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Rejected Count",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolWriteRejected",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Write Thread Pool",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Metrics for the index thread pool: number of threads tasks in the queue and rejected tasks. If the queue size is consistently high or rejected count is high, consider scaling your cluster.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 23
+          },
+          "id": 46,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "ThreadCount",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolIndexThreads",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Queue Depth",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolIndexQueue",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Rejected Count",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolIndexRejected",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Index Thread Pool",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Metrics for search thread pool: number of threads tasks in the queue and rejected tasks. If the queue size is consistently high or rejected count is high, consider scaling your cluster.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 8,
+            "y": 23
+          },
+          "id": 15,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "ThreadCount",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolSearchThreads",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Queue Depth",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolSearchQueue",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Rejected Count",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolSearchRejected",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Search Thread Pool",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Metrics for the force merge thread pool: number of threads tasks in the queue and rejected tasks. If the queue size is consistently high or rejected count is high, consider scaling your cluster.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 12,
+            "y": 23
+          },
+          "id": 47,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "ThreadCount",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolForce_mergeThreads",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Queue Depth",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolForce_mergeQueue",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "B",
+              "region": "$region",
+              "statistic": "Maximum"
+            },
+            {
+              "alias": "Rejected Count",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "ThreadpoolForce_mergeRejected",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "C",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Merge Thread Pool",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 27
+          },
+          "id": 38,
+          "panels": [],
+          "title": "Data Instances",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Maximum CPU utilization percentage for all data nodes.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 28
+          },
+          "id": 2,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "CPUUtilization",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "CPUUtilization",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Maximum CPU Utilization ",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Maximum JVM memory pressure percentage for all data nodes.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 28
+          },
+          "id": 7,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "JVMMemoryPressure",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "JVMMemoryPressure",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Maximum JVMMemoryPressure",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The amount of free storage space on the data node with the smallest amount of free storage space in the cluster.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 8,
+            "y": 28
+          },
+          "id": 39,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "hide": false,
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "FreeStorageSpace",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "1m",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Minimum"
+            }
+          ],
+          "title": "Minimum free storage space",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "Maximum memory usage percentage for all data nodes.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 12,
+            "y": 28
+          },
+          "id": 40,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "SysMemoryUtilization",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "SysMemoryUtilization",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "1m",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Maximum Memory Utilization",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 32
+          },
+          "id": 49,
+          "panels": [],
+          "title": "ElasticSearch JVM garbage collection",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The number of times that \"Young generation\" garbage collection has run. A large number if runs is a normal part of cluster operations. ",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 33
+          },
+          "id": 41,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "JVMGCYoungCollectionCount",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "JVMGCYoungCollectionCount",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Young collection",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The amount of time, in milliseconds that the cluster has spent performing \"Young generation\" garbage collection.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 33
+          },
+          "id": 44,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "JVMGCYoungCollectionTime",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "JVMGCYoungCollectionTime",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Young Collection Time",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The  number of times that \"old generation\" garbage collection has run. In a cluster with sufficient resources this number should remain small.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 8,
+            "y": 33
+          },
+          "id": 43,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "JVMGCOldCollectionCount",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "JVMGCOldCollectionCount",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Old collection",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "The amount of time, in milliseconds that the cluster has spent performing \"old generation\" garbage collection.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 12,
+            "y": 33
+          },
+          "id": 45,
+          "interval": "1m",
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "JVMGCOldCollectionTime",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "JVMGCOldCollectionTime",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "Old Collection Time",
+          "type": "timeseries"
+        },
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 37
+          },
+          "id": 31,
+          "panels": [],
+          "title": "Dedicated master instances",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "CPU utilization percentage for the master node.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 0,
+            "y": 38
+          },
+          "id": 3,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "MasterCPUUtilization",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "MasterCPUUtilization",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "CPU Utilization",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "P034F075C744B399F"
+          },
+          "description": "JVM memory pressure percentage for the master node.",
+          "fieldConfig": {
+            "defaults": {
+              "links": []
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 4,
+            "x": 4,
+            "y": 38
+          },
+          "id": 36,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "8.0.5",
+          "targets": [
+            {
+              "alias": "MasterJVMMemoryPressure",
+              "datasource": {
+                "type": "cloudwatch",
+                "uid": "P034F075C744B399F"
+              },
+              "dimensions": {
+                "ClientId": "*",
+                "DomainName": "$esname"
+              },
+              "expression": "",
+              "id": "",
+              "matchExact": true,
+              "metricEditorMode": 0,
+              "metricName": "MasterJVMMemoryPressure",
+              "metricQueryType": 0,
+              "namespace": "AWS/ES",
+              "period": "",
+              "refId": "A",
+              "region": "$region",
+              "statistic": "Maximum"
+            }
+          ],
+          "title": "JVMMemoryPressure",
+          "type": "timeseries"
+        }
+      ],
+      "preload": false,
+      "refresh": "1m",
+      "schemaVersion": 40,
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values(aws_es_info,tag_duplo_project)",
+            "includeAll": true,
+            "label": "Tenant",
+            "multi": true,
+            "name": "tenant",
+            "options": [],
+            "query": {
+              "query": "label_values(aws_es_info,tag_duplo_project)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values(aws_es_info{tag_duplo_project=~\"$tenant\"}, name)",
+            "includeAll": true,
+            "label": "ES",
+            "multi": true,
+            "name": "esname",
+            "options": [],
+            "query": {
+              "query": "label_values(aws_es_info{tag_duplo_project=~\"$tenant\"}, name)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "/[^/]+\\/(?:/)?([^/]*)/",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "hide": 2,
+            "label": "Region",
+            "name": "region",
+            "options": [
+              {
+                "selected": true,
+                "text": "",
+                "value": ""
+              }
+            ],
+            "query": "",
+            "type": "textbox"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Elasticsearch Admin",
+      "uid": "5f5rKL47z",
+      "version": 1,
+      "weekStart": ""
+    }

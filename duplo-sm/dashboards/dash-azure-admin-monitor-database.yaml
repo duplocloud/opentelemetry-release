@@ -1,0 +1,1139 @@
+# Rendered from grafana/dashboards/Azure Admin Monitor Database-1660841917392.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dash-azure-admin-monitor-database
+  namespace: duplo-monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Cloud - Azure"
+data:
+  dash-azure-admin-monitor-database.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "grafana"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Use Azure Monitor to view relevante information of Database",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 248,
+      "links": [],
+      "panels": [
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#56A64B"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 5
+                  },
+                  {
+                    "color": "#E02F44",
+                    "value": 8
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 5,
+            "x": 0,
+            "y": 0
+          },
+          "id": 12,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "appInsights": {
+                "groupBy": "none",
+                "metricName": "select",
+                "rawQuery": false,
+                "rawQueryString": "",
+                "spliton": "",
+                "timeGrainType": "auto",
+                "xaxis": "timestamp",
+                "yaxis": ""
+              },
+              "azureLogAnalytics": {
+                "query": "//change this example to create your own time series query\n<table name>                                                              //the table to query (e.g. Usage, Heartbeat, Perf)\n| where $__timeFilter(TimeGenerated)                                      //this is a macro used to show the full chart’s time range, choose the datetime column here\n| summarize count() by <group by column>, bin(TimeGenerated, $__interval) //change “group by column” to a column in your table, such as “Computer”. The $__interval macro is used to auto-select the time grain. Can also use 1h, 5m etc.\n| order by TimeGenerated asc",
+                "resultFormat": "time_series"
+              },
+              "azureMonitor": {
+                "aggOptions": [
+                  "Average",
+                  "Maximum",
+                  "Minimum"
+                ],
+                "aggregation": "Average",
+                "allowedTimeGrainsMs": [
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilter": "",
+                "dimensionFilters": [],
+                "dimensions": [],
+                "metricName": "backup_storage_used",
+                "metricNamespace": "$Namespaces",
+                "resourceGroup": "$ResourceGroup",
+                "resourceName": "$ResourceName",
+                "resourceUri": "/subscriptions/$Subscriptions/resourceGroups/$ResourceGroup/providers/$Namespaces/$ResourceName",
+                "timeGrain": "auto",
+                "timeGrains": [
+                  {
+                    "text": "auto",
+                    "value": "auto"
+                  },
+                  {
+                    "text": "1 minute",
+                    "value": "PT1M"
+                  },
+                  {
+                    "text": "5 minutes",
+                    "value": "PT5M"
+                  },
+                  {
+                    "text": "15 minutes",
+                    "value": "PT15M"
+                  },
+                  {
+                    "text": "30 minutes",
+                    "value": "PT30M"
+                  },
+                  {
+                    "text": "1 hour",
+                    "value": "PT1H"
+                  },
+                  {
+                    "text": "6 hours",
+                    "value": "PT6H"
+                  },
+                  {
+                    "text": "12 hours",
+                    "value": "PT12H"
+                  },
+                  {
+                    "text": "1 day",
+                    "value": "P1D"
+                  }
+                ]
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Backup Storage Used",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "decimals": 0,
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#E02F44"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 170
+                  },
+                  {
+                    "color": "#56A64B",
+                    "value": 210
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 5,
+            "x": 5,
+            "y": 0
+          },
+          "id": 45,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Average",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "storage_used",
+                "metricNamespace": "$Namespaces",
+                "resourceUri": "/subscriptions/$Subscriptions/resourceGroups/$ResourceGroup/providers/$Namespaces/$ResourceName",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Storage Used",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "#d44a3a"
+                  },
+                  {
+                    "color": "rgba(237, 129, 40, 0.89)",
+                    "value": 1
+                  },
+                  {
+                    "color": "#8F3BB8",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 6,
+            "x": 10,
+            "y": 0
+          },
+          "id": 42,
+          "maxDataPoints": 100,
+          "options": {
+            "colorMode": "none",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Maximum",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "storage_limit",
+                "metricNamespace": "$Namespaces",
+                "resourceUri": "/subscriptions/$Subscriptions/resourceGroups/$ResourceGroup/providers/$Namespaces/$ResourceName",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Storage Limit",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "line"
+                }
+              },
+              "decimals": 0,
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 16,
+            "y": 0
+          },
+          "id": 43,
+          "maxDataPoints": 100,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "min",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Maximum",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "storage_percent",
+                "metricNamespace": "$Namespaces",
+                "resourceUri": "/subscriptions/$Subscriptions/resourceGroups/$ResourceGroup/providers/$Namespaces/$ResourceName",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "SPACE %",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineStyle": {
+                  "fill": "solid"
+                },
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "decimals": 2,
+              "mappings": [
+                {
+                  "options": {
+                    "match": "null",
+                    "result": {
+                      "text": "N/A"
+                    }
+                  },
+                  "type": "special"
+                }
+              ],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 0,
+            "y": 7
+          },
+          "id": 47,
+          "maxDataPoints": 100,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "min",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Average",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "memory_percent",
+                "metricNamespace": "$Namespaces",
+                "resourceUri": "/subscriptions/$Subscriptions/resourceGroups/$ResourceGroup/providers/$Namespaces/$ResourceName",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Memory %",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "bars",
+                "fillOpacity": 0,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 12,
+            "x": 12,
+            "y": 7
+          },
+          "id": 46,
+          "maxDataPoints": 100,
+          "options": {
+            "legend": {
+              "calcs": [
+                "lastNotNull",
+                "min",
+                "max",
+                "mean"
+              ],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "appInsights": {
+                "groupBy": "none",
+                "metricName": "select",
+                "rawQuery": false,
+                "rawQueryString": "",
+                "spliton": "",
+                "timeGrainType": "auto",
+                "xaxis": "timestamp",
+                "yaxis": ""
+              },
+              "azureLogAnalytics": {
+                "query": "//change this example to create your own time series query\n<table name>                                                              //the table to query (e.g. Usage, Heartbeat, Perf)\n| where $__timeFilter(TimeGenerated)                                      //this is a macro used to show the full chart’s time range, choose the datetime column here\n| summarize count() by <group by column>, bin(TimeGenerated, $__interval) //change “group by column” to a column in your table, such as “Computer”. The $__interval macro is used to auto-select the time grain. Can also use 1h, 5m etc.\n| order by TimeGenerated asc",
+                "resultFormat": "time_series"
+              },
+              "azureMonitor": {
+                "aggOptions": [
+                  "Average",
+                  "Maximum",
+                  "Minimum"
+                ],
+                "aggregation": "Average",
+                "alias": "",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimension": "",
+                "dimensionFilter": "*",
+                "dimensionFilters": [],
+                "dimensions": [],
+                "metricName": "cpu_percent",
+                "metricNamespace": "$Namespaces",
+                "resourceGroup": "$ResourceGroup",
+                "resourceName": "$ResourceName",
+                "resourceUri": "/subscriptions/$Subscriptions/resourceGroups/$ResourceGroup/providers/$Namespaces/$ResourceName",
+                "timeGrain": "auto",
+                "timeGrains": [
+                  {
+                    "text": "auto",
+                    "value": "auto"
+                  },
+                  {
+                    "text": "1 minute",
+                    "value": "PT1M"
+                  },
+                  {
+                    "text": "5 minutes",
+                    "value": "PT5M"
+                  },
+                  {
+                    "text": "15 minutes",
+                    "value": "PT15M"
+                  },
+                  {
+                    "text": "30 minutes",
+                    "value": "PT30M"
+                  },
+                  {
+                    "text": "1 hour",
+                    "value": "PT1H"
+                  },
+                  {
+                    "text": "6 hours",
+                    "value": "PT6H"
+                  },
+                  {
+                    "text": "12 hours",
+                    "value": "PT12H"
+                  },
+                  {
+                    "text": "1 day",
+                    "value": "P1D"
+                  }
+                ],
+                "top": ""
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A",
+              "subscriptions": [
+                "143ffc59-9394-4ec6-8f5a-c408a238be62"
+              ]
+            }
+          ],
+          "title": "CPU %",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 17
+          },
+          "id": 5,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "appInsights": {
+                "groupBy": "none",
+                "metricName": "select",
+                "rawQuery": false,
+                "rawQueryString": "",
+                "spliton": "",
+                "timeGrainType": "auto",
+                "xaxis": "timestamp",
+                "yaxis": ""
+              },
+              "azureLogAnalytics": {
+                "query": "//change this example to create your own time series query\n<table name>                                                              //the table to query (e.g. Usage, Heartbeat, Perf)\n| where $__timeFilter(TimeGenerated)                                      //this is a macro used to show the full chart’s time range, choose the datetime column here\n| summarize count() by <group by column>, bin(TimeGenerated, $__interval) //change “group by column” to a column in your table, such as “Computer”. The $__interval macro is used to auto-select the time grain. Can also use 1h, 5m etc.\n| order by TimeGenerated asc",
+                "resultFormat": "time_series"
+              },
+              "azureMonitor": {
+                "aggOptions": [
+                  "Total",
+                  "Count"
+                ],
+                "aggregation": "Average",
+                "alias": "",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilter": "*",
+                "dimensionFilters": [],
+                "dimensions": [],
+                "metricName": "active_connections",
+                "metricNamespace": "$Namespaces",
+                "resourceGroup": "$ResourceGroup",
+                "resourceName": "$ResourceName",
+                "resourceUri": "/subscriptions/$Subscriptions/resourceGroups/$ResourceGroup/providers/$Namespaces/$ResourceName",
+                "timeGrain": "auto",
+                "timeGrains": [
+                  {
+                    "text": "auto",
+                    "value": "auto"
+                  },
+                  {
+                    "text": "1 minute",
+                    "value": "PT1M"
+                  },
+                  {
+                    "text": "5 minutes",
+                    "value": "PT5M"
+                  },
+                  {
+                    "text": "15 minutes",
+                    "value": "PT15M"
+                  },
+                  {
+                    "text": "30 minutes",
+                    "value": "PT30M"
+                  },
+                  {
+                    "text": "1 hour",
+                    "value": "PT1H"
+                  },
+                  {
+                    "text": "6 hours",
+                    "value": "PT6H"
+                  },
+                  {
+                    "text": "12 hours",
+                    "value": "PT12H"
+                  },
+                  {
+                    "text": "1 day",
+                    "value": "P1D"
+                  }
+                ]
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            },
+            {
+              "appInsights": {
+                "groupBy": "none",
+                "metricName": "select",
+                "rawQuery": false,
+                "rawQueryString": "",
+                "spliton": "",
+                "timeGrainType": "auto",
+                "xaxis": "timestamp",
+                "yaxis": ""
+              },
+              "azureLogAnalytics": {
+                "query": "//change this example to create your own time series query\n<table name>                                                              //the table to query (e.g. Usage, Heartbeat, Perf)\n| where $__timeFilter(TimeGenerated)                                      //this is a macro used to show the full chart’s time range, choose the datetime column here\n| summarize count() by <group by column>, bin(TimeGenerated, $__interval) //change “group by column” to a column in your table, such as “Computer”. The $__interval macro is used to auto-select the time grain. Can also use 1h, 5m etc.\n| order by TimeGenerated asc",
+                "resultFormat": "time_series"
+              },
+              "azureMonitor": {
+                "aggOptions": [
+                  "Total",
+                  "Count"
+                ],
+                "aggregation": "Total",
+                "alias": "Failed",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilter": "*",
+                "dimensionFilters": [],
+                "dimensions": [],
+                "metricName": "connections_failed",
+                "metricNamespace": "$Namespaces",
+                "resourceGroup": "$ResourceGroup",
+                "resourceName": "$ResourceName",
+                "resourceUri": "/subscriptions/$Subscriptions/resourceGroups/$ResourceGroup/providers/$Namespaces/$ResourceName",
+                "timeGrain": "auto",
+                "timeGrains": [
+                  {
+                    "text": "auto",
+                    "value": "auto"
+                  },
+                  {
+                    "text": "1 minute",
+                    "value": "PT1M"
+                  },
+                  {
+                    "text": "5 minutes",
+                    "value": "PT5M"
+                  },
+                  {
+                    "text": "15 minutes",
+                    "value": "PT15M"
+                  },
+                  {
+                    "text": "30 minutes",
+                    "value": "PT30M"
+                  },
+                  {
+                    "text": "1 hour",
+                    "value": "PT1H"
+                  },
+                  {
+                    "text": "6 hours",
+                    "value": "PT6H"
+                  },
+                  {
+                    "text": "12 hours",
+                    "value": "PT12H"
+                  },
+                  {
+                    "text": "1 day",
+                    "value": "P1D"
+                  }
+                ]
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "B"
+            }
+          ],
+          "title": "Connections",
+          "type": "timeseries"
+        }
+      ],
+      "preload": false,
+      "refresh": "",
+      "schemaVersion": 40,
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "Azure Monitor",
+              "value": "P1EB995EACC6832D3"
+            },
+            "hide": 2,
+            "includeAll": false,
+            "name": "ds",
+            "options": [],
+            "query": "grafana-azure-monitor-datasource",
+            "refresh": 1,
+            "regex": "",
+            "type": "datasource"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "uid": "$ds"
+            },
+            "definition": "",
+            "includeAll": false,
+            "label": "Subscriptions",
+            "name": "Subscriptions",
+            "options": [],
+            "query": {
+              "grafanaTemplateVariableFn": {
+                "kind": "SubscriptionsQuery",
+                "rawQuery": "subscriptions()"
+              },
+              "queryType": "Grafana Template Variable Function",
+              "refId": "A",
+              "subscription": "143ffc59-9394-4ec6-8f5a-c408a238be62"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "uid": "$ds"
+            },
+            "definition": "ResourceGroups()",
+            "includeAll": false,
+            "label": "Resource Group",
+            "name": "ResourceGroup",
+            "options": [],
+            "query": {
+              "grafanaTemplateVariableFn": {
+                "kind": "ResourceGroupsQuery",
+                "rawQuery": "ResourceGroups($Subscriptions)",
+                "subscription": "$Subscriptions"
+              },
+              "queryType": "Grafana Template Variable Function",
+              "refId": "A",
+              "subscription": "c45cf64b-81f1-40af-88f3-e755389eedcd"
+            },
+            "refresh": 1,
+            "regex": "/duploservices/",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "uid": "$ds"
+            },
+            "definition": "Namespaces($ResourceGroup)",
+            "includeAll": false,
+            "label": "Namespaces",
+            "name": "Namespaces",
+            "options": [],
+            "query": {
+              "grafanaTemplateVariableFn": {
+                "kind": "MetricDefinitionsQuery",
+                "rawQuery": "Namespaces($Subscriptions,$ResourceGroup)",
+                "resourceGroup": "$ResourceGroup",
+                "subscription": "$Subscriptions"
+              },
+              "queryType": "Grafana Template Variable Function",
+              "refId": "A",
+              "subscription": "c45cf64b-81f1-40af-88f3-e755389eedcd"
+            },
+            "refresh": 2,
+            "regex": "/SQL/",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "uid": "$ds"
+            },
+            "definition": "ResourceNames($ResourceGroup,$Namespaces)",
+            "includeAll": false,
+            "label": "ResourceName",
+            "name": "ResourceName",
+            "options": [],
+            "query": {
+              "grafanaTemplateVariableFn": {
+                "kind": "ResourceNamesQuery",
+                "metricDefinition": "$Namespaces",
+                "rawQuery": "ResourceNames($Subscriptions,$ResourceGroup,$Namespaces)",
+                "resourceGroup": "$ResourceGroup",
+                "subscription": "$Subscriptions"
+              },
+              "queryType": "Grafana Template Variable Function",
+              "refId": "A",
+              "subscription": "c45cf64b-81f1-40af-88f3-e755389eedcd"
+            },
+            "refresh": 2,
+            "regex": "",
+            "type": "query"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-24h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "Admin Microsoft Azure Monitor Database",
+      "uid": "zMujfEmVk",
+      "version": 1,
+      "weekStart": ""
+    }

@@ -1,0 +1,54 @@
+# Ported from grafana/provisioning/datasources/all.yml.
+#
+# The Prometheus datasource is deliberately named exactly `prometheus`
+# (lowercase, matching the legacy convention) rather than whatever name
+# kube-prometheus-stack's own bundled Grafana datasource provisioning would
+# use, so all 38 legacy dashboard JSONs (which reference "datasource":
+# "prometheus" by plain name everywhere) import with zero edits
+# (PLAN.md > Data Migration > B. Grafana content migration).
+#
+# CloudWatch and Azure Monitor datasources are carried forward unchanged --
+# native Grafana datasources, queried directly (authType: default picks up
+# whatever AWS credentials the Grafana pod already has, no IRSA/exporter
+# needed). Generic community CloudWatch dashboards are pushed against this
+# datasource directly; there's no tenant dropdown to support anymore since
+# each customer/cluster has its own dedicated Grafana now.
+#
+# Picked up by kube-prometheus-stack's Grafana sidecar via the
+# grafana_datasource=1 label (grafana.sidecar.datasources in
+# base/values-central.yaml).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: duplo-legacy-datasources
+  namespace: duplo-monitoring
+  labels:
+    grafana_datasource: "1"
+data:
+  datasources.yaml: |
+    apiVersion: 1
+    datasources:
+    - name: prometheus
+      type: prometheus
+      access: proxy
+      orgId: 1
+      # `prometheus-operated` is Prometheus Operator's own fixed-name headless
+      # Service (created automatically for the Prometheus resource,
+      # independent of the Helm release name) -- confirmed against the actual
+      # chart's own bundled datasource default (grafana.sidecar.datasources
+      # in values.yaml uses `prometheusServiceName: prometheus-operated`).
+      # Using the same convention here rather than a release-name-derived
+      # guess.
+      url: http://prometheus-operated.duplo-monitoring.svc.cluster.local:9090
+      isDefault: true
+      version: 1
+      editable: true
+    - name: CloudWatch
+      type: cloudwatch
+      editable: true
+      jsonData:
+        authType: default
+        defaultRegion: us-west-2
+    - name: Azure Monitor
+      type: grafana-azure-monitor-datasource
+      editable: true

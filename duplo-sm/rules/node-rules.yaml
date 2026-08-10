@@ -1,0 +1,66 @@
+# Ported from prometheus/rootfs/etc/prometheus/rules/node.yml
+#
+# Changes vs. legacy:
+#   - Dropped the tenant=~"compliance|default" filter (looked like an
+#     accidental customer-specific leak baked into what shipped to every
+#     customer; PLAN.md > Alerting Rule Migration). Alerts now fire for
+#     every tenant/namespace.
+#   - Added `cluster` to the one aggregating clause (HostCriticalCpuLoad's
+#     `avg(...) by (name)`) so a customer with more than one cluster feeding
+#     the central Prometheus doesn't silently merge series from different
+#     clusters that happen to share a node `name`.
+#   - `release: duplo-sm` label is required for the Prometheus Operator to
+#     discover this PrometheusRule (ruleSelectorNilUsesHelmValues), and must
+#     match base/values-central.yaml's fullnameOverride/ruleSelector.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  # Short, deliberately -- Grafana's alerting UI displays
+  # "<this name> / <group name> / <alert name>" as one line; the chart's own
+  # default rule groups are already long (e.g.
+  # kube-prometheus-stack-kubernetes-apps.rules), so keep ours terse to not
+  # compound it.
+  name: legacy-node
+  namespace: duplo-monitoring
+  labels:
+    release: duplo-sm
+spec:
+  groups:
+  - name: node
+    rules:
+    - alert: HostCriticalCpuLoad
+      expr: (1 - avg(rate(node_cpu_seconds_total{mode="idle"}[2m])) by (cluster, name)) * 100 > 90
+      for: 0m
+      labels:
+        severity: high
+        owner: duplo
+      annotations:
+        summary: "Host critical CPU load (instance {{ $labels.name }})"
+        description: "CPU load is > 90%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostOutOfMemory
+      expr: node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10
+      for: 2m
+      labels:
+        severity: high
+        owner: duplo
+      annotations:
+        summary: "Host out of memory (instance {{ $labels.name }})"
+        description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostMemoryUnderMemoryPressure
+      expr: rate(node_vmstat_pgmajfault[1m]) > 1000
+      for: 2m
+      labels:
+        severity: high
+        owner: duplo
+      annotations:
+        summary: "Host memory under memory pressure (instance {{ $labels.name }})"
+        description: "The node is under heavy memory pressure. High rate of major page faults\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostOutOfDiskSpace
+      expr: (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"}) * 100 < 20
+      for: 2m
+      labels:
+        severity: warning
+        owner: duplo
+      annotations:
+        summary: "Host out of disk space (instance {{ $labels.name }})"
+        description: "Disk is almost full (< 20% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"

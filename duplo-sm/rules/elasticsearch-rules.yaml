@@ -1,0 +1,107 @@
+# Ported from prometheus/rootfs/etc/prometheus/rules/elasticsearch.yml
+# and elasticsearch_recording_rules.yaml (combined into one PrometheusRule,
+# two groups, to mirror the legacy file split).
+#
+# Changes vs. legacy:
+#   - elasticsearch_exporter emits its OWN label literally named `cluster`,
+#     meaning the Elasticsearch cluster — this collides with the new
+#     k8s-cluster-identity `cluster` external label every other metric family
+#     now carries (PLAN.md > Exporter/Scrape-Target Mapping "real gotcha").
+#     The exporter's ServiceMonitor (base/exporters/elasticsearch-exporter.yaml)
+#     renames it to `es_cluster` at scrape time via metric_relabel_configs,
+#     so every `by (cluster, ...)` referring to the ES cluster below has been
+#     updated to `by (es_cluster, ...)` to match. The alerting rules (which
+#     don't aggregate `by (cluster)`) are unchanged.
+#   - No tenant filter existed in the legacy ES rules — nothing to drop here.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  # Short, deliberately -- see node-rules.yaml's comment on why.
+  name: legacy-es
+  namespace: duplo-monitoring
+  labels:
+    release: duplo-sm
+spec:
+  groups:
+  - name: es-alerts
+    rules:
+    - alert: ElasticsearchHeapUsageTooHigh
+      expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 90
+      for: 2m
+      labels:
+        severity: critical
+        owner: duplo
+      annotations:
+        summary: "Elasticsearch Heap Usage Too High (instance {{ $labels.instance }})"
+        description: "The heap usage is over 90%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: ElasticsearchHeapUsageWarning
+      expr: (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}) * 100 > 80
+      for: 2m
+      labels:
+        severity: warning
+        owner: duplo
+      annotations:
+        summary: "Elasticsearch Heap Usage warning (instance {{ $labels.instance }})"
+        description: "The heap usage is over 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: ElasticsearchDiskOutOfSpace
+      expr: elasticsearch_filesystem_data_available_bytes / elasticsearch_filesystem_data_size_bytes * 100 < 10
+      for: 0m
+      labels:
+        severity: critical
+        owner: duplo
+      annotations:
+        summary: "Elasticsearch disk out of space (instance {{ $labels.instance }})"
+        description: "The disk usage is over 90%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: ElasticsearchDiskSpaceLow
+      expr: elasticsearch_filesystem_data_available_bytes / elasticsearch_filesystem_data_size_bytes * 100 < 20
+      for: 2m
+      labels:
+        severity: warning
+        owner: duplo
+      annotations:
+        summary: "Elasticsearch disk space low (instance {{ $labels.instance }})"
+        description: "The disk usage is over 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: ElasticsearchClusterRed
+      expr: elasticsearch_cluster_health_status{color="red"} == 1
+      for: 0m
+      labels:
+        severity: critical
+        owner: duplo
+      annotations:
+        summary: "Elasticsearch Cluster Red (instance {{ $labels.instance }})"
+        description: "Elastic Cluster Red status\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: ElasticsearchNoNewDocuments
+      expr: increase(elasticsearch_indices_docs{es_data_node="true"}[30m]) < 1
+      for: 0m
+      labels:
+        severity: warning
+        owner: duplo
+      annotations:
+        summary: "Elasticsearch no new documents (instance {{ $labels.instance }})"
+        description: "No new documents for 30 min!\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+  - name: elasticsearch_rules
+    rules:
+    - record: elasticsearch_filesystem_data_free_percent
+      expr: 100 - elasticsearch_filesystem_data_used_percent
+    - record: elasticsearch_red_cluster_status
+      expr: sum by (es_cluster) (elasticsearch_cluster_health_status == 2)
+    - record: elasticsearch_yellow_cluster_status
+      expr: sum by (es_cluster) (elasticsearch_cluster_health_status == 1)
+    - record: elasticsearch_process_cpu_high
+      expr: sum by (es_cluster, instance, name) (elasticsearch_process_cpu_percent)
+    - record: elasticsearch_os_cpu_high
+      expr: sum by (es_cluster, instance, name) (elasticsearch_os_cpu_percent)
+    - record: elasticsearch_filesystem_data_used_percent
+      expr: |-
+        sum by (es_cluster, instance, name) (
+          100 * (elasticsearch_filesystem_data_size_bytes - elasticsearch_filesystem_data_free_bytes)
+          / elasticsearch_filesystem_data_size_bytes)
+    - record: elasticsearch_node_disk_watermark_reached
+      expr: |-
+        sum by (es_cluster, instance, name) (round(
+              (1 - (elasticsearch_filesystem_data_available_bytes / elasticsearch_filesystem_data_size_bytes)
+            ) * 100, 0.001))
+    - record: elasticsearch_heap_utilization_percentage
+      expr: |-
+        sum by (es_cluster, instance, name) (
+          100 * (elasticsearch_jvm_memory_used_bytes{area="heap"} / elasticsearch_jvm_memory_max_bytes{area="heap"}))

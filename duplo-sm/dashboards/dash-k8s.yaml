@@ -1,0 +1,1336 @@
+# Rendered from grafana/dashboards/K8s-1648889545339.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dash-k8s
+  namespace: duplo-monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Legacy Tenant Dashboards"
+data:
+  dash-k8s.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "grafana"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Dashboard with details of the container metrics and host OS metrics.",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": 253,
+      "links": [
+        {
+          "$$hashKey": "object:2302",
+          "asDropdown": true,
+          "icon": "external link",
+          "tags": [],
+          "targetBlank": true,
+          "title": "",
+          "type": "dashboards"
+        }
+      ],
+      "panels": [
+        {
+          "datasource": "prometheus",
+          "description": "Deployments specify a number of pods of a given service that are running. This number is captured as \"total.\" \n\nPods that are running, giving good readiness and health checks are considered \"Available.\"\n\nPods that are running but failing health/readiness checks are considered \"Unavailable.\"\n\nThe final column shows the number of pods desired as defined in the kubernetes spec. This is called \"desired\"",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "filterable": false,
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 102
+                  },
+                  {
+                    "id": "min",
+                    "value": 0
+                  },
+                  {
+                    "id": "max",
+                    "value": 1
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 62,
+          "options": {
+            "footer": {
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 0,
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Value #A"
+              }
+            ]
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "kube_deployment_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * on (namespace, deployment) group_left max by(namespace, deployment)(kube_deployment_status_replicas_available)",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{deployment}}-{{namespace}}",
+              "refId": "A"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "kube_deployment_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * on (namespace, deployment) group_left max by(namespace, deployment)(kube_deployment_status_replicas_unavailable)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{deployment}}-{{namespace}}",
+              "refId": "B"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "kube_deployment_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * on (namespace, deployment) group_left max by(namespace, deployment)(kube_deployment_status_replicas)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{deployment}}-{{namespace}}",
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "kube_deployment_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * on (namespace, deployment) group_left max by(namespace, deployment)(kube_deployment_spec_replicas)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "Current Deployment Status",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value #A": false,
+                  "app": false,
+                  "deployment": true,
+                  "duploinfra_nonprod": true,
+                  "instance": true,
+                  "job": true,
+                  "label_app": true,
+                  "label_tenantname": true,
+                  "namespace": true,
+                  "tenant": false
+                },
+                "indexByName": {},
+                "renameByName": {
+                  "Time": "",
+                  "Value #A": "Available",
+                  "Value #B": "Unavailable",
+                  "Value #C": "Total",
+                  "Value #D": "Desired",
+                  "app": "App",
+                  "deployment": "",
+                  "tenant": "Tenant"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Percentage of replicas available of total replicas for the deployment depicted over the time interval. Less than 100% means that at least one pod failed or has not started.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 0
+          },
+          "id": 60,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "kube_deployment_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * \n  on (namespace, deployment) group_left max by(namespace, deployment)(\n    kube_deployment_status_replicas_available / kube_deployment_status_replicas * 100\n  )  ",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{deployment}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Deployment Replicas Available",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "StatefulSets manage Pods and replication. Some services may be managed by deployments, while others are managed by StatefulSets based on the configuration of your Pods. This table displays the number of replicas that are deployed as StatefulSets for your applications.\n\nReady indicates the number of replicas that have passed Health and Readiness Checks and are ready to process workloads.* \n\nRunning indicates the number of deployed Pods, including those that have not passed Health and Readiness Checks.\n\nUnavailable indicates the number of running Pods that did not pass Health and Readiness Checks.\n\nDesired is the number of replicas specified by the StatefulSet.\n\nReady is the number of currently ready replicas - which means they are passing health and readiness checks and can therefore handle traffic. Running is a count of all pods currently deployed, regardless of if they pass health/readiness checks. Unavailable is the number of pods that are running that are not passing readiness/health checks. Desired is the number of replicas the statefulset specifies.\n\n",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "filterable": false,
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 8
+          },
+          "id": 63,
+          "options": {
+            "footer": {
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 0,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "kube_statefulset_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * on (namespace, statefulset) group_left max by(namespace, statefulset)(kube_statefulset_status_replicas_ready)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{deployment}}",
+              "refId": "A"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "kube_statefulset_labels{tenant=~\"^$tenant$\",label_app=~\"^$app$\"} * on (namespace, statefulset) group_left max by(namespace, statefulset)(kube_statefulset_status_replicas_current)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{deployment}}",
+              "refId": "B"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "kube_statefulset_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * on (namespace, statefulset) group_left max by(namespace, statefulset)(kube_statefulset_status_replicas - kube_statefulset_status_replicas_ready)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{deployment}}",
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "kube_statefulset_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * on (namespace, statefulset) group_left max by(namespace, statefulset)(kube_statefulset_status_replicas - kube_statefulset_status_replicas_available)",
+              "format": "table",
+              "hide": true,
+              "instant": true,
+              "legendFormat": "TODO We want this when available becomes a field",
+              "range": false,
+              "refId": "E"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "kube_statefulset_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * on (namespace, statefulset) group_left max by(namespace, statefulset)(kube_statefulset_status_replicas_current - kube_statefulset_status_replicas_ready)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{deployment}}",
+              "refId": "F"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "kube_statefulset_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * on (namespace, statefulset) group_left max by(namespace, statefulset)(kube_statefulset_status_replicas)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "{{deployment}}",
+              "refId": "D"
+            }
+          ],
+          "title": "Statefulset status",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {}
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Value #A": false,
+                  "app": false,
+                  "duploinfra_nonprod": true,
+                  "instance": true,
+                  "job": true,
+                  "label_app": true,
+                  "label_tenantname": true,
+                  "namespace": true,
+                  "statefulset": true,
+                  "tenant": false
+                },
+                "indexByName": {
+                  "Time": 0,
+                  "Value #A": 10,
+                  "Value #B": 11,
+                  "Value #C": 12,
+                  "Value #D": 14,
+                  "Value #F": 13,
+                  "app": 1,
+                  "duploinfra_nonprod": 2,
+                  "instance": 3,
+                  "job": 4,
+                  "label_app": 5,
+                  "label_tenantname": 6,
+                  "namespace": 7,
+                  "statefulset": 8,
+                  "tenant": 9
+                },
+                "renameByName": {
+                  "Time": "",
+                  "Value #A": "Ready",
+                  "Value #B": "Running",
+                  "Value #C": "Not Ready",
+                  "Value #D": "Desired",
+                  "Value #F": "Pending",
+                  "app": "App",
+                  "tenant": "Tenant"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Percentage of replicas ready to the total number of replicas. Less than 100% means that at least one replica is unavailable.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 12,
+            "y": 8
+          },
+          "id": 64,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "kube_statefulset_labels{tenant=~\"^$tenant$\",app=~\"^$app$\"} * \n  on (namespace, statefulset) group_left ()(\n    kube_statefulset_status_replicas_ready / kube_statefulset_status_replicas * 100\n  ) ",
+              "format": "time_series",
+              "instant": false,
+              "interval": "",
+              "legendFormat": "{{app}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Statefulset replicas ready",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Displays common metrics about the servers running in a given tenant. Some notes: if multiple network cards or multiple partitions exist, the value of the network card or partition with the highest utilization rate collected is displayed. \n\nCurrEstab is the number of TCP connections whose current status is ESTABLISHED or CLOSE-WAIT.\n\nTCP_TW - number of sockets ending TIME_WAIT status after normal timeout. \n\n5m load measures % of a single cpu used - for example, if it is 4 it means that 4 cpu cores are fully used.",
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 24,
+            "x": 0,
+            "y": 17
+          },
+          "id": 58,
+          "options": {},
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_uname_info{tenant=~\"^$tenant$\", name=~\"$node$\",private_ip=~\"$private_ip\"} - 0",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "A"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(time() - node_boot_time_seconds{tenant=~\"^$tenant$\",name=~\"$node$\",private_ip=~\"$private_ip\"})by(private_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "D"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_memory_MemTotal_bytes{tenant=~\"^$tenant$\",name=~\"$node$\",private_ip=~\"$private_ip\"} - 0",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "B"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "count(node_cpu_seconds_total{mode='system', tenant=~\"^$tenant$\",name=~\"$node$\",private_ip=~\"$private_ip\"}) by (private_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_load5{tenant=~\"^$tenant$\", name=~\"$node$\",private_ip=~\"$private_ip\"}",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "L"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "(1 - avg(rate(node_cpu_seconds_total{mode=\"idle\", tenant=~\"^$tenant$\", name=~\"$node$\",private_ip=~\"$private_ip\"}[$interval])) by (private_ip)) * 100",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "F"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "(1 - (node_memory_MemAvailable_bytes{tenant=~\"^$tenant$\",name=~\"$node$\",private_ip=~\"$private_ip\"} / (node_memory_MemTotal_bytes{tenant=~\"^$tenant$\",name=~\"$node$\",private_ip=~\"$private_ip\"})))* 100",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "G"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "max((node_filesystem_size_bytes{fstype=~\"ext.?|xfs\", tenant=~\"^$tenant$\", mountpoint=\"/\",name=~\"$node$\",private_ip=~\"$private_ip\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\", tenant=~\"^$tenant$\",mountpoint=\"/\",name=~\"$node$\",private_ip=~\"$private_ip\"}) *100/(node_filesystem_avail_bytes {fstype=~\"ext.?|xfs\", tenant=~\"^$tenant$\",mountpoint=\"/\",name=~\"$node$\",private_ip=~\"$private_ip\"}+(node_filesystem_size_bytes{fstype=~\"ext.?|xfs\", tenant=~\"^$tenant$\",mountpoint=\"/\",name=~\"$node$\",private_ip=~\"$private_ip\"}-node_filesystem_free_bytes{fstype=~\"ext.?|xfs\", tenant=~\"^$tenant$\",mountpoint=\"/\",name=~\"$node$\",private_ip=~\"$private_ip\"})))by(private_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "E"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(node_disk_read_bytes_total{tenant=~\"^$tenant$\", name=~\"$node$\",private_ip=~\"$private_ip\"}[$interval])) by (private_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "H"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(node_disk_written_bytes_total{tenant=~\"^$tenant$\", name=~\"$node$\",private_ip=~\"$private_ip\"}[$interval])) by (private_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "I"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "node_netstat_Tcp_CurrEstab{tenant=~\"^$tenant$\", name=~\"$node$\",private_ip=~\"$private_ip\"} - 0",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "M"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "node_sockstat_TCP_tw{tenant=~\"^$tenant$\", name=~\"$node$\",private_ip=~\"$private_ip\"} - 0",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "TIME_WAIT",
+              "refId": "N"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(node_network_receive_bytes_total{tenant=~\"^$tenant$\", name=~\"$node$\",private_ip=~\"$private_ip\"}[$interval])*8) by (private_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "J"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum(rate(node_network_transmit_bytes_total{tenant=~\"^$tenant$\", name=~\"$node$\",private_ip=~\"$private_ip\"}[$interval])*8) by (private_ip)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "refId": "K"
+            }
+          ],
+          "title": "Server Resource Overview 【Node：$node，Total：$total】",
+          "type": "table"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Total number of containers connected to metrics during of the time range specified for this dashboard.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 3,
+            "x": 0,
+            "y": 24
+          },
+          "id": 46,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "text": {},
+            "textMode": "auto"
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "count(rate(container_last_seen{id=~\"/kubepods/.*\",host_friendlyname=~\"^$node$\",tenant=~\"^$tenant$\",app=~\"^$app$\"}[5m]))",
+              "interval": "",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Containers",
+          "type": "stat"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "The CPU utilization is the percentage of a single CPU used by a pod. If it is 400% it means that it is using 4 cpus on the host.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Pod Name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 344
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "CPU Utilization"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 176
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 9,
+            "x": 3,
+            "y": 24
+          },
+          "id": 53,
+          "options": {
+            "footer": {
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "CPU Utilization"
+              }
+            ]
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\", container_label_io_kubernetes_container_name!=\"\", container_label_io_kubernetes_container_name!=\"POD\", tenant=~\"^$tenant$\",host_friendlyname=~\"^$node$\",host_ip=~\"^$private_ip$\",app=~\"^$app$\"}[1m])) by (pod, tenant)  * 100",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "{{name}}",
+              "metric": "",
+              "refId": "F",
+              "step": 240
+            }
+          ],
+          "title": "CPU Usage/Pod",
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "host_ip": true,
+                  "tenant": false
+                },
+                "indexByName": {
+                  "Time": 3,
+                  "Value": 2,
+                  "pod": 1,
+                  "tenant": 0
+                },
+                "renameByName": {
+                  "Value": "CPU Utilization",
+                  "container_env_role_name": "Container Name",
+                  "container_label_io_kubernetes_pod_name": "Pod Name",
+                  "pod": "Pod Name",
+                  "tenant": "Tenant"
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "This table shows how much memory is being used by each pod. Actively Used Memory is working memory used, which is what the out of memory police look at when trying to kill pods. Total used memory includes files that are cached and can be evacuated. Avaialble memory is the memory limit minus the actively used memory. Memory Limit is the limit specified on the pod spec for memory utilization by a pod.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "__name__"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "short"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 2
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value #A"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Actively Used RAM"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 2
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value #B"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Total Used RAM"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 2
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value #C"
+                },
+                "properties": [
+                  {
+                    "id": "displayName",
+                    "value": "Available RAM"
+                  },
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 2
+                  },
+                  {
+                    "id": "custom.align"
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Value #D"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "bytes"
+                  },
+                  {
+                    "id": "decimals",
+                    "value": 2
+                  },
+                  {
+                    "id": "custom.align",
+                    "value": "right"
+                  },
+                  {
+                    "id": "displayName",
+                    "value": "RAM Limit"
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 12,
+            "y": 24
+          },
+          "id": 49,
+          "options": {
+            "footer": {
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": true,
+                "displayName": "Actively Used RAM"
+              }
+            ]
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "max(container_memory_working_set_bytes{ container_label_io_kubernetes_pod_name!=\"\", tenant=~\"^$tenant$\",host_friendlyname=~\"^$node$\",host_ip=~\"^$private_ip$\",app=~\"^$app$\"}) by (tenant,container_label_io_kubernetes_pod_name)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "A"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "max(container_memory_usage_bytes{ container_label_io_kubernetes_pod_name!=\"\", tenant=~\"^$tenant$\",host_friendlyname=~\"^$node$\",host_ip=~\"^$private_ip$\",app=~\"^$app$\"}) by (tenant,container_label_io_kubernetes_pod_name)",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "B"
+            },
+            {
+              "datasource": "prometheus",
+              "exemplar": true,
+              "expr": "max(container_spec_memory_limit_bytes{container_label_io_kubernetes_pod_name!=\"\",tenant=~\"^$tenant$\",host_friendlyname=~\"^$node$\",host_ip=~\"^$private_ip$\",app=~\"^$app$\"}-container_memory_working_set_bytes{container_label_io_kubernetes_pod_name!=\"\",tenant=~\"^$tenant$\",host_friendlyname=~\"^$node$\",host_ip=~\"^$private_ip$\",app=~\"^$app$\"})by (tenant,container_label_io_kubernetes_pod_name)",
+              "format": "table",
+              "instant": true,
+              "interval": "",
+              "intervalFactor": 1,
+              "legendFormat": "",
+              "refId": "C"
+            },
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "max(container_spec_memory_limit_bytes{container_label_io_kubernetes_pod_name!=\"\",tenant=~\"^$tenant$\",host_friendlyname=~\"^$node$\",host_ip=~\"^$private_ip$\",app=~\"^$app$\"}) by (tenant,container_label_io_kubernetes_pod_name)",
+              "format": "table",
+              "hide": false,
+              "instant": true,
+              "range": false,
+              "refId": "D"
+            }
+          ],
+          "title": "Memory usage/pod",
+          "transformations": [
+            {
+              "id": "merge",
+              "options": {
+                "reducers": []
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true
+                },
+                "indexByName": {
+                  "Time": 0,
+                  "Value #A": 3,
+                  "Value #B": 4,
+                  "Value #C": 5,
+                  "Value #D": 6,
+                  "container_label_io_kubernetes_pod_name": 2,
+                  "tenant": 1
+                },
+                "renameByName": {
+                  "Value #A": "",
+                  "container_env_role_name": "Container Name",
+                  "container_label_io_kubernetes_pod_name": "Pod Name",
+                  "tenant": "Tenant",
+                  "{container_label_io_kubernetes_pod_name=\"bad-api-live-8575f65444-48zwd\"}": ""
+                }
+              }
+            }
+          ],
+          "type": "table"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "The CPU utilization is the percentage of a single CPU used by a pod. If it is 400% it means that it is using 4 cpus on the host.",
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 32
+          },
+          "id": 47,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": true,
+              "expr": "sum (rate (container_cpu_usage_seconds_total{image!=\"\", container_label_io_kubernetes_container_name!=\"\", container_label_io_kubernetes_container_name!=\"POD\", tenant=~\"^$tenant$\",host_friendlyname=~\"^$node$\",host_ip=~\"^$private_ip$\",app=~\"^$app$\"}[1m])) by (tenant, pod)  * 100",
+              "format": "time_series",
+              "hide": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "{{pod}} - Tenant: {{tenant}}",
+              "metric": "",
+              "range": true,
+              "refId": "F",
+              "step": 240
+            }
+          ],
+          "title": "CPU Usage/Pod",
+          "type": "timeseries"
+        },
+        {
+          "datasource": "prometheus",
+          "description": "Memory utilization per pod. This tracks the working memory utilization per pod, which does not include optional memory usage such as cached files etc, but is what Kubernetes's OOM killer tracks against the pod memory limit.",
+          "fieldConfig": {
+            "defaults": {
+              "unit": "decmbytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 24,
+            "x": 0,
+            "y": 42
+          },
+          "id": 54,
+          "options": {
+            "alertThreshold": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "datasource": "prometheus",
+              "editorMode": "code",
+              "exemplar": false,
+              "expr": "sum(container_memory_working_set_bytes{container_label_io_kubernetes_pod_name!=\"\",tenant=~\"^$tenant$\",host_friendlyname=~\"^$node$\",host_ip=~\"^$private_ip$\",app=~\"^$app$\"}) by (container_label_io_kubernetes_pod_name, tenant) / 1024 /1024",
+              "format": "time_series",
+              "hide": false,
+              "instant": false,
+              "interval": "",
+              "intervalFactor": 2,
+              "legendFormat": "{{ container_label_io_kubernetes_pod_name }}- Tenant: {{ tenant }}",
+              "metric": "",
+              "range": true,
+              "refId": "F",
+              "step": 240
+            }
+          ],
+          "title": "Memory Usage/Pod",
+          "type": "timeseries"
+        }
+      ],
+      "preload": false,
+      "refresh": "",
+      "schemaVersion": 40,
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values(tenant)",
+            "hide": 2,
+            "includeAll": true,
+            "label": "Tenant",
+            "multi": true,
+            "name": "tenant",
+            "options": [],
+            "query": {
+              "query": "label_values(tenant)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values({tenant=~\"^$tenant$\"}, host_friendlyname)",
+            "includeAll": true,
+            "label": "Node",
+            "multi": true,
+            "name": "node",
+            "options": [],
+            "query": {
+              "query": "label_values({tenant=~\"^$tenant$\"}, host_friendlyname)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values({tenant=~\"^$tenant$$\", name=~\"$node$\"},private_ip)",
+            "includeAll": true,
+            "label": "Private IP",
+            "multi": true,
+            "name": "private_ip",
+            "options": [],
+            "query": {
+              "query": "label_values({tenant=~\"^$tenant$$\", name=~\"$node$\"},private_ip)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "label_values({tenant=~\"^$tenant$\", name=~\"$node$\", host_ip=~\"$private_ip$\"},app)",
+            "includeAll": true,
+            "label": "Pod",
+            "multi": true,
+            "name": "app",
+            "options": [],
+            "query": {
+              "query": "label_values({tenant=~\"^$tenant$\", name=~\"$node$\", host_ip=~\"$private_ip$\"},app)",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "auto": false,
+            "auto_count": 30,
+            "auto_min": "10s",
+            "current": {
+              "text": "30s",
+              "value": "30s"
+            },
+            "label": "Interval",
+            "name": "interval",
+            "options": [
+              {
+                "selected": true,
+                "text": "30s",
+                "value": "30s"
+              },
+              {
+                "selected": false,
+                "text": "1m",
+                "value": "1m"
+              },
+              {
+                "selected": false,
+                "text": "2m",
+                "value": "2m"
+              },
+              {
+                "selected": false,
+                "text": "3m",
+                "value": "3m"
+              },
+              {
+                "selected": false,
+                "text": "5m",
+                "value": "5m"
+              },
+              {
+                "selected": false,
+                "text": "10m",
+                "value": "10m"
+              },
+              {
+                "selected": false,
+                "text": "30m",
+                "value": "30m"
+              }
+            ],
+            "query": "30s,1m,2m,3m,5m,10m,30m",
+            "refresh": 2,
+            "type": "interval"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": "prometheus",
+            "definition": "query_result(count(node_uname_info{tenant=~\"^$tenant$\", name=~\"$node$\", host_ip=~\"$private_ip$\"}))",
+            "includeAll": false,
+            "label": "Total Servers",
+            "name": "total",
+            "options": [],
+            "query": {
+              "query": "query_result(count(node_uname_info{tenant=~\"^$tenant$\", name=~\"$node$\", host_ip=~\"$private_ip$\"}))",
+              "refId": "StandardVariableQuery"
+            },
+            "refresh": 1,
+            "regex": "/{} (.*) .*/",
+            "type": "query"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "browser",
+      "title": "K8s",
+      "uid": "kh3aJGV7z",
+      "version": 1,
+      "weekStart": ""
+    }

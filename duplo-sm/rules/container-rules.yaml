@@ -1,0 +1,55 @@
+# Ported from prometheus/rootfs/etc/prometheus/rules/container.yml
+#
+# Changes vs. legacy:
+#   - Dropped the tenant=~"compliance|default" filter on ContainerMemoryUsage
+#     (it was applied inconsistently in the legacy file — 2 of its 3 rules
+#     didn't have it at all — treated as an unintentional leak, not a real
+#     requirement; PLAN.md > Alerting Rule Migration).
+#   - Added `cluster` to every aggregating/`on(...)` clause. HostOutOfDiskSpace
+#     in particular used `and on (instance, device, mountpoint)` — without
+#     `cluster` in that match clause, two different customer clusters that
+#     happen to share an `instance`/`device`/`mountpoint` value (very possible
+#     with generic node/device naming) could get cross-matched.
+#   - HostMemoryUnderMemoryPressure here is a verbatim duplicate of the one in
+#     node-rules.yaml (also duplicated in the legacy repo) — kept as-is for a
+#     faithful port; consider de-duplicating once both are running in
+#     production and confirmed to fire identically.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  # Short, deliberately -- see node-rules.yaml's comment on why.
+  name: legacy-container
+  namespace: duplo-monitoring
+  labels:
+    release: duplo-sm
+spec:
+  groups:
+  - name: container
+    rules:
+    - alert: ContainerMemoryUsage
+      expr: (sum(container_memory_working_set_bytes{name!=""}) BY (cluster, instance, name) / sum(container_spec_memory_limit_bytes > 0) BY (cluster, instance, name) * 100) > 80
+      for: 2m
+      labels:
+        severity: warning
+        owner: duplo
+      annotations:
+        summary: "Container Memory usage (instance {{ $labels.instance }})"
+        description: "Container Memory usage is above 80%\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostMemoryUnderMemoryPressure
+      expr: rate(node_vmstat_pgmajfault[1m]) > 1000
+      for: 2m
+      labels:
+        severity: warning
+        owner: duplo
+      annotations:
+        summary: "Host memory under memory pressure (instance {{ $labels.name }})"
+        description: "The node is under heavy memory pressure. High rate of major page faults\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
+    - alert: HostOutOfDiskSpace
+      expr: (node_filesystem_avail_bytes{mountpoint="/"} * 100) / node_filesystem_size_bytes{mountpoint="/"} < 10 and ON (cluster, instance, device, mountpoint) node_filesystem_readonly == 0
+      for: 2m
+      labels:
+        severity: warning
+        owner: duplo
+      annotations:
+        summary: "Host out of disk space (instance {{ $labels.name }})"
+        description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"

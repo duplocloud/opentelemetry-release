@@ -1,0 +1,992 @@
+# Rendered from grafana/dashboards/Azure ApplicationGateway-1660841996654.json
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dash-azure-applicationgateway
+  namespace: duplo-monitoring
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: "Cloud - Azure"
+data:
+  dash-azure-applicationgateway.json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "grafana"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "target": {
+              "limit": 100,
+              "matchAny": false,
+              "tags": [],
+              "type": "dashboard"
+            },
+            "type": "dashboard"
+          }
+        ]
+      },
+      "description": "Using Azure Monitor data source, this dashboard provides insights for network monitoring. This monitoring is available for the following Azure services: Front Door, Traffic Manager, Application Gateways and Load Balancers.",
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 249,
+      "links": [],
+      "panels": [
+        {
+          "collapsed": false,
+          "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 6,
+          "panels": [],
+          "repeat": "resapplicationgateway",
+          "title": "Application Gateways - ${resapplicationgateway}",
+          "type": "row"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 24,
+            "x": 0,
+            "y": 1
+          },
+          "id": 22,
+          "options": {
+            "footer": {
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "9.0.4",
+          "targets": [
+            {
+              "azureLogAnalytics": {
+                "query": "",
+                "resource": "/subscriptions/$sub/resourceGroups/$rg/providers/$applicationgateway/$resapplicationgateway"
+              },
+              "azureMonitor": {
+                "allowedTimeGrainsMs": [],
+                "timeGrain": "auto"
+              },
+              "azureResourceGraph": {
+                "query": "resources\r\n| where tolower(subscriptionId) == tolower(\"$sub\") and tolower(resourceGroup) == tolower(\"$rg\") and tolower(name) == tolower($resapplicationgateway)\r\n| project Name=name, sku.name, location, subscriptionId\r\n| join kind=inner(\r\n    resourcecontainers\r\n        | where type == \"microsoft.resources/subscriptions\" and tolower(subscriptionId) == tolower(\"$sub\")\r\n        | project subscriptionId, Subscription = name\r\n) on subscriptionId\r\n| project-away subscriptionId, subscriptionId1\r\n| join kind=leftouter(\r\n    alertsmanagementresources\r\n        | where tolower(properties.context.context.resourceName) == tolower($resapplicationgateway)\r\n        | summarize count() by tostring(properties.context.context.resourceName), subscriptionId\r\n        | project properties_context_context_resourceName, count_, subscriptionId\r\n) on $left.Name == $right.properties_context_context_resourceName\r\n| project Name, Alerts=iff(isnull(count_), 0, count_), SKU=tostring(sku_name), Subscription, Location=location\r\n"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Resource Graph",
+              "refId": "A",
+              "subscriptions": [
+                "$sub"
+              ]
+            }
+          ],
+          "title": "",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "description": "",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 0,
+            "y": 3
+          },
+          "id": 8,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Average",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "Throughput",
+                "metricNamespace": "microsoft.network/applicationgateways",
+                "resourceUri": "/subscriptions/$sub/resourceGroups/$rg/providers/$applicationgateway/$resapplicationgateway",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Throughput",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 6,
+            "y": 3
+          },
+          "id": 23,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Average",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "UnhealthyHostCount",
+                "metricNamespace": "microsoft.network/applicationgateways",
+                "resourceUri": "/subscriptions/$sub/resourceGroups/$rg/providers/$applicationgateway/$resapplicationgateway",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Unhealthy Host Count",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 12,
+            "y": 3
+          },
+          "id": 33,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Average",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "HealthyHostCount",
+                "metricNamespace": "microsoft.network/applicationgateways",
+                "resourceUri": "/subscriptions/$sub/resourceGroups/$rg/providers/$applicationgateway/$resapplicationgateway",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Healthy Host Count",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 18,
+            "y": 3
+          },
+          "id": 25,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Total",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "ResponseStatus",
+                "metricNamespace": "microsoft.network/applicationgateways",
+                "resourceUri": "/subscriptions/$sub/resourceGroups/$rg/providers/$applicationgateway/$resapplicationgateway",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Response Status",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 0,
+            "y": 13
+          },
+          "id": 34,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Average",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "AvgRequestCountPerHealthyHost",
+                "metricNamespace": "microsoft.network/applicationgateways",
+                "resourceUri": "/subscriptions/$sub/resourceGroups/$rg/providers/$applicationgateway/$resapplicationgateway",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Requests per Healthy Host",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 6,
+            "y": 13
+          },
+          "id": 24,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Total",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "TotalRequests",
+                "metricNamespace": "microsoft.network/applicationgateways",
+                "resourceUri": "/subscriptions/$sub/resourceGroups/$rg/providers/$applicationgateway/$resapplicationgateway",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Total Requests",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "uid": "$ds"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 6,
+            "x": 12,
+            "y": 13
+          },
+          "id": 35,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "azureMonitor": {
+                "aggregation": "Total",
+                "allowedTimeGrainsMs": [
+                  60000,
+                  300000,
+                  900000,
+                  1800000,
+                  3600000,
+                  21600000,
+                  43200000,
+                  86400000
+                ],
+                "dimensionFilters": [],
+                "metricName": "FailedRequests",
+                "metricNamespace": "microsoft.network/applicationgateways",
+                "resourceUri": "/subscriptions/$sub/resourceGroups/$rg/providers/$applicationgateway/$resapplicationgateway",
+                "timeGrain": "auto"
+              },
+              "datasource": {
+                "uid": "$ds"
+              },
+              "queryType": "Azure Monitor",
+              "refId": "A"
+            }
+          ],
+          "title": "Failed Requests",
+          "type": "timeseries"
+        }
+      ],
+      "preload": false,
+      "refresh": "",
+      "schemaVersion": 40,
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "current": {
+              "text": "Azure Monitor",
+              "value": "P1EB995EACC6832D3"
+            },
+            "hide": 2,
+            "includeAll": false,
+            "label": "Datasource",
+            "name": "ds",
+            "options": [],
+            "query": "grafana-azure-monitor-datasource",
+            "refresh": 1,
+            "regex": "",
+            "type": "datasource"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "uid": "$ds"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "label": "Subscription",
+            "name": "sub",
+            "options": [],
+            "query": {
+              "grafanaTemplateVariableFn": {
+                "kind": "SubscriptionsQuery",
+                "rawQuery": "subscriptions()"
+              },
+              "queryType": "Grafana Template Variable Function",
+              "refId": "A"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "uid": "$ds"
+            },
+            "definition": "",
+            "hide": 2,
+            "includeAll": false,
+            "label": "Resource Group",
+            "name": "rg",
+            "options": [],
+            "query": {
+              "grafanaTemplateVariableFn": {
+                "kind": "ResourceGroupsQuery",
+                "rawQuery": "resourcegroups($sub)",
+                "subscription": "$sub"
+              },
+              "queryType": "Grafana Template Variable Function",
+              "refId": "A"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": "",
+              "value": ""
+            },
+            "datasource": {
+              "uid": "$ds"
+            },
+            "definition": "namespaces($sub,$rg)",
+            "hide": 2,
+            "includeAll": false,
+            "name": "applicationgateway",
+            "options": [],
+            "query": {
+              "grafanaTemplateVariableFn": {
+                "kind": "MetricDefinitionsQuery",
+                "rawQuery": "namespaces($sub,$rg)",
+                "resourceGroup": "$rg",
+                "subscription": "$sub"
+              },
+              "queryType": "Grafana Template Variable Function",
+              "refId": "A"
+            },
+            "refresh": 1,
+            "regex": "([Mm](icrosoft)\\.[Nn](etwork)/(application)[Gg](ateways))",
+            "type": "query"
+          },
+          {
+            "current": {
+              "text": [],
+              "value": []
+            },
+            "datasource": {
+              "uid": "$ds"
+            },
+            "definition": "",
+            "description": "",
+            "includeAll": false,
+            "label": "Application Gateways",
+            "multi": true,
+            "name": "resapplicationgateway",
+            "options": [],
+            "query": {
+              "grafanaTemplateVariableFn": {
+                "kind": "ResourceNamesQuery",
+                "metricDefinition": "$applicationgateway",
+                "rawQuery": "resourcenames($sub,$rg,$applicationgateway)",
+                "resourceGroup": "$rg",
+                "subscription": "$sub"
+              },
+              "queryType": "Grafana Template Variable Function",
+              "refId": "A"
+            },
+            "refresh": 1,
+            "regex": "",
+            "type": "query"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-5m",
+        "to": "now"
+      },
+      "timepicker": {},
+      "timezone": "",
+      "title": "ApplicationGateway",
+      "uid": "lbRhy4mVz",
+      "version": 1,
+      "weekStart": ""
+    }
