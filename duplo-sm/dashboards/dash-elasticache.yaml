@@ -1287,6 +1287,7 @@ data:
       "refresh": "",
       "schemaVersion": 40,
       "tags": [
+        "Duplo Managed",
         "monitoringartist",
         "cloudwatch"
       ],

@@ -6282,6 +6282,7 @@ data:
       "schemaVersion": 26,
       "style": "dark",
       "tags": [
+        "Duplo Managed",
         "elasticsearch",
         "App"
       ],

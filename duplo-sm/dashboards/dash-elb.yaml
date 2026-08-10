@@ -553,7 +553,9 @@ data:
       "preload": false,
       "refresh": "",
       "schemaVersion": 40,
-      "tags": [],
+      "tags": [
+        "Duplo Managed"
+      ],
       "templating": {
         "list": [
           {

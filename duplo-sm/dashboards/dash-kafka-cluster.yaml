@@ -441,7 +441,9 @@ data:
       "refresh": false,
       "schemaVersion": 30,
       "style": "dark",
-      "tags": [],
+      "tags": [
+        "Duplo Managed"
+      ],
       "templating": {
         "list": [
           {
