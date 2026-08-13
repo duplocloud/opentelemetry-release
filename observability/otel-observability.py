@@ -556,8 +556,18 @@ def collect_pod_annotations(namespace_regex: str) -> Dict[tuple, Dict[str, Optio
     return annotations_map
 
 
+ANNOTATION_POD_COMPONENTS = re.compile(
+    r'(ingester|metrics-generator|metricsgenerator|write|backend|read|querier)',
+    re.IGNORECASE
+)
+
+
 def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
-    """Collect safe-to-evict and memory-limit-oom-score-adj annotations from pod metadata and send to Loki."""
+    """
+    Collect safe-to-evict and memory-limit-oom-score-adj annotations for stateful
+    otel components (ingester, metrics-generator, write, backend, read, querier)
+    and send to Loki independently of Prometheus availability.
+    """
     logger.info("Collecting and sending pod annotations")
     namespace_regex = labels.get('namespace_filter', '.*otel.*')
     annotations_map = collect_pod_annotations(namespace_regex)
@@ -568,6 +578,8 @@ def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
     current_time_ns = str(int(time.time() * 1_000_000_000))
     values = []
     for (cluster, namespace, pod_name), ann in annotations_map.items():
+        if not ANNOTATION_POD_COMPONENTS.search(pod_name):
+            continue
         values.append([current_time_ns, json.dumps({
             "metadata": {"cluster": cluster, "namespace": namespace},
             "spec": {
@@ -576,6 +588,10 @@ def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
                 "memory_limit_oom_score_adj": ann.get("memory_limit_oom_score_adj"),
             }
         })])
+
+    if not values:
+        logger.warning("No matching component pods found for annotation collection")
+        return
 
     send_to_loki("pod_annotations", "kubernetes", "pod_annotation_info", values)
     logger.info(f"Sent pod annotations for {len(values)} pods")
