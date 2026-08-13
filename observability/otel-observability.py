@@ -560,13 +560,23 @@ ANNOTATION_POD_COMPONENTS = re.compile(
     r'(ingester|metrics-generator|metricsgenerator|write|backend|read|querier)',
     re.IGNORECASE
 )
+_STATEFULSET_REPLICA_INDEX = re.compile(r'-(\d+)$')
+
+
+def _is_first_or_only_replica(pod_name: str) -> bool:
+    """Skip StatefulSet replicas beyond index 0 (e.g. write-1, ingester-2)."""
+    m = _STATEFULSET_REPLICA_INDEX.search(pod_name)
+    if m:
+        return m.group(1) == '0'
+    return True
 
 
 def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
     """
     Collect safe-to-evict and memory-limit-oom-score-adj annotations for stateful
-    otel components (ingester, metrics-generator, write, backend, read, querier)
-    and send to Loki independently of Prometheus availability.
+    otel components (ingester, metrics-generator, write, backend, read, querier).
+    Only the first replica (index 0) of each StatefulSet is collected.
+    Runs independently of Prometheus availability.
     """
     logger.info("Collecting and sending pod annotations")
     namespace_regex = labels.get('namespace_filter', '.*otel.*')
@@ -579,6 +589,8 @@ def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
     values = []
     for (cluster, namespace, pod_name), ann in annotations_map.items():
         if not ANNOTATION_POD_COMPONENTS.search(pod_name):
+            continue
+        if not _is_first_or_only_replica(pod_name):
             continue
         values.append([current_time_ns, json.dumps({
             "metadata": {"cluster": cluster, "namespace": namespace},
