@@ -1032,12 +1032,16 @@ def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
 
         spec: Dict[str, Any] = {"release": release_name, "chart": cfg['chart_name']}
 
-        # Ingester replication factor — Mimir: mimir.structuredConfig.ingester.ring.replication_factor
-        #                              Tempo:  ingester.config.replication_factor
+        # Ingester replication factor — checked in priority order:
+        #   Mimir explicit:  mimir.structuredConfig.ingester.ring.replication_factor
+        #   Tempo explicit:  ingester.config.replication_factor
+        #   Generic ring:    ingester.ring.replicationFactor / replication_factor
+        #   Fallback:        ingester.replicas (chart default; equals RF when zone-aware disabled)
         rf = (merged('mimir', 'structuredConfig', 'ingester', 'ring', 'replication_factor') or
               merged('ingester', 'config', 'replication_factor') or
               merged('ingester', 'ring', 'replicationFactor') or
-              merged('ingester', 'ring', 'replication_factor'))
+              merged('ingester', 'ring', 'replication_factor') or
+              merged('ingester', 'replicas'))
         if rf is not None:
             try:
                 spec['ingester_replication_factor'] = int(rf)
