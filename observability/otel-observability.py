@@ -560,22 +560,14 @@ ANNOTATION_POD_COMPONENTS = re.compile(
     r'(ingester|metrics-generator|metricsgenerator|write|backend|read|querier)',
     re.IGNORECASE
 )
-_STATEFULSET_REPLICA_INDEX = re.compile(r'-(\d+)$')
-
-
-def _is_first_or_only_replica(pod_name: str) -> bool:
-    """Skip StatefulSet replicas beyond index 0 (e.g. write-1, ingester-2)."""
-    m = _STATEFULSET_REPLICA_INDEX.search(pod_name)
-    if m:
-        return m.group(1) == '0'
-    return True
 
 
 def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
     """
-    Collect safe-to-evict and memory-limit-oom-score-adj annotations for stateful
-    otel components (ingester, metrics-generator, write, backend, read, querier).
-    Only the first replica (index 0) of each StatefulSet is collected.
+    Collect safe-to-evict and memory-limit-oom-score-adj annotations for otel
+    components (ingester, metrics-generator, write, backend, read, querier).
+    Deduplicates to one entry per component type per namespace — handles both
+    StatefulSet and Deployment pods without emitting duplicate entries per replica.
     Runs independently of Prometheus availability.
     """
     logger.info("Collecting and sending pod annotations")
@@ -586,16 +578,21 @@ def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
         return
 
     current_time_ns = str(int(time.time() * 1_000_000_000))
+    seen_components: set = set()
     values = []
     for (cluster, namespace, pod_name), ann in annotations_map.items():
-        if not ANNOTATION_POD_COMPONENTS.search(pod_name):
+        m = ANNOTATION_POD_COMPONENTS.search(pod_name)
+        if not m:
             continue
-        if not _is_first_or_only_replica(pod_name):
+        component = m.group(1).lower()
+        dedup_key = (cluster, namespace, component)
+        if dedup_key in seen_components:
             continue
+        seen_components.add(dedup_key)
         values.append([current_time_ns, json.dumps({
             "metadata": {"cluster": cluster, "namespace": namespace},
             "spec": {
-                "pod": pod_name,
+                "component": component,
                 "safe_to_evict": ann.get("safe_to_evict"),
                 "memory_limit_oom_score_adj": ann.get("memory_limit_oom_score_adj"),
             }
