@@ -585,13 +585,17 @@ def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
         if not m:
             continue
         component = m.group(1).lower()
-        dedup_key = (cluster, namespace, component)
+        # Everything before the component keyword is the release prefix
+        # e.g. "duplo-tracing-ingester-0" → product="duplo-tracing"
+        product = pod_name[:m.start()].rstrip('-')
+        dedup_key = (cluster, namespace, product, component)
         if dedup_key in seen_components:
             continue
         seen_components.add(dedup_key)
         values.append([current_time_ns, json.dumps({
             "metadata": {"cluster": cluster, "namespace": namespace},
             "spec": {
+                "product": product,
                 "component": component,
                 "safe_to_evict": ann.get("safe_to_evict"),
                 "memory_limit_oom_score_adj": ann.get("memory_limit_oom_score_adj"),
