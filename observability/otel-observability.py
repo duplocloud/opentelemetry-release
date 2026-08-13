@@ -11,6 +11,7 @@ import gzip
 import json
 import logging
 import os
+import re
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union, Tuple
@@ -25,6 +26,37 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+REQUIRED_CUSTOMER_PATHS = {
+    'duplo-metrics': {
+        'aws':   ['serviceAccount.name', 'ruler.serviceAccount.name',
+                  'mimir.structuredConfig.common.storage.s3.endpoint',
+                  'mimir.structuredConfig.common.storage.s3.bucket_name'],
+        'azure': ['serviceAccount.name', 'ruler.serviceAccount.name',
+                  'mimir.structuredConfig.common.storage.azure.account_name'],
+        'gcp':   ['serviceAccount.name', 'ruler.serviceAccount.name',
+                  'mimir.structuredConfig.common.storage.gcs.bucket_name'],
+    },
+    'duplo-logging': {
+        'aws':   ['serviceAccount.name',
+                  'loki.storage.bucketNames.chunks',
+                  'loki.storage.s3.region'],
+        'azure': ['serviceAccount.name',
+                  'loki.storage.azure.accountName'],
+        'gcp':   ['serviceAccount.name',
+                  'loki.storage.bucketNames.chunks'],
+    },
+    'duplo-tracing': {
+        'aws':   ['serviceAccount.name',
+                  'storage.trace.s3.bucket',
+                  'metricsGenerator.config.storage.remote_write'],
+        'azure': ['serviceAccount.name',
+                  'storage.trace.azure.storage_account_name',
+                  'metricsGenerator.config.storage.remote_write'],
+        'gcp':   ['serviceAccount.name',
+                  'storage.trace.gcs.bucket_name',
+                  'metricsGenerator.config.storage.remote_write'],
+    },
+}
 
 
 def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = None, password: Optional[str] = None) -> Optional[Dict[str, Any]]:
@@ -481,6 +513,49 @@ def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str], credentials:
     logger.info("Completed Grafana DB lock error data collection and sending")
 
 
+def collect_pod_annotations(namespace_regex: str) -> Dict[tuple, Dict[str, Optional[str]]]:
+    """
+    Collect safe-to-evict and memory-limit-oom-score-adj annotations by reading pod metadata
+    directly from the Kubernetes API, filtered to namespaces matching namespace_regex.
+    """
+    token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+    k8s_host = os.getenv('KUBERNETES_SERVICE_HOST', 'kubernetes.default.svc')
+    k8s_port = os.getenv('KUBERNETES_SERVICE_PORT', '443')
+    cluster = os.getenv('CLUSTER', '')
+
+    try:
+        with open(token_path) as f:
+            token = f.read().strip()
+    except OSError as e:
+        logger.error(f"Could not read service account token: {e}")
+        return {}
+
+    annotations_map: Dict[tuple, Dict[str, Optional[str]]] = {}
+    ns_pattern = re.compile(namespace_regex)
+
+    try:
+        url = f"https://{k8s_host}:{k8s_port}/api/v1/pods"
+        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path)
+        response.raise_for_status()
+        for pod in response.json().get('items', []):
+            metadata = pod.get('metadata', {})
+            namespace = metadata.get('namespace', '')
+            pod_name = metadata.get('name', '')
+            if not ns_pattern.search(namespace):
+                continue
+            annotations = metadata.get('annotations') or {}
+            annotations_map[(cluster, namespace, pod_name)] = {
+                "safe_to_evict": annotations.get('cluster-autoscaler.kubernetes.io/safe-to-evict'),
+                "memory_limit_oom_score_adj": annotations.get('container.kubernetes.io/memory-limit-oom-score-adj'),
+            }
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error querying Kubernetes API for pod annotations: {e}")
+
+    logger.info(f"Collected annotations for {len(annotations_map)} pods")
+    return annotations_map
+
+
 def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, credentials: Optional[Dict[str, str]] = None) -> None:
     """
     Collects 24h pod/node resource stats and otel_node_count for all clusters/namespaces;
@@ -502,7 +577,10 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
     job_pods = excluded_pods_by_owner_kind("Job")
     excluded_pods = daemonset_pods | job_pods
 
-    # 2. Pod-to-node mapping
+    # 2. Pod annotations (safe-to-evict, memory-limit-oom-score-adj) from K8s pod metadata
+    pod_annotations = collect_pod_annotations(namespace_regex)
+
+    # 3. Pod-to-node mapping
     pod_to_node = {}
     pod_node_query = f'kube_pod_info{{namespace=~"{namespace_regex}"}}'
     pod_node_response = query_prometheus(prometheus_url, pod_node_query, username, password) or {}
@@ -514,7 +592,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         if cluster and namespace and pod_name and node_name:
             pod_to_node[(cluster, namespace, pod_name)] = node_name
 
-    # 3. Node -> instance_type mapping
+    # 4. Node -> instance_type mapping
     instance_type_query = 'kube_node_labels{job="integrations/kubernetes/kube-state-metrics"}'
     instance_type_data = query_prometheus(prometheus_url, instance_type_query, username, password) or {}
     node_instance_type = {}
@@ -529,7 +607,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         if cluster and node_name and instance_type:
             node_instance_type[(cluster, node_name)] = instance_type
 
-    # 4. Pod resource requests/limits
+    # 5. Pod resource requests/limits
     def extract_pod_resource_usage(prometheus_query):
         response = query_prometheus(prometheus_url, prometheus_query, username, password)
         result = {}
@@ -547,7 +625,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
     cpu_limit = extract_pod_resource_usage(f'sum by(pod,namespace,cluster) (kube_pod_container_resource_limits{{resource="cpu",namespace=~"{namespace_regex}"}})')
     mem_limit = extract_pod_resource_usage(f'sum by(pod,namespace,cluster) (kube_pod_container_resource_limits{{resource="memory",namespace=~"{namespace_regex}"}})')
 
-    # 5. Pod 24h usage
+    # 6. Pod 24h usage
     label_filter = f'namespace=~"{namespace_regex}",container!="",container!="POD"'
     promql_templates = {
         "cpu_avg": f'avg by (pod,namespace,cluster) (avg_over_time(rate(container_cpu_usage_seconds_total{{{label_filter}}}[5m])[24h:5m]))',
@@ -581,6 +659,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         ns_key = (cluster, namespace)
         nodes_by_namespace.setdefault(ns_key, set()).add(node_name)
         pods_by_namespace.setdefault(ns_key, [])
+        ann = pod_annotations.get((cluster, namespace, pod_name), {})
         pod_info = {
             "pod": pod_name,
             "node": node_name,
@@ -594,6 +673,8 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
             "cpu_millicores_limit": round(cpu_limit.get((cluster, namespace, pod_name), 0) * 1000, 2) if cpu_limit.get((cluster, namespace, pod_name)) is not None else None,
             "memory_MB_request": round(mem_request.get((cluster, namespace, pod_name), 0) / (1024 * 1024), 2) if mem_request.get((cluster, namespace, pod_name)) is not None else None,
             "memory_MB_limit": round(mem_limit.get((cluster, namespace, pod_name), 0) / (1024 * 1024), 2) if mem_limit.get((cluster, namespace, pod_name)) is not None else None,
+            "safe_to_evict": ann.get("safe_to_evict"),
+            "memory_limit_oom_score_adj": ann.get("memory_limit_oom_score_adj"),
         }
         pods_by_namespace[ns_key].append(pod_info)
 
@@ -793,6 +874,17 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     return records
 
 
+def _get_nested(d: Any, *keys: str, default: Any = None) -> Any:
+    """Walk nested dicts by key sequence; return default if any key is missing or not a dict."""
+    for key in keys:
+        if not isinstance(d, dict):
+            return default
+        d = d.get(key, default)
+        if d is default:
+            return default
+    return d
+
+
 def collect_and_send_helm_chart_versions(namespace: str) -> None:
     """Collect Helm chart versions from Helm release secrets and send to Loki."""
     logger.info("Collecting and sending Helm chart versions")
@@ -813,6 +905,326 @@ def collect_and_send_helm_chart_versions(namespace: str) -> None:
     values = [[current_time_ns, json.dumps(r)] for r in records]
     send_to_loki("helm_chart_versions", "kubernetes", "helm_chart_version_info", values)
     logger.info("Completed Helm chart version collection and sending")
+
+
+def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
+    """
+    Read Helm release secrets and extract from user-supplied values:
+      - safe-to-evict pod annotation
+      - memory-limit-oom-score-adj pod annotation
+      - ingester replication factor (Mimir chart)
+    Checks global and per-component podAnnotations; user values take priority over chart defaults.
+    """
+    token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+    k8s_host = os.getenv('KUBERNETES_SERVICE_HOST', 'kubernetes.default.svc')
+    k8s_port = os.getenv('KUBERNETES_SERVICE_PORT', '443')
+
+    try:
+        with open(token_path) as f:
+            token = f.read().strip()
+    except OSError as e:
+        logger.error(f"Could not read service account token: {e}")
+        return []
+
+    best_revisions: Dict[str, int] = {}
+    best_configs: Dict[str, Dict[str, Any]] = {}
+
+    try:
+        url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
+        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path,
+                                params={'labelSelector': 'owner=helm,status=deployed'})
+        response.raise_for_status()
+        for secret in response.json().get('items', []):
+            release_name = secret.get('metadata', {}).get('labels', {}).get('name', '')
+            if not release_name:
+                continue
+            release_b64 = secret.get('data', {}).get('release')
+            if not release_b64:
+                continue
+            secret_name = secret.get('metadata', {}).get('name', '')
+            try:
+                revision = int(secret_name.rsplit('.v', 1)[-1])
+            except (ValueError, IndexError):
+                revision = 0
+            if release_name in best_revisions and best_revisions[release_name] >= revision:
+                continue
+            try:
+                helm_encoded = base64.b64decode(release_b64)
+                release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
+            except Exception as e:
+                logger.warning(f"Could not decode Helm secret for release '{release_name}': {e}")
+                continue
+            best_revisions[release_name] = revision
+            best_configs[release_name] = {
+                'chart_name': release_data.get('chart', {}).get('metadata', {}).get('name', release_name),
+                'user_values': release_data.get('config') or {},
+                'chart_defaults': release_data.get('chart', {}).get('values') or {},
+            }
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error querying Kubernetes API for Helm config values: {e}")
+        return []
+
+    records = []
+    cluster = os.getenv('CLUSTER', '')
+
+    for release_name, cfg in best_configs.items():
+        user_vals = cfg['user_values']
+        defaults = cfg['chart_defaults']
+
+        def merged(*keys: str) -> Any:
+            v = _get_nested(user_vals, *keys)
+            return v if v is not None else _get_nested(defaults, *keys)
+
+        spec: Dict[str, Any] = {"release": release_name, "chart": cfg['chart_name']}
+
+        # Ingester replication factor — check all common Mimir value paths
+        rf = (merged('ingester', 'ring', 'replicationFactor') or
+              merged('ingester', 'ring', 'replication_factor') or
+              merged('mimir', 'structuredConfig', 'ingester', 'ring', 'replication_factor'))
+        if rf is not None:
+            try:
+                spec['ingester_replication_factor'] = int(rf)
+            except (ValueError, TypeError):
+                pass
+
+        # Only emit a record if at least one relevant field was found
+        if len(spec) > 2:
+            records.append({
+                "metadata": {"cluster": cluster, "namespace": namespace},
+                "spec": spec
+            })
+
+    logger.info(f"Collected Helm config values for {len(records)} releases")
+    return records
+
+
+def collect_and_send_helm_config_values(namespace: str) -> None:
+    """Collect safe-to-evict, memory-limit-oom-score-adj, and ingester replication factor
+    from Helm release values and send to Loki."""
+    logger.info("Collecting Helm config values (pod annotations + ingester replication factor)")
+    records = collect_helm_config_values(namespace)
+    if not records:
+        logger.warning("No Helm config values found to send")
+        return
+    current_time_ns = str(int(time.time() * 1e9))
+    values = [[current_time_ns, json.dumps(r)] for r in records]
+    send_to_loki("helm_config_values", "kubernetes", "helm_config_value_info", values)
+    logger.info("Completed Helm config values collection and sending")
+
+
+def collect_ingester_replication_factor(namespace: str) -> Optional[int]:
+    """
+    Read the Mimir ingester replication factor from a Kubernetes ConfigMap.
+    ConfigMap name is controlled by the MIMIR_CONFIGMAP_NAME env var (default: mimir-config).
+    Supports both a flat 'ingester-replication-factor' key and a nested YAML config file.
+    """
+    token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+    k8s_host = os.getenv('KUBERNETES_SERVICE_HOST', 'kubernetes.default.svc')
+    k8s_port = os.getenv('KUBERNETES_SERVICE_PORT', '443')
+    configmap_name = os.getenv('MIMIR_CONFIGMAP_NAME', 'mimir-config')
+
+    try:
+        with open(token_path) as f:
+            token = f.read().strip()
+    except OSError as e:
+        logger.error(f"Could not read service account token: {e}")
+        return None
+
+    try:
+        url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/configmaps/{configmap_name}"
+        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path)
+        response.raise_for_status()
+        cm_data = response.json().get('data', {})
+
+        # Check flat keys first
+        for key in ('ingester-replication-factor', 'replication_factor', 'replication-factor'):
+            if key in cm_data:
+                try:
+                    return int(cm_data[key])
+                except (ValueError, TypeError):
+                    pass
+
+        # Try parsing YAML config files within the ConfigMap
+        try:
+            import yaml
+            for key, value in cm_data.items():
+                if not isinstance(value, str):
+                    continue
+                if key.endswith(('.yaml', '.yml')) or key in ('config', 'mimir-config'):
+                    try:
+                        config = yaml.safe_load(value)
+                        if isinstance(config, dict):
+                            ring = config.get('ingester', {}).get('ring', {})
+                            rf = ring.get('replication-factor') or ring.get('replication_factor')
+                            if rf is not None:
+                                return int(rf)
+                    except yaml.YAMLError as ye:
+                        logger.warning(f"Could not parse ConfigMap key '{key}' as YAML: {ye}")
+        except ImportError:
+            logger.warning("PyYAML not available; skipping YAML config parsing for replication factor")
+
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error querying Kubernetes API for ConfigMap '{configmap_name}': {e}")
+
+    logger.warning(f"Ingester replication factor not found in ConfigMap '{configmap_name}'")
+    return None
+
+
+def collect_and_send_mimir_config(namespace: str) -> None:
+    """Collect Mimir ingester replication factor from ConfigMap and send to Loki."""
+    logger.info("Collecting Mimir ingester replication factor from ConfigMap")
+    replication_factor = collect_ingester_replication_factor(namespace)
+    if replication_factor is None:
+        logger.warning("Could not determine ingester replication factor; skipping send")
+        return
+
+    current_time_ns = str(int(time.time() * 1e9))
+    record = {
+        "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
+        "spec": {"ingester_replication_factor": replication_factor}
+    }
+    send_to_loki(
+        "mimir_config",
+        "kubernetes",
+        "ingester_config",
+        [[current_time_ns, json.dumps(record)]]
+    )
+    logger.info(f"Sent ingester replication factor: {replication_factor}")
+
+
+def get_nested(d: dict, path: str) -> Any:
+    """Traverse a dict by dot-notation path. Returns None if any key is missing."""
+    for key in path.split('.'):
+        if not isinstance(d, dict) or key not in d:
+            return None
+        d = d[key]
+    return d
+
+
+def detect_cloud(values: dict) -> str:
+    """Infer cloud provider from the Helm values structure."""
+    m = values.get('mimir', {}).get('structuredConfig', {}).get('common', {}).get('storage', {})
+    if 's3' in m or values.get('loki', {}).get('storage', {}).get('s3'):
+        return 'aws'
+    if 'azure' in m or values.get('loki', {}).get('storage', {}).get('azure'):
+        return 'azure'
+    if 'gcs' in m or values.get('storage', {}).get('trace', {}).get('gcs'):
+        return 'gcp'
+    return 'unknown'
+
+
+def check_customer_values(release: str, values: dict) -> dict:
+    """
+    Compare Helm release values against the expected customer-value paths for that chart and cloud.
+    Returns cloud, required paths, missing paths, and whether values are complete.
+    """
+    cloud = detect_cloud(values)
+    required = REQUIRED_CUSTOMER_PATHS.get(release, {}).get(cloud, [])
+    missing = [p for p in required if get_nested(values, p) is None]
+    return {
+        'cloud': cloud,
+        'required': required,
+        'missing': missing,
+        'match': len(missing) == 0,
+    }
+
+
+def collect_and_send_customer_structure(namespace: str) -> None:
+    """
+    For each tracked Helm release (duplo-metrics, duplo-logging, duplo-tracing), read the
+    deployed user-supplied values and check them against REQUIRED_CUSTOMER_PATHS.
+
+    Emits one Loki record per release with:
+      - structure: 'base_only_with_values' (has user values) or 'base_only' (no user values)
+      - cloud: detected cloud provider
+      - match: True if all required paths are present
+      - missing: list of paths that must be filled before the ConfigMap patch can be applied
+    """
+    logger.info("Collecting customer Helm value structure")
+
+    token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+    ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+    k8s_host = os.getenv('KUBERNETES_SERVICE_HOST', 'kubernetes.default.svc')
+    k8s_port = os.getenv('KUBERNETES_SERVICE_PORT', '443')
+    cluster = os.getenv('CLUSTER', '')
+
+    try:
+        with open(token_path) as f:
+            token = f.read().strip()
+    except OSError as e:
+        logger.error(f"Could not read service account token: {e}")
+        return
+
+    tracked_charts = set(REQUIRED_CUSTOMER_PATHS.keys())
+    best_revisions: Dict[str, int] = {}
+    best_release_data: Dict[str, Dict[str, Any]] = {}
+
+    try:
+        url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/secrets"
+        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path,
+                                params={'labelSelector': 'owner=helm,status=deployed'})
+        response.raise_for_status()
+        for secret in response.json().get('items', []):
+            release_name = secret.get('metadata', {}).get('labels', {}).get('name', '')
+            if not release_name or release_name not in tracked_charts:
+                continue
+            release_b64 = secret.get('data', {}).get('release')
+            if not release_b64:
+                continue
+            secret_name = secret.get('metadata', {}).get('name', '')
+            try:
+                revision = int(secret_name.rsplit('.v', 1)[-1])
+            except (ValueError, IndexError):
+                revision = 0
+            if release_name in best_revisions and best_revisions[release_name] >= revision:
+                continue
+            try:
+                helm_encoded = base64.b64decode(release_b64)
+                release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
+            except Exception as e:
+                logger.warning(f"Could not decode Helm secret for release '{release_name}': {e}")
+                continue
+            best_revisions[release_name] = revision
+            best_release_data[release_name] = {
+                'user_values': release_data.get('config') or {},
+                'chart_defaults': release_data.get('chart', {}).get('values') or {},
+            }
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Error querying Kubernetes API for customer structure: {e}")
+        return
+
+    results = []
+    for release, data in best_release_data.items():
+        user_values = data['user_values']
+        # Merge user values over chart defaults for cloud detection
+        merged_values = {**data['chart_defaults'], **user_values}
+
+        structure = 'base_only_with_values' if user_values else 'base_only'
+        check = check_customer_values(release, merged_values)
+
+        results.append({
+            'release': release,
+            'structure': structure,
+            'cloud': check['cloud'],
+            'match': check['match'],
+            'missing': check['missing'],
+        })
+        logger.debug(f"Release '{release}': structure={structure}, cloud={check['cloud']}, "
+                     f"match={check['match']}, missing={check['missing']}")
+
+    if not results:
+        logger.warning("No tracked Helm releases found for customer structure check")
+        return
+
+    current_time_ns = str(int(time.time() * 1e9))
+    values = [[current_time_ns, json.dumps({
+        "metadata": {"cluster": cluster, "namespace": namespace},
+        "spec": r
+    })] for r in results]
+    send_to_loki("customer_structure", "kubernetes", "helm_customer_structure", values)
+    logger.info(f"Sent customer structure for {len(results)} releases")
 
 
 def main() -> None:
@@ -848,6 +1260,9 @@ def main() -> None:
     collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
     collect_and_send_grafana_db_lock_errors(labels, loki_creds)
     collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
+    collect_and_send_helm_config_values(os.getenv('NAMESPACE', ''))
+    collect_and_send_mimir_config(os.getenv('NAMESPACE', ''))
+    collect_and_send_customer_structure(os.getenv('NAMESPACE', ''))
 
     logger.info("Completed monitoring data collection")
 
