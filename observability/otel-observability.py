@@ -556,6 +556,31 @@ def collect_pod_annotations(namespace_regex: str) -> Dict[tuple, Dict[str, Optio
     return annotations_map
 
 
+def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
+    """Collect safe-to-evict and memory-limit-oom-score-adj annotations from pod metadata and send to Loki."""
+    logger.info("Collecting and sending pod annotations")
+    namespace_regex = labels.get('namespace_filter', '.*otel.*')
+    annotations_map = collect_pod_annotations(namespace_regex)
+    if not annotations_map:
+        logger.warning("No pod annotations collected")
+        return
+
+    current_time_ns = str(int(time.time() * 1_000_000_000))
+    values = []
+    for (cluster, namespace, pod_name), ann in annotations_map.items():
+        values.append([current_time_ns, json.dumps({
+            "metadata": {"cluster": cluster, "namespace": namespace},
+            "spec": {
+                "pod": pod_name,
+                "safe_to_evict": ann.get("safe_to_evict"),
+                "memory_limit_oom_score_adj": ann.get("memory_limit_oom_score_adj"),
+            }
+        })])
+
+    send_to_loki("pod_annotations", "kubernetes", "pod_annotation_info", values)
+    logger.info(f"Sent pod annotations for {len(values)} pods")
+
+
 def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, credentials: Optional[Dict[str, str]] = None) -> None:
     """
     Collects 24h pod/node resource stats and otel_node_count for all clusters/namespaces;
@@ -978,10 +1003,12 @@ def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
 
         spec: Dict[str, Any] = {"release": release_name, "chart": cfg['chart_name']}
 
-        # Ingester replication factor — check all common Mimir value paths
-        rf = (merged('ingester', 'ring', 'replicationFactor') or
-              merged('ingester', 'ring', 'replication_factor') or
-              merged('mimir', 'structuredConfig', 'ingester', 'ring', 'replication_factor'))
+        # Ingester replication factor — Mimir: mimir.structuredConfig.ingester.ring.replication_factor
+        #                              Tempo:  ingester.config.replication_factor
+        rf = (merged('mimir', 'structuredConfig', 'ingester', 'ring', 'replication_factor') or
+              merged('ingester', 'config', 'replication_factor') or
+              merged('ingester', 'ring', 'replicationFactor') or
+              merged('ingester', 'ring', 'replication_factor'))
         if rf is not None:
             try:
                 spec['ingester_replication_factor'] = int(rf)
@@ -1259,6 +1286,7 @@ def main() -> None:
     collect_and_send_grafana_usage(prometheus_url, labels, prometheus_creds)
     collect_and_send_otel_pod_node_usage(prometheus_url, labels, prometheus_creds)
     collect_and_send_grafana_db_lock_errors(labels, loki_creds)
+    collect_and_send_pod_annotations(labels)
     collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
     collect_and_send_helm_config_values(os.getenv('NAMESPACE', ''))
     collect_and_send_mimir_config(os.getenv('NAMESPACE', ''))
