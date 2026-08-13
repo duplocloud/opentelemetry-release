@@ -1042,7 +1042,7 @@ def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
               merged('ingester', 'ring', 'replicationFactor') or
               merged('ingester', 'ring', 'replication_factor') or
               merged('ingester', 'replicas'))
-        if rf is not None:
+        if rf:
             try:
                 spec['ingester_replication_factor'] = int(rf)
             except (ValueError, TypeError):
