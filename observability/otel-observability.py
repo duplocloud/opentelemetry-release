@@ -1178,7 +1178,7 @@ def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str
                 logger.warning(f"Base ConfigMap '{name}' has no 'values.yaml' key")
                 return set()
             keys = {m.group(1) for line in raw.splitlines()
-                    if (m := re.match(r'^([a-zA-Z_][a-zA-Z0-9_-]*)\s*:', line))}
+                    if (m := re.match(r'^["\']?([a-zA-Z_][a-zA-Z0-9_-]*)["\']?\s*:', line))}
             logger.debug(f"Base ConfigMap '{name}' for release '{release}': {len(keys)} top-level keys")
             return keys
     except (requests.exceptions.RequestException, ValueError) as e:
