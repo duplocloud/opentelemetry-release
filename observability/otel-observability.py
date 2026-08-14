@@ -1166,9 +1166,9 @@ def get_nested(d: dict, path: str) -> Any:
 def detect_cloud(values: dict) -> str:
     """Infer cloud provider from the Helm values structure."""
     m = values.get('mimir', {}).get('structuredConfig', {}).get('common', {}).get('storage', {})
-    if 's3' in m or values.get('loki', {}).get('storage', {}).get('s3'):
+    if 's3' in m or values.get('loki', {}).get('storage', {}).get('s3') or values.get('storage', {}).get('trace', {}).get('s3'):
         return 'aws'
-    if 'azure' in m or values.get('loki', {}).get('storage', {}).get('azure'):
+    if 'azure' in m or values.get('loki', {}).get('storage', {}).get('azure') or values.get('storage', {}).get('trace', {}).get('azure'):
         return 'azure'
     if 'gcs' in m or values.get('storage', {}).get('trace', {}).get('gcs'):
         return 'gcp'
@@ -1191,16 +1191,40 @@ def check_customer_values(release: str, values: dict) -> dict:
     }
 
 
+def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str, k8s_port: str, ca_path: str) -> set:
+    """
+    Find the base-values ConfigMap for a release (pattern: *-{release}-base-values) and
+    return its top-level YAML keys. Returns an empty set if no ConfigMap is found.
+    """
+    try:
+        url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/configmaps"
+        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path)
+        response.raise_for_status()
+        pattern = re.compile(rf'.+-{re.escape(release)}-base-values$')
+        for cm in response.json().get('items', []):
+            name = cm.get('metadata', {}).get('name', '')
+            if not pattern.match(name):
+                continue
+            raw = cm.get('data', {}).get('values.yaml', '')
+            keys = {m.group(1) for m in re.finditer(r'^"?([a-zA-Z0-9_\-]+)"?\s*:', raw, re.MULTILINE)}
+            logger.debug(f"Base ConfigMap '{name}' for release '{release}': {len(keys)} top-level keys")
+            return keys
+    except requests.exceptions.RequestException as e:
+        logger.warning(f"Could not fetch base ConfigMap for release '{release}': {e}")
+    return set()
+
+
 def collect_and_send_customer_structure(namespace: str) -> None:
     """
     For each tracked Helm release (duplo-metrics, duplo-logging, duplo-tracing), read the
     deployed user-supplied values and check them against REQUIRED_CUSTOMER_PATHS.
 
     Emits one Loki record per release with:
-      - structure: 'base_only_with_values' (has user values) or 'base_only' (no user values)
+      - structure: 'base-only'     — Helm user values match the base ConfigMap (no customer overrides)
+                   'base-customer' — Helm user values contain keys beyond the base ConfigMap
       - cloud: detected cloud provider
-      - match: True if all required paths are present
-      - missing: list of paths that must be filled before the ConfigMap patch can be applied
+      - match: True if all required paths are present in the merged values
+      - missing: list of paths that are absent
     """
     logger.info("Collecting customer Helm value structure")
 
@@ -1258,10 +1282,15 @@ def collect_and_send_customer_structure(namespace: str) -> None:
     results = []
     for release, data in best_release_data.items():
         user_values = data['user_values']
-        # Merge user values over chart defaults for cloud detection
         merged_values = {**data['chart_defaults'], **user_values}
 
-        structure = 'base_only_with_values' if user_values else 'base_only'
+        # Compare top-level keys in helm user values against the base ConfigMap.
+        # base-only:     no extra keys beyond ConfigMap (customer hasn't added overrides)
+        # base-customer: helm user values contain keys not in the base ConfigMap
+        cm_keys = _base_configmap_keys(release, namespace, token, k8s_host, k8s_port, ca_path)
+        extra_keys = set(user_values.keys()) - cm_keys
+        structure = 'base-customer' if extra_keys else 'base-only'
+
         check = check_customer_values(release, merged_values)
 
         results.append({
