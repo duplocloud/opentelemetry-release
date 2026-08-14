@@ -1159,21 +1159,11 @@ def check_customer_values(release: str, values: dict, cloud: str = '') -> dict:
 def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str, k8s_port: str, ca_path: str) -> Optional[set]:
     """
     Find the base-values ConfigMap for a release (pattern: *-{release}-base-values) and
-    return its top-level YAML keys. Uses yaml.safe_load for reliable parsing.
-    Returns None if:
-      - PyYAML is not installed, OR
-      - the ConfigMap is not found, OR
-      - the K8s API request fails
-    In all None cases, the caller classifies the release as 'customer-only'.
-    Returns an empty set if the ConfigMap exists but values.yaml is missing or unparseable
-    (caller will classify as 'base-customer' if user_values has any keys — log error already emitted).
+    return its top-level YAML keys parsed via regex (lines matching '^key:' at column 0).
+    Returns None if the ConfigMap is not found or the K8s API request fails —
+    caller classifies the release as 'customer-only'.
+    Returns an empty set if the ConfigMap exists but values.yaml is missing or has no keys.
     """
-    try:
-        import yaml
-    except ImportError:
-        logger.warning("PyYAML not available; cannot parse base ConfigMap keys")
-        return None
-
     try:
         url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/configmaps"
         response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path, timeout=10)
@@ -1187,15 +1177,8 @@ def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str
             if not raw:
                 logger.warning(f"Base ConfigMap '{name}' has no 'values.yaml' key")
                 return set()
-            try:
-                parsed = yaml.safe_load(raw)
-            except yaml.YAMLError as e:
-                logger.warning(f"Could not parse values.yaml in ConfigMap '{name}': {e}")
-                return set()
-            if not isinstance(parsed, dict):
-                logger.warning(f"Base ConfigMap '{name}' values.yaml did not parse to a mapping")
-                return set()
-            keys = set(parsed.keys())
+            keys = {m.group(1) for line in raw.splitlines()
+                    if (m := re.match(r'^([a-zA-Z_][a-zA-Z0-9_-]*)\s*:', line))}
             logger.debug(f"Base ConfigMap '{name}' for release '{release}': {len(keys)} top-level keys")
             return keys
     except (requests.exceptions.RequestException, ValueError) as e:
