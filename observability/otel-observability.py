@@ -513,16 +513,21 @@ def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str], credentials:
     logger.info("Completed Grafana DB lock error data collection and sending")
 
 
-def collect_pod_annotations(namespace_regex: str) -> Dict[tuple, Dict[str, Optional[str]]]:
+def collect_pod_annotations() -> Dict[tuple, Dict[str, Optional[str]]]:
     """
     Collect safe-to-evict and memory-limit-oom-score-adj annotations by reading pod metadata
-    directly from the Kubernetes API, filtered to namespaces matching namespace_regex.
+    directly from the Kubernetes API.
+
+    Always queries the NAMESPACE env var directly — that is always set to the namespace where
+    otel components are deployed, regardless of whether the namespace name matches the
+    namespace_filter regex (e.g. duploservices-aos vs duploservices-otel-o11y).
     """
     token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
     ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
     k8s_host = os.getenv('KUBERNETES_SERVICE_HOST', 'kubernetes.default.svc')
     k8s_port = os.getenv('KUBERNETES_SERVICE_PORT', '443')
     cluster = os.getenv('CLUSTER', '')
+    namespace = os.getenv('NAMESPACE', '')
 
     try:
         with open(token_path) as f:
@@ -531,19 +536,19 @@ def collect_pod_annotations(namespace_regex: str) -> Dict[tuple, Dict[str, Optio
         logger.error(f"Could not read service account token: {e}")
         return {}
 
+    if not namespace:
+        logger.warning("NAMESPACE env var not set; cannot collect pod annotations")
+        return {}
+
     annotations_map: Dict[tuple, Dict[str, Optional[str]]] = {}
-    ns_pattern = re.compile(namespace_regex)
 
     try:
-        url = f"https://{k8s_host}:{k8s_port}/api/v1/pods"
+        url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods"
         response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path)
         response.raise_for_status()
         for pod in response.json().get('items', []):
             metadata = pod.get('metadata', {})
-            namespace = metadata.get('namespace', '')
             pod_name = metadata.get('name', '')
-            if not ns_pattern.search(namespace):
-                continue
             annotations = metadata.get('annotations') or {}
             annotations_map[(cluster, namespace, pod_name)] = {
                 "safe_to_evict": annotations.get('cluster-autoscaler.kubernetes.io/safe-to-evict'),
@@ -571,8 +576,7 @@ def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
     Runs independently of Prometheus availability.
     """
     logger.info("Collecting and sending pod annotations")
-    namespace_regex = labels.get('namespace_filter', '.*otel.*')
-    annotations_map = collect_pod_annotations(namespace_regex)
+    annotations_map = collect_pod_annotations()
     if not annotations_map:
         logger.warning("No pod annotations collected")
         return
@@ -632,7 +636,7 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
     excluded_pods = daemonset_pods | job_pods
 
     # 2. Pod annotations (safe-to-evict, memory-limit-oom-score-adj) from K8s pod metadata
-    pod_annotations = collect_pod_annotations(namespace_regex)
+    pod_annotations = collect_pod_annotations()
 
     # 3. Pod-to-node mapping
     pod_to_node = {}
