@@ -26,6 +26,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+INGESTER_RF_RELEASES = {'duplo-metrics', 'duplo-tracing'}
+
 REQUIRED_CUSTOMER_PATHS = {
     'duplo-metrics': {
         'aws':   ['serviceAccount.name', 'ruler.serviceAccount.name',
@@ -554,7 +556,7 @@ def collect_pod_annotations() -> Dict[tuple, Dict[str, Optional[str]]]:
                 "safe_to_evict": annotations.get('cluster-autoscaler.kubernetes.io/safe-to-evict'),
                 "memory_limit_oom_score_adj": annotations.get('container.kubernetes.io/memory-limit-oom-score-adj'),
             }
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, ValueError) as e:
         logger.error(f"Error querying Kubernetes API for pod annotations: {e}")
 
     logger.info(f"Collected annotations for {len(annotations_map)} pods")
@@ -592,6 +594,8 @@ def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
         # Everything before the component keyword is the release prefix
         # e.g. "duplo-tracing-ingester-0" → product="duplo-tracing"
         product = pod_name[:m.start()].rstrip('-')
+        if not product:
+            continue
         dedup_key = (cluster, namespace, product, component)
         if dedup_key in seen_components:
             continue
@@ -965,13 +969,11 @@ def collect_and_send_helm_chart_versions(namespace: str) -> None:
     logger.info("Completed Helm chart version collection and sending")
 
 
-def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
+
+def collect_ingester_replication_factor(namespace: str) -> Dict[str, int]:
     """
-    Read Helm release secrets and extract from user-supplied values:
-      - safe-to-evict pod annotation
-      - memory-limit-oom-score-adj pod annotation
-      - ingester replication factor (Mimir chart)
-    Checks global and per-component podAnnotations; user values take priority over chart defaults.
+    Read ingester replication factor from Helm release secrets for Mimir (duplo-metrics)
+    and Tempo (duplo-tracing). Returns a dict mapping release name to RF value.
     """
     token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
     ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
@@ -983,7 +985,7 @@ def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
             token = f.read().strip()
     except OSError as e:
         logger.error(f"Could not read service account token: {e}")
-        return []
+        return {}
 
     best_revisions: Dict[str, int] = {}
     best_configs: Dict[str, Dict[str, Any]] = {}
@@ -995,7 +997,7 @@ def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
         response.raise_for_status()
         for secret in response.json().get('items', []):
             release_name = secret.get('metadata', {}).get('labels', {}).get('name', '')
-            if not release_name:
+            if not release_name or release_name not in INGESTER_RF_RELEASES:
                 continue
             release_b64 = secret.get('data', {}).get('release')
             if not release_b64:
@@ -1015,17 +1017,14 @@ def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
                 continue
             best_revisions[release_name] = revision
             best_configs[release_name] = {
-                'chart_name': release_data.get('chart', {}).get('metadata', {}).get('name', release_name),
                 'user_values': release_data.get('config') or {},
                 'chart_defaults': release_data.get('chart', {}).get('values') or {},
             }
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error querying Kubernetes API for Helm config values: {e}")
-        return []
+    except (requests.exceptions.RequestException, ValueError) as e:
+        logger.error(f"Error querying Kubernetes API for ingester RF: {e}")
+        return {}
 
-    records = []
-    cluster = os.getenv('CLUSTER', '')
-
+    result: Dict[str, int] = {}
     for release_name, cfg in best_configs.items():
         user_vals = cfg['user_values']
         defaults = cfg['chart_defaults']
@@ -1034,13 +1033,6 @@ def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
             v = _get_nested(user_vals, *keys)
             return v if v is not None else _get_nested(defaults, *keys)
 
-        spec: Dict[str, Any] = {"release": release_name, "chart": cfg['chart_name']}
-
-        # Ingester replication factor — checked in priority order:
-        #   Mimir explicit:  mimir.structuredConfig.ingester.ring.replication_factor
-        #   Tempo explicit:  ingester.config.replication_factor
-        #   Generic ring:    ingester.ring.replicationFactor / replication_factor
-        #   Fallback:        ingester.replicas (chart default; equals RF when zone-aware disabled)
         rf = (merged('mimir', 'structuredConfig', 'ingester', 'ring', 'replication_factor') or
               merged('ingester', 'config', 'replication_factor') or
               merged('ingester', 'ring', 'replicationFactor') or
@@ -1048,114 +1040,33 @@ def collect_helm_config_values(namespace: str) -> List[Dict[str, Any]]:
               merged('ingester', 'replicas'))
         if rf:
             try:
-                spec['ingester_replication_factor'] = int(rf)
+                result[release_name] = int(rf)
             except (ValueError, TypeError):
                 pass
 
-        # Only emit a record if at least one relevant field was found
-        if len(spec) > 2:
-            records.append({
-                "metadata": {"cluster": cluster, "namespace": namespace},
-                "spec": spec
-            })
-
-    logger.info(f"Collected Helm config values for {len(records)} releases")
-    return records
-
-
-def collect_and_send_helm_config_values(namespace: str) -> None:
-    """Collect safe-to-evict, memory-limit-oom-score-adj, and ingester replication factor
-    from Helm release values and send to Loki."""
-    logger.info("Collecting Helm config values (pod annotations + ingester replication factor)")
-    records = collect_helm_config_values(namespace)
-    if not records:
-        logger.warning("No Helm config values found to send")
-        return
-    current_time_ns = str(int(time.time() * 1e9))
-    values = [[current_time_ns, json.dumps(r)] for r in records]
-    send_to_loki("helm_config_values", "kubernetes", "helm_config_value_info", values)
-    logger.info("Completed Helm config values collection and sending")
-
-
-def collect_ingester_replication_factor(namespace: str) -> Optional[int]:
-    """
-    Read the Mimir ingester replication factor from a Kubernetes ConfigMap.
-    ConfigMap name is controlled by the MIMIR_CONFIGMAP_NAME env var (default: mimir-config).
-    Supports both a flat 'ingester-replication-factor' key and a nested YAML config file.
-    """
-    token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
-    ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
-    k8s_host = os.getenv('KUBERNETES_SERVICE_HOST', 'kubernetes.default.svc')
-    k8s_port = os.getenv('KUBERNETES_SERVICE_PORT', '443')
-    configmap_name = os.getenv('MIMIR_CONFIGMAP_NAME', 'mimir-config')
-
-    try:
-        with open(token_path) as f:
-            token = f.read().strip()
-    except OSError as e:
-        logger.error(f"Could not read service account token: {e}")
-        return None
-
-    try:
-        url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/configmaps/{configmap_name}"
-        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path)
-        response.raise_for_status()
-        cm_data = response.json().get('data', {})
-
-        # Check flat keys first
-        for key in ('ingester-replication-factor', 'replication_factor', 'replication-factor'):
-            if key in cm_data:
-                try:
-                    return int(cm_data[key])
-                except (ValueError, TypeError):
-                    pass
-
-        # Try parsing YAML config files within the ConfigMap
-        try:
-            import yaml
-            for key, value in cm_data.items():
-                if not isinstance(value, str):
-                    continue
-                if key.endswith(('.yaml', '.yml')) or key in ('config', 'mimir-config'):
-                    try:
-                        config = yaml.safe_load(value)
-                        if isinstance(config, dict):
-                            ring = config.get('ingester', {}).get('ring', {})
-                            rf = ring.get('replication-factor') or ring.get('replication_factor')
-                            if rf is not None:
-                                return int(rf)
-                    except yaml.YAMLError as ye:
-                        logger.warning(f"Could not parse ConfigMap key '{key}' as YAML: {ye}")
-        except ImportError:
-            logger.warning("PyYAML not available; skipping YAML config parsing for replication factor")
-
-    except requests.exceptions.RequestException as e:
-        logger.error(f"Error querying Kubernetes API for ConfigMap '{configmap_name}': {e}")
-
-    logger.warning(f"Ingester replication factor not found in ConfigMap '{configmap_name}'")
-    return None
+    logger.info(f"Collected ingester RF for releases: {list(result.keys())}")
+    return result
 
 
 def collect_and_send_mimir_config(namespace: str) -> None:
-    """Collect Mimir ingester replication factor from ConfigMap and send to Loki."""
-    logger.info("Collecting Mimir ingester replication factor from ConfigMap")
-    replication_factor = collect_ingester_replication_factor(namespace)
-    if replication_factor is None:
+    """Collect ingester replication factor for Mimir and Tracing from Helm values and send to Loki."""
+    logger.info("Collecting ingester replication factor for Mimir and Tracing")
+    rf_by_release = collect_ingester_replication_factor(namespace)
+    if not rf_by_release:
         logger.warning("Could not determine ingester replication factor; skipping send")
         return
 
     current_time_ns = str(int(time.time() * 1e9))
-    record = {
-        "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
-        "spec": {"ingester_replication_factor": replication_factor}
-    }
-    send_to_loki(
-        "mimir_config",
-        "kubernetes",
-        "ingester_config",
-        [[current_time_ns, json.dumps(record)]]
-    )
-    logger.info(f"Sent ingester replication factor: {replication_factor}")
+    cluster = os.getenv('CLUSTER', '')
+    values = [
+        [current_time_ns, json.dumps({
+            "metadata": {"cluster": cluster, "namespace": namespace},
+            "spec": {"release": release, "ingester_replication_factor": rf}
+        })]
+        for release, rf in rf_by_release.items()
+    ]
+    send_to_loki("mimir_config", "kubernetes", "ingester_config", values)
+    logger.info(f"Sent ingester RF for releases: {list(rf_by_release.keys())}")
 
 
 def get_nested(d: dict, path: str) -> Any:
@@ -1174,7 +1085,7 @@ def detect_cloud(values: dict) -> str:
         return 'aws'
     if 'azure' in m or values.get('loki', {}).get('storage', {}).get('azure') or values.get('storage', {}).get('trace', {}).get('azure'):
         return 'azure'
-    if 'gcs' in m or values.get('storage', {}).get('trace', {}).get('gcs'):
+    if 'gcs' in m or values.get('loki', {}).get('storage', {}).get('gcs') or values.get('storage', {}).get('trace', {}).get('gcs'):
         return 'gcp'
     return 'unknown'
 
@@ -1185,6 +1096,8 @@ def check_customer_values(release: str, values: dict) -> dict:
     Returns cloud, required paths, missing paths, and whether values are complete.
     """
     cloud = detect_cloud(values)
+    if cloud == 'unknown':
+        return {'cloud': cloud, 'required': [], 'missing': [], 'match': False}
     required = REQUIRED_CUSTOMER_PATHS.get(release, {}).get(cloud, [])
     missing = [p for p in required if get_nested(values, p) is None]
     return {
@@ -1213,7 +1126,7 @@ def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str
             keys = {m.group(1) for m in re.finditer(r'^"?([a-zA-Z0-9_\-]+)"?\s*:', raw, re.MULTILINE)}
             logger.debug(f"Base ConfigMap '{name}' for release '{release}': {len(keys)} top-level keys")
             return keys
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, ValueError) as e:
         logger.warning(f"Could not fetch base ConfigMap for release '{release}': {e}")
     return set()
 
@@ -1279,7 +1192,7 @@ def collect_and_send_customer_structure(namespace: str) -> None:
                 'user_values': release_data.get('config') or {},
                 'chart_defaults': release_data.get('chart', {}).get('values') or {},
             }
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, ValueError) as e:
         logger.error(f"Error querying Kubernetes API for customer structure: {e}")
         return
 
@@ -1354,7 +1267,6 @@ def main() -> None:
     collect_and_send_grafana_db_lock_errors(labels, loki_creds)
     collect_and_send_pod_annotations(labels)
     collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
-    collect_and_send_helm_config_values(os.getenv('NAMESPACE', ''))
     collect_and_send_mimir_config(os.getenv('NAMESPACE', ''))
     collect_and_send_customer_structure(os.getenv('NAMESPACE', ''))
 
