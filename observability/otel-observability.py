@@ -515,7 +515,7 @@ def collect_and_send_grafana_db_lock_errors(labels: Dict[str, str], credentials:
     logger.info("Completed Grafana DB lock error data collection and sending")
 
 
-def collect_pod_annotations() -> Dict[tuple, Dict[str, Optional[str]]]:
+def collect_pod_annotations() -> Dict[tuple, Dict[str, Any]]:
     """
     Collect safe-to-evict and memory-limit-oom-score-adj annotations by reading pod metadata
     directly from the Kubernetes API.
@@ -523,6 +523,8 @@ def collect_pod_annotations() -> Dict[tuple, Dict[str, Optional[str]]]:
     Always queries the NAMESPACE env var directly — that is always set to the namespace where
     otel components are deployed, regardless of whether the namespace name matches the
     namespace_filter regex (e.g. duploservices-aos vs duploservices-otel-o11y).
+
+    Annotations are normalized: safe-to-evict → bool, memory-limit-oom-score-adj → int.
     """
     token_path = '/var/run/secrets/kubernetes.io/serviceaccount/token'
     ca_path = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
@@ -542,19 +544,30 @@ def collect_pod_annotations() -> Dict[tuple, Dict[str, Optional[str]]]:
         logger.warning("NAMESPACE env var not set; cannot collect pod annotations")
         return {}
 
-    annotations_map: Dict[tuple, Dict[str, Optional[str]]] = {}
+    annotations_map: Dict[tuple, Dict[str, Any]] = {}
 
     try:
         url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/pods"
-        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path)
+        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path, timeout=10)
         response.raise_for_status()
         for pod in response.json().get('items', []):
             metadata = pod.get('metadata', {})
             pod_name = metadata.get('name', '')
             annotations = metadata.get('annotations') or {}
+
+            raw_safe = annotations.get('cluster-autoscaler.kubernetes.io/safe-to-evict')
+            raw_oom = annotations.get('container.kubernetes.io/memory-limit-oom-score-adj')
+
+            safe_to_evict = (raw_safe.lower() == 'true') if raw_safe is not None else None
+            try:
+                memory_limit_oom_score_adj = int(raw_oom) if raw_oom is not None else None
+            except (ValueError, TypeError):
+                logger.warning(f"Pod '{pod_name}': unexpected memory-limit-oom-score-adj value '{raw_oom}'")
+                memory_limit_oom_score_adj = None
+
             annotations_map[(cluster, namespace, pod_name)] = {
-                "safe_to_evict": annotations.get('cluster-autoscaler.kubernetes.io/safe-to-evict'),
-                "memory_limit_oom_score_adj": annotations.get('container.kubernetes.io/memory-limit-oom-score-adj'),
+                "safe_to_evict": safe_to_evict,
+                "memory_limit_oom_score_adj": memory_limit_oom_score_adj,
             }
     except (requests.exceptions.RequestException, ValueError) as e:
         logger.error(f"Error querying Kubernetes API for pod annotations: {e}")
@@ -600,6 +613,10 @@ def collect_and_send_pod_annotations(labels: Dict[str, str]) -> None:
         if dedup_key in seen_components:
             continue
         seen_components.add(dedup_key)
+        if ann.get("safe_to_evict") is None:
+            logger.debug(f"Pod '{pod_name}' ({product}/{component}): safe-to-evict annotation not set")
+        if ann.get("memory_limit_oom_score_adj") is None:
+            logger.debug(f"Pod '{pod_name}' ({product}/{component}): memory-limit-oom-score-adj annotation not set")
         values.append([current_time_ns, json.dumps({
             "metadata": {"cluster": cluster, "namespace": namespace},
             "spec": {
@@ -887,21 +904,16 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
             if release_name in best_records and best_records[release_name][0] >= revision:
                 continue
 
-            try:
-                # K8s base64-encodes secret data; Helm also base64+gzip-encodes the release.
-                # So the value is double-encoded: base64(base64(gzip(json))).
-                helm_encoded = base64.b64decode(release_b64)
-                release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
-                chart_name = release_data.get('chart', {}).get('metadata', {}).get('name', release_name)
-                chart_version = release_data.get('chart', {}).get('metadata', {}).get('version')
-                subcharts = [
-                    (dep.get('name'), dep.get('version'))
-                    for dep in release_data.get('chart', {}).get('metadata', {}).get('dependencies', [])
-                    if dep.get('name')
-                ]
-            except Exception as e:
-                logger.warning(f"Could not decode Helm secret for release {release_name}: {e}")
+            release_data = _decode_helm_secret(release_b64, release_name)
+            if release_data is None:
                 continue
+            chart_name = release_data.get('chart', {}).get('metadata', {}).get('name', release_name)
+            chart_version = release_data.get('chart', {}).get('metadata', {}).get('version')
+            subcharts = [
+                (dep.get('name'), dep.get('version'))
+                for dep in release_data.get('chart', {}).get('metadata', {}).get('dependencies', [])
+                if dep.get('name')
+            ]
 
             best_records[release_name] = (revision, {
                 "metadata": {"cluster": os.getenv('CLUSTER', ''), "namespace": namespace},
@@ -945,6 +957,56 @@ def _get_nested(d: Any, *keys: str, default: Any = None) -> Any:
         if d is default:
             return default
     return d
+
+
+def _decode_helm_secret(release_b64: str, release_name: str = '') -> Optional[Dict[str, Any]]:
+    """
+    Decode a Helm release secret value, tolerating common encoding variants:
+      1. base64(base64(gzip(json)))  — standard Helm 3 via K8s API
+      2. base64(gzip(json))          — single-layer base64
+      3. base64(json)                — base64 only, no gzip
+    Returns the parsed JSON dict, or None if all variants fail.
+    """
+    label = f"release '{release_name}'" if release_name else "Helm secret"
+    try:
+        outer = base64.b64decode(release_b64)
+    except Exception as e:
+        logger.warning(f"Could not base64-decode {label}: {e}")
+        return None
+
+    candidates: List[bytes] = []
+    try:
+        candidates.append(gzip.decompress(base64.b64decode(outer)))  # variant 1: double b64 + gzip
+    except Exception:
+        pass
+    try:
+        candidates.append(gzip.decompress(outer))                    # variant 2: single b64 + gzip
+    except Exception:
+        pass
+    candidates.append(outer)                                         # variant 3: single b64, no gzip
+
+    for raw in candidates:
+        try:
+            return json.loads(raw.decode('utf-8'))
+        except (ValueError, UnicodeDecodeError):
+            continue
+
+    logger.warning(f"Could not decode {label}: all encoding variants failed")
+    return None
+
+
+def _deep_merge(base: dict, override: dict) -> dict:
+    """
+    Recursively merge override into base, matching Helm's value merge semantics.
+    Nested dicts are merged rather than replaced; all other types are overridden.
+    """
+    result = dict(base)
+    for key, val in override.items():
+        if key in result and isinstance(result[key], dict) and isinstance(val, dict):
+            result[key] = _deep_merge(result[key], val)
+        else:
+            result[key] = val
+    return result
 
 
 def collect_and_send_helm_chart_versions(namespace: str) -> None:
@@ -1009,11 +1071,8 @@ def collect_ingester_replication_factor(namespace: str) -> Dict[str, int]:
                 revision = 0
             if release_name in best_revisions and best_revisions[release_name] >= revision:
                 continue
-            try:
-                helm_encoded = base64.b64decode(release_b64)
-                release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
-            except Exception as e:
-                logger.warning(f"Could not decode Helm secret for release '{release_name}': {e}")
+            release_data = _decode_helm_secret(release_b64, release_name)
+            if release_data is None:
                 continue
             best_revisions[release_name] = revision
             best_configs[release_name] = {
@@ -1042,7 +1101,7 @@ def collect_ingester_replication_factor(namespace: str) -> Dict[str, int]:
             try:
                 result[release_name] = int(rf)
             except (ValueError, TypeError):
-                pass
+                logger.warning(f"Release '{release_name}': replication factor value '{rf}' is not an integer, skipping")
 
     logger.info(f"Collected ingester RF for releases: {list(result.keys())}")
     return result
@@ -1097,9 +1156,12 @@ def check_customer_values(release: str, values: dict) -> dict:
     """
     cloud = detect_cloud(values)
     if cloud == 'unknown':
+        logger.warning(f"Release '{release}': could not detect cloud provider from Helm values")
         return {'cloud': cloud, 'required': [], 'missing': [], 'match': False}
     required = REQUIRED_CUSTOMER_PATHS.get(release, {}).get(cloud, [])
     missing = [p for p in required if get_nested(values, p) is None]
+    for path in missing:
+        logger.warning(f"Release '{release}' ({cloud}): required path '{path}' is missing or null")
     return {
         'cloud': cloud,
         'required': required,
@@ -1111,8 +1173,15 @@ def check_customer_values(release: str, values: dict) -> dict:
 def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str, k8s_port: str, ca_path: str) -> set:
     """
     Find the base-values ConfigMap for a release (pattern: *-{release}-base-values) and
-    return its top-level YAML keys. Returns an empty set if no ConfigMap is found.
+    return its top-level YAML keys. Uses yaml.safe_load for reliable parsing.
+    Returns an empty set if no ConfigMap is found or YAML cannot be parsed.
     """
+    try:
+        import yaml
+    except ImportError:
+        logger.warning("PyYAML not available; cannot parse base ConfigMap keys")
+        return set()
+
     try:
         url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/configmaps"
         response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path)
@@ -1123,7 +1192,18 @@ def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str
             if not pattern.match(name):
                 continue
             raw = cm.get('data', {}).get('values.yaml', '')
-            keys = {m.group(1) for m in re.finditer(r'^"?([a-zA-Z0-9_\-]+)"?\s*:', raw, re.MULTILINE)}
+            if not raw:
+                logger.warning(f"Base ConfigMap '{name}' has no 'values.yaml' key")
+                return set()
+            try:
+                parsed = yaml.safe_load(raw)
+            except yaml.YAMLError as e:
+                logger.warning(f"Could not parse values.yaml in ConfigMap '{name}': {e}")
+                return set()
+            if not isinstance(parsed, dict):
+                logger.warning(f"Base ConfigMap '{name}' values.yaml did not parse to a mapping")
+                return set()
+            keys = set(parsed.keys())
             logger.debug(f"Base ConfigMap '{name}' for release '{release}': {len(keys)} top-level keys")
             return keys
     except (requests.exceptions.RequestException, ValueError) as e:
@@ -1181,11 +1261,8 @@ def collect_and_send_customer_structure(namespace: str) -> None:
                 revision = 0
             if release_name in best_revisions and best_revisions[release_name] >= revision:
                 continue
-            try:
-                helm_encoded = base64.b64decode(release_b64)
-                release_data = json.loads(gzip.decompress(base64.b64decode(helm_encoded)).decode('utf-8'))
-            except Exception as e:
-                logger.warning(f"Could not decode Helm secret for release '{release_name}': {e}")
+            release_data = _decode_helm_secret(release_b64, release_name)
+            if release_data is None:
                 continue
             best_revisions[release_name] = revision
             best_release_data[release_name] = {
@@ -1199,7 +1276,7 @@ def collect_and_send_customer_structure(namespace: str) -> None:
     results = []
     for release, data in best_release_data.items():
         user_values = data['user_values']
-        merged_values = {**data['chart_defaults'], **user_values}
+        merged_values = _deep_merge(data['chart_defaults'], user_values)
 
         # Compare top-level keys in helm user values against the base ConfigMap.
         # base-only:     no extra keys beyond ConfigMap (customer hasn't added overrides)
