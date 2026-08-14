@@ -224,14 +224,14 @@ class TestCollectHelmChartVersions(unittest.TestCase):
             records = collect_helm_chart_versions("test-ns")
         self.assertEqual(records, [])
 
-    def test_k8s_api_error_returns_empty(self):
-        """If the K8s API call fails, return empty list without crashing."""
+    def test_k8s_api_error_propagates(self):
+        """K8s API errors propagate so collect_and_send_helm_chart_versions can log them to Loki."""
         import requests as req
         with patch("builtins.open", mock_open(read_data="fake-token")), \
              patch("requests.get", side_effect=req.exceptions.ConnectionError("refused")), \
              patch.dict("os.environ", {"CLUSTER": "c", "NAMESPACE": "n"}):
-            records = collect_helm_chart_versions("test-ns")
-        self.assertEqual(records, [])
+            with self.assertRaises(req.exceptions.ConnectionError):
+                collect_helm_chart_versions("test-ns")
 
 
 if __name__ == "__main__":
