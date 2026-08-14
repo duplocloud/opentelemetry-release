@@ -1149,15 +1149,16 @@ def detect_cloud(values: dict) -> str:
     return 'unknown'
 
 
-def check_customer_values(release: str, values: dict) -> dict:
+def check_customer_values(release: str, values: dict, cloud: str = '') -> dict:
     """
     Compare Helm release values against the expected customer-value paths for that chart and cloud.
+    cloud should be pre-detected once across all releases and passed in — all components
+    always share the same cloud provider.
     Returns cloud, required paths, missing paths, and whether values are complete.
     """
-    cloud = detect_cloud(values)
-    if cloud == 'unknown':
-        logger.warning(f"Release '{release}': could not detect cloud provider from Helm values")
-        return {'cloud': cloud, 'required': [], 'missing': [], 'match': False}
+    if cloud == 'unknown' or not cloud:
+        logger.warning(f"Release '{release}': cloud provider unknown, cannot check required paths")
+        return {'cloud': cloud or 'unknown', 'required': [], 'missing': [], 'match': False}
     required = REQUIRED_CUSTOMER_PATHS.get(release, {}).get(cloud, [])
     missing = [p for p in required if get_nested(values, p) is None]
     for path in missing:
@@ -1170,17 +1171,18 @@ def check_customer_values(release: str, values: dict) -> dict:
     }
 
 
-def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str, k8s_port: str, ca_path: str) -> set:
+def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str, k8s_port: str, ca_path: str) -> Optional[set]:
     """
     Find the base-values ConfigMap for a release (pattern: *-{release}-base-values) and
     return its top-level YAML keys. Uses yaml.safe_load for reliable parsing.
-    Returns an empty set if no ConfigMap is found or YAML cannot be parsed.
+    Returns None if the ConfigMap is not found (caller should skip structure classification).
+    Returns an empty set if the ConfigMap exists but has no parseable keys.
     """
     try:
         import yaml
     except ImportError:
         logger.warning("PyYAML not available; cannot parse base ConfigMap keys")
-        return set()
+        return None
 
     try:
         url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/configmaps"
@@ -1208,7 +1210,10 @@ def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str
             return keys
     except (requests.exceptions.RequestException, ValueError) as e:
         logger.warning(f"Could not fetch base ConfigMap for release '{release}': {e}")
-    return set()
+        return None
+
+    logger.warning(f"No base-values ConfigMap found for release '{release}'; skipping structure classification")
+    return None
 
 
 def collect_and_send_customer_structure(namespace: str) -> None:
@@ -1219,6 +1224,7 @@ def collect_and_send_customer_structure(namespace: str) -> None:
     Emits one Loki record per release with:
       - structure: 'base-only'     — Helm user values match the base ConfigMap (no customer overrides)
                    'base-customer' — Helm user values contain keys beyond the base ConfigMap
+                   'customer-only' — base ConfigMap not found; all values are customer-supplied
       - cloud: detected cloud provider
       - match: True if all required paths are present in the merged values
       - missing: list of paths that are absent
@@ -1273,6 +1279,18 @@ def collect_and_send_customer_structure(namespace: str) -> None:
         logger.error(f"Error querying Kubernetes API for customer structure: {e}")
         return
 
+    # All components are always on the same cloud — detect once across all releases.
+    # duplo-metrics (Mimir) has the most complete storage config, but any release may
+    # have the cloud signal; stop at the first non-unknown result.
+    cloud = 'unknown'
+    for data in best_release_data.values():
+        merged = _deep_merge(data['chart_defaults'], data['user_values'])
+        cloud = detect_cloud(merged)
+        if cloud != 'unknown':
+            break
+    if cloud == 'unknown':
+        logger.warning("Could not detect cloud provider from any tracked Helm release")
+
     results = []
     for release, data in best_release_data.items():
         user_values = data['user_values']
@@ -1281,11 +1299,15 @@ def collect_and_send_customer_structure(namespace: str) -> None:
         # Compare top-level keys in helm user values against the base ConfigMap.
         # base-only:     no extra keys beyond ConfigMap (customer hasn't added overrides)
         # base-customer: helm user values contain keys not in the base ConfigMap
+        # customer-only: base ConfigMap not found; all values are customer-supplied
         cm_keys = _base_configmap_keys(release, namespace, token, k8s_host, k8s_port, ca_path)
-        extra_keys = set(user_values.keys()) - cm_keys
-        structure = 'base-customer' if extra_keys else 'base-only'
+        if cm_keys is None:
+            structure = 'customer-only'
+        else:
+            extra_keys = set(user_values.keys()) - cm_keys
+            structure = 'base-customer' if extra_keys else 'base-only'
 
-        check = check_customer_values(release, merged_values)
+        check = check_customer_values(release, merged_values, cloud=cloud)
 
         results.append({
             'release': release,
