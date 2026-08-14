@@ -948,16 +948,6 @@ def collect_helm_chart_versions(namespace: str) -> List[Dict[str, Any]]:
     return records
 
 
-def _get_nested(d: Any, *keys: str, default: Any = None) -> Any:
-    """Walk nested dicts by key sequence; return default if any key is missing or not a dict."""
-    for key in keys:
-        if not isinstance(d, dict):
-            return default
-        d = d.get(key, default)
-        if d is default:
-            return default
-    return d
-
 
 def _decode_helm_secret(release_b64: str, release_name: str = '') -> Optional[Dict[str, Any]]:
     """
@@ -1085,18 +1075,13 @@ def collect_ingester_replication_factor(namespace: str) -> Dict[str, int]:
 
     result: Dict[str, int] = {}
     for release_name, cfg in best_configs.items():
-        user_vals = cfg['user_values']
-        defaults = cfg['chart_defaults']
+        merged_vals = _deep_merge(cfg['chart_defaults'], cfg['user_values'])
 
-        def merged(*keys: str) -> Any:
-            v = _get_nested(user_vals, *keys)
-            return v if v is not None else _get_nested(defaults, *keys)
-
-        rf = (merged('mimir', 'structuredConfig', 'ingester', 'ring', 'replication_factor') or
-              merged('ingester', 'config', 'replication_factor') or
-              merged('ingester', 'ring', 'replicationFactor') or
-              merged('ingester', 'ring', 'replication_factor') or
-              merged('ingester', 'replicas'))
+        rf = (get_nested(merged_vals, 'mimir.structuredConfig.ingester.ring.replication_factor') or
+              get_nested(merged_vals, 'ingester.config.replication_factor') or
+              get_nested(merged_vals, 'ingester.ring.replicationFactor') or
+              get_nested(merged_vals, 'ingester.ring.replication_factor') or
+              get_nested(merged_vals, 'ingester.replicas'))
         if rf:
             try:
                 result[release_name] = int(rf)
@@ -1175,8 +1160,13 @@ def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str
     """
     Find the base-values ConfigMap for a release (pattern: *-{release}-base-values) and
     return its top-level YAML keys. Uses yaml.safe_load for reliable parsing.
-    Returns None if the ConfigMap is not found (caller should skip structure classification).
-    Returns an empty set if the ConfigMap exists but has no parseable keys.
+    Returns None if:
+      - PyYAML is not installed, OR
+      - the ConfigMap is not found, OR
+      - the K8s API request fails
+    In all None cases, the caller classifies the release as 'customer-only'.
+    Returns an empty set if the ConfigMap exists but values.yaml is missing or unparseable
+    (caller will classify as 'base-customer' if user_values has any keys — log error already emitted).
     """
     try:
         import yaml
@@ -1186,7 +1176,7 @@ def _base_configmap_keys(release: str, namespace: str, token: str, k8s_host: str
 
     try:
         url = f"https://{k8s_host}:{k8s_port}/api/v1/namespaces/{namespace}/configmaps"
-        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path)
+        response = requests.get(url, headers={'Authorization': f'Bearer {token}'}, verify=ca_path, timeout=10)
         response.raise_for_status()
         pattern = re.compile(rf'.+-{re.escape(release)}-base-values$')
         for cm in response.json().get('items', []):
