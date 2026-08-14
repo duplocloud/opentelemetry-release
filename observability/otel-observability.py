@@ -1048,7 +1048,7 @@ def collect_ingester_replication_factor(namespace: str) -> Dict[str, int]:
     return result
 
 
-def collect_and_send_mimir_config(namespace: str) -> None:
+def collect_and_send_ingester_replication_factor(namespace: str) -> None:
     """Collect ingester replication factor for Mimir and Tracing from Helm values and send to Loki."""
     logger.info("Collecting ingester replication factor for Mimir and Tracing")
     rf_by_release = collect_ingester_replication_factor(namespace)
@@ -1065,7 +1065,7 @@ def collect_and_send_mimir_config(namespace: str) -> None:
         })]
         for release, rf in rf_by_release.items()
     ]
-    send_to_loki("mimir_config", "kubernetes", "ingester_config", values)
+    send_to_loki("ingester_replication_factor", "kubernetes", "ingester_replication_factor", values)
     logger.info(f"Sent ingester RF for releases: {list(rf_by_release.keys())}")
 
 
@@ -1267,7 +1267,7 @@ def main() -> None:
     collect_and_send_grafana_db_lock_errors(labels, loki_creds)
     collect_and_send_pod_annotations(labels)
     collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
-    collect_and_send_mimir_config(os.getenv('NAMESPACE', ''))
+    collect_and_send_ingester_replication_factor(os.getenv('NAMESPACE', ''))
     collect_and_send_customer_structure(os.getenv('NAMESPACE', ''))
 
     logger.info("Completed monitoring data collection")
