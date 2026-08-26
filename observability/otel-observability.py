@@ -11,6 +11,7 @@ import gzip
 import json
 import logging
 import os
+import re
 import time
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union, Tuple
@@ -24,7 +25,6 @@ logging.basicConfig(
     datefmt='%Y-%m-%d %H:%M:%S'
 )
 logger = logging.getLogger(__name__)
-
 
 
 def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = None, password: Optional[str] = None) -> Optional[Dict[str, Any]]:
@@ -56,16 +56,20 @@ def query_prometheus(prometheus_url: str, query: str, username: Optional[str] = 
         return None
 
 
-def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[Dict[str, Dict[str, Dict[str, Dict[str, str]]]]]:
+def extract_monitoring_images(prometheus_response: Dict[str, Any], pod_owner_map: Optional[Dict[tuple, str]] = None) -> Optional[Dict[str, Dict[str, Dict[str, Dict[str, str]]]]]:
     """
     Extract image information for monitoring components and daemonsets.
-    
+
     Args:
         prometheus_response: Response from Prometheus containing container information
-        
+        pod_owner_map: Optional dict of (cluster, namespace, pod) -> owner_name for
+                       resolving alloy variant names from DaemonSet/Deployment names
+
     Returns:
         Dictionary with image information categorized by cluster and namespace, then by 'main' and 'monitoring'
     """
+    if pod_owner_map is None:
+        pod_owner_map = {}
     try:
         logger.info("Extracting monitoring images from Prometheus response")
         images = {}
@@ -100,15 +104,25 @@ def extract_monitoring_images(prometheus_response: Dict[str, Any]) -> Optional[D
                 else:
                     service_name = 'mimir'
             elif container == 'alloy':
-                # Check alloy type based on pod name
-                if 'profiles' in pod:
+                # Derive alloy variant from owner controller name (DaemonSet/Deployment).
+                # Falls back to pod-name substrings if no owner entry found.
+                owner_name = pod_owner_map.get((cluster, namespace, pod), '')
+                if owner_name:
+                    service_name = re.sub(r'^duplo-monitoring-', '', owner_name) or 'alloy'
+                elif 'profiles' in pod:
                     service_name = 'alloy-profiles'
                 elif 'logs' in pod:
                     service_name = 'alloy-logs'
                 elif 'events' in pod:
                     service_name = 'alloy-events'
+                elif 'metrics' in pod:
+                    service_name = 'alloy-metrics'
+                elif 'receiver' in pod:
+                    service_name = 'alloy-receiver'
+                elif 'singleton' in pod:
+                    service_name = 'alloy-singleton'
                 else:
-                    service_name = 'alloy-core'
+                    service_name = 'alloy'
             elif container == 'manager':
                 service_name = 'opentelemetry-operator'
                 # This is run on each cluster, so we need to categorize it as monitoring
@@ -157,7 +171,11 @@ def send_to_loki(
     environment = os.getenv('ENVIRONMENT', '')
     duplo_url = os.getenv('DUPLO_URL', '')
     job_version = os.getenv('JOB_VERSION', '')
-    
+    stack_type = os.getenv('STACK_TYPE', 'main')
+    scribe_version = os.getenv('SCRIBE_VERSION', '')
+    central_duplo_url = os.getenv('CENTRAL_DUPLO_URL', '')
+    grafana_url = os.getenv('GRAFANA_URL', '')
+
     # Prepare the stream with labels
     stream = {
         "job": job,
@@ -168,7 +186,11 @@ def send_to_loki(
         "customer": customer,
         "environment": environment,
         "duplo_url": duplo_url,
-        "job_version": job_version
+        "job_version": job_version,
+        "stack_type": stack_type,
+        "scribe_version": scribe_version,
+        "central_duplo_url": central_duplo_url,
+        "grafana_url": grafana_url,
     }
     
     # Create the payload
@@ -278,6 +300,24 @@ def format_and_send_grafana_usage_data(grafana_usage: Dict[str, int], labels: Di
     )
 
 
+def send_identity_ping() -> None:
+    """Push a single identity log line to Loki for any stack type.
+
+    Both main and collector stacks call this at startup so that
+    {job="stack_identity"} returns exactly one row per deployment regardless
+    of stack type — enabling a single LogQL query in Customer Overview.
+    """
+    required = ['LOKI_URL', 'CLUSTER', 'NAMESPACE', 'CUSTOMER', 'ENVIRONMENT', 'DUPLO_URL']
+    missing = [v for v in required if not os.getenv(v)]
+    if missing:
+        logger.error(f"Missing required environment variables for identity ping: {', '.join(missing)}")
+        return
+
+    timestamp_ns = str(int(time.time() * 1e9))
+    log_line = json.dumps({'message': 'stack identity ping'})
+    send_to_loki("stack_identity", "identity", "ping", [[timestamp_ns, log_line]])
+
+
 def validate_environment_variables() -> Tuple[bool, Dict[str, str], List[str]]:
     """
     Validate required environment variables and return configuration.
@@ -343,17 +383,33 @@ def collect_image_versions(prometheus_url: str, labels: Dict[str, str], credenti
     )
     '''
 
+    # Build pod -> owner_name map from kube_pod_owner so alloy variants resolve
+    # from DaemonSet/Deployment name rather than pod-name substrings.
+    owner_query = (
+        f'kube_pod_owner{{namespace=~"{namespace_filter}",'
+        f'owner_kind=~"DaemonSet|Deployment|StatefulSet|ReplicaSet"}}'
+    )
+    owner_response = query_prometheus(prometheus_url, owner_query, username, password) or {}
+    pod_owner_map: Dict[tuple, str] = {}
+    for r in owner_response.get('data', {}).get('result', []):
+        m = r['metric']
+        key = (m.get('cluster', ''), m.get('namespace', ''), m.get('pod', ''))
+        raw_owner = m.get('owner_name', '')
+        owner_name = re.sub(r'-[a-f0-9]{8,10}$', '', raw_owner)
+        if owner_name:
+            pod_owner_map[key] = owner_name
+
     prometheus_response = query_prometheus(prometheus_url, query, username, password)
     if not prometheus_response:
         logger.error("Failed to query Prometheus for image versions")
         return None
-    
+
     # Extract monitoring images
-    images = extract_monitoring_images(prometheus_response)
+    images = extract_monitoring_images(prometheus_response, pod_owner_map)
     if not images:
         logger.error("Failed to extract monitoring images from Prometheus response")
         return None
-    
+
     logger.info("Successfully collected image versions")
     return images
 
@@ -529,6 +585,17 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
         if cluster and node_name and instance_type:
             node_instance_type[(cluster, node_name)] = instance_type
 
+    # 3b. Total node count per cluster from kube_node_info (all registered nodes)
+    total_nodes_by_cluster = {}
+    total_nodes_data = query_prometheus(prometheus_url, 'count by (cluster) (kube_node_info)', username, password) or {}
+    for res in total_nodes_data.get('data', {}).get('result', []):
+        cl = res['metric'].get('cluster', '')
+        if cl:
+            try:
+                total_nodes_by_cluster[cl] = int(float(res['value'][1]))
+            except (KeyError, ValueError):
+                pass
+
     # 4. Pod resource requests/limits
     def extract_pod_resource_usage(prometheus_query):
         response = query_prometheus(prometheus_url, prometheus_query, username, password)
@@ -651,7 +718,8 @@ def collect_and_send_otel_pod_node_usage(prometheus_url: str, labels: dict, cred
                 "namespace": namespace,
             },
             "spec": {
-                "otel_node_count": len(node_names)
+                "otel_node_count": len(node_names),
+                "total_cluster_nodes": total_nodes_by_cluster.get(cluster, 0),
             }
         }
         values.append([current_time_ns, json.dumps(entry_node_count)])
@@ -827,11 +895,17 @@ def main() -> None:
     """
     logger.info("Starting monitoring data collection")
 
+    send_identity_ping()
+
+    if os.getenv('STACK_TYPE', 'main') == 'collector':
+        collect_and_send_helm_chart_versions(os.getenv('NAMESPACE', ''))
+        return
+
     # Validate environment variables
     is_valid, labels, missing_vars = validate_environment_variables()
     if not is_valid:
         return
-
+    
     # Get configuration from environment
     prometheus_url = os.getenv('PROMETHEUS_URL')
     prom_user = os.getenv('SOURCE_PROMETHEUS_USERNAME', '').strip()
