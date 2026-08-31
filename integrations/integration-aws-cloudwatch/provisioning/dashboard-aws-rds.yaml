@@ -93,7 +93,8 @@ spec:
                     mode: multi
                     sort: none
               targets:
-                - datasource:
+                - accountId: $account
+                  datasource:
                     type: cloudwatch
                     uid: $datasource
                   dimensions:
@@ -172,7 +173,8 @@ spec:
                     mode: multi
                     sort: none
               targets:
-                - datasource:
+                - accountId: $account
+                  datasource:
                     uid: $datasource
                   dimensions:
                     DBClusterIdentifier: '*'
@@ -249,7 +251,8 @@ spec:
                     mode: multi
                     sort: none
               targets:
-                - datasource:
+                - accountId: $account
+                  datasource:
                     uid: $datasource
                   dimensions:
                     DBClusterIdentifier: '*'
@@ -350,7 +353,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -429,7 +433,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -507,7 +512,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -585,7 +591,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -662,7 +669,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -739,7 +747,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -816,7 +825,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -893,7 +903,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -970,7 +981,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -1047,7 +1059,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 uid: $datasource
               dimensions:
                 DBInstanceIdentifier: '*'
@@ -1156,6 +1169,30 @@ spec:
               tagsQuery: ""
               type: query
               useTags: false
+            - current:
+                selected: true
+                text: All
+                value: all
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: ""
+              description: 'AWS account to query. Requires CloudWatch cross-account observability (OAM); "All" targets every linked source account.'
+              hide: 0
+              includeAll: false
+              label: Account
+              multi: false
+              name: account
+              options: []
+              query:
+                queryType: accounts
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
             - current:
                 selected: true
                 text: ""

@@ -98,7 +98,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -128,7 +129,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -227,7 +229,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -257,7 +260,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -287,7 +291,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -317,7 +322,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -415,7 +421,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -444,7 +451,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -473,7 +481,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -569,7 +578,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -598,7 +608,8 @@ spec:
               region: $region
               returnData: false
               statistic: Average
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -627,7 +638,8 @@ spec:
               region: $region
               returnData: false
               statistic: Average
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -656,7 +668,8 @@ spec:
               region: $region
               returnData: false
               statistic: Average
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -759,7 +772,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -788,7 +802,8 @@ spec:
               region: $region
               returnData: false
               statistic: Average
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -817,7 +832,8 @@ spec:
               region: $region
               returnData: false
               statistic: Average
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -913,7 +929,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -942,7 +959,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1046,7 +1064,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1075,7 +1094,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1171,7 +1191,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1275,7 +1296,8 @@ spec:
                 mode: multi
                 sort: none
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1304,7 +1326,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1333,7 +1356,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1362,7 +1386,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1391,7 +1416,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1420,7 +1446,8 @@ spec:
               region: $region
               returnData: false
               statistic: Sum
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -1494,6 +1521,30 @@ spec:
               tagsQuery: ""
               type: query
               useTags: false
+            - current:
+                selected: true
+                text: All
+                value: all
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: ""
+              description: 'AWS account to query. Requires CloudWatch cross-account observability (OAM); "All" targets every linked source account.'
+              hide: 0
+              includeAll: false
+              label: Account
+              multi: false
+              name: account
+              options: []
+              query:
+                queryType: accounts
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
             - current:
                 selected: true
                 text: ""

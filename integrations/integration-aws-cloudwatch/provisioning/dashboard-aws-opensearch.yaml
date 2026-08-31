@@ -109,7 +109,8 @@ spec:
                     sort: none
               pluginVersion: 8.5.15
               targets:
-                - alias: ""
+                - accountId: $account
+                  alias: ""
                   datasource:
                     type: cloudwatch
                     uid: $datasource
@@ -205,7 +206,8 @@ spec:
                     sort: none
               pluginVersion: 8.5.15
               targets:
-                - alias: ""
+                - accountId: $account
+                  alias: ""
                   datasource:
                     type: cloudwatch
                     uid: $datasource
@@ -301,7 +303,8 @@ spec:
                     sort: none
               pluginVersion: 8.5.15
               targets:
-                - alias: ""
+                - accountId: $account
+                  alias: ""
                   datasource:
                     type: cloudwatch
                     uid: $datasource
@@ -436,7 +439,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: Green
+            - accountId: $account
+              alias: Green
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -456,7 +460,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Yellow
+            - accountId: $account
+              alias: Yellow
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -476,7 +481,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Red
+            - accountId: $account
+              alias: Red
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -574,7 +580,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -709,7 +716,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -833,7 +841,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -931,7 +940,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1056,7 +1066,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1144,7 +1155,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1231,7 +1243,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1331,7 +1344,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1417,7 +1431,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 uid: $datasource
               dimensions:
@@ -1500,7 +1515,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1586,7 +1602,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1737,7 +1754,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: 2XX
+            - accountId: $account
+              alias: 2XX
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1757,7 +1775,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Sum
-            - alias: 3XX
+            - accountId: $account
+              alias: 3XX
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1778,7 +1797,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Sum
-            - alias: 4XX
+            - accountId: $account
+              alias: 4XX
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1799,7 +1819,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Sum
-            - alias: 5XX
+            - accountId: $account
+              alias: 5XX
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1967,7 +1988,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ElasticSearchRequests
+            - accountId: $account
+              alias: ElasticSearchRequests
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -1987,7 +2009,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Sum
-            - alias: InvalidHostHeaderRequests
+            - accountId: $account
+              alias: InvalidHostHeaderRequests
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2121,7 +2144,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ThreadCount
+            - accountId: $account
+              alias: ThreadCount
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2141,7 +2165,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Queue Depth
+            - accountId: $account
+              alias: Queue Depth
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2161,7 +2186,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Rejected Count
+            - accountId: $account
+              alias: Rejected Count
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2282,7 +2308,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ThreadCount
+            - accountId: $account
+              alias: ThreadCount
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2302,7 +2329,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Queue Depth
+            - accountId: $account
+              alias: Queue Depth
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2322,7 +2350,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Rejected Count
+            - accountId: $account
+              alias: Rejected Count
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2443,7 +2472,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ThreadCount
+            - accountId: $account
+              alias: ThreadCount
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2463,7 +2493,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Queue Depth
+            - accountId: $account
+              alias: Queue Depth
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2483,7 +2514,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Rejected Count
+            - accountId: $account
+              alias: Rejected Count
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2604,7 +2636,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: ThreadCount
+            - accountId: $account
+              alias: ThreadCount
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2624,7 +2657,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Queue Depth
+            - accountId: $account
+              alias: Queue Depth
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2644,7 +2678,8 @@ spec:
               region: $region
               sqlExpression: ""
               statistic: Maximum
-            - alias: Rejected Count
+            - accountId: $account
+              alias: Rejected Count
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2743,7 +2778,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: CPUUtilization
+            - accountId: $account
+              alias: CPUUtilization
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2830,7 +2866,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: JVMMemoryPressure
+            - accountId: $account
+              alias: JVMMemoryPressure
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -2918,7 +2955,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: FreeStorageSpace
+            - accountId: $account
+              alias: FreeStorageSpace
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3008,7 +3046,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: SysMemoryUtilization
+            - accountId: $account
+              alias: SysMemoryUtilization
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3104,7 +3143,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: WarmCPUUtilization
+            - accountId: $account
+              alias: WarmCPUUtilization
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3191,7 +3231,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: WarmJVMMemoryPressure
+            - accountId: $account
+              alias: WarmJVMMemoryPressure
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3279,7 +3320,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: WarmFreeStorageSpace
+            - accountId: $account
+              alias: WarmFreeStorageSpace
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3369,7 +3411,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: WarmSysMemoryUtilization
+            - accountId: $account
+              alias: WarmSysMemoryUtilization
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3468,7 +3511,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: MasterCPUUtilization
+            - accountId: $account
+              alias: MasterCPUUtilization
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3555,7 +3599,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: MasterJVMMemoryPressure
+            - accountId: $account
+              alias: MasterJVMMemoryPressure
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3643,7 +3688,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: MasterFreeStorageSpace
+            - accountId: $account
+              alias: MasterFreeStorageSpace
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3733,7 +3779,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: MasterSysMemoryUtilization
+            - accountId: $account
+              alias: MasterSysMemoryUtilization
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3834,7 +3881,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: JVMGCYoungCollectionTime
+            - accountId: $account
+              alias: JVMGCYoungCollectionTime
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3921,7 +3969,8 @@ spec:
                 sort: none
           pluginVersion: 8.5.15
           targets:
-            - alias: JVMGCYoungCollectionCount
+            - accountId: $account
+              alias: JVMGCYoungCollectionCount
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -3987,6 +4036,30 @@ spec:
               tagsQuery: ""
               type: query
               useTags: false
+            - current:
+                selected: true
+                text: All
+                value: all
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: ""
+              description: 'AWS account to query. Requires CloudWatch cross-account observability (OAM); "All" targets every linked source account.'
+              hide: 0
+              includeAll: false
+              label: Account
+              multi: false
+              name: account
+              options: []
+              query:
+                queryType: accounts
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
             - current:
                 selected: true
                 text: ""

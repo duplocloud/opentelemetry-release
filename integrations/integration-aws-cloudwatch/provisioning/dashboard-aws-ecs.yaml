@@ -89,7 +89,8 @@ spec:
                 sort: none
           pluginVersion: 11.3.1
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -177,7 +178,8 @@ spec:
                 sort: none
           pluginVersion: 11.3.1
           targets:
-            - datasource:
+            - accountId: $account
+              datasource:
                 type: cloudwatch
                 uid: $datasource
               dimensions:
@@ -269,7 +271,8 @@ spec:
                 sort: none
           pluginVersion: 11.3.1
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -364,7 +367,8 @@ spec:
                 sort: none
           pluginVersion: 11.3.1
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               datasource:
                 type: cloudwatch
                 uid: $datasource
@@ -413,6 +417,30 @@ spec:
               name: region
               options: []
               query: regions()
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
+            - current:
+                selected: true
+                text: All
+                value: all
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: ""
+              description: 'AWS account to query. Requires CloudWatch cross-account observability (OAM); "All" targets every linked source account.'
+              hide: 0
+              includeAll: false
+              label: Account
+              multi: false
+              name: account
+              options: []
+              query:
+                queryType: accounts
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
               refresh: 1
               regex: ""
               skipUrlSync: false

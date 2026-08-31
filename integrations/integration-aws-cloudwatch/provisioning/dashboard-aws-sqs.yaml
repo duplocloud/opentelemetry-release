@@ -86,7 +86,8 @@ spec:
                 sort: none
           pluginVersion: 11.4.0
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -113,7 +114,8 @@ spec:
               refId: A
               region: $region
               statistic: Average
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -139,7 +141,8 @@ spec:
               refId: B
               region: $region
               statistic: Average
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -233,7 +236,8 @@ spec:
                 sort: none
           pluginVersion: 11.4.0
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -327,7 +331,8 @@ spec:
                 sort: none
           pluginVersion: 11.4.0
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -354,7 +359,8 @@ spec:
               refId: C
               region: $region
               statistic: Average
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -380,7 +386,8 @@ spec:
               refId: A
               region: $region
               statistic: Average
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -474,7 +481,8 @@ spec:
                 sort: none
           pluginVersion: 11.4.0
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -567,7 +575,8 @@ spec:
                 sort: none
           pluginVersion: 11.4.0
           targets:
-            - alias: ""
+            - accountId: $account
+              alias: ""
               application:
                 filter: ""
               datasource:
@@ -626,6 +635,30 @@ spec:
               name: region
               options: []
               query: regions()
+              refresh: 1
+              regex: ""
+              skipUrlSync: false
+              sort: 0
+              type: query
+            - current:
+                selected: true
+                text: All
+                value: all
+              datasource:
+                type: cloudwatch
+                uid: $datasource
+              definition: ""
+              description: 'AWS account to query. Requires CloudWatch cross-account observability (OAM); "All" targets every linked source account.'
+              hide: 0
+              includeAll: false
+              label: Account
+              multi: false
+              name: account
+              options: []
+              query:
+                queryType: accounts
+                refId: CloudWatchVariableQueryEditor-VariableQuery
+                region: $region
               refresh: 1
               regex: ""
               skipUrlSync: false
