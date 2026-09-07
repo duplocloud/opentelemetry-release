@@ -723,18 +723,17 @@ spec:
               skipUrlSync: false
               sort: 0
               type: query
-            - allValue: all
-              current:
+            - current:
                 selected: true
                 text: All
-                value: $__all
+                value: all
               datasource:
                 type: cloudwatch
                 uid: $datasource
               definition: ""
-              description: 'AWS account to query. With CloudWatch cross-account observability (OAM) the dropdown lists the linked source accounts; without OAM it resolves to "All", which behaves exactly as before.'
+              description: 'AWS account to query. Requires CloudWatch cross-account observability (OAM); "All" targets every linked source account.'
               hide: 0
-              includeAll: true
+              includeAll: false
               label: Account
               multi: false
               name: account
@@ -744,7 +743,7 @@ spec:
                 refId: CloudWatchVariableQueryEditor-VariableQuery
                 region: $region
               refresh: 1
-              regex: /^(?![Aa][Ll][Ll]$).+/
+              regex: ""
               skipUrlSync: false
               sort: 0
               type: query
