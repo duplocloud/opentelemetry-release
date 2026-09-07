@@ -4048,11 +4048,10 @@ spec:
     templating:
         list:
             - current:
-                selected: true
+                selected: false
                 text: duplo-aws
                 value: duplo-aws
-              description: 'Metrics are read through the OAM monitoring account; only this datasource can serve them.'
-              hide: 2
+              hide: 0
               includeAll: false
               label: Data source
               multi: false
@@ -4061,7 +4060,7 @@ spec:
               query: cloudwatch
               queryValue: ""
               refresh: 1
-              regex: /^duplo-aws$/
+              regex: ""
               skipUrlSync: false
               type: datasource
             - current:
