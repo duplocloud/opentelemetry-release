@@ -1,0 +1,14 @@
+apiVersion: grizzly.grafana.com/v1alpha1
+kind: Datasource
+metadata:
+    name: duplo-aws
+spec:
+    access: proxy
+    jsonData:
+        authType: default
+        defaultRegion: ${AOS_REGION}
+    name: duplo-aws
+    orgId: 1
+    type: cloudwatch
+    typeLogoUrl: public/app/plugins/datasource/cloudwatch/img/amazon-web-services.png
+    uid: duplo-aws
