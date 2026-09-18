@@ -73,15 +73,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"(distributor|write)"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor", resource="cpu"} > 0)
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"(distributor|write)", resource="cpu"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
-                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"})
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"(distributor|write)"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"(distributor|write)"})
                   format: time_series
                   legendFormat: limit
                   legendLink: null
@@ -137,15 +137,15 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"(distributor|write)"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor", resource="memory"} > 0)
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"(distributor|write)", resource="memory"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"distributor"} > 0)
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"(distributor|write)"} > 0)
                   format: time_series
                   legendFormat: limit
                   legendLink: null
@@ -181,7 +181,7 @@ spec:
                     sort: none
               span: 4
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/distributor"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/(distributor|.*-write)"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -226,7 +226,7 @@ spec:
                     sort: none
               span: 1
               targets:
-                - expr: sum by(pod) (loki_ingester_memory_streams{cluster=~"$cluster", job=~"($namespace)/(.*ingester.*)"})
+                - expr: sum by(pod) (loki_ingester_memory_streams{cluster=~"$cluster", job=~"($namespace)/(.*ingester.*|.*-write)"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -282,15 +282,15 @@ spec:
                     sort: none
               span: 1
               targets:
-                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"}[$__rate_interval]))
+                - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)"}[$__rate_interval]))
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", resource="cpu"} > 0)
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)", resource="cpu"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
-                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"})
+                - expr: min(container_spec_cpu_quota{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)"} / container_spec_cpu_period{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)"})
                   format: time_series
                   legendFormat: limit
                   legendLink: null
@@ -346,15 +346,15 @@ spec:
                     sort: none
               span: 1
               targets:
-                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"})
+                - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
-                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", resource="memory"} > 0)
+                - expr: min(kube_pod_container_resource_requests{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)", resource="memory"} > 0)
                   format: time_series
                   legendFormat: request
                   legendLink: null
-                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester"} > 0)
+                - expr: min(container_spec_memory_limit_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)"} > 0)
                   format: time_series
                   legendFormat: limit
                   legendLink: null
@@ -390,7 +390,7 @@ spec:
                     sort: none
               span: 1
               targets:
-                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/(.*ingester.*)"})
+                - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/(.*ingester.*|.*-write)"})
                   format: time_series
                   legendFormat: '{{pod}}'
                   legendLink: null
@@ -427,7 +427,7 @@ spec:
               span: 1
               targets:
                 - expr: |
-                    sum by(instance, device) (rate(node_disk_written_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
+                    sum by(instance, device) (rate(node_disk_written_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
                   format: time_series
                   legendFormat: '{{pod}} - {{device}}'
                   legendLink: null
@@ -462,7 +462,7 @@ spec:
               span: 1
               targets:
                 - expr: |
-                    sum by(instance, device) (rate(node_disk_read_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container=~"ingester|partition-ingester", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
+                    sum by(instance, device) (rate(node_disk_read_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
                   format: time_series
                   legendFormat: '{{pod}} - {{device}}'
                   legendLink: null
@@ -496,7 +496,7 @@ spec:
                     sort: none
               span: 1
               targets:
-                - expr: max by(persistentvolumeclaim) (kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(.*ingester.*).*"} / kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~".*(.*ingester.*).*"})
+                - expr: max by(persistentvolumeclaim) (kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~"(.*ingester.*|.*-write.*)"} / kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~"(.*ingester.*|.*-write.*)"})
                   format: time_series
                   legendFormat: '{{persistentvolumeclaim}}'
                   legendLink: null
