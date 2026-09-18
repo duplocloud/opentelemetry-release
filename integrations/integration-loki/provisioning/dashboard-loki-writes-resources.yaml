@@ -224,7 +224,7 @@ spec:
                 tooltip:
                     mode: single
                     sort: none
-              span: 1
+              span: 3
               targets:
                 - expr: sum by(pod) (loki_ingester_memory_streams{cluster=~"$cluster", job=~"($namespace)/(.*ingester.*|.*-write)"})
                   format: time_series
@@ -280,7 +280,7 @@ spec:
                 tooltip:
                     mode: single
                     sort: none
-              span: 1
+              span: 3
               targets:
                 - expr: sum by(pod) (rate(container_cpu_usage_seconds_total{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)"}[$__rate_interval]))
                   format: time_series
@@ -344,7 +344,7 @@ spec:
                 tooltip:
                     mode: single
                     sort: none
-              span: 1
+              span: 3
               targets:
                 - expr: max by(pod) (container_memory_working_set_bytes{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)"})
                   format: time_series
@@ -388,7 +388,7 @@ spec:
                 tooltip:
                     mode: single
                     sort: none
-              span: 1
+              span: 3
               targets:
                 - expr: sum by(pod) (go_memstats_heap_inuse_bytes{cluster=~"$cluster", job=~"($namespace)/(.*ingester.*|.*-write)"})
                   format: time_series
@@ -424,7 +424,7 @@ spec:
                 tooltip:
                     mode: single
                     sort: none
-              span: 1
+              span: 4
               targets:
                 - expr: |
                     sum by(instance, device) (rate(node_disk_written_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
@@ -459,7 +459,7 @@ spec:
                 tooltip:
                     mode: single
                     sort: none
-              span: 1
+              span: 4
               targets:
                 - expr: |
                     sum by(instance, device) (rate(node_disk_read_bytes_total[$__rate_interval])) + ignoring(pod) group_right() (label_replace(count by(instance, pod, device) (container_fs_writes_bytes_total{cluster=~"$cluster", namespace=~"$namespace", container=~"(ingester|partition-ingester|write)", device!~".*sda.*"}), "device", "$1", "device", "/dev/(.*)") * 0)
@@ -494,7 +494,7 @@ spec:
                 tooltip:
                     mode: single
                     sort: none
-              span: 1
+              span: 4
               targets:
                 - expr: max by(persistentvolumeclaim) (kubelet_volume_stats_used_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~"(.*ingester.*|.*-write.*)"} / kubelet_volume_stats_capacity_bytes{cluster=~"$cluster", namespace=~"$namespace", persistentvolumeclaim=~"(.*ingester.*|.*-write.*)"})
                   format: time_series
