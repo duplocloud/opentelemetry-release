@@ -17,16 +17,6 @@ route:
       group_wait: 30s
       group_interval: 5m
       repeat_interval: 999w
-    - receiver: duplo-webhook-notifications
-      matchers:
-        - namespace=~"${AOS_NAMESPACE_FILTER}"
-        - severity!="info"
-        - daemonset!~"duplo-monitoring-.*"
-        - alertname!="KubeHpaMaxedOut"
-        - pod!~"duplo-monitoring-beyla-.*"
-        - pod!~"duplo-monitoring-prometheus-.*"
-        - pod!~"duplo-monitoring-alloy-profiles-.*"
-        - pod!~"duplo-monitoring-alloy-logs-.*"
 receivers:
   - name: duplo-loki-webhook
     webhook_configs:
@@ -34,9 +24,5 @@ receivers:
         url: ${AOS_LOKI_WEBHOOK}
   - name: default-receiver
     slack_configs: []
-  - name: duplo-webhook-notifications
-    webhook_configs:
-      - send_resolved: true
-        url: ${AOS_AUTOMATION_WEBHOOK}
 templates:
   - duplo_templates.tpl
