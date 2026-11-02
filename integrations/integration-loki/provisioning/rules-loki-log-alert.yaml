@@ -18,7 +18,7 @@ spec:
                     type: loki
                     uid: duplo-logging
                 editorMode: code
-                expr: sum(count_over_time({container="loki"} |~ "(?i)rate limit" | json | logfmt | drop __error__, __error_details__ | caller=~".*manager.go.*" | msg="write operation failed" [$__auto])) by (cluster, namespace)
+                expr: sum(count_over_time({container=~"write|read|backend"} |~ "(?i)rate limit" | json | logfmt | drop __error__, __error_details__ | caller=~".*manager.go.*" | msg="write operation failed" [$__auto])) by (cluster, namespace)
                 instant: true
                 intervalMs: 1000
                 maxDataPoints: 43200
